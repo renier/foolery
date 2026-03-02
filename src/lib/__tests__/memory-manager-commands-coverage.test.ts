@@ -30,9 +30,9 @@ describe("buildClaimCommand (line 32-34)", () => {
 });
 
 describe("buildWorkflowStateCommand (lines 36-48)", () => {
-  it("returns kno update for knots", () => {
+  it("returns kno next for knots", () => {
     const cmd = buildWorkflowStateCommand("foo-123", "implementation", "knots");
-    expect(cmd).toBe('kno update "foo-123" --status "implementation"');
+    expect(cmd).toBe('kno next "foo-123" --actor-kind agent');
   });
 
   it("returns bd update with compat status and wf:state label for beads", () => {
@@ -42,9 +42,9 @@ describe("buildWorkflowStateCommand (lines 36-48)", () => {
     expect(cmd).toContain('--add-label "wf:state:implementation"');
   });
 
-  it("normalizes workflow state to lowercase", () => {
+  it("ignores workflow state for knots and returns kno next", () => {
     const cmd = buildWorkflowStateCommand("foo-123", "  IMPLEMENTATION  ", "knots");
-    expect(cmd).toContain('"implementation"');
+    expect(cmd).toBe('kno next "foo-123" --actor-kind agent');
   });
 
   it("appends --no-daemon flag when noDaemon option is set for beads", () => {
@@ -58,9 +58,14 @@ describe("buildWorkflowStateCommand (lines 36-48)", () => {
   });
 });
 
-describe("quoteArg helper (line 14)", () => {
-  it("JSON-encodes special characters in values", () => {
+describe("quoteId helper (line 9)", () => {
+  it("JSON-encodes special characters in id for knots", () => {
     const cmd = buildWorkflowStateCommand('id"special', "state", "knots");
+    expect(cmd).toBe('kno next "id\\"special" --actor-kind agent');
+  });
+
+  it("JSON-encodes special characters in id for beads", () => {
+    const cmd = buildWorkflowStateCommand('id"special', "state", "beads");
     expect(cmd).toContain('"id\\"special"');
   });
 });

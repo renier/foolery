@@ -139,9 +139,10 @@ function buildGranularProgressionCommands(
       ? nonTerminalStates.slice(currentIndex + 1)
       : nonTerminalStates;
 
-  return progression.map((state) =>
+  const commands = progression.map((state) =>
     buildWorkflowStateCommand(target.id, state, memoryManagerType),
   );
+  return [...new Set(commands)];
 }
 
 function buildSingleTargetFollowUpLines(

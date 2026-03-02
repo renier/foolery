@@ -41,7 +41,7 @@ export function buildWorkflowStateCommand(
 ): string {
   const normalizedState = workflowState.trim().toLowerCase();
   if (memoryManagerType === "knots") {
-    return `kno update ${quoteId(id)} --status ${quoteArg(normalizedState)}`;
+    return `kno next ${quoteId(id)} --actor-kind agent`;
   }
   const compatStatus = mapWorkflowStateToCompatStatus(normalizedState, "memory-manager-commands");
   return `bd update ${quoteId(id)} --status ${quoteArg(compatStatus)} --add-label ${quoteArg(`wf:state:${normalizedState}`)}${beadsNoDaemonFlag(options)}`;
