@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchBeads, fetchReadyBeads, updateBead } from "@/lib/api";
+import { fetchBeads, updateBead } from "@/lib/api";
 import { startSession, abortSession } from "@/lib/terminal-api";
 import { BeatTable } from "@/components/beat-table";
 import { BeatDetailLightbox } from "@/components/beat-detail-lightbox";
@@ -103,17 +103,16 @@ function BeadsPageInner() {
     {}
   );
 
-  const isReadyFilter = filters.state === "ready";
   const params: Record<string, string> = {};
-  if (filters.state && !isReadyFilter) params.state = filters.state;
+  if (filters.state) params.state = filters.state;
   if (filters.type) params.type = filters.type;
   if (filters.priority !== undefined) params.priority = String(filters.priority);
   if (searchQuery) params.q = searchQuery;
 
   const { data, isLoading, error: queryError } = useQuery({
-    queryKey: ["beads", params, activeRepo, isReadyFilter, registeredRepos.length],
+    queryKey: ["beads", params, activeRepo, registeredRepos.length],
     queryFn: async () => {
-      const fetcher = isReadyFilter ? fetchReadyBeads : fetchBeads;
+      const fetcher = fetchBeads;
       if (activeRepo) {
         const result = await fetcher(params, activeRepo);
         throwIfDegraded(result);
