@@ -26,7 +26,9 @@ import { updateMessageTypeIndexFromSession } from "@/lib/agent-message-type-inde
 import type { Beat, MemoryWorkflowDescriptor } from "@/lib/types";
 import {
   defaultWorkflowDescriptor,
+  isQueueOrTerminal,
   resolveStep,
+  rollbackActivePhase,
   workflowDescriptorById,
 } from "@/lib/workflows";
 
@@ -43,6 +45,12 @@ const MAX_SESSIONS = 5;
 const CLEANUP_DELAY_MS = 5 * 60 * 1000;
 const INPUT_CLOSE_GRACE_MS = 2000;
 const MAX_TAKE_ITERATIONS = 10;
+const QUEUE_TERMINAL_INVARIANT_INSTRUCTION = [
+  `CRITICAL INVARIANT — QUEUE/TERMINAL STATE REQUIREMENT:`,
+  `Before ending your work, you MUST ensure the knot is in a queue state (ready_for_*) or terminal state (shipped/abandoned).`,
+  `Never leave work in an action state (planning, plan_review, implementation, implementation_review, shipment, shipment_review).`,
+  `If the knot is currently in an action state, run "kno next" to advance it to the next queue state before stopping.`,
+].join("\n");
 
 type JsonObject = Record<string, unknown>;
 
@@ -502,6 +510,8 @@ export async function createSession(
       ? [
           `You are executing a parent bead and its children. Implement the children beads and use the parent bead's notes/description for context and guidance. You MUST edit source files directly — do not just describe what to do.`,
           ``,
+          QUEUE_TERMINAL_INVARIANT_INSTRUCTION,
+          ``,
           `IMPORTANT INSTRUCTIONS:`,
           `1. Execute immediately in accept-edits mode; do not enter plan mode and do not wait for an execution follow-up prompt.`,
           `2. Use this parent bead's description/acceptance/notes as the source of truth for strategy and agent roles.`,
@@ -515,6 +525,8 @@ export async function createSession(
         ]
       : [
           `Implement the following task. You MUST edit the actual source files to make the change — do not just describe what to do.`,
+          ``,
+          QUEUE_TERMINAL_INVARIANT_INSTRUCTION,
           ``,
           `IMPORTANT INSTRUCTIONS:`,
           `1. Execute immediately in accept-edits mode; do not enter plan mode and do not wait for an execution follow-up prompt.`,
@@ -615,6 +627,8 @@ export async function createSession(
     return [
       `Implement the following task. You MUST edit the actual source files to make the change — do not just describe what to do.`,
       ``,
+      QUEUE_TERMINAL_INVARIANT_INSTRUCTION,
+      ``,
       `IMPORTANT INSTRUCTIONS:`,
       `1. Execute immediately in accept-edits mode; do not enter plan mode and do not wait for an execution follow-up prompt.`,
       `2. Use the Task tool to spawn subagents for independent subtasks whenever parallel execution is possible.`,
@@ -703,6 +717,58 @@ export async function createSession(
     });
 
     return { prompt: wrapSingleBeatPrompt(takeResult.data.prompt), beatState: current.state };
+  };
+
+  /**
+   * Enforce queue/terminal invariant after a take-loop iteration.
+   * Returns true if the beat is already in a valid resting state.
+   * If the beat is in an action state after retry exhaustion, forces rollback.
+   */
+  const enforceQueueTerminalInvariant = async (): Promise<boolean> => {
+    const tag = `[terminal-manager] [${id}] [invariant]`;
+    const currentResult = await getBackend().get(beatId, repoPath);
+    if (!currentResult.ok || !currentResult.data) {
+      console.log(`${tag} failed to fetch beat state for invariant check`);
+      return true; // cannot verify — treat as ok to avoid blocking
+    }
+
+    const current = currentResult.data;
+    const workflow = resolveWorkflowForBeat(current, workflowsById, fallbackWorkflow);
+
+    if (isQueueOrTerminal(current.state, workflow)) {
+      console.log(`${tag} beat=${beatId} state=${current.state} — invariant satisfied`);
+      return true;
+    }
+
+    console.log(`${tag} beat=${beatId} state=${current.state} — VIOLATION: action state on exit`);
+    pushEvent({
+      type: "stdout",
+      data: `\x1b[33m--- Invariant violation: beat ${beatId} in action state "${current.state}" after agent exit ---\x1b[0m\n`,
+      timestamp: Date.now(),
+    });
+
+    // Layer 3: force rollback to queue state
+    const rolledBack = rollbackActivePhase(current.state);
+    if (rolledBack !== current.state) {
+      console.log(`${tag} forcing rollback: ${current.state} → ${rolledBack}`);
+      const updateResult = await getBackend().update(beatId, { state: rolledBack }, repoPath);
+      if (updateResult.ok) {
+        pushEvent({
+          type: "stdout",
+          data: `\x1b[33m--- Forced rollback: ${current.state} → ${rolledBack} ---\x1b[0m\n`,
+          timestamp: Date.now(),
+        });
+        console.log(`${tag} rollback succeeded: ${beatId} now in ${rolledBack}`);
+      } else {
+        console.error(`${tag} rollback failed: ${updateResult.error?.message ?? "unknown"}`);
+        pushEvent({
+          type: "stderr",
+          data: `Invariant enforcement: failed to rollback ${beatId} from ${current.state} to ${rolledBack}: ${updateResult.error?.message ?? "unknown"}\n`,
+          timestamp: Date.now(),
+        });
+      }
+    }
+    return false;
   };
 
   const finishSession = (exitCode: number) => {
@@ -881,7 +947,9 @@ export async function createSession(
 
       if (takeCode !== 0) {
         console.log(`${tag} STOP: non-zero exit code=${takeCode}`);
-        finishSession(takeCode ?? 1);
+        enforceQueueTerminalInvariant().finally(() => {
+          finishSession(takeCode ?? 1);
+        });
         return;
       }
 
@@ -892,7 +960,9 @@ export async function createSession(
           data: `\x1b[33m--- Take loop stopped: max ${MAX_TAKE_ITERATIONS} iterations reached ---\x1b[0m\n`,
           timestamp: Date.now(),
         });
-        finishSession(takeCode ?? 1);
+        enforceQueueTerminalInvariant().finally(() => {
+          finishSession(takeCode ?? 1);
+        });
         return;
       }
 
@@ -919,6 +989,7 @@ export async function createSession(
             timestamp: Date.now(),
           });
         }
+        await enforceQueueTerminalInvariant();
         finishSession(takeCode ?? 0);
       })();
     });
@@ -1207,7 +1278,9 @@ export async function createSession(
     // Take loop: check if knots-backed session should continue claiming the same beat
     if (isTakeLoop && code !== 0) {
       console.log(`${tag} STOP: initial child exited with non-zero code=${code}`);
-      finishSession(code ?? 1);
+      enforceQueueTerminalInvariant().finally(() => {
+        finishSession(code ?? 1);
+      });
       return;
     }
 
@@ -1218,7 +1291,9 @@ export async function createSession(
         data: `\x1b[33m--- Take loop stopped: max ${MAX_TAKE_ITERATIONS} iterations reached ---\x1b[0m\n`,
         timestamp: Date.now(),
       });
-      finishSession(code ?? 1);
+      enforceQueueTerminalInvariant().finally(() => {
+        finishSession(code ?? 1);
+      });
       return;
     }
 
@@ -1247,7 +1322,16 @@ export async function createSession(
             timestamp: Date.now(),
           });
         }
+        await enforceQueueTerminalInvariant();
         finishSession(code ?? 0);
+      })();
+      return;
+    }
+
+    if (isTakeLoop) {
+      (async () => {
+        await enforceQueueTerminalInvariant();
+        finishSession(code ?? 1);
       })();
       return;
     }

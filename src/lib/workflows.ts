@@ -707,6 +707,20 @@ export function rollbackActivePhase(state: string): string {
 }
 
 /**
+ * Returns true when the state is a queue state (queued phase) or a terminal state.
+ * An agent must never end a work iteration in an active (action) state;
+ * this helper expresses the invariant check.
+ */
+export function isQueueOrTerminal(state: string, workflow?: MemoryWorkflowDescriptor): boolean {
+  const terminalStates = workflow?.terminalStates ?? ["shipped", "abandoned", "closed"];
+  if (terminalStates.includes(state)) return true;
+  if (state === "deferred") return true;
+  const resolved = resolveStep(state);
+  if (!resolved) return true; // unknown states are treated as non-action
+  return resolved.phase === StepPhase.Queued;
+}
+
+/**
  * Ordered pipeline index for each workflow state.
  * A transition is a "rollback" when the target has a lower index than the source.
  */

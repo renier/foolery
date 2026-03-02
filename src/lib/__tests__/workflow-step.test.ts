@@ -4,6 +4,8 @@ import {
   StepPhase,
   resolveStep,
   rollbackActivePhase,
+  isQueueOrTerminal,
+  builtinProfileDescriptor,
 } from "@/lib/workflows";
 import type { MemoryWorkflowOwners } from "@/lib/types";
 
@@ -131,5 +133,49 @@ describe("rollbackActivePhase", () => {
     expect(rollbackActivePhase("deferred")).toBe("deferred");
     expect(rollbackActivePhase("unknown_state")).toBe("unknown_state");
     expect(rollbackActivePhase("")).toBe("");
+  });
+});
+
+describe("isQueueOrTerminal", () => {
+  const workflow = builtinProfileDescriptor("autopilot");
+
+  it("returns true for all queue states", () => {
+    expect(isQueueOrTerminal("ready_for_planning", workflow)).toBe(true);
+    expect(isQueueOrTerminal("ready_for_plan_review", workflow)).toBe(true);
+    expect(isQueueOrTerminal("ready_for_implementation", workflow)).toBe(true);
+    expect(isQueueOrTerminal("ready_for_implementation_review", workflow)).toBe(true);
+    expect(isQueueOrTerminal("ready_for_shipment", workflow)).toBe(true);
+    expect(isQueueOrTerminal("ready_for_shipment_review", workflow)).toBe(true);
+  });
+
+  it("returns true for terminal states", () => {
+    expect(isQueueOrTerminal("shipped", workflow)).toBe(true);
+    expect(isQueueOrTerminal("abandoned", workflow)).toBe(true);
+  });
+
+  it("returns true for deferred state", () => {
+    expect(isQueueOrTerminal("deferred", workflow)).toBe(true);
+  });
+
+  it("returns false for all action (active) states", () => {
+    expect(isQueueOrTerminal("planning", workflow)).toBe(false);
+    expect(isQueueOrTerminal("plan_review", workflow)).toBe(false);
+    expect(isQueueOrTerminal("implementation", workflow)).toBe(false);
+    expect(isQueueOrTerminal("implementation_review", workflow)).toBe(false);
+    expect(isQueueOrTerminal("shipment", workflow)).toBe(false);
+    expect(isQueueOrTerminal("shipment_review", workflow)).toBe(false);
+  });
+
+  it("returns true for unknown states (not action states)", () => {
+    expect(isQueueOrTerminal("unknown_state")).toBe(true);
+    expect(isQueueOrTerminal("")).toBe(true);
+  });
+
+  it("works without a workflow descriptor (uses defaults)", () => {
+    expect(isQueueOrTerminal("shipped")).toBe(true);
+    expect(isQueueOrTerminal("abandoned")).toBe(true);
+    expect(isQueueOrTerminal("closed")).toBe(true);
+    expect(isQueueOrTerminal("ready_for_planning")).toBe(true);
+    expect(isQueueOrTerminal("implementation")).toBe(false);
   });
 });
