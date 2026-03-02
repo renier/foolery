@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf17-9a05-74e0-b77d-e2305a65c85a",
+  "occurred_at": "2026-03-02T15:08:05.509081Z",
+  "knot_id": "foolery-9861",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implemented agent stdout/stderr file logging (90a224f). Added logStdout/logStderr methods to InteractionLog interface in interaction-logger.ts. Wired stdout/stderr data handlers in terminal-manager.ts (both initial child and take-loop children) and orchestration-manager.ts. Updated log-lifecycle.ts to handle .stdout.log and .stderr.log file extensions for cleanup/compression. Added 11 new tests in agent-output-log.test.ts and 3 new tests in log-lifecycle.test.ts. Uses sequential write queue to prevent interleaved output. All 1656 tests pass, typecheck and build clean.",
+    "datetime": "2026-03-02T15:08:05.509081Z",
+    "entry_id": "019caf17-9a05-74e0-b77d-e22510184d04",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

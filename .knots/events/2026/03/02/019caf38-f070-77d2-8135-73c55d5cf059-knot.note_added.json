@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf38-f070-77d2-8135-73c55d5cf059",
+  "occurred_at": "2026-03-02T15:44:30.320158Z",
+  "knot_id": "foolery-8fc5",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Analysis\nThe `nextKnot()` function at knots.ts:395-405 already uses `execWrite` which serializes through `withWriteSerialization` per-repo-path. However, this is overly broad -- it serializes ALL writes to the same repo. The issue is that multiple callers (terminal-manager, verification-orchestrator) can call `nextKnot` concurrently for the same knot ID, and the repo-wide queue does not prevent the same knot from being advanced multiple times concurrently when interleaved with other write operations.\n\n### Solution\nAdd a per-knot-id async queue using `Map<string, Promise<void>>` pattern, applied only to `nextKnot`. This will:\n1. Serialize concurrent `nextKnot` calls for the same knot ID\n2. Allow different knot IDs to run concurrently\n3. Layer on top of the existing repo-wide write serialization\n\n### Implementation Steps\n1. Add a `knotIdQueues` Map at module level (similar to `repoWriteQueues`)\n2. Create `withKnotIdSerialization(id, run)` helper function\n3. Wrap `nextKnot`'s body with the per-id serialization\n4. Add `_pendingNextCount(id)` test helper\n5. Add tests in knots-write-serialization.test.ts verifying:\n   - Same-ID `nextKnot` calls are serialized\n   - Different-ID `nextKnot` calls run concurrently\n   - Queue cleanup after completion\n   - Error recovery (queue continues after failure)\n\n### Files Changed\n- `src/lib/knots.ts` -- add knotIdQueues, withKnotIdSerialization, wrap nextKnot\n- `src/lib/__tests__/knots-write-serialization.test.ts` -- add nextKnot serialization tests\n\n### Complexity: Low\n### Risk: Low -- additive change, no existing behavior modified",
+    "datetime": "2026-03-02T15:44:30.320158Z",
+    "entry_id": "019caf38-f070-77d2-8135-73bb97461ce7",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

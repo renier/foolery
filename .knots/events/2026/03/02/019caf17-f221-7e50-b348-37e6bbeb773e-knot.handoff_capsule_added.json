@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf17-f221-7e50-b348-37e6bbeb773e",
+  "occurred_at": "2026-03-02T15:08:28.065864Z",
+  "knot_id": "foolery-c760",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Pushed 15e6da8 to main. Adds isQueueOrTerminal() to workflows.ts and enforceQueueTerminalInvariant() to terminal-manager.ts. Every agent prompt now includes a CRITICAL INVARIANT instruction. The take-loop exit paths all enforce the invariant: if a beat is left in an action state, it is force-rolled-back to the queue state. Tests pass (15 tests in workflow-step.test.ts, 1646 total). 0 lint errors, 0 type errors, build succeeds.",
+    "datetime": "2026-03-02T15:08:28.065864Z",
+    "entry_id": "019caf17-f221-7e50-b348-37d5c563db1e",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

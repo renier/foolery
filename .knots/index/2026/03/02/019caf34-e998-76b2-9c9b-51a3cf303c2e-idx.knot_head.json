@@ -1,0 +1,17 @@
+{
+  "event_id": "019caf34-e998-76b2-9c9b-51a3cf303c2e",
+  "occurred_at": "2026-03-02T15:40:06.424626Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-e4df",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment",
+    "terminal": false,
+    "title": "beats view: remove ready option from state pulldown",
+    "updated_at": "2026-03-02T15:40:06.424626Z"
+  },
+  "precondition": {
+    "profile_etag": "019caf34-c501-74f1-ab70-f916552bf9eb"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf14-b4ea-7852-8d3a-021a7bb65a81",
+  "occurred_at": "2026-03-02T15:04:55.78613Z",
+  "knot_id": "foolery-aca8",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Commit 29835df: Added logBeatState to InteractionLog interface with kind:beat_state JSONL entries. Terminal-manager now logs beat state before/after each prompt in the take-loop with iteration ID. Three call sites: before initial prompt (iteration 1), before spawnTakeChild prompt, and after each child close. Two new tests in interaction-logger.test.ts, full lifecycle test updated to include beat_state entries. All quality gates green (1642 tests pass, lint/typecheck/build clean).",
+    "datetime": "2026-03-02T15:04:55.78613Z",
+    "entry_id": "019caf14-b4ea-7852-8d3a-020e30eae4c0",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

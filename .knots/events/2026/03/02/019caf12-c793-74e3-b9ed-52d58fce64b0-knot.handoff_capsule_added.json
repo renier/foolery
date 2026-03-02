@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf12-c793-74e3-b9ed-52d58fce64b0",
+  "occurred_at": "2026-03-02T15:02:49.491197Z",
+  "knot_id": "foolery-f637",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Removed profileId and nextActionOwnerKind pills from TitleCell in beat-columns.tsx. These duplicated information already shown in dedicated columns. All tests pass (1640/1640). Commit 0cdb3ee pushed to main.",
+    "datetime": "2026-03-02T16:03:00Z",
+    "entry_id": "019caf12-c793-74e3-b9ed-52c557536e36",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

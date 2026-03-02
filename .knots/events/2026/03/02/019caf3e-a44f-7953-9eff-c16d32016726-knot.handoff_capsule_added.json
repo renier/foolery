@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf3e-a44f-7953-9eff-c16d32016726",
+  "occurred_at": "2026-03-02T15:50:44.047851Z",
+  "knot_id": "foolery-261d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed transitionToRetry in verification-orchestrator.ts to use nextKnot(beadId, repoPath) instead of getBackend().update(beadId, { state: 'open' }). The old code caused normalizeStateForWorkflow to map 'open' to initialState, producing invalid backward transitions. Label mutations are now applied separately only when there are actual changes. Updated tests in both verification-orchestrator.test.ts and verification-orchestrator-coverage.test.ts to mock @/lib/knots and assert nextKnot is called. All 1674 tests pass. Commit: 22fcb5d, merged to main and pushed as e212396.",
+    "datetime": "2026-03-02T15:50:44.047851Z",
+    "entry_id": "019caf3e-a44f-7953-9eff-c1594438d79a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

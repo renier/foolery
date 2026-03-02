@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf16-ef4a-7e30-87b1-d80e47bda506",
+  "occurred_at": "2026-03-02T15:07:21.802465Z",
+  "knot_id": "foolery-6812",
+  "type": "knot.created",
+  "data": {
+    "body": "Always try to review the prior action with a different agent than the one that executed the prior action, regardless of what the weights dictate.\n\nFor example, if you have a 3:1 weight on claude opus 4.6 for review implementaiton, and the weights say it is claud opus 4.6's turn to review implementation, and claude opus 4.6 DID the implementation, you should pick a different agent from the pool despite the weight on claude opus 4.6\n\nthis of course requires that there be an eligible agent in the pool.  if not, log that fact and use the agent that is in the pool",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Agent Pools: Cross agent review supersedes pool weights"
+  }
+}

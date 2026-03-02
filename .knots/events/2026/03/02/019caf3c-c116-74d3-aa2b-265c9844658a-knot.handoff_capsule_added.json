@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf3c-c116-74d3-aa2b-265c9844658a",
+  "occurred_at": "2026-03-02T15:48:40.342639Z",
+  "knot_id": "foolery-198d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Replaced getBackend().update(beatId, { state: rolledBack }) with nextKnot(beatId, repoPath, { actorKind: 'agent' }) in enforceQueueTerminalInvariant (src/lib/terminal-manager.ts). The old code called kno update --status which fails on invalid backward state transitions. The new code calls kno next which knows valid forward transitions. Commit 9f34d5c merged to main as 9005d94. All quality gates pass: 0 lint errors, clean typecheck, 1694 tests passing.",
+    "datetime": "2026-03-02T15:48:40.342639Z",
+    "entry_id": "019caf3c-c116-74d3-aa2b-2643fcb6734b",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

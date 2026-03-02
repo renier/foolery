@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf38-d233-7732-860b-5d645b58da71",
+  "occurred_at": "2026-03-02T15:44:22.579779Z",
+  "knot_id": "foolery-198d",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Problem\n`enforceQueueTerminalInvariant` at line 754 calls `getBackend().update(beatId, { state: rolledBack })` which internally invokes `kno update --status`. This fails for invalid backward state transitions (e.g., `implementation -> ready_for_implementation`).\n\n### Solution\nReplace the `getBackend().update()` call with `knots.nextKnot(beatId)` which calls `kno next` and knows valid state transitions. When a knot is in an active (action) state, `kno next` advances it to the next queue state in the workflow, which satisfies the queue/terminal invariant.\n\n### Changes\n1. **src/lib/terminal-manager.ts**:\n   - Add import for `nextKnot` from `@/lib/knots`\n   - Replace `getBackend().update(beatId, { state: rolledBack }, repoPath)` with `nextKnot(beatId, repoPath, { actorKind: \"agent\" })`\n   - Keep `rollbackActivePhase` call for logging/diagnostics but remove it from the state-change path\n   - Update success/failure log messages accordingly\n\n2. **src/lib/__tests__/terminal-manager-invariant.test.ts** (new):\n   - Unit test that mocks `nextKnot` and verifies it is called instead of `getBackend().update()` during invariant enforcement\n\n### Risks\n- Low: `kno next` advances forward rather than rolling back. This is actually correct behavior -- an agent that was in `implementation` and exited should advance to the next queue state, not go backward.\n- The `rollbackActivePhase` function and its import can remain for diagnostic logging (showing what rollback would have been).",
+    "datetime": "2026-03-02T15:44:22.579779Z",
+    "entry_id": "019caf38-d233-7732-860b-5d5548d5ea59",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

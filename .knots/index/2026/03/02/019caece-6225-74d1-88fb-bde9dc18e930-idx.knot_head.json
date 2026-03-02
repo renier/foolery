@@ -1,0 +1,14 @@
+{
+  "event_id": "019caece-6225-74d1-88fb-bde9dc18e930",
+  "occurred_at": "2026-03-02T13:48:07.077334Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-ioos",
+    "profile_id": "autopilot",
+    "state": "shipped",
+    "terminal": true,
+    "title": "agent message type index",
+    "updated_at": "2026-03-02T13:48:07.077334Z"
+  }
+}

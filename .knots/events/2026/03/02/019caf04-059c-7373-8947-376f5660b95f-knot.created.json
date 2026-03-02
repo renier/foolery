@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf04-059c-7373-8947-376f5660b95f",
+  "occurred_at": "2026-03-02T14:46:42.332194Z",
+  "knot_id": "foolery-c760",
+  "type": "knot.created",
+  "data": {
+    "body": "Hard invariant: an agent must never end a work iteration in an action state. It must be in a queue or terminal state.\n\nRequirements:\n1. Foolery must preface its own prompt with an instruction that the agent must progress or regress the work to a queued state before ending.\n2. If the agent ends in an action state, foolery should use the same session ID to prompt the agent to either progress or regress the work to a queued state.\n3. If that retry also fails, foolery should regress the beat to the queue state itself and initiate a new session with a new agent.\n\nRoot cause context: knot 9b59 was handed to a ship-mode subagent while already in the 'shipment' action state. The agent ran kno next once (shipment → ready_for_shipment_review) and stopped. The completion prompt only instructed a single kno next, so the agent considered its work done. The real problem is that the agent was prompted in an action state and no guardrail enforced the queue/terminal invariant on exit.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Enforce queue/terminal state invariant on agent work iteration exit"
+  }
+}

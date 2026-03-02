@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf39-0870-7fb0-a069-2d21f92a2c10",
+  "occurred_at": "2026-03-02T15:44:36.464435Z",
+  "knot_id": "foolery-ef28",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Problem\n`nextKnot()` in `knots.ts:395-405` calls `execWrite` once and returns failure on any error, including transient \"database is locked\" errors.\n\n### Solution\nAdd retry-with-exponential-backoff logic to `nextKnot()`. Retry up to 3 times with delays of 1s, 2s, 4s. Only retry on transient errors (LOCKED, TIMEOUT, UNAVAILABLE, RATE_LIMITED) using the existing `classifyErrorMessage()` + `isRetryableByDefault()` from `backend-errors.ts`.\n\n### File Changes\n1. `src/lib/knots.ts` - Add `sleep()` helper, add `retryOnTransient()` wrapper, update `nextKnot()` to use it\n2. `src/lib/__tests__/knots-retry.test.ts` - New test file covering retry scenarios\n\n### Test Strategy\n- Test: retries on \"database is locked\" error up to 3 times\n- Test: succeeds after transient failure (retry 1 fails, retry 2 succeeds)\n- Test: does NOT retry on non-transient errors (e.g., \"not found\")\n- Test: returns final error after exhausting retries\n\n### Risks\n- Minimal: retry logic is self-contained and only wraps the existing exec call\n- Sleep delays are real wall-clock time in prod but will be mocked in tests",
+    "datetime": "2026-03-02T15:44:36.464435Z",
+    "entry_id": "019caf39-0870-7fb0-a069-2d18e95d41fa",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

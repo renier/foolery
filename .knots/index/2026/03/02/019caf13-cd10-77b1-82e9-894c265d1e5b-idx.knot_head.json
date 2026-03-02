@@ -1,0 +1,17 @@
+{
+  "event_id": "019caf13-cd10-77b1-82e9-894c265d1e5b",
+  "occurred_at": "2026-03-02T15:03:56.432815Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-f4ff",
+    "profile_id": "autopilot",
+    "state": "implementation",
+    "terminal": false,
+    "title": "beat e4df throws error when Take! selected",
+    "updated_at": "2026-03-02T15:03:56.432815Z"
+  },
+  "precondition": {
+    "profile_etag": "019caf13-bbb3-7d02-aeb8-13cdfc5b0b67"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "019caf0f-d303-7c61-9b89-460bfa71766c",
+  "occurred_at": "2026-03-02T14:59:35.811311Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-aca8",
+    "profile_id": "autopilot",
+    "state": "ready_for_implementation",
+    "terminal": false,
+    "title": "Log beat state before/after each prompt with loop iteration ID",
+    "updated_at": "2026-03-02T14:59:35.811311Z"
+  }
+}

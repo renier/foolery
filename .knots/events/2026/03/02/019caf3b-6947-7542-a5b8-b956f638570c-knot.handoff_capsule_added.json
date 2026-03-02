@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf3b-6947-7542-a5b8-b956f638570c",
+  "occurred_at": "2026-03-02T15:47:12.327103Z",
+  "knot_id": "foolery-8fc5",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implemented per-knot-id async queueing for nextKnot in src/lib/knots.ts. Added nextKnotQueues Map and withNextKnotSerialization helper mirroring the existing withWriteSerialization pattern. nextKnot now wraps its body with per-id serialization so concurrent calls for the same knot ID queue up, while different IDs proceed independently. Added _pendingNextCount test helper. 4 new tests in knots-write-serialization.test.ts verify same-ID serialization, different-ID concurrency, cleanup, and error recovery. All 1676 tests pass, lint/typecheck/build green. Commit 73ee1b5 pushed to origin/main.",
+    "datetime": "2026-03-02T15:47:12.327103Z",
+    "entry_id": "019caf3b-6947-7542-a5b8-b94098ff1716",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

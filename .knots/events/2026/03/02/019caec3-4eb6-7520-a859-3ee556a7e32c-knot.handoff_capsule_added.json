@@ -1,0 +1,15 @@
+{
+  "event_id": "019caec3-4eb6-7520-a859-3ee556a7e32c",
+  "occurred_at": "2026-03-02T13:36:01.206992Z",
+  "knot_id": "foolery-ioos",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review complete. Fixed 2 broken test assertions (.resolves.not.toThrow() → .resolves.toBeUndefined()) and added 7 new tests covering the message-type index startup block in instrumentation.ts. All feature tests pass. TypeCheck clean. Commit 6b52bc7 pushed to origin/main.",
+    "datetime": "2026-03-02T13:36:01.206992Z",
+    "entry_id": "019caec3-4eb6-7520-a859-3ed4634cca12",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

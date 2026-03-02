@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf3b-ca8d-70e3-84af-73f244e90dc6",
+  "occurred_at": "2026-03-02T15:47:37.229378Z",
+  "knot_id": "foolery-ef28",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added retry with exponential backoff (1s, 2s, 4s) to nextKnot() in knots.ts. Uses classifyErrorMessage + isRetryableByDefault from backend-errors.ts to only retry transient errors (LOCKED, TIMEOUT, UNAVAILABLE, RATE_LIMITED). Non-transient errors fail immediately. Added execWriteWithRetry wrapper and sleep helper. 6 tests in knots-retry.test.ts cover: success on first try, retry-then-succeed, no retry on non-transient, exhaust all retries, succeed on final retry, stop retrying on non-transient mid-retry. All 1678 tests pass, 0 lint errors, clean typecheck. Commit 0b5af29.",
+    "datetime": "2026-03-02T15:47:37.229378Z",
+    "entry_id": "019caf3b-ca8d-70e3-84af-73e0bcbfeb01",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

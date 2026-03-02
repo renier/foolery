@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf39-1cbf-7733-a82f-633d236e9c1c",
+  "occurred_at": "2026-03-02T15:44:41.663024Z",
+  "knot_id": "foolery-261d",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Problem\n`transitionToRetry` in `verification-orchestrator.ts:479-493` sets `state: \"open\"` via `getBackend().update()`. The `normalizeStateForWorkflow` function maps `\"open\"` to the workflow's `initialState` (`ready_for_planning`), causing backward transitions like `ready_for_implementation -> ready_for_planning`.\n\n### Fix\nReplace `getBackend().update(beadId, { state: \"open\", ... })` with `knots.nextKnot(beadId, repoPath)`. The `nextKnot` function uses `kno next` which correctly advances the knot to the next valid state rather than resetting to initial.\n\n### Steps\n1. Import `nextKnot` from `@/lib/knots` in `verification-orchestrator.ts`\n2. In `transitionToRetry`: keep the label mutation via `getBackend().update()` (without `state`) for retry labels\n3. After label update, call `nextKnot(beadId, repoPath)` to advance state correctly\n4. Update the test mock in `verification-orchestrator-coverage.test.ts` to also mock `@/lib/knots`\n5. Add a test verifying `nextKnot` is called instead of state:open\n\n### Risks\n- `nextKnot` could fail independently from label update; need to handle errors\n- Label update still needed for retry tracking, so we split the operation in two\n\n### Test Strategy\n- Update existing transitionToRetry test mocks\n- Add explicit test that nextKnot is called and state:open is NOT set",
+    "datetime": "2026-03-02T15:44:41.663024Z",
+    "entry_id": "019caf39-1cbf-7733-a82f-632fb317c490",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

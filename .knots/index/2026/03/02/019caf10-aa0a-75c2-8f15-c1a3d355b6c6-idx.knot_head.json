@@ -1,0 +1,14 @@
+{
+  "event_id": "019caf10-aa0a-75c2-8f15-c1a3d355b6c6",
+  "occurred_at": "2026-03-02T15:00:30.858125Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-9861",
+    "profile_id": "autopilot",
+    "state": "implementation",
+    "terminal": false,
+    "title": "Log agent stdout/stderr to file",
+    "updated_at": "2026-03-02T15:00:30.858125Z"
+  }
+}

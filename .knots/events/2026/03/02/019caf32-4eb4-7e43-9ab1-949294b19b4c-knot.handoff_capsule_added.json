@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf32-4eb4-7e43-9ab1-949294b19b4c",
+  "occurred_at": "2026-03-02T15:37:15.699954Z",
+  "knot_id": "foolery-e4df",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Cleaned up dead isReadyFilter code and fetchReadyBeads import from page.tsx. The Ready option was already removed from the filter-bar pulldown in commit 2e300a9. Commit: 1653e51. All tests pass (1671/1671).",
+    "datetime": "2026-03-02T16:40:00Z",
+    "entry_id": "019caf32-4eb4-7e43-9ab1-948cb3f2d029",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

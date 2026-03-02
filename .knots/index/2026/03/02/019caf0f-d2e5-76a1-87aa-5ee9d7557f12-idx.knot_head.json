@@ -1,0 +1,14 @@
+{
+  "event_id": "019caf0f-d2e5-76a1-87aa-5ee9d7557f12",
+  "occurred_at": "2026-03-02T14:59:35.781309Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-c760",
+    "profile_id": "autopilot",
+    "state": "ready_for_implementation",
+    "terminal": false,
+    "title": "Enforce queue/terminal state invariant on agent work iteration exit",
+    "updated_at": "2026-03-02T14:59:35.781309Z"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf0f-5911-7611-921d-e7044d259314",
+  "occurred_at": "2026-03-02T14:59:04.593046Z",
+  "knot_id": "foolery-c760",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Problem\nWhen an agent ends a work iteration, the knot may be left in an action state (e.g. \"shipment\", \"implementation\") rather than a queue state (e.g. \"ready_for_*\") or terminal state (\"shipped\", \"abandoned\"). This breaks the invariant that work items should be in a resting state between agent sessions.\n\n### Root Cause\nKnot 9b59 was handed to a ship-mode subagent while already in the 'shipment' action state. The agent ran kno next once (shipment -> ready_for_shipment_review) and stopped. No guardrail enforced the queue/terminal invariant on exit.\n\n### Solution (3 layers of defense)\n\n#### Layer 1: Prompt-level instruction (preventive)\nIn terminal-manager.ts, prepend a clear instruction to every agent prompt:\n\"CRITICAL INVARIANT: Before ending your work, ensure the knot is in a queue state (ready_for_*) or terminal state (shipped/abandoned). Never leave work in an action state (planning, implementation, shipment, etc.).\"\n\nFiles changed: `src/lib/terminal-manager.ts`\n\n#### Layer 2: Post-iteration state check with retry (detective + corrective)\nAfter each take-loop iteration completes, check if the beat is in an action state. If so, send a follow-up prompt to the same session instructing the agent to progress or regress to a queue/terminal state.\n\nFiles changed: `src/lib/terminal-manager.ts`\n\n#### Layer 3: Forced rollback on retry failure (last resort)\nIf the retry prompt also fails to move the beat out of an action state, Foolery should call `rollbackActivePhase()` directly to regress to the queue state, then log a warning.\n\nFiles changed: `src/lib/terminal-manager.ts`\n\n### Utility additions\nAdd an `isQueueOrTerminal()` helper to `workflows.ts` that checks whether a given state is a queue state (resolveStep returns Queued phase) or a terminal state (shipped/abandoned/closed).\n\n### Test strategy\n1. Unit test for `isQueueOrTerminal()` in workflow-step.test.ts\n2. Unit tests for the invariant enforcement logic in terminal-manager tests\n\n### Estimated complexity\nMedium - touches terminal-manager.ts (the core agent execution loop) and workflows.ts (utility layer). Changes are additive and defensive.\n\n### Risk\nLow - the prompt instruction is purely additive. The post-iteration check only activates when the beat is in an action state. The forced rollback is a safe operation (rollbackActivePhase already exists and is well-tested).",
+    "datetime": "2026-03-02T14:59:04.593046Z",
+    "entry_id": "019caf0f-5911-7611-921d-e6fbcbc3f471",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

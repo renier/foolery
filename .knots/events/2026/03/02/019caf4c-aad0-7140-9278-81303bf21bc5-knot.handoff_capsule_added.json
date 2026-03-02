@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf4c-aad0-7140-9278-81303bf21bc5",
+  "occurred_at": "2026-03-02T16:06:03.216436Z",
+  "knot_id": "foolery-6812",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Cross-agent review for pool dispatch is fully implemented. All code changes are in place: agent-pool.ts (excludeAgentId param, step agent tracking), workflows.ts (isReviewStep/priorActionStep helpers), types.ts (agentId on RegisteredAgent), settings.ts (cross-agent review logic in getStepAgent), terminal-manager.ts (take loop stops for cross-agent review). Tests pass (59/59). No new code changes needed.",
+    "datetime": "2026-03-02T17:06:00Z",
+    "entry_id": "019caf4c-aad0-7140-9278-812db5c1e640",
+    "model": "claude-opus-4-6",
+    "username": "claude",
+    "version": "4.6"
+  }
+}

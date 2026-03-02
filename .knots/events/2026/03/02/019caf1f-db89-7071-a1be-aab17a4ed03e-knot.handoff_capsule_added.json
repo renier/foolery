@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf1f-db89-7071-a1be-aab17a4ed03e",
+  "occurred_at": "2026-03-02T15:17:06.569569Z",
+  "knot_id": "foolery-30bb",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Fixed clipboard copy on beat IDs in both table view (beat-columns.tsx) and lightbox header (beat-detail-lightbox.tsx). Changed navigator.clipboard.writeText() to properly handle the Promise with .then() - showing toast.success on copy success and toast.error on failure. Previously the toast fired regardless of clipboard write result. Commit: 38e175a",
+    "datetime": "2026-03-02T15:30:00Z",
+    "entry_id": "019caf1f-db89-7071-a1be-aaa929fabde5",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf32-9779-7052-8011-0b3c781debac",
+  "occurred_at": "2026-03-02T15:37:34.329829Z",
+  "knot_id": "foolery-5690",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Split the combined Owner Type column in beat-columns.tsx into two separate columns: (1) Owner Type column that correctly shows Agent or Human based on nextActionOwnerKind, and (2) a new Action column (last in table) that contains the Take!/Scene!/Rolling... buttons. Updated beat-detail.tsx to capitalize owner type display. Fixed and extended tests. All 1671 tests pass.",
+    "datetime": "2026-03-02T16:38:00Z",
+    "entry_id": "019caf32-9779-7052-8011-0b219b997e2e",
+    "model": "claude-opus-4-6",
+    "username": "claude",
+    "version": "4.6"
+  }
+}

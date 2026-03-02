@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf32-cbcd-7832-aac6-008c7b110828",
+  "occurred_at": "2026-03-02T15:37:47.725278Z",
+  "knot_id": "foolery-3c09",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Added getStepAgent dispatch mode tests covering pools vs actions mode toggling, fallback chain, and default behavior. Tests verify the dispatchMode setting gates pool usage correctly. Commit: b4c0973. All 1671 tests pass, typecheck clean.",
+    "datetime": "2026-03-02T16:38:00+01:00",
+    "entry_id": "019caf32-cbcd-7832-aac6-0079a23e83ff",
+    "model": "claude-opus-4-6",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf35-bc41-7b81-a1c5-716678e41365",
+  "occurred_at": "2026-03-02T15:41:00.353606Z",
+  "knot_id": "foolery-6812",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Problem\nWhen pools mode is active, the same agent can execute an action step (planning, implementation, shipment) and then review its own work in the subsequent review step. The take loop continues with the same agent, meaning the review is never cross-agent.\n\n### Solution\n1. Add `excludeAgentId` parameter to pool selection functions to prefer a different agent for review steps\n2. Track which agent was selected for each beat+step combination (in-memory)\n3. In the take loop, stop when transitioning to a review step so a different agent can be selected\n4. Return `agentId` from pool selection so callers can track identity\n\n### File Changes\n\n**src/lib/types.ts** - Add optional `agentId` field to `RegisteredAgent`\n\n**src/lib/workflows.ts** - Add `isReviewStep()` and `priorActionStep()` helpers\n\n**src/lib/agent-pool.ts** - Core changes:\n- Add `excludeAgentId` to `selectFromPool()` and `resolvePoolAgent()`\n- Include `agentId` in returned RegisteredAgent\n- Fallback: if no alternative agents exist, log and use the excluded agent\n- Add `recordStepAgent()` and `getLastStepAgent()` for in-memory tracking\n\n**src/lib/settings.ts** - Add `priorStepAgentId` to `getStepAgent()`, derive from tracking map for review steps\n\n**src/lib/terminal-manager.ts** - In `buildNextTakePrompt()`, stop the loop when transitioning to a review step and an alternative agent is available\n\n**Tests** - Add tests for exclusion logic, review step detection, and tracking",
+    "datetime": "2026-03-02T15:41:00.353606Z",
+    "entry_id": "019caf35-bc41-7b81-a1c5-715f94c7b613",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "event_id": "019caf37-d2d8-7f41-aafb-6e7e03e6095a",
+  "occurred_at": "2026-03-02T15:43:17.208325Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-198d",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "Replace kno update --status with kno next in enforceQueueTerminalInvariant",
+    "updated_at": "2026-03-02T15:43:17.208325Z"
+  },
+  "precondition": {
+    "profile_etag": "019caf34-a745-70b1-83fc-fa3a3d5f9122"
+  }
+}

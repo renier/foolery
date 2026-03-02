@@ -1,0 +1,14 @@
+{
+  "event_id": "019caf38-ff3e-74e1-80b4-501a4fa173c5",
+  "occurred_at": "2026-03-02T15:44:34.11055Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-037e",
+    "profile_id": "autopilot",
+    "state": "ready_for_implementation",
+    "terminal": false,
+    "title": "Replace kno update --status with kno next in buildWorkflowStateCommand",
+    "updated_at": "2026-03-02T15:44:34.11055Z"
+  }
+}

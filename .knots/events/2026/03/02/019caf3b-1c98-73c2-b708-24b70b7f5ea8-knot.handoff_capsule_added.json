@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf3b-1c98-73c2-b708-24b70b7f5ea8",
+  "occurred_at": "2026-03-02T15:46:52.696067Z",
+  "knot_id": "foolery-037e",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Changed buildWorkflowStateCommand in memory-manager-commands.ts to emit `kno next <id> --actor-kind agent` for knots instead of `kno update <id> --status <state>`. Beads path unchanged. Deduplicated progression commands in terminal-manager.ts. Tests updated. All quality gates pass (lint, tsc, 1673 tests). Commit 7f6df9d.",
+    "datetime": "2026-03-02T15:46:52.696067Z",
+    "entry_id": "019caf3b-1c98-73c2-b708-24aa43e2fc39",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

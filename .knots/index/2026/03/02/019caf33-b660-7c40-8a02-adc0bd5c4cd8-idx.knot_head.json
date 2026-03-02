@@ -1,0 +1,14 @@
+{
+  "event_id": "019caf33-b660-7c40-8a02-adc0bd5c4cd8",
+  "occurred_at": "2026-03-02T15:38:47.776861Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-5690",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment",
+    "terminal": false,
+    "title": "Beats view: Owner Type column is wrong",
+    "updated_at": "2026-03-02T15:38:47.776861Z"
+  }
+}

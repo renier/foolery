@@ -1,0 +1,12 @@
+{
+  "event_id": "019caef0-8294-7b13-b4c9-3d8897474dc7",
+  "occurred_at": "2026-03-02T14:25:23.604093Z",
+  "knot_id": "foolery-30bb",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says, should copy to clipboard with a toast",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "beats view: clicking on beat id to copy to clipboard is broken"
+  }
+}

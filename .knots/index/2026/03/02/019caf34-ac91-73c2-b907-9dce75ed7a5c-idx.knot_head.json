@@ -1,0 +1,14 @@
+{
+  "event_id": "019caf34-ac91-73c2-b907-9dce75ed7a5c",
+  "occurred_at": "2026-03-02T15:39:50.801649Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-261d",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "terminal": false,
+    "title": "Replace kno update --status with kno next in transitionToRetry",
+    "updated_at": "2026-03-02T15:39:50.801649Z"
+  }
+}

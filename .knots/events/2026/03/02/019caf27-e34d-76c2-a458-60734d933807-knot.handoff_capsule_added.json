@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf27-e34d-76c2-a458-60734d933807",
+  "occurred_at": "2026-03-02T15:25:52.845058Z",
+  "knot_id": "foolery-3c09",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Unified Action Mappings and Agent Pools into a single Agent Dispatch section with Simple/Advanced mode toggle. Added dispatchMode setting to schema. Commit: 0d0429c",
+    "datetime": "2026-03-02T15:25:52.845058Z",
+    "entry_id": "019caf27-e34d-76c2-a458-606b9b7c1f96",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

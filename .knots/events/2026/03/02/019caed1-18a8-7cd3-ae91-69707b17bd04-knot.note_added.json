@@ -1,0 +1,15 @@
+{
+  "event_id": "019caed1-18a8-7cd3-ae91-69707b17bd04",
+  "occurred_at": "2026-03-02T13:51:04.87271Z",
+  "knot_id": "foolery-ioos",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "---\n**Verification attempt 2 failed (2026-03-02 13:51)** — commit: f82debc, reason: fail-requirements\n\nMain correctly builds a persisted message-type index from the latest logs and refreshes it after successful Take!/Scene! sessions, but it does not fully meet the bead requirements. The index schema in `src/lib/agent-message-type-index.ts` only stores `agentName` and `agentModel`; there is no `agentVersion` capture, persistence, or exposure for each message type. Update session logging and index extraction/merge logic to include agent version metadata, then expose that annotation through the message-type API payload used by history navigation.",
+    "datetime": "2026-03-02T13:51:04.87271Z",
+    "entry_id": "019caed1-18a8-7cd3-ae91-696d4e1bd1a5",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

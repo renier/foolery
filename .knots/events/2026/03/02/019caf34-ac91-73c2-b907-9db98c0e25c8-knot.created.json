@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf34-ac91-73c2-b907-9db98c0e25c8",
+  "occurred_at": "2026-03-02T15:39:50.801649Z",
+  "knot_id": "foolery-261d",
+  "type": "knot.created",
+  "data": {
+    "body": "verification-orchestrator.ts:486-492 sets state: 'open' via getBackend().update(), which normalizeStateForWorkflow maps to the workflow initialState (ready_for_planning). Causes invalid backward transitions like ready_for_implementation -> ready_for_planning. Should use knots.nextKnot(beatId) instead.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Replace kno update --status with kno next in transitionToRetry"
+  }
+}

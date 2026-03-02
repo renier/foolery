@@ -1,0 +1,12 @@
+{
+  "event_id": "019caef4-d5cd-71c0-8b7d-8f3c27056e70",
+  "occurred_at": "2026-03-02T14:30:07.053228Z",
+  "knot_id": "foolery-5690",
+  "type": "knot.created",
+  "data": {
+    "body": "Owner Type should show \"Agent\" or \"Human\" - not Take!.  Move Take! and the related Rolling..., etc. into it's own column as the last column in the table.\n\nThen correct Owner Type to show either Agent or Human",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Beats view: Owner Type column is wrong"
+  }
+}

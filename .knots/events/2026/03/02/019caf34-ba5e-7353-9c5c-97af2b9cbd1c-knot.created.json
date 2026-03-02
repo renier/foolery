@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf34-ba5e-7353-9c5c-97af2b9cbd1c",
+  "occurred_at": "2026-03-02T15:39:54.33479Z",
+  "knot_id": "foolery-8fc5",
+  "type": "knot.created",
+  "data": {
+    "body": "knots.ts:395-405 nextKnot() has no concurrency control. Multiple callers (terminal-manager, verification-orchestrator) can call nextKnot concurrently for the same knot, contributing to database lock contention. Should serialize calls per-knot-id to prevent concurrent kno CLI invocations from competing for the SQLite lock.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Add per-knot-id async queueing to knots.nextKnot"
+  }
+}

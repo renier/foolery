@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf38-cab0-7613-b1e7-b60c2791e0eb",
+  "occurred_at": "2026-03-02T15:44:20.656145Z",
+  "knot_id": "foolery-037e",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Summary\nChange `buildWorkflowStateCommand` in `memory-manager-commands.ts` so that the knots branch generates `kno next <id>` instead of `kno update <id> --status <state>`. The beads branch remains unchanged.\n\n### Changes\n\n**File: `src/lib/memory-manager-commands.ts`**\n- Modify `buildWorkflowStateCommand` (line 43-44): For knots, return `kno next <id>` instead of `kno update <id> --status <state>`.\n- The `workflowState` parameter is ignored for knots since `kno next` determines the next state automatically.\n- Signature stays the same to avoid breaking the beads callers.\n\n**File: `src/lib/terminal-manager.ts`**\n- `buildGranularProgressionCommands` (line 124-143): Since every call to `buildWorkflowStateCommand` for knots now returns the same `kno next <id>`, deduplicate so only one `kno next <id>` command is emitted instead of N identical ones. For beads, keep per-state commands.\n- `buildSingleTargetFollowUpLines` (line 167): No change needed since it calls `buildWorkflowStateCommand` which will now return the correct knots command.\n\n**File: `src/lib/__tests__/memory-manager-commands-coverage.test.ts`**\n- Update test expectations for knots branch to expect `kno next <id>` instead of `kno update <id> --status <state>`.\n- The lowercase normalization test for knots state is no longer relevant (state is ignored), remove or adjust.\n\n### Risks\n- Low: The change is narrow and well-tested.\n- The beads path is untouched.\n\n### Complexity\nSmall — 3 files, ~10 lines changed.",
+    "datetime": "2026-03-02T15:44:20.656145Z",
+    "entry_id": "019caf38-cab0-7613-b1e7-b5fb1217d480",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

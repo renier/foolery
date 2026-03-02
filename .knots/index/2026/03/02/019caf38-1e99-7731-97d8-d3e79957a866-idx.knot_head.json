@@ -1,0 +1,17 @@
+{
+  "event_id": "019caf38-1e99-7731-97d8-d3e79957a866",
+  "occurred_at": "2026-03-02T15:43:36.60113Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-8fc5",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "Add per-knot-id async queueing to knots.nextKnot",
+    "updated_at": "2026-03-02T15:43:36.60113Z"
+  },
+  "precondition": {
+    "profile_etag": "019caf34-ba5e-7353-9c5c-97b327d81d97"
+  }
+}

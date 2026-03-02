@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf14-3b36-7df0-8e6c-b4a26fb802e8",
+  "occurred_at": "2026-03-02T15:04:24.630805Z",
+  "knot_id": "foolery-3c09",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says - you're either using pools or action settings.  maybe the best thing to do is to move them to the same tab and have the user explicitly choose one style over the other.\n\nit should also be made clear that action settings are simpler but less robust.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Settings: When Agent Pools are configured, gray out/disable the action settings"
+  }
+}

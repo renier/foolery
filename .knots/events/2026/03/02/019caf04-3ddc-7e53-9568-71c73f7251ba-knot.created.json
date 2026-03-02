@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf04-3ddc-7e53-9568-71c73f7251ba",
+  "occurred_at": "2026-03-02T14:46:56.732646Z",
+  "knot_id": "foolery-aca8",
+  "type": "knot.created",
+  "data": {
+    "body": "Before and after each agent prompt in the take-loop/ship-mode, log:\n1. The beat state before the prompt\n2. The beat state after the prompt\n3. The loop iteration count/ID that the prompt belonged to\n\nThis provides an audit trail for diagnosing state transition issues like the 9b59 incident where the agent was prompted in an action state and only advanced one step.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Log beat state before/after each prompt with loop iteration ID"
+  }
+}

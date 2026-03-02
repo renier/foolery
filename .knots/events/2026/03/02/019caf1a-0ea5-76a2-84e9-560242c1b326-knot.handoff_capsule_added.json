@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf1a-0ea5-76a2-84e9-560242c1b326",
+  "occurred_at": "2026-03-02T15:10:46.437097Z",
+  "knot_id": "foolery-f4ff",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added BUILTIN_SKILL_PROMPTS map in knots-backend.ts with a local shipment skill prompt. Modified buildClaimFallbackPrompt to prefer local skill prompts before falling back to kno skill CLI. The shipment skill includes auto-discovery logic: check main, check feature branches, search for knot-referencing commits, or roll back to ready_for_implementation. Tests added for builtin skill usage, CLI fallback for non-builtin states, and combined failure scenario. All 1664 tests pass. Commit: 384b176",
+    "datetime": "2026-03-02T15:10:46.437097Z",
+    "entry_id": "019caf1a-0ea5-76a2-84e9-55fe10a42e15",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

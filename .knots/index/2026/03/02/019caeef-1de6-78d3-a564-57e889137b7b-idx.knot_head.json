@@ -1,0 +1,14 @@
+{
+  "event_id": "019caeef-1de6-78d3-a564-57e889137b7b",
+  "occurred_at": "2026-03-02T14:23:52.286175Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-6q2x",
+    "profile_id": "autopilot",
+    "state": "abandoned",
+    "terminal": true,
+    "title": "invalidate final cut state on window open or agent action completion",
+    "updated_at": "2026-03-02T14:23:52.286175Z"
+  }
+}

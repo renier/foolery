@@ -1,0 +1,14 @@
+{
+  "event_id": "019caeef-024e-7560-9ee7-ea201b617f97",
+  "occurred_at": "2026-03-02T14:23:45.216097Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-6c7c",
+    "profile_id": "autopilot",
+    "state": "abandoned",
+    "terminal": true,
+    "title": "Stabilize Beads lock health and commit Dolt hook fixes",
+    "updated_at": "2026-03-02T14:23:45.216097Z"
+  }
+}

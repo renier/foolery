@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf34-a745-70b1-83fc-fa22792ce575",
+  "occurred_at": "2026-03-02T15:39:49.445444Z",
+  "knot_id": "foolery-198d",
+  "type": "knot.created",
+  "data": {
+    "body": "terminal-manager.ts:754 uses getBackend().update(beatId, { state: rolledBack }) to roll back action states to queue states. This calls kno update --status which fails with invalid state transitions (e.g. ready_for_implementation -> planning). Should use knots.nextKnot(beatId) instead.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Replace kno update --status with kno next in enforceQueueTerminalInvariant"
+  }
+}

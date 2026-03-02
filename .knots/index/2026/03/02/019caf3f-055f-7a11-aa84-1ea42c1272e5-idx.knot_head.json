@@ -1,0 +1,17 @@
+{
+  "event_id": "019caf3f-055f-7a11-aa84-1ea42c1272e5",
+  "occurred_at": "2026-03-02T15:51:08.89568Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-261d",
+    "profile_id": "autopilot",
+    "state": "shipment",
+    "terminal": false,
+    "title": "Replace kno update --status with kno next in transitionToRetry",
+    "updated_at": "2026-03-02T15:51:08.89568Z"
+  },
+  "precondition": {
+    "profile_etag": "019caf3e-f54f-75b2-8fed-ab8424fc1416"
+  }
+}

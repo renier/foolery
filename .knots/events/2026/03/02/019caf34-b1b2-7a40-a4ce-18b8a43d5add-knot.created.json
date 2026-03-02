@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf34-b1b2-7a40-a4ce-18b8a43d5add",
+  "occurred_at": "2026-03-02T15:39:52.11436Z",
+  "knot_id": "foolery-037e",
+  "type": "knot.created",
+  "data": {
+    "body": "memory-manager-commands.ts:42 generates 'kno update <id> --status <state>' commands injected into agent prompts for forward workflow transitions. Should generate 'kno next <id>' instead. Called from terminal-manager.ts:141 (buildProgressionCommands) and terminal-manager.ts:167 (buildSingleTargetFollowUpLines).",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Replace kno update --status with kno next in buildWorkflowStateCommand"
+  }
+}

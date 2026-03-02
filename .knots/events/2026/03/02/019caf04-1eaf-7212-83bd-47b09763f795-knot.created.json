@@ -1,0 +1,12 @@
+{
+  "event_id": "019caf04-1eaf-7212-83bd-47b09763f795",
+  "occurred_at": "2026-03-02T14:46:48.751118Z",
+  "knot_id": "foolery-9861",
+  "type": "knot.created",
+  "data": {
+    "body": "Ensure that all agent stdout and stderr output is logged to file during take-loop and ship-mode sessions. This is needed for post-mortem debugging when agents fail or stop in unexpected states.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Log agent stdout/stderr to file"
+  }
+}

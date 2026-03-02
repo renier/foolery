@@ -1,0 +1,14 @@
+{
+  "event_id": "019caf35-bc4b-7022-b427-085c11bb8808",
+  "occurred_at": "2026-03-02T15:41:00.353606Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-6812",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "Agent Pools: Cross agent review supersedes pool weights",
+    "updated_at": "2026-03-02T15:41:00.353606Z"
+  }
+}
