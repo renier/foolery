@@ -93,7 +93,14 @@ async function collectFromDateDir(
   }
 
   for (const file of files) {
-    if (!file.endsWith(".jsonl") && !file.endsWith(".jsonl.gz")) continue;
+    const isLogFile =
+      file.endsWith(".jsonl") ||
+      file.endsWith(".jsonl.gz") ||
+      file.endsWith(".stdout.log") ||
+      file.endsWith(".stdout.log.gz") ||
+      file.endsWith(".stderr.log") ||
+      file.endsWith(".stderr.log.gz");
+    if (!isLogFile) continue;
     const filePath = join(datePath, file);
     try {
       const s = await stat(filePath);
@@ -194,7 +201,7 @@ function applyAgePolicies(
       toDelete.push(entry);
     } else if (
       entry.mtimeMs < compressThreshold &&
-      entry.path.endsWith(".jsonl")
+      !entry.path.endsWith(".gz")
     ) {
       toCompress.push(entry);
       // Not added to kept -- compressed versions will be added separately

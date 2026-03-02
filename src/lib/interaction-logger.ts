@@ -83,6 +83,14 @@ function sessionFile(meta: SessionMeta): string {
   return join(sessionDir(meta), `${meta.sessionId}.jsonl`);
 }
 
+function sessionStdoutFile(meta: SessionMeta): string {
+  return join(sessionDir(meta), `${meta.sessionId}.stdout.log`);
+}
+
+function sessionStderrFile(meta: SessionMeta): string {
+  return join(sessionDir(meta), `${meta.sessionId}.stderr.log`);
+}
+
 async function ensureDir(dir: string): Promise<void> {
   await mkdir(dir, { recursive: true });
 }
@@ -93,18 +101,42 @@ async function writeLine(path: string, line: LogLine): Promise<void> {
 }
 
 /**
+ * A sequential write queue that ensures appends to a single file
+ * are serialized, preventing interleaved output from concurrent
+ * fire-and-forget calls.
+ */
+function createWriteQueue(filePath: string): (chunk: string) => void {
+  let chain: Promise<void> = Promise.resolve();
+  return (chunk: string) => {
+    chain = chain
+      .then(() => appendFile(filePath, chunk, "utf-8"))
+      .catch((err) => {
+        console.error(`[interaction-logger] raw write failed (${filePath}):`, err);
+      });
+  };
+}
+
+/**
  * A lightweight handle returned when a session begins logging.
  * Callers use `logPrompt`, `logResponse`, and `logEnd` to append entries.
  */
 export interface InteractionLog {
   /** Path to the log file on disk. Empty string for no-op loggers. */
   readonly filePath: string;
+  /** Path to the stdout log file. Empty string for no-op loggers. */
+  readonly stdoutPath: string;
+  /** Path to the stderr log file. Empty string for no-op loggers. */
+  readonly stderrPath: string;
   /** Log the prompt sent to the agent. */
   logPrompt(prompt: string, metadata?: PromptLogMetadata): void;
   /** Log a raw NDJSON line received from the agent. */
   logResponse(rawLine: string): void;
   /** Log beat state snapshot before or after a prompt. */
   logBeatState(entry: BeatStateLogEntry): void;
+  /** Log a raw stdout chunk from the agent child process. */
+  logStdout(chunk: string): void;
+  /** Log a raw stderr chunk from the agent child process. */
+  logStderr(chunk: string): void;
   /** Log session completion. */
   logEnd(exitCode: number | null, status: string): void;
 }
@@ -144,6 +176,8 @@ export async function startInteractionLog(
 ): Promise<InteractionLog> {
   const dir = sessionDir(meta);
   const file = sessionFile(meta);
+  const stdoutFile = sessionStdoutFile(meta);
+  const stderrFile = sessionStderrFile(meta);
 
   try {
     await ensureDir(dir);
@@ -183,6 +217,8 @@ export async function startInteractionLog(
 
   return {
     filePath: file,
+    stdoutPath: stdoutFile,
+    stderrPath: stderrFile,
     logPrompt(prompt: string, metadata?: PromptLogMetadata) {
       write({
         kind: "prompt",
@@ -223,6 +259,10 @@ export async function startInteractionLog(
       });
     },
 
+    logStdout: createWriteQueue(stdoutFile),
+
+    logStderr: createWriteQueue(stderrFile),
+
     logEnd(exitCode: number | null, status: string) {
       write({
         kind: "session_end",
@@ -239,9 +279,13 @@ export async function startInteractionLog(
 export function noopInteractionLog(): InteractionLog {
   return {
     filePath: "",
+    stdoutPath: "",
+    stderrPath: "",
     logPrompt() {},
     logResponse() {},
     logBeatState() {},
+    logStdout() {},
+    logStderr() {},
     logEnd() {},
   };
 }

@@ -719,6 +719,7 @@ export async function createOrchestrationSession(
   let ndjsonBuffer = "";
 
   child.stdout?.on("data", (chunk: Buffer) => {
+    orchInteractionLog.logStdout(chunk.toString());
     ndjsonBuffer += chunk.toString();
     const lines = ndjsonBuffer.split("\n");
     ndjsonBuffer = lines.pop() ?? "";
@@ -809,6 +810,7 @@ export async function createOrchestrationSession(
   child.stderr?.on("data", (chunk: Buffer) => {
     const text = chunk.toString();
     if (!text) return;
+    orchInteractionLog.logStderr(text);
     pushEvent(entry, "log", text);
   });
 

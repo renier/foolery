@@ -810,6 +810,7 @@ export async function createSession(
     };
 
     takeChild.stdout?.on("data", (chunk: Buffer) => {
+      interactionLog.logStdout(chunk.toString());
       takeLineBuffer += chunk.toString();
       const lines = takeLineBuffer.split("\n");
       takeLineBuffer = lines.pop() ?? "";
@@ -836,6 +837,7 @@ export async function createSession(
     });
 
     takeChild.stderr?.on("data", (chunk: Buffer) => {
+      interactionLog.logStderr(chunk.toString());
       pushEvent({ type: "stderr", data: chunk.toString(), timestamp: Date.now() });
     });
 
@@ -1106,6 +1108,7 @@ export async function createSession(
   // Parse stream-json NDJSON output from claude CLI
   let lineBuffer = "";
   child.stdout?.on("data", (chunk: Buffer) => {
+    interactionLog.logStdout(chunk.toString());
     lineBuffer += chunk.toString();
     const lines = lineBuffer.split("\n");
     lineBuffer = lines.pop() ?? ""; // keep incomplete last line
@@ -1141,6 +1144,7 @@ export async function createSession(
 
   child.stderr?.on("data", (chunk: Buffer) => {
     const text = chunk.toString();
+    interactionLog.logStderr(text);
     console.log(`[terminal-manager] [${id}] stderr: ${text.slice(0, 200)}`);
     pushEvent({ type: "stderr", data: text, timestamp: Date.now() });
   });

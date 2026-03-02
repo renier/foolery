@@ -300,6 +300,70 @@ describe("cleanupLogs", () => {
     expect(await pathExists(join(tempDir, "repo-c/2026-02-18/s1.jsonl"))).toBe(true);
   });
 
+  it("compresses .stdout.log files older than compressAfterDays", async () => {
+    const content = "raw stdout output here\n";
+    const file = await createLogFile(
+      "my-repo/2026-02-14/session-old.stdout.log",
+      content,
+      5,
+    );
+
+    await cleanupLogs({
+      logRoot: tempDir,
+      compressAfterDays: 3,
+      deleteAfterDays: 30,
+    });
+
+    expect(await pathExists(file)).toBe(false);
+    expect(await pathExists(file + ".gz")).toBe(true);
+
+    const decompressed = await readGzFile(file + ".gz");
+    expect(decompressed).toBe(content);
+  });
+
+  it("compresses .stderr.log files older than compressAfterDays", async () => {
+    const content = "raw stderr output here\n";
+    const file = await createLogFile(
+      "my-repo/2026-02-14/session-old.stderr.log",
+      content,
+      5,
+    );
+
+    await cleanupLogs({
+      logRoot: tempDir,
+      compressAfterDays: 3,
+      deleteAfterDays: 30,
+    });
+
+    expect(await pathExists(file)).toBe(false);
+    expect(await pathExists(file + ".gz")).toBe(true);
+
+    const decompressed = await readGzFile(file + ".gz");
+    expect(decompressed).toBe(content);
+  });
+
+  it("deletes old .stdout.log and .stderr.log files", async () => {
+    const stdoutFile = await createLogFile(
+      "my-repo/2025-01-01/session-ancient.stdout.log",
+      "old stdout\n",
+      60,
+    );
+    const stderrFile = await createLogFile(
+      "my-repo/2025-01-01/session-ancient.stderr.log",
+      "old stderr\n",
+      60,
+    );
+
+    await cleanupLogs({
+      logRoot: tempDir,
+      compressAfterDays: 3,
+      deleteAfterDays: 30,
+    });
+
+    expect(await pathExists(stdoutFile)).toBe(false);
+    expect(await pathExists(stderrFile)).toBe(false);
+  });
+
   it("ignores non-log files in log directories", async () => {
     // Create a non-log file alongside a log file
     await createLogFile("repo/2025-01-01/notes.txt", "not a log", 60);
