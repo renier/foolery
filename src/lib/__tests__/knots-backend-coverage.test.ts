@@ -563,7 +563,7 @@ describe("KnotsBackend coverage: buildTakePrompt parent/scene mode", () => {
     expect(result.data?.claimed).toBe(true);
   });
 
-  it("falls back to skillPrompt when claim fails", async () => {
+  it("falls back to builtin skill when claim fails for shipment state", async () => {
     const backend = new KnotsBackend("/repo");
     mockClaimKnot.mockResolvedValueOnce({
       ok: false as const,
@@ -576,7 +576,26 @@ describe("KnotsBackend coverage: buildTakePrompt parent/scene mode", () => {
     expect(result.ok).toBe(true);
     expect(result.data?.claimed).toBe(false);
     expect(result.data?.prompt).toContain("Fallback Beat");
+    // Builtin skill prompt is used; kno skill CLI is not called
+    expect(result.data?.prompt).toContain("# Shipment");
+    expect(mockSkillPrompt).not.toHaveBeenCalled();
+  });
+
+  it("falls back to kno skill CLI when claim fails for non-builtin state", async () => {
+    const backend = new KnotsBackend("/repo");
+    mockClaimKnot.mockResolvedValueOnce({
+      ok: false as const,
+      error: "planning has no skill",
+    });
+
+    insertKnot({ id: "FB-2", title: "Fallback Planning", state: "ready_for_planning" });
+    const result = await backend.buildTakePrompt("FB-2");
+
+    expect(result.ok).toBe(true);
+    expect(result.data?.claimed).toBe(false);
+    expect(result.data?.prompt).toContain("Fallback Planning");
     expect(result.data?.prompt).toContain("Skill prompt placeholder");
+    expect(mockSkillPrompt).toHaveBeenCalledWith("planning", "/repo");
   });
 
   it("returns original claim error when fallback skillPrompt also fails", async () => {
@@ -594,6 +613,27 @@ describe("KnotsBackend coverage: buildTakePrompt parent/scene mode", () => {
     const result = await backend.buildTakePrompt("LOCKED-1");
 
     expect(result.ok).toBe(false);
+  });
+
+  it("uses builtin skill prompt for shipment when kno skill also fails", async () => {
+    const backend = new KnotsBackend("/repo");
+    mockClaimKnot.mockResolvedValueOnce({
+      ok: false as const,
+      error: "Ready For Shipment has no skill",
+    });
+    mockSkillPrompt.mockResolvedValueOnce({
+      ok: false as const,
+      error: "unknown skill",
+    });
+
+    insertKnot({ id: "SHIP-1", title: "Ship Beat", state: "ready_for_shipment" });
+    const result = await backend.buildTakePrompt("SHIP-1");
+
+    expect(result.ok).toBe(true);
+    expect(result.data?.claimed).toBe(false);
+    expect(result.data?.prompt).toContain("Ship Beat");
+    expect(result.data?.prompt).toContain("Shipment");
+    expect(result.data?.prompt).toContain("committed to `main`");
   });
 });
 

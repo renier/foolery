@@ -418,6 +418,37 @@ function memoryManagerKey(repoPath?: string): string {
   return repoPath ?? process.cwd();
 }
 
+/**
+ * Local skill prompt overrides keyed by action-state name.
+ *
+ * When `kno skill <state>` fails (e.g. the binary lacks a built-in skill for
+ * that state), the fallback path checks this map before propagating the error.
+ * Only states that need a local override should appear here.
+ */
+export const BUILTIN_SKILL_PROMPTS: Readonly<Record<string, string>> = Object.freeze({
+  shipment: `# Shipment
+
+## Input
+- Knot in \`ready_for_shipment\` state
+- Implementation work from a prior phase
+
+## Actions
+1. Check if implementation code is already committed to \`main\`. If so, skip to Completion.
+2. Check if implementation code is committed to a feature branch. If so, merge the branch into \`main\`, push, then skip to Completion.
+3. Search the repository for committed code that references this knot ID or the problem description. If matching commits are found, go back to step 1.
+4. If no committed code is found anywhere, roll back:
+   \`kno update <id> --status ready_for_implementation --add-note "No committed implementation found; rolling back to implementation."\`
+
+## Output
+- Implementation code merged and pushed to \`main\`
+- Transition: \`kno next <id>\`
+
+## Failure Modes
+- Merge conflicts: \`kno update <id> --status ready_for_implementation --add-note "<blocker details>"\`
+- CI failure after merge: \`kno update <id> --status ready_for_implementation --add-note "<blocker details>"\`
+- No implementation found: \`kno update <id> --status ready_for_implementation --add-note "No committed implementation found; rolling back."\``,
+});
+
 export class KnotsBackend implements BackendPort {
   readonly capabilities: BackendCapabilities = KNOTS_CAPABILITIES;
 
@@ -983,8 +1014,14 @@ export class KnotsBackend implements BackendPort {
       ? rawState.slice("ready_for_".length)
       : rawState;
 
-    const skillResult = fromKnots(await knots.skillPrompt(actionState, rp));
-    if (!skillResult.ok) return propagateError<TakePromptResult>(claimResult);
+    // Prefer a local builtin skill prompt; fall back to kno skill CLI.
+    const localSkill = BUILTIN_SKILL_PROMPTS[actionState];
+    let skillText: string | undefined = localSkill;
+    if (!skillText) {
+      const skillResult = fromKnots(await knots.skillPrompt(actionState, rp));
+      if (!skillResult.ok) return propagateError<TakePromptResult>(claimResult);
+      skillText = skillResult.data!;
+    }
 
     // Try to advance the knot state so it's properly claimed
     await knots.nextKnot(beatId, rp);
@@ -998,7 +1035,7 @@ export class KnotsBackend implements BackendPort {
       ``,
       `---`,
       ``,
-      skillResult.data!,
+      skillText,
       ``,
       `## Completion`,
       ``,
