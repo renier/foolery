@@ -331,20 +331,6 @@ function TitleCell({ beat, onTitleClick, onUpdateBeat, allLabels, isBuiltForRevi
         <span className="text-muted-foreground text-xs">
           {relativeTime(beat.updated)}
         </span>
-        {beat.profileId && (
-          <span className="inline-flex items-center rounded px-1 py-0 text-[10px] font-medium leading-none bg-emerald-100 text-emerald-700">
-            {beat.profileId}
-          </span>
-        )}
-        {beat.nextActionOwnerKind && beat.nextActionOwnerKind !== "none" && (
-          <span className={`inline-flex items-center rounded px-1 py-0 text-[10px] font-medium leading-none ${
-            beat.nextActionOwnerKind === "human"
-              ? "bg-amber-100 text-amber-700"
-              : "bg-blue-100 text-blue-700"
-          }`}>
-            {beat.nextActionOwnerKind === "human" ? "Human" : "Agent"}
-          </span>
-        )}
         {beat.requiresHumanAction && (
           <span className="inline-flex items-center rounded px-1 py-0 text-[10px] font-semibold leading-none bg-rose-100 text-rose-700">
             Human action
