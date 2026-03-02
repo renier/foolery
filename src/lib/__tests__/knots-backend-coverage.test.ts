@@ -635,6 +635,44 @@ describe("KnotsBackend coverage: buildTakePrompt parent/scene mode", () => {
     expect(result.data?.prompt).toContain("Shipment");
     expect(result.data?.prompt).toContain("committed to `main`");
   });
+
+  it("falls back to builtin skill when claim fails for shipment_review state", async () => {
+    const backend = new KnotsBackend("/repo");
+    mockClaimKnot.mockResolvedValueOnce({
+      ok: false as const,
+      error: "Ready For Shipment Review has no skill",
+    });
+
+    insertKnot({ id: "SR-1", title: "Review Beat", state: "ready_for_shipment_review" });
+    const result = await backend.buildTakePrompt("SR-1");
+
+    expect(result.ok).toBe(true);
+    expect(result.data?.claimed).toBe(false);
+    expect(result.data?.prompt).toContain("Review Beat");
+    expect(result.data?.prompt).toContain("# Shipment Review");
+    expect(mockSkillPrompt).not.toHaveBeenCalled();
+  });
+
+  it("uses builtin skill prompt for shipment_review when kno skill also fails", async () => {
+    const backend = new KnotsBackend("/repo");
+    mockClaimKnot.mockResolvedValueOnce({
+      ok: false as const,
+      error: "Ready For Shipment Review has no skill",
+    });
+    mockSkillPrompt.mockResolvedValueOnce({
+      ok: false as const,
+      error: "unknown skill",
+    });
+
+    insertKnot({ id: "SR-2", title: "Review Ship", state: "ready_for_shipment_review" });
+    const result = await backend.buildTakePrompt("SR-2");
+
+    expect(result.ok).toBe(true);
+    expect(result.data?.claimed).toBe(false);
+    expect(result.data?.prompt).toContain("Review Ship");
+    expect(result.data?.prompt).toContain("Shipment Review");
+    expect(result.data?.prompt).toContain("committed to `main`");
+  });
 });
 
 describe("KnotsBackend coverage: search and query", () => {
