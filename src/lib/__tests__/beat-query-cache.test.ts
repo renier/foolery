@@ -15,6 +15,9 @@ describe("beat-query-cache", () => {
 
     await invalidateBeatListQueries(queryClient);
 
-    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ["beads"] });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["beads"],
+      refetchType: "all",
+    });
   });
 });
