@@ -269,7 +269,7 @@ export const systemPaths = {
       operationId: "getAgentHistory",
       parameters: [
         { name: "_repo", in: "query", schema: { type: "string" }, description: "Repository path" },
-        { name: "beadId", in: "query", schema: { type: "string" }, description: "Filter by beat ID" },
+        { name: "beatId", in: "query", schema: { type: "string" }, description: "Filter by beat ID (also accepts legacy 'beadId')" },
         { name: "beadRepo", in: "query", schema: { type: "string" }, description: "Filter by beat repo" },
         { name: "sinceHours", in: "query", schema: { type: "string" }, description: "Limit to recent N hours" },
       ],

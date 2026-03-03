@@ -394,4 +394,41 @@ describe("readAgentHistory", () => {
 
     expect(history.beats.map((beat) => beat.beadId)).toEqual(["foo-recent", "foo-closed"]);
   });
+
+  it("returns sessions when queried with beadId matching beatIds in logs", async () => {
+    await writeLog(tempDir, "repo-a/2026-02-20/session-query.jsonl", [
+      {
+        kind: "session_start",
+        ts: "2026-02-20T17:00:00.000Z",
+        sessionId: "session-query",
+        interactionType: "take",
+        repoPath: "/tmp/repo-a",
+        beatIds: ["foo-query"],
+      },
+      {
+        kind: "prompt",
+        ts: "2026-02-20T17:00:01.000Z",
+        sessionId: "session-query",
+        prompt: "Do the work",
+        source: "initial",
+      },
+      {
+        kind: "session_end",
+        ts: "2026-02-20T17:01:00.000Z",
+        sessionId: "session-query",
+        status: "completed",
+        exitCode: 0,
+      },
+    ]);
+
+    const history = await readAgentHistory({
+      logRoot: tempDir,
+      beadId: "foo-query",
+      beadRepoPath: "/tmp/repo-a",
+    });
+
+    expect(history.sessions).toHaveLength(1);
+    expect(history.sessions[0]?.sessionId).toBe("session-query");
+    expect(history.sessions[0]?.entries).toHaveLength(3);
+  });
 });

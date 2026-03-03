@@ -3,7 +3,10 @@ import { readAgentHistory } from "@/lib/agent-history";
 
 export async function GET(request: NextRequest) {
   const repoPath = request.nextUrl.searchParams.get("_repo") ?? undefined;
-  const beadId = request.nextUrl.searchParams.get("beadId") ?? undefined;
+  // Accept both "beatId" (current client) and "beadId" (legacy) param names
+  const beadId = request.nextUrl.searchParams.get("beatId")
+    ?? request.nextUrl.searchParams.get("beadId")
+    ?? undefined;
   const beadRepoPath = request.nextUrl.searchParams.get("beadRepo") ?? undefined;
   const sinceHoursRaw = request.nextUrl.searchParams.get("sinceHours");
   const sinceHours =
