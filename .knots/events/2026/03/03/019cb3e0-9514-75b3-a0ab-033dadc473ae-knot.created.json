@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb3e0-9514-75b3-a0ab-033dadc473ae",
+  "occurred_at": "2026-03-03T13:26:05.844345Z",
+  "knot_id": "foolery-dbeb",
+  "type": "knot.created",
+  "data": {
+    "body": "they appear to be anchored against knot creation time.\n\nthey should be anchored against the most recent time somebody executed Take! on the beat.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "UI terminal times are incorrect"
+  }
+}

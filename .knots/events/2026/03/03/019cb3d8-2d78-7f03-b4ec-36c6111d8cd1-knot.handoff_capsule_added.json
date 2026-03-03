@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb3d8-2d78-7f03-b4ec-36c6111d8cd1",
+  "occurred_at": "2026-03-03T13:16:55.032956Z",
+  "knot_id": "foolery-685d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Root cause update: parent-scene prompt told agents to stop a child after one claim/completion cycle, which strands multi-step workflows (e.g. ready_for_implementation_review/implementation_review) instead of reaching shipped. Fix: Knots parent-mode prompt now requires repeating claim->execute->completion until each child is terminal (shipped/abandoned), with explicit active-state recovery via kno next before resuming the loop. Added regression assertions in knots-backend coverage tests. Validation: bun run lint, bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Integrated on main and pushed to origin/main as 6483427.",
+    "datetime": "2026-03-03T13:16:55Z",
+    "entry_id": "019cb3d8-2d78-7f03-b4ec-36b868d0dc9c",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

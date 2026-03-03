@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb3aa-af95-74b3-812b-de864dbcf37f",
+  "occurred_at": "2026-03-03T12:27:13.685671Z",
+  "knot_id": "foolery-f8ce",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says, but state is shipped.\ninvestigate what happened here by looking at the logs.  my suspicion here i sthat the agent was finished with work and we didn't handle the hang-up properly.  if that is the case we can treat it as a successful session and close gracefully.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "6fbb says Session stream disconnected"
+  }
+}

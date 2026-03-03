@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb3d1-ef6b-7813-81bb-b43a6ed1d657",
+  "occurred_at": "2026-03-03T13:10:05.931541Z",
+  "knot_id": "foolery-3b7b",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Summary\nRemove the entire approval/rejection flow from the codebase including Built For Review badges, checkmark/thumbsdown buttons, Shift+V and Shift+F hotkeys, rejection notes mode, and verification state helpers.\n\n### Files to Modify\n1. **src/components/hotkey-help.tsx** - Remove Shift+V (verify) and Shift+F (reject) hotkey entries\n2. **src/components/beat-table.tsx** - Remove notesRejectionMode, verifyingIds, rejectingIds state; remove builtForReviewIds memo; remove handleApproveReview/handleRejectReview callbacks; remove handleRejectBeat; clean up column config and keyboard handler\n3. **src/components/beat-columns.tsx** - Remove ThumbsDown/Check imports for approval; remove builtForReviewIds/onApproveReview/onRejectReview from interface; remove isVerificationState helper; remove VerificationButtons and RejectButton components; clean TitleCell of Built for Review badge; remove verifyBeatFields/rejectBeatFields; remove deprecated re-exports\n4. **src/components/notes-dialog.tsx** - Remove rejectionMode prop and all rejection-specific dialog UI\n5. **src/components/existing-orchestrations-view.tsx** - Remove builtForReviewIds memo, handleApproveReview/handleRejectReview, Built for Review badge UI\n6. **src/lib/__tests__/bead-review-fields.test.ts** - Remove or update test suite for verify/reject field builders\n7. **src/app/api/beads/[id]/route.ts** - Remove LABEL_TRANSITION_VERIFICATION import and verification lock logic\n8. **README.md** - Update to remove approval/rejection references\n\n### Approach\nSpawn parallel subagents in worktrees to handle independent file groups, then merge to main.\n\n### Risks\n- Removing verification state references might affect workflow transitions - need to check workflows.ts carefully\n- Must ensure no runtime errors from missing props/callbacks",
+    "datetime": "2026-03-03T13:10:05.931541Z",
+    "entry_id": "019cb3d1-ef6b-7813-81bb-b4267b237ad4",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

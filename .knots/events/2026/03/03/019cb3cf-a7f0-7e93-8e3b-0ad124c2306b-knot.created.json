@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb3cf-a7f0-7e93-8e3b-0ad124c2306b",
+  "occurred_at": "2026-03-03T13:07:36.560561Z",
+  "knot_id": "foolery-3b7b",
+  "type": "knot.created",
+  "data": {
+    "body": "the entire approval/rejection flow should be removed from the codebase.  it is no longer relevant with the new workflow.  this means removing the hotkeys, the hotkey cheatsheet, all that stuff.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "remove Approve/Reject/Built For Review, checkmark, thumbsdown"
+  }
+}

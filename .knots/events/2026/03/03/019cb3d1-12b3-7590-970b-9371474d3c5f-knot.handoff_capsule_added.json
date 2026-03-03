@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb3d1-12b3-7590-970b-9371474d3c5f",
+  "occurred_at": "2026-03-03T13:09:09.427212Z",
+  "knot_id": "foolery-f8ce",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Shipment review completed: verified fix commit d174e77 is on origin/main; CI workflows (CI/Changesets/Coverage Badge) succeeded for d174e77 and current head ad792c6. Parsed session logs show foolery-6fbb session term-1772535988525-kei04g ended with status=completed exitCode=0, supporting a clean completion with cosmetic stream-disconnect warning root cause. Ran focused regression test src/lib/__tests__/terminal-api.test.ts (6/6 passing). Approved for close.",
+    "datetime": "2026-03-03T13:09:09.427212Z",
+    "entry_id": "019cb3d1-12b3-7590-970b-93628fe29f54",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

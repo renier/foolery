@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb3dd-55e7-7be0-b743-4e05dd9eee01",
+  "occurred_at": "2026-03-03T13:22:33.063792Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-685d",
+    "profile_id": "autopilot",
+    "state": "ready_for_shipment",
+    "terminal": false,
+    "title": "investigate state issues with c051",
+    "updated_at": "2026-03-03T13:22:33.063792Z"
+  }
+}

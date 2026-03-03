@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb3ce-f22b-7163-a6c7-9a44a05a250c",
+  "occurred_at": "2026-03-03T13:06:50.027143Z",
+  "knot_id": "foolery-685d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Root cause: scene/take flow could attempt kno claim from active states, causing claim failures like ready_for_* skill errors and leaving beats stuck in action states. Also regroom only treated closed children as terminal, so shipped/abandoned children did not auto-close parents. Fixes: (1) terminal-manager now auto-advances agent-owned active states via kno next before claim checks and take-loop re-claims; (2) parent child filtering excludes closed/shipped/abandoned; (3) regroom treats closed/shipped/abandoned as terminal and supports upward cascade. Validation: bun run lint, bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build.",
+    "datetime": "2026-03-03T13:06:50.027143Z",
+    "entry_id": "019cb3ce-f22b-7163-a6c7-9a362c34c6b4",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

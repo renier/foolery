@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb3c3-08ed-7712-bcfc-17086f492ccf",
+  "occurred_at": "2026-03-03T12:53:49.421546Z",
+  "knot_id": "foolery-685d",
+  "type": "knot.created",
+  "data": {
+    "body": "- child beats stopped progressing at Ready For Impl Review.  they should have went all the way to shipped\n- parent beat never progressed past Ready For Planning.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "investigate state issues with c051"
+  }
+}

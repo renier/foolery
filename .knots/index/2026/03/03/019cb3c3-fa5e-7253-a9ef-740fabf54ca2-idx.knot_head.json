@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb3c3-fa5e-7253-a9ef-740fabf54ca2",
+  "occurred_at": "2026-03-03T12:54:51.230604Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-f8ce",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "6fbb says Session stream disconnected",
+    "updated_at": "2026-03-03T12:54:51.230604Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb3aa-afb6-7a83-b2b2-4a458dcbe8d9"
+  }
+}

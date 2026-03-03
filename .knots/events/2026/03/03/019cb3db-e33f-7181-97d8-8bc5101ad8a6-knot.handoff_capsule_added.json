@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb3db-e33f-7181-97d8-8bc5101ad8a6",
+  "occurred_at": "2026-03-03T13:20:58.175515Z",
+  "knot_id": "foolery-3b7b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Removed entire approval/rejection flow: hotkeys (Shift+V, Shift+F), VerificationButtons, RejectButton, Built for Review badge, rejection mode in NotesDialog, verify/reject field helpers, verification lock in API route, and related tests. 9 files changed, -615 lines. All quality gates pass (lint, typecheck, tests). Build has pre-existing error unrelated to changes.",
+    "datetime": "2026-03-03T13:20:58.175515Z",
+    "entry_id": "019cb3db-e33f-7181-97d8-8bbe8d3b4309",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

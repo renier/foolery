@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb3ca-da93-7c82-be8d-29d3dcc89a76",
+  "occurred_at": "2026-03-03T13:02:21.843882Z",
+  "knot_id": "foolery-f8ce",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Investigated 6fbb session logs: agent completed successfully (exit 0, status completed, beat shipped). The Session stream disconnected warning was a client-side cosmetic issue caused by the server closing the SSE stream after the exit event, which triggered EventSource.onerror before the exit message was fully processed. Fixed with three-layer approach: (1) server sends synthetic stream_end event before closing, (2) client defers onerror by 200ms to let pending messages process, (3) terminal panel tracks exit state and suppresses warning post-exit. Added 6 tests for connectToSession. All quality gates pass (1771 tests, lint, tsc, build).",
+    "datetime": "2026-03-03T14:05:00Z",
+    "entry_id": "019cb3ca-da93-7c82-be8d-29c95f92620a",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

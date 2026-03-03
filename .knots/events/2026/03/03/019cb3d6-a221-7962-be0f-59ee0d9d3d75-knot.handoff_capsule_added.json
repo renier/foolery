@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb3d6-a221-7962-be0f-59ee0d9d3d75",
+  "occurred_at": "2026-03-03T13:15:13.825682Z",
+  "knot_id": "foolery-8198",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Added model-aware pool labels so OpenRouter models like devstral are visible in pool selectors, added OpenRouter prompt/completion price badges in pools and selected model display, and added matching/pricing unit tests.",
+    "datetime": "2026-03-03T13:15:08Z",
+    "entry_id": "019cb3d6-a221-7962-be0f-59d7a2c173c8",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}
