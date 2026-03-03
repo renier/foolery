@@ -269,6 +269,33 @@ function isAgentOwnedActionState(
   return ownerKind === "agent";
 }
 
+function isExpectedStateMismatchError(errorMessage: string): boolean {
+  const normalized = errorMessage.toLowerCase();
+  return normalized.includes("expected state") && normalized.includes("currently");
+}
+
+type GuardedNextKnotResult =
+  | { ok: true }
+  | { ok: false; error: string; expectedStateMismatch: boolean };
+
+async function nextKnotGuarded(
+  knotId: string,
+  expectedState: string,
+  repoPath: string | undefined,
+): Promise<GuardedNextKnotResult> {
+  const result = await nextKnot(knotId, repoPath, {
+    actorKind: "agent",
+    expectedState,
+  });
+  if (result.ok) return { ok: true };
+  const error = typeof result.error === "string" ? result.error : "unknown";
+  return {
+    ok: false,
+    error,
+    expectedStateMismatch: isExpectedStateMismatchError(error),
+  };
+}
+
 async function advanceAgentOwnedActionStateToQueue(
   beat: Beat,
   repoPath: string | undefined,
@@ -282,14 +309,15 @@ async function advanceAgentOwnedActionStateToQueue(
   const tag = `[terminal-manager] [${contextLabel}] [action-heal]`;
   console.log(`${tag} advancing ${beat.id} from action state=${beat.state}`);
 
-  const nextResult = await nextKnot(beat.id, repoPath, {
-    actorKind: "agent",
-    expectedState: beat.state,
-  });
-  if (!nextResult.ok) {
-    const errMsg = typeof nextResult.error === "string" ? nextResult.error : "unknown";
-    console.warn(`${tag} failed to advance ${beat.id}: ${errMsg}`);
+  const nextResult = await nextKnotGuarded(beat.id, beat.state, repoPath);
+  if (!nextResult.ok && !nextResult.expectedStateMismatch) {
+    console.warn(`${tag} failed to advance ${beat.id}: ${nextResult.error}`);
     return beat;
+  }
+  if (!nextResult.ok) {
+    console.log(
+      `${tag} skipped stale advance for ${beat.id}: ${nextResult.error}`,
+    );
   }
 
   const refreshed = await getBackend().get(beat.id, repoPath);
@@ -768,19 +796,20 @@ export async function createSession(
     let stepOwner = resolved ? workflow.owners?.[resolved.step] ?? "agent" : "none";
     if (resolved?.phase === StepPhase.Active && stepOwner === "agent") {
       console.log(`${tag} auto-advancing ${beatId} from active state=${current.state}`);
-      const nextResult = await nextKnot(beatId, repoPath, {
-        actorKind: "agent",
-        expectedState: current.state,
-      });
-      if (!nextResult.ok) {
-        const errMsg = typeof nextResult.error === "string" ? nextResult.error : "unknown";
-        console.log(`${tag} STOP: auto-advance failed for ${beatId}: ${errMsg}`);
+      const nextResult = await nextKnotGuarded(beatId, current.state, repoPath);
+      if (!nextResult.ok && !nextResult.expectedStateMismatch) {
+        console.log(`${tag} STOP: auto-advance failed for ${beatId}: ${nextResult.error}`);
         pushEvent({
           type: "stderr",
-          data: `Take loop: failed to advance ${beatId} from ${current.state}: ${errMsg}\n`,
+          data: `Take loop: failed to advance ${beatId} from ${current.state}: ${nextResult.error}\n`,
           timestamp: Date.now(),
         });
         return null;
+      }
+      if (!nextResult.ok) {
+        console.log(
+          `${tag} auto-advance skipped for ${beatId} due stale expected state: ${nextResult.error}`,
+        );
       }
 
       const refreshedResult = await getBackend().get(beatId, repoPath);
@@ -916,10 +945,7 @@ export async function createSession(
     // Layer 3: advance to the next queue/terminal state via kno next
     const rolledBack = rollbackActivePhase(current.state);
     console.log(`${tag} advancing via nextKnot (would-be rollback: ${current.state} → ${rolledBack})`);
-    const nextResult = await nextKnot(beatId, repoPath, {
-      actorKind: "agent",
-      expectedState: current.state,
-    });
+    const nextResult = await nextKnotGuarded(beatId, current.state, repoPath);
     if (nextResult.ok) {
       pushEvent({
         type: "stdout",
@@ -927,12 +953,21 @@ export async function createSession(
         timestamp: Date.now(),
       });
       console.log(`${tag} nextKnot succeeded for ${beatId}`);
+    } else if (nextResult.expectedStateMismatch) {
+      console.log(`${tag} nextKnot skipped due stale expected state: ${nextResult.error}`);
+      const refreshed = await getBackend().get(beatId, repoPath);
+      if (refreshed.ok && refreshed.data) {
+        const refreshedWorkflow = resolveWorkflowForBeat(refreshed.data, workflowsById, fallbackWorkflow);
+        if (isQueueOrTerminal(refreshed.data.state, refreshedWorkflow)) {
+          console.log(`${tag} beat=${beatId} state=${refreshed.data.state} — invariant satisfied after stale check`);
+          return true;
+        }
+      }
     } else {
-      const errMsg = typeof nextResult.error === "string" ? nextResult.error : "unknown";
-      console.error(`${tag} nextKnot failed: ${errMsg}`);
+      console.error(`${tag} nextKnot failed: ${nextResult.error}`);
       pushEvent({
         type: "stderr",
-        data: `Invariant enforcement: failed to advance ${beatId} from ${current.state}: ${errMsg}\n`,
+        data: `Invariant enforcement: failed to advance ${beatId} from ${current.state}: ${nextResult.error}\n`,
         timestamp: Date.now(),
       });
     }
