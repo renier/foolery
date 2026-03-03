@@ -41,6 +41,11 @@ export interface KnotRecord {
   tags?: string[];
   notes?: Array<Record<string, unknown>>;
   handoff_capsules?: Array<Record<string, unknown>>;
+  steps?: Array<Record<string, unknown>>;
+  step_history?: Array<Record<string, unknown>>;
+  stepHistory?: Array<Record<string, unknown>>;
+  timeline?: Array<Record<string, unknown>>;
+  transitions?: Array<Record<string, unknown>>;
   workflow_etag?: string | null;
   created_at?: string | null;
 }

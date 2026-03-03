@@ -164,6 +164,34 @@ function stringifyNotes(raw: unknown): string | undefined {
   return parts.join("\n\n");
 }
 
+function normalizeMetadataEntries(raw: unknown): Array<Record<string, unknown>> {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((entry): entry is Record<string, unknown> => Boolean(entry && typeof entry === "object"));
+}
+
+function knotStepEntries(knot: KnotRecord): Array<Record<string, unknown>> {
+  const knotRecord = knot as unknown as Record<string, unknown>;
+  const fields: unknown[] = [
+    knot.steps,
+    knot.step_history,
+    knot.stepHistory,
+    knot.timeline,
+    knot.transitions,
+    knotRecord.knotsSteps,
+    knotRecord.step_history,
+    knotRecord.stepHistory,
+    knotRecord.timeline,
+    knotRecord.transitions,
+  ];
+
+  for (const field of fields) {
+    const entries = normalizeMetadataEntries(field);
+    if (entries.length > 0) return entries;
+  }
+
+  return [];
+}
+
 function parentFromEdges(id: string, edges: KnotEdge[]): string | undefined {
   const parentEdge = edges.find((edge) => edge.kind === "parent_of" && edge.dst === id);
   return parentEdge?.src;
@@ -273,6 +301,7 @@ function toBeat(
   const fallback = workflowsById.values().next().value as MemoryWorkflowDescriptor | undefined;
   const profileId = normalizeProfileId(knot.profile_id ?? knot.workflow_id) ?? fallback?.id ?? "autopilot";
   const workflow = workflowsById.get(profileId) ?? fallback;
+  const stepEntries = knotStepEntries(knot);
 
   if (!workflow) {
     return {
@@ -295,6 +324,7 @@ function toBeat(
       updated: knot.updated_at,
       metadata: {
         knotsProfileId: profileId,
+        knotsSteps: stepEntries,
       },
     };
   }
@@ -340,6 +370,7 @@ function toBeat(
       knotsWorkflowEtag: knot.workflow_etag,
       knotsHandoffCapsules: knot.handoff_capsules ?? [],
       knotsNotes: knot.notes ?? [],
+      knotsSteps: stepEntries,
     },
   };
 }

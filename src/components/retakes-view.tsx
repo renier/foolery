@@ -63,6 +63,57 @@ function extractCommitSha(bead: Beat): string | undefined {
   return label ? label.slice("commit:".length) : undefined;
 }
 
+type MetadataEntry = Record<string, unknown>;
+
+function pickString(entry: MetadataEntry, keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = entry[key];
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) return trimmed;
+    }
+  }
+  return undefined;
+}
+
+function readMetadataEntries(bead: Beat, keys: string[]): MetadataEntry[] {
+  const metadata = bead.metadata;
+  if (!metadata || typeof metadata !== "object") return [];
+
+  for (const key of keys) {
+    const raw = (metadata as Record<string, unknown>)[key];
+    if (!Array.isArray(raw)) continue;
+    return raw.filter((entry): entry is MetadataEntry => Boolean(entry && typeof entry === "object"));
+  }
+
+  return [];
+}
+
+function metadataEntryKey(entry: MetadataEntry, index: number): string {
+  return pickString(entry, ["entry_id", "id", "step_id"]) ?? String(index);
+}
+
+function stepSummary(entry: MetadataEntry): string | undefined {
+  const direct = pickString(entry, ["content", "summary", "description", "message", "note", "title"]);
+  if (direct) return direct;
+
+  const from = pickString(entry, ["from_state", "fromState", "from"]);
+  const to = pickString(entry, ["to_state", "toState", "to", "state"]);
+  const action = pickString(entry, ["action", "step"]);
+  const actorKind = pickString(entry, ["actor_kind", "actorKind", "owner_kind", "ownerKind"]);
+
+  const parts: string[] = [];
+  if (action) parts.push(action);
+  if (from || to) parts.push(`${from ?? "?"} -> ${to ?? "?"}`);
+  if (actorKind) parts.push(`actor:${actorKind}`);
+  return parts.length > 0 ? parts.join(" · ") : undefined;
+}
+
+function safeRelativeTime(value: string): string {
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? value : relativeTime(value);
+}
+
 function ExpandableText({
   text,
   className,
@@ -81,7 +132,13 @@ function ExpandableText({
   }, [text]);
 
   return (
-    <div className={className} onMouseLeave={() => setExpanded(false)}>
+    <div
+      className={className}
+      onMouseEnter={() => {
+        if (overflows) setExpanded(true);
+      }}
+      onMouseLeave={() => setExpanded(false)}
+    >
       <div
         ref={ref}
         className={`whitespace-pre-wrap break-words text-xs ${expanded ? "" : "line-clamp-6"}`}
@@ -89,58 +146,68 @@ function ExpandableText({
         {text}
       </div>
       {!expanded && overflows && (
-        <button
-          type="button"
-          title="Expand full text"
-          className="text-green-700 font-bold cursor-pointer mt-0.5 text-xs"
-          onMouseEnter={() => setExpanded(true)}
-        >
-          ...show more...
-        </button>
+        <div className="mt-0.5 text-[10px] font-semibold text-green-700">Hover to expand</div>
       )}
     </div>
   );
 }
 
-function AgentBadge({ entry }: { entry: Record<string, unknown> }) {
-  const agentname = typeof entry.agentname === "string" ? entry.agentname : undefined;
-  const model = typeof entry.model === "string" ? entry.model : undefined;
-  const username = typeof entry.username === "string" ? entry.username : undefined;
-  const datetime = typeof entry.datetime === "string" ? entry.datetime : undefined;
+function AgentBadge({ entry }: { entry: MetadataEntry }) {
+  const agentname = pickString(entry, ["agentname", "agentName"]) ?? "unknown-agent";
+  const model = pickString(entry, ["model", "agentModel"]) ?? "unknown-model";
+  const username = pickString(entry, ["username", "user", "actor"]) ?? "unknown-user";
+  const datetime = pickString(entry, ["datetime", "timestamp", "ts", "created_at", "updated_at"]);
 
   return (
-    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-0.5">
-      {agentname && agentname !== "unknown" && (
-        <span className="font-medium">{agentname}</span>
-      )}
-      {model && model !== "unknown" && (
+    <div className="mb-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+      <span className="font-medium">{agentname}</span>
+      <span className="text-muted-foreground/40">|</span>
+      <span>{model}</span>
+      <span className="text-muted-foreground/40">|</span>
+      <span>{username}</span>
+      {datetime ? (
         <>
           <span className="text-muted-foreground/40">|</span>
-          <span>{model}</span>
+          <span>{safeRelativeTime(datetime)}</span>
         </>
-      )}
-      {username && (
-        <>
-          <span className="text-muted-foreground/40">|</span>
-          <span>{username}</span>
-        </>
-      )}
-      {datetime && (
-        <>
-          <span className="text-muted-foreground/40">|</span>
-          <span>{relativeTime(datetime)}</span>
-        </>
-      )}
+      ) : null}
     </div>
   );
 }
 
 function RetakeDetails({ bead }: { bead: Beat }) {
   const description = bead.description;
-  const rawNotes = (bead.metadata?.knotsNotes ?? []) as Array<Record<string, unknown>>;
-  const rawCapsules = (bead.metadata?.knotsHandoffCapsules ?? []) as Array<Record<string, unknown>>;
+  const rawSteps = readMetadataEntries(bead, [
+    "knotsSteps",
+    "knotsStepHistory",
+    "knotsTimeline",
+    "knotsTransitions",
+    "steps",
+  ]);
+  const rawNotes = readMetadataEntries(bead, ["knotsNotes", "notes"]);
+  const rawCapsules = readMetadataEntries(bead, ["knotsHandoffCapsules", "handoff_capsules"]);
 
-  if (!description && rawNotes.length === 0 && rawCapsules.length === 0) return null;
+  const renderedSteps = rawSteps.flatMap((step, index) => {
+    const content = stepSummary(step);
+    if (!content) return [];
+    return [{ entry: step, key: metadataEntryKey(step, index), content }];
+  });
+
+  const renderedNotes = rawNotes.flatMap((note, index) => {
+    const content = pickString(note, ["content", "note", "message"]);
+    if (!content) return [];
+    return [{ entry: note, key: metadataEntryKey(note, index), content }];
+  });
+
+  const renderedCapsules = rawCapsules.flatMap((capsule, index) => {
+    const content = pickString(capsule, ["content", "summary", "message"]);
+    if (!content) return [];
+    return [{ entry: capsule, key: metadataEntryKey(capsule, index), content }];
+  });
+
+  if (!description && renderedSteps.length === 0 && renderedNotes.length === 0 && renderedCapsules.length === 0) {
+    return null;
+  }
 
   return (
     <div className="mt-2 space-y-2">
@@ -153,45 +220,45 @@ function RetakeDetails({ bead }: { bead: Beat }) {
         </div>
       )}
 
-      {rawNotes.length > 0 && (
+      {renderedSteps.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+            Steps
+          </div>
+          {renderedSteps.map((step) => (
+            <div key={step.key} className="rounded bg-slate-100 px-2 py-1.5">
+              <AgentBadge entry={step.entry} />
+              <ExpandableText text={step.content} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {renderedNotes.length > 0 && (
         <div className="space-y-1.5">
           <div className="text-[10px] font-semibold text-yellow-800 uppercase tracking-wide">
             Notes
           </div>
-          {rawNotes.map((note, i) => {
-            const content = typeof note.content === "string" ? note.content : "";
-            if (!content) return null;
-            return (
-              <div
-                key={typeof note.entry_id === "string" ? note.entry_id : i}
-                className="rounded bg-yellow-50 px-2 py-1.5"
-              >
-                <AgentBadge entry={note} />
-                <ExpandableText text={content} />
-              </div>
-            );
-          })}
+          {renderedNotes.map((note) => (
+            <div key={note.key} className="rounded bg-yellow-50 px-2 py-1.5">
+              <AgentBadge entry={note.entry} />
+              <ExpandableText text={note.content} />
+            </div>
+          ))}
         </div>
       )}
 
-      {rawCapsules.length > 0 && (
+      {renderedCapsules.length > 0 && (
         <div className="space-y-1.5">
           <div className="text-[10px] font-semibold text-blue-800 uppercase tracking-wide">
             Handoff Capsules
           </div>
-          {rawCapsules.map((capsule, i) => {
-            const content = typeof capsule.content === "string" ? capsule.content : "";
-            if (!content) return null;
-            return (
-              <div
-                key={typeof capsule.entry_id === "string" ? capsule.entry_id : i}
-                className="rounded bg-blue-50 px-2 py-1.5"
-              >
-                <AgentBadge entry={capsule} />
-                <ExpandableText text={content} />
-              </div>
-            );
-          })}
+          {renderedCapsules.map((capsule) => (
+            <div key={capsule.key} className="rounded bg-blue-50 px-2 py-1.5">
+              <AgentBadge entry={capsule.entry} />
+              <ExpandableText text={capsule.content} />
+            </div>
+          ))}
         </div>
       )}
     </div>

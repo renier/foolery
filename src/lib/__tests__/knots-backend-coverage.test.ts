@@ -33,6 +33,7 @@ interface MockKnot {
   tags: string[];
   notes: Array<Record<string, unknown>>;
   handoff_capsules: Array<Record<string, unknown>>;
+  steps?: Array<Record<string, unknown>>;
   workflow_etag: string;
   profile_etag?: string;
   created_at: string;
@@ -365,6 +366,7 @@ function insertKnot(overrides: Partial<MockKnot> & { id: string }): void {
     tags: overrides.tags ?? [],
     notes: overrides.notes ?? [],
     handoff_capsules: overrides.handoff_capsules ?? [],
+    steps: overrides.steps ?? [],
     workflow_etag: overrides.workflow_etag ?? "etag",
     profile_etag: overrides.profile_etag,
     created_at: overrides.created_at ?? now,
@@ -1122,13 +1124,14 @@ describe("KnotsBackend coverage: toBeat edge cases", () => {
     expect(result.data?.labels).not.toContain("");
   });
 
-  it("includes knotsHandoffCapsules and knotsNotes in metadata", async () => {
+  it("includes knotsHandoffCapsules, knotsNotes, and knotsSteps in metadata", async () => {
     const backend = new KnotsBackend("/repo");
     insertKnot({
       id: "MD1",
       title: "Metadata",
       notes: [{ content: "note1", username: "u", datetime: "" }],
       handoff_capsules: [{ content: "capsule1" }],
+      steps: [{ content: "implementation -> ready_for_implementation_review", agentname: "codex" }],
     });
 
     const result = await backend.get("MD1");
@@ -1136,6 +1139,9 @@ describe("KnotsBackend coverage: toBeat edge cases", () => {
     const meta = result.data?.metadata as Record<string, unknown>;
     expect(meta?.knotsHandoffCapsules).toEqual([{ content: "capsule1" }]);
     expect(Array.isArray(meta?.knotsNotes)).toBe(true);
+    expect(meta?.knotsSteps).toEqual([
+      { content: "implementation -> ready_for_implementation_review", agentname: "codex" },
+    ]);
   });
 });
 
