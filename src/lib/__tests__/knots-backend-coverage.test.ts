@@ -207,7 +207,7 @@ const mockSetKnotProfile = vi.fn(
     id: string,
     profile: string,
     _repoPath?: string,
-    options?: { state?: string },
+    options?: { state?: string; ifMatch?: string },
   ) => {
     const knot = store.knots.get(id);
     if (!knot) {
@@ -355,7 +355,7 @@ vi.mock("@/lib/knots", () => ({
     id: string,
     profile: string,
     repoPath?: string,
-    options?: { state?: string },
+    options?: { state?: string; ifMatch?: string },
   ) => mockSetKnotProfile(id, profile, repoPath, options),
   listEdges: (
     id: string,
@@ -857,9 +857,27 @@ describe("KnotsBackend coverage: update with parent manipulation", () => {
       "PID1",
       "semiauto",
       "/repo",
-      { state: undefined },
+      expect.objectContaining({ state: "ready_for_planning" }),
     );
     expect(store.knots.get("PID1")?.profile_id).toBe("semiauto");
+  });
+
+  it("passes profile etag as ifMatch when changing profile", async () => {
+    const backend = new KnotsBackend("/repo");
+    insertKnot({
+      id: "PID3",
+      title: "Test etag",
+      profile_etag: "profile-etag-123",
+    });
+
+    const result = await backend.update("PID3", { profileId: "semiauto" });
+    expect(result.ok).toBe(true);
+    expect(mockSetKnotProfile).toHaveBeenCalledWith(
+      "PID3",
+      "semiauto",
+      "/repo",
+      expect.objectContaining({ ifMatch: "profile-etag-123" }),
+    );
   });
 
   it("returns INVALID_INPUT when profileId is unknown", async () => {

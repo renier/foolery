@@ -182,7 +182,7 @@ const mockUpdateKnot = vi.fn(
 );
 
 const mockSetKnotProfile = vi.fn(
-  async (id: string, profile: string, _repoPath?: string, options?: { state?: string }) => {
+  async (id: string, profile: string, _repoPath?: string, options?: { state?: string; ifMatch?: string }) => {
     const knot = store.knots.get(id);
     if (!knot) return { ok: false as const, error: `knot '${id}' not found in local cache` };
     knot.profile_id = profile;
@@ -246,7 +246,7 @@ vi.mock("@/lib/knots", () => ({
   showKnot: (id: string) => mockShowKnot(id),
   newKnot: (title: string, options?: Record<string, unknown>) => mockNewKnot(title, options as Parameters<typeof mockNewKnot>[1]),
   updateKnot: (id: string, input: Record<string, unknown>) => mockUpdateKnot(id, input),
-  setKnotProfile: (id: string, profile: string, repoPath?: string, options?: { state?: string }) =>
+  setKnotProfile: (id: string, profile: string, repoPath?: string, options?: { state?: string; ifMatch?: string }) =>
     mockSetKnotProfile(id, profile, repoPath, options),
   listEdges: (id: string, direction?: string) => mockListEdges(id, direction),
   addEdge: (src: string, kind: string, dst: string) => mockAddEdge(src, kind, dst),
@@ -406,7 +406,7 @@ describe("Capability-aware API guard behavior", () => {
       created.data!.id,
       "semiauto",
       "/repo",
-      { state: undefined },
+      expect.objectContaining({ state: "ready_for_planning" }),
     );
   });
 

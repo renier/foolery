@@ -799,6 +799,13 @@ export class KnotsBackend implements BackendPort {
     const currentProfileId = current.profileId ?? current.workflowId;
     let workflow =
       workflows.find((item) => item.id === currentProfileId) ?? workflows[0];
+    const rawKnoState = typeof current.metadata?.knotsState === "string"
+      ? current.metadata.knotsState.trim().toLowerCase()
+      : undefined;
+    const currentWorkflowState = rawKnoState ?? current.state;
+    const knotsProfileEtag = typeof current.metadata?.knotsProfileEtag === "string"
+      ? current.metadata.knotsProfileEtag.trim()
+      : undefined;
     const requestedProfileId = input.profileId?.trim();
     let stateHandledByProfileSet = false;
 
@@ -811,17 +818,20 @@ export class KnotsBackend implements BackendPort {
       if (requestedProfileId !== currentProfileId) {
         const requestedState = input.state !== undefined
           ? normalizeStateForWorkflow(input.state, targetWorkflow)
+          : normalizeStateForWorkflow(currentWorkflowState, targetWorkflow);
+        const ifMatch = knotsProfileEtag && knotsProfileEtag.length > 0
+          ? knotsProfileEtag
           : undefined;
         const profileResult = fromKnots(
           await knots.setKnotProfile(
             id,
             targetWorkflow.id,
             rp,
-            { state: requestedState },
+            { state: requestedState, ifMatch },
           ),
         );
         if (!profileResult.ok) return propagateError<void>(profileResult);
-        stateHandledByProfileSet = requestedState !== undefined;
+        stateHandledByProfileSet = true;
       }
 
       workflow = targetWorkflow;
@@ -837,10 +847,6 @@ export class KnotsBackend implements BackendPort {
       const normalizedState = workflow
         ? normalizeStateForWorkflow(input.state, workflow)
         : input.state.trim().toLowerCase();
-
-      const rawKnoState = typeof current.metadata?.knotsState === "string"
-        ? current.metadata.knotsState.trim().toLowerCase()
-        : undefined;
 
       if (rawKnoState && normalizedState === rawKnoState) {
         // Already in this state in kno — skip to avoid "no field change" error
