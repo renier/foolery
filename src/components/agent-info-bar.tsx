@@ -3,6 +3,7 @@
 import { Bot, Code2, Diamond, Globe, Sparkles, Clock, Timer } from "lucide-react";
 import type { ResolvedAgentInfo } from "@/hooks/use-agent-info";
 import { useElapsedTime } from "@/hooks/use-elapsed-time";
+import { resolveTerminalElapsedAnchor } from "@/lib/terminal-time-anchor";
 
 const VENDOR_CONFIG: Record<
   string,
@@ -78,6 +79,8 @@ export interface BeatInfoForBar {
   stateChangedAt: string;
   /** ISO timestamp of when the beat was created (beat.created). */
   createdAt: string;
+  /** ISO timestamp of the latest Take! execution for the beat. */
+  latestTakeStartedAt?: string;
 }
 
 interface AgentInfoBarProps {
@@ -97,7 +100,7 @@ export function AgentInfoBar({ agent, beat }: AgentInfoBarProps) {
   const versionLabel = agent.version ?? parsedModel.version ?? "--";
 
   const stateElapsed = useElapsedTime(beat?.stateChangedAt);
-  const totalElapsed = useElapsedTime(beat?.createdAt);
+  const totalElapsed = useElapsedTime(resolveTerminalElapsedAnchor(beat));
 
   return (
     <div

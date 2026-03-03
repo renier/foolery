@@ -921,7 +921,7 @@ export function ExistingOrchestrationsView() {
         agentVersion: result.data.agentVersion,
         agentCommand: result.data.agentCommand,
         status: "running",
-        startedAt: new Date().toISOString(),
+        startedAt: result.data.startedAt,
       });
       toast.success(`Action fired for ${wave.name}`);
     },
@@ -961,7 +961,7 @@ export function ExistingOrchestrationsView() {
             agentVersion: result.data.agentVersion,
             agentCommand: result.data.agentCommand,
             status: "running",
-            startedAt: new Date().toISOString(),
+            startedAt: result.data.startedAt,
           });
           fired += 1;
         }

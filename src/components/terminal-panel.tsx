@@ -78,6 +78,21 @@ export function TerminalPanel() {
   const activeBeatId = activeTerminal?.beatId ?? null;
   const activeBeatTitle = activeTerminal?.beatTitle ?? null;
   const activeRepoPath = activeTerminal?.repoPath;
+  const latestTakeStartedAt = useMemo(() => {
+    if (!activeBeatId) return activeTerminal?.startedAt;
+    let latestStartedAt: string | undefined;
+    let latestMs = Number.NEGATIVE_INFINITY;
+    for (const terminal of terminals) {
+      if (terminal.beatId !== activeBeatId) continue;
+      const parsed = Date.parse(terminal.startedAt);
+      if (!Number.isFinite(parsed)) continue;
+      if (parsed > latestMs) {
+        latestMs = parsed;
+        latestStartedAt = terminal.startedAt;
+      }
+    }
+    return latestStartedAt ?? activeTerminal?.startedAt;
+  }, [activeBeatId, activeTerminal?.startedAt, terminals]);
 
   const termContainerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<XtermTerminal | null>(null);
@@ -123,8 +138,9 @@ export function TerminalPanel() {
       state: beat.state,
       stateChangedAt: beat.updated,
       createdAt: beat.created,
+      latestTakeStartedAt,
     };
-  }, [beatQuery.data?.data]);
+  }, [beatQuery.data?.data, latestTakeStartedAt]);
 
   const handleAbort = useCallback(async () => {
     if (!activeTerminal) return;
@@ -324,7 +340,7 @@ export function TerminalPanel() {
           agentVersion: recovery.data.agentVersion,
           agentCommand: recovery.data.agentCommand,
           status: "running",
-          startedAt: new Date().toISOString(),
+          startedAt: recovery.data.startedAt,
         });
         removeTerminal(sessionId);
         toast.info("Retry launched with take recovery prompt.");

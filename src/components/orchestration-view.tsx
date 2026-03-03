@@ -744,7 +744,7 @@ export function OrchestrationView({ onApplied }: OrchestrationViewProps) {
       agentVersion: result.data.agentVersion,
       agentCommand: result.data.agentCommand,
       status: "running",
-      startedAt: new Date().toISOString(),
+      startedAt: result.data.startedAt,
     });
 
     toast.success(`Triggered ${nextWaveToTrigger.waveTitle}`);
