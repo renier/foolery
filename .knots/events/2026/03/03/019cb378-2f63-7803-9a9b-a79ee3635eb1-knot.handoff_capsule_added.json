@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb378-2f63-7803-9a9b-a79ee3635eb1",
+  "occurred_at": "2026-03-03T11:32:04.067557Z",
+  "knot_id": "foolery-f646",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implemented beat state + elapsed timers in terminal agent info bar. Added useElapsedTime hook (live 1s ticker), enhanced AgentInfoBar with state pill/timers, TerminalPanel fetches beat via useQuery. 8 unit tests pass. All quality gates green (lint, tsc, test). Build failure pre-existing.",
+    "datetime": "2026-03-03T11:32:04Z",
+    "entry_id": "019cb378-2f63-7803-9a9b-a7874c9c3960",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

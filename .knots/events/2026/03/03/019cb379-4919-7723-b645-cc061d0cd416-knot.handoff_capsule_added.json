@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb379-4919-7723-b645-cc061d0cd416",
+  "occurred_at": "2026-03-03T11:33:16.18532Z",
+  "knot_id": "foolery-98b4",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Shipment validated on origin/main: commit c4af44e is integrated, main is up to date, and GitHub CI/Changesets/Coverage Badge succeeded for head 91b41664.",
+    "datetime": "2026-03-03T11:33:16.18532Z",
+    "entry_id": "019cb379-4919-7723-b645-cbf39a95b565",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
