@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb49c-94c2-74d3-b10f-84c28ae2208d",
+  "occurred_at": "2026-03-03T16:51:26.530877Z",
+  "knot_id": "foolery-da96",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Shipment completed: feature commit a2ce0b35cf33ed8921ce98c87225ea05776c518a already on origin/main, remote CI runs passed, advanced state shipment -> ready_for_shipment_review.",
+    "datetime": "2026-03-03T16:51:26.530877Z",
+    "entry_id": "019cb49c-94c2-74d3-b10f-84b63ae38a9e",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
