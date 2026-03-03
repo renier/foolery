@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,16 +8,23 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import { buildBeadFocusHref, stripBeadPrefix } from "@/lib/bead-navigation";
 import {
   useNotificationStore,
   selectUnreadCount,
+  type Notification,
 } from "@/stores/notification-store";
 
 export function NotificationBell() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const unreadCount = useNotificationStore(selectUnreadCount);
   const notifications = useNotificationStore((s) => s.notifications);
   const markAllRead = useNotificationStore((s) => s.markAllRead);
   const clearAll = useNotificationStore((s) => s.clearAll);
+  const focusBead = (beadId: string) => {
+    router.push(buildBeadFocusHref(beadId, searchParams.toString()));
+  };
 
   return (
     <Popover onOpenChange={(open) => { if (open) markAllRead(); }}>
@@ -49,7 +57,7 @@ export function NotificationBell() {
             </Button>
           )}
         </div>
-        <NotificationList notifications={notifications} />
+        <NotificationList notifications={notifications} onFocusBead={focusBead} />
       </PopoverContent>
     </Popover>
   );
@@ -57,8 +65,10 @@ export function NotificationBell() {
 
 function NotificationList({
   notifications,
+  onFocusBead,
 }: {
-  notifications: readonly { id: string; message: string; timestamp: number; read: boolean }[];
+  notifications: readonly Notification[];
+  onFocusBead: (beadId: string) => void;
 }) {
   if (notifications.length === 0) {
     return (
@@ -70,19 +80,32 @@ function NotificationList({
 
   return (
     <ul className="max-h-64 overflow-y-auto">
-      {notifications.map((n) => (
-        <li
-          key={n.id}
-          className={`border-b px-3 py-2 text-sm last:border-b-0 ${
-            n.read ? "text-muted-foreground" : "bg-muted/30"
-          }`}
-        >
-          <p className="leading-snug">{n.message}</p>
-          <time className="mt-0.5 block text-[10px] text-muted-foreground">
-            {new Date(n.timestamp).toLocaleTimeString()}
-          </time>
-        </li>
-      ))}
+      {notifications.map((n) => {
+          const beadId = n.beadId;
+          return (
+            <li
+              key={n.id}
+              className={`border-b px-3 py-2 text-sm last:border-b-0 ${
+                n.read ? "text-muted-foreground" : "bg-muted/30"
+              }`}
+            >
+              <p className="leading-snug">{n.message}</p>
+              {beadId ? (
+                <button
+                  type="button"
+                  className="mt-1 block font-mono text-[11px] text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline"
+                  title={`Focus ${beadId}`}
+                  onClick={() => onFocusBead(beadId)}
+                >
+                  {stripBeadPrefix(beadId)}
+                </button>
+              ) : null}
+              <time className="mt-0.5 block text-[10px] text-muted-foreground">
+                {new Date(n.timestamp).toLocaleTimeString()}
+              </time>
+            </li>
+          );
+      })}
     </ul>
   );
 }

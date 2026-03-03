@@ -22,6 +22,7 @@ import {
 import { useAppStore } from "@/stores/app-store";
 import { useTerminalStore } from "@/stores/terminal-store";
 import { useVerificationCount } from "@/hooks/use-verification-count";
+import { buildBeadFocusHref } from "@/lib/bead-navigation";
 
 type VersionBanner = {
   installedVersion: string;
@@ -65,7 +66,6 @@ export function AppHeader() {
   const isFinalCutActive = beadsView === "finalcut";
   const verificationCount = useVerificationCount(isBeadsRoute, isFinalCutActive);
   const activeBeadId = searchParams.get("bead");
-  const activeBeadShortId = activeBeadId?.replace(/^[^-]+-/, "") ?? null;
 
   // Derive settings sheet state from URL param — open when ?settings=repos is present
   const effectiveSettingsOpen = settingsOpen || settingsOpenFromUrl;
@@ -312,18 +312,18 @@ export function AppHeader() {
               </button>
               <VersionBadge />
               <RepoSwitcher />
-              {activeBeadShortId && (
+              {activeBeadId && (
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 rounded-md border bg-muted/50 px-2 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="inline-flex max-w-[14rem] items-center gap-1 truncate rounded-md border bg-muted/50 px-2 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   title={`Viewing ${activeBeadId} — click to focus in list`}
                   onClick={() => {
-                    const params = new URLSearchParams(searchParams.toString());
-                    params.set("bead", activeBeadId!);
-                    router.push(`/beads?${params.toString()}`);
+                    router.push(
+                      buildBeadFocusHref(activeBeadId, searchParams.toString()),
+                    );
                   }}
                 >
-                  {activeBeadShortId}
+                  {activeBeadId}
                 </button>
               )}
             </div>

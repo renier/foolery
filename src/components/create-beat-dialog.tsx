@@ -17,6 +17,7 @@ import { createBead, addDep, fetchWorkflows } from "@/lib/api";
 import { fetchSettings } from "@/lib/settings-api";
 import type { CreateBeatInput } from "@/lib/schemas";
 import { buildBeadBreakdownPrompt, setDirectPrefillPayload } from "@/lib/breakdown-prompt";
+import { buildBeadFocusHref, stripBeadPrefix } from "@/lib/bead-navigation";
 import type { MemoryWorkflowDescriptor } from "@/lib/types";
 
 async function addDepsForBeat(
@@ -104,16 +105,17 @@ export function CreateBeatDialog({
           await addDepsForBeat(result.data.id, deps, repo ?? undefined);
         }
         const createdId = result.data?.id;
-        const shortId = createdId?.replace(/^[^-]+-/, "") ?? "";
-        toast.success(`Created ${shortId}`, {
+        const shortId = createdId ? stripBeadPrefix(createdId) : "";
+        toast.success(createdId ? `Created bead ${createdId}` : `Created ${shortId}`, {
           action: createdId
             ? {
-                label: "Open",
+                label: shortId || createdId,
                 onClick: () => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  params.set("bead", createdId);
-                  if (repo) params.set("detailRepo", repo);
-                  router.push(`/beads?${params.toString()}`);
+                  router.push(
+                    buildBeadFocusHref(createdId, searchParams.toString(), {
+                      detailRepo: repo,
+                    }),
+                  );
                 },
               }
             : undefined,
@@ -144,20 +146,26 @@ export function CreateBeatDialog({
           await addDepsForBeat(result.data.id, deps, repo ?? undefined);
         }
         const createdId2 = result.data?.id;
-        const shortId2 = createdId2?.replace(/^[^-]+-/, "") ?? "";
-        toast.success(`Created ${shortId2} — ready for another`, {
+        const shortId2 = createdId2 ? stripBeadPrefix(createdId2) : "";
+        toast.success(
+          createdId2
+            ? `Created bead ${createdId2} — ready for another`
+            : `Created ${shortId2} — ready for another`,
+          {
           action: createdId2
             ? {
-                label: "Open",
+                label: shortId2 || createdId2,
                 onClick: () => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  params.set("bead", createdId2);
-                  if (repo) params.set("detailRepo", repo);
-                  router.push(`/beads?${params.toString()}`);
+                  router.push(
+                    buildBeadFocusHref(createdId2, searchParams.toString(), {
+                      detailRepo: repo,
+                    }),
+                  );
                 },
               }
             : undefined,
-        });
+          },
+        );
         setFormKey((k) => k + 1);
         queryClient.invalidateQueries({ queryKey: ["beads"] });
       } else {
@@ -181,8 +189,7 @@ export function CreateBeatDialog({
         toast.error(result.error ?? "Failed to create parent beat");
         return;
       }
-      const shortId3 = result.data.id.replace(/^[^-]+-/, "");
-      toast.success(`Created ${shortId3} — starting breakdown...`);
+      toast.success(`Created bead ${result.data.id} — starting breakdown...`);
       onOpenChange(false);
       queryClient.invalidateQueries({ queryKey: ["beads"] });
 
