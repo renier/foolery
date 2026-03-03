@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb45c-78c8-7991-880c-65e9d5701396",
+  "occurred_at": "2026-03-03T15:41:25.064004Z",
+  "knot_id": "foolery-e6d4",
+  "type": "knot.created",
+  "data": {
+    "body": "The take loop in terminal-manager.ts calls kno next in three places: (1) pre-claim healing via advanceAgentOwnedActionStateToQueue, (2) inter-iteration auto-advance in buildNextTakePrompt, and (3) post-iteration enforceQueueTerminalInvariant. When kno claim succeeds (the normal path), it already transitions ready_for_X to X. But the auto-advance and invariant enforcement then call kno next AGAIN, pushing the knot past the action state to the next queue state before the agent has finished its work. This causes knots to appear perpetually stuck in queue states.\n\nFix approach: add an optimistic expected-state argument so callers can assert what state they believe the knot is in before advancing. The kno binary fix comes first (knots repo), then Foolery adopts the new argument.\n\nPhase 1 (knots): Add --expected-state flag to kno next that rejects the transition if current state != expected.\nPhase 2 (foolery): Update all kno next call sites in terminal-manager.ts to pass --expected-state, eliminating spurious double-advances.",
+    "profile_id": "semiauto",
+    "state": "ready_for_planning",
+    "title": "Fix double kno-next causing knots to skip action states"
+  }
+}

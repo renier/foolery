@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb460-4532-7e11-8596-c71e43914e13",
+  "occurred_at": "2026-03-03T15:45:34.002291Z",
+  "knot_id": "foolery-051a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review approved. Original commit 1057826 was thorough: deleted orchestration-view.tsx (1200 lines), breakdown-prompt.ts, orchestration-restage.ts, orchestration-state.ts and associated tests. Cleaned up all UI refs, types, schemas, scripts, README. Correctly preserved 'direct' interaction type in logging/history for backward compat. Found one orphan: orchestration-api.ts (124 lines, zero importers) — deleted in 4027da2. Quality gates: tsc pass, tests pass (1779), lint source-clean, build fails with pre-existing SSR provider error (not a regression).",
+    "datetime": "2026-03-03T15:45:34.002291Z",
+    "entry_id": "019cb460-4532-7e11-8596-c70a9ac7540f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
