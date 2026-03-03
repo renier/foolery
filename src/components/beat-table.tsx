@@ -14,7 +14,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Beat } from "@/lib/types";
 import type { UpdateBeatInput } from "@/lib/schemas";
-import { updateBead, closeBead, previewCascadeClose, cascadeCloseBead } from "@/lib/api";
+import { closeBead, previewCascadeClose, cascadeCloseBead } from "@/lib/api";
 import { buildHierarchy, type HierarchicalBeat } from "@/lib/beat-hierarchy";
 import { compareBeatsByHierarchicalOrder } from "@/lib/beat-sort";
 import { getBeatColumns } from "@/components/beat-columns";
@@ -44,6 +44,7 @@ import { useUpdateUrl } from "@/hooks/use-update-url";
 import { isInternalLabel, isReadOnlyLabel } from "@/lib/wave-slugs";
 import { CascadeCloseDialog } from "@/components/cascade-close-dialog";
 import type { CascadeDescendant } from "@/lib/cascade-close";
+import { updateBeatOrThrow } from "@/lib/update-beat-mutation";
 
 function SummaryColumn({
   text,
@@ -190,11 +191,8 @@ export function BeatTable({
   const filtersKey = JSON.stringify(filters);
 
   const { mutate: handleUpdateBeat } = useMutation({
-    mutationFn: ({ id, fields }: { id: string; fields: UpdateBeatInput }) => {
-      const beat = data.find((b) => b.id === id) as unknown as Record<string, unknown>;
-      const repo = beat?._repoPath as string | undefined;
-      return updateBead(id, fields, repo);
-    },
+    mutationFn: ({ id, fields }: { id: string; fields: UpdateBeatInput }) =>
+      updateBeatOrThrow(data, id, fields),
     onMutate: async ({ id, fields }) => {
       // Optimistically update the beads cache
       await queryClient.cancelQueries({ queryKey: ["beads"] });
@@ -216,8 +214,9 @@ export function BeatTable({
 
       return { previousBeads };
     },
-    onError: (_err, _vars, context) => {
-      toast.error("Failed to update beat");
+    onError: (error, _vars, context) => {
+      const message = error instanceof Error ? error.message : "Failed to update beat";
+      toast.error(message);
       if (context?.previousBeads) {
         for (const [key, snapData] of context.previousBeads) {
           queryClient.setQueryData(key, snapData);

@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchBeads, updateBead } from "@/lib/api";
+import { fetchBeads } from "@/lib/api";
 import { startSession, abortSession } from "@/lib/terminal-api";
 import { BeatTable } from "@/components/beat-table";
 import { BeatDetailLightbox } from "@/components/beat-detail-lightbox";
@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import type { Beat } from "@/lib/types";
 import type { UpdateBeatInput } from "@/lib/schemas";
+import { updateBeatOrThrow } from "@/lib/update-beat-mutation";
 
 const DEGRADED_ERROR_PREFIX = "Unable to interact with beads store";
 const MAX_SESSIONS = 5;
@@ -193,21 +194,16 @@ function BeadsPageInner() {
 
   const { mutate: bulkUpdate } = useMutation({
     mutationFn: async ({ ids, fields }: { ids: string[]; fields: UpdateBeatInput }) => {
-      await Promise.all(
-        ids.map((id) => {
-          const beat = beats.find((b) => b.id === id) as unknown as Record<string, unknown>;
-          const repo = beat?._repoPath as string | undefined;
-          return updateBead(id, fields, repo);
-        })
-      );
+      await Promise.all(ids.map((id) => updateBeatOrThrow(beats, id, fields)));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["beads"] });
       setSelectionVersion((v) => v + 1);
       toast.success("Beats updated");
     },
-    onError: () => {
-      toast.error("Failed to update beats");
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "Failed to update beats";
+      toast.error(message);
     },
   });
 
