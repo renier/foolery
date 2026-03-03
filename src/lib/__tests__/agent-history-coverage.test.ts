@@ -414,6 +414,58 @@ describe("readAgentHistory (additional coverage)", () => {
     }
   });
 
+  it("includes canonical repo logs when active repo path is a .knots/_worktree checkout", async () => {
+    const originalHome = process.env.HOME;
+    const originalNodeEnv = process.env.NODE_ENV;
+    const fakeHome = join(tempDir, "fake-home");
+    const repoPath = join(tempDir, "repo-knots");
+    const knotsWorktreePath = join(repoPath, ".knots", "_worktree");
+
+    await mkdir(fakeHome, { recursive: true });
+    await mkdir(knotsWorktreePath, { recursive: true });
+
+    await writeLog(join(repoPath, ".foolery-logs"), "repo-knots/2026-03-03/canonical.jsonl", [
+      {
+        kind: "session_start",
+        ts: "2026-03-03T13:00:00.000Z",
+        sessionId: "knots-canonical-1",
+        interactionType: "take",
+        repoPath,
+        beadIds: ["knots-canonical-beat"],
+      },
+      {
+        kind: "session_end",
+        ts: "2026-03-03T13:01:00.000Z",
+        sessionId: "knots-canonical-1",
+        status: "completed",
+        exitCode: 0,
+      },
+    ]);
+
+    (process.env as Record<string, string | undefined>).HOME = fakeHome;
+    (process.env as Record<string, string | undefined>).NODE_ENV = "production";
+
+    try {
+      const history = await readAgentHistory({ repoPath: knotsWorktreePath });
+      expect(history.beats.map((b) => b.beadId)).toEqual(["knots-canonical-beat"]);
+      expect(history.beats[0]?.repoPath).toBe(knotsWorktreePath);
+
+      const sessionHistory = await readAgentHistory({
+        repoPath: knotsWorktreePath,
+        beadId: "knots-canonical-beat",
+        beadRepoPath: knotsWorktreePath,
+      });
+      expect(sessionHistory.sessions).toHaveLength(1);
+      expect(sessionHistory.sessions[0]?.sessionId).toBe("knots-canonical-1");
+      expect(sessionHistory.sessions[0]?.repoPath).toBe(knotsWorktreePath);
+    } finally {
+      if (originalHome === undefined) delete (process.env as Record<string, string | undefined>).HOME;
+      else (process.env as Record<string, string | undefined>).HOME = originalHome;
+      if (originalNodeEnv === undefined) delete (process.env as Record<string, string | undefined>).NODE_ENV;
+      else (process.env as Record<string, string | undefined>).NODE_ENV = originalNodeEnv;
+    }
+  });
+
   it("deduplicates sessions discovered in both default and repo-local roots", async () => {
     const originalHome = process.env.HOME;
     const originalNodeEnv = process.env.NODE_ENV;
