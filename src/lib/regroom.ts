@@ -39,10 +39,11 @@ function getAncestors(beatId: string, beatsById: Map<string, Beat>): string[] {
 }
 
 /**
- * After a beat is closed (or otherwise changes state), walk up the hierarchy
- * and auto-close any parent whose children are ALL closed.
+ * After a beat is closed (or otherwise changes state), walk the hierarchy
+ * starting at that beat and auto-close any parent-like node whose children are
+ * all terminal.
  *
- * This cascades upward: closing a parent may in turn satisfy *its* parent.
+ * This cascades upward: closing one node may in turn satisfy its parent.
  *
  * Errors are caught and logged — regroom never fails the caller.
  */
@@ -64,31 +65,33 @@ export async function regroomAncestors(
     const childrenIndex = buildChildrenIndex(
       Array.from(beatsById.values())
     );
-    const ancestors = getAncestors(beatId, beatsById);
+    const hierarchyIds = [beatId, ...getAncestors(beatId, beatsById)];
 
-    for (const ancestorId of ancestors) {
-      const children = childrenIndex.get(ancestorId);
+    for (const currentId of hierarchyIds) {
+      const current = beatsById.get(currentId);
+      if (current && isTerminalChildState(current.state)) continue;
+
+      const children = childrenIndex.get(currentId);
       if (!children || children.length === 0) continue;
 
       const allTerminal = children.every((child) => isTerminalChildState(child.state));
       if (!allTerminal) break; // stop walking up — this ancestor still has open work
 
       console.log(
-        `[regroom] Auto-closing ${ancestorId} — all ${children.length} children are terminal`
+        `[regroom] Auto-closing ${currentId} — all ${children.length} children are terminal`
       );
-      const result = await getBackend().close(ancestorId, undefined, repoPath);
+      const result = await getBackend().close(currentId, undefined, repoPath);
       if (!result.ok) {
         console.error(
-          `[regroom] Failed to close ${ancestorId}: ${result.error?.message}`
+          `[regroom] Failed to close ${currentId}: ${result.error?.message}`
         );
         break;
       }
 
       // Update our in-memory map so the next ancestor check sees this as closed
-      const ancestor = beatsById.get(ancestorId);
-      if (ancestor) {
-        ancestor.state = "closed";
-        beatsById.set(ancestorId, ancestor);
+      if (current) {
+        current.state = "closed";
+        beatsById.set(currentId, current);
       }
     }
   } catch (err) {

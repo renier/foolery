@@ -76,6 +76,20 @@ describe("regroomAncestors", () => {
     expect(mockClose).not.toHaveBeenCalled();
   });
 
+  it("auto-closes the starting beat when all of its children are terminal", async () => {
+    const beats: Beat[] = [
+      makeBeat({ id: "P", state: "ready_for_planning" }),
+      makeBeat({ id: "C1", parent: "P", state: "shipped" }),
+      makeBeat({ id: "C2", parent: "P", state: "abandoned" }),
+    ];
+    mockList.mockResolvedValue({ ok: true, data: beats });
+
+    await regroomAncestors("P", "/repo");
+
+    expect(mockClose).toHaveBeenCalledTimes(1);
+    expect(mockClose).toHaveBeenCalledWith("P", undefined, "/repo");
+  });
+
   it("cascades upward after closing an ancestor", async () => {
     const beats: Beat[] = [
       makeBeat({ id: "G", state: "ready_for_planning" }),
