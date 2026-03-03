@@ -102,9 +102,10 @@ export function fetchOpenRouterModels(): Promise<
 }
 
 export function validateOpenRouterKey(apiKey: string): Promise<BdResult<{ valid: boolean }>> {
+  const isMasked = apiKey.includes("...");
   return request<{ valid: boolean }>("/api/openrouter/validate", {
     method: "POST",
-    body: JSON.stringify({ apiKey }),
+    body: JSON.stringify(isMasked ? { useStored: true } : { apiKey }),
   });
 }
 

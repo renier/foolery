@@ -194,6 +194,8 @@ function ApiKeyField({
   onToggleShow,
   onValidate,
 }: ApiKeyFieldProps) {
+  const isMasked = apiKey.includes("...");
+
   return (
     <div className="space-y-1.5">
       <Label className="text-xs">API Key</Label>
@@ -234,6 +236,12 @@ function ApiKeyField({
           )}
         </Button>
       </div>
+      {isMasked && (
+        <p className="text-[10px] text-muted-foreground">
+          Key is stored server-side. Clear the field and type a new key to
+          update.
+        </p>
+      )}
       <p className="text-[10px] text-muted-foreground">
         Get your key at{" "}
         <a

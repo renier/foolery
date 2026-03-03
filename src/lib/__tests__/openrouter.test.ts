@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   formatPricing,
+  maskApiKey,
   fetchOpenRouterModels,
   validateOpenRouterApiKey,
 } from "../openrouter";
@@ -33,6 +34,27 @@ describe("openrouter", () => {
     it("formats larger costs", () => {
       // $0.00006 per token = $60.00 per million
       expect(formatPricing("0.00006")).toBe("$60.00/M");
+    });
+  });
+
+  describe("maskApiKey", () => {
+    it("returns empty string for empty key", () => {
+      expect(maskApiKey("")).toBe("");
+    });
+
+    it("returns **** for short keys (8 chars or fewer)", () => {
+      expect(maskApiKey("abc")).toBe("****");
+      expect(maskApiKey("12345678")).toBe("****");
+    });
+
+    it("masks middle of longer keys", () => {
+      expect(maskApiKey("sk-or-v1-abcdef123456")).toBe("sk-or-...3456");
+    });
+
+    it("preserves first 6 and last 4 chars", () => {
+      const key = "abcdefghijklmnop";
+      const masked = maskApiKey(key);
+      expect(masked).toBe("abcdef...mnop");
     });
   });
 

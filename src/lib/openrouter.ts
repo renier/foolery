@@ -75,6 +75,13 @@ export async function validateOpenRouterApiKey(
   }
 }
 
+/** Mask an API key for safe display. Returns empty string for empty keys. */
+export function maskApiKey(key: string): string {
+  if (!key) return "";
+  if (key.length <= 8) return "****";
+  return key.slice(0, 6) + "..." + key.slice(-4);
+}
+
 /**
  * Format model pricing for display.
  * Converts per-token cost strings to per-million-token dollar amounts.
