@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb44f-a1db-7760-9ea3-459a686da653",
+  "occurred_at": "2026-03-03T15:27:23.611837Z",
+  "knot_id": "foolery-8bbd",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Fixed terminal completion invalidation to use the shared bead-list cache key so completion UI updates trigger immediately without waiting for visibility-focus refresh. Added a unit test to prevent query-key drift and validated lint, typecheck, unit tests, and production build.",
+    "datetime": "2026-03-03T15:27:23Z",
+    "entry_id": "019cb44f-a1db-7760-9ea3-458b8fe6a263",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "gpt-5-codex"
+  }
+}

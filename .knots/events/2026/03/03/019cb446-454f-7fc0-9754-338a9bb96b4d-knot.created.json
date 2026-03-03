@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb446-454f-7fc0-9754-338a9bb96b4d",
+  "occurred_at": "2026-03-03T15:17:10.095182Z",
+  "knot_id": "foolery-8bbd",
+  "type": "knot.created",
+  "data": {
+    "body": "This used to just work, you'd see the animation and you'd know it was completed.  We just recently added a commit to improve completion detection and unfortunately this broke how the animation was automated.  Now the animation only happens if you happen to click on the tab after the beat has been completed.  It should happen immediately whether the tab is in focus or not.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "UX Terminal: Completion animation won't trigger until you click on the tab"
+  }
+}

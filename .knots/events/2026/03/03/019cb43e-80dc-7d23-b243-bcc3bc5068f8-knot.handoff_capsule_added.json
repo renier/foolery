@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb43e-80dc-7d23-b243-bcc3bc5068f8",
+  "occurred_at": "2026-03-03T15:08:41.052777Z",
+  "knot_id": "foolery-2fb0",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added regression coverage for shipped-only notifications by extracting and testing shipped/closed transition diff helpers in use-shipped-notifications. Creation-time persistent notifications remain removed; shipped notifications carry title text and beadId for clickable focus in notification bell. Gates: lint+tsc+tests pass; build still fails on existing /beads and /_global-error prerender useContext null issue unrelated to this change.",
+    "datetime": "2026-03-03T15:08:41.052777Z",
+    "entry_id": "019cb43e-80dc-7d23-b243-bcbd2e7a281f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

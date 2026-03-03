@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb43b-7bd0-7882-b26a-fa89f713ad44",
+  "occurred_at": "2026-03-03T15:05:23.152063Z",
+  "knot_id": "foolery-dbeb",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review passed. Fixed 2 remaining beads/page.tsx callsites using client timestamps instead of backend startedAt, and added missing skipped-terminal to VerificationEventType. All gates green: lint 0 errors, tsc clean, 1780 tests pass, production build succeeds.",
+    "datetime": "2026-03-03T15:05:23.152063Z",
+    "entry_id": "019cb43b-7bd0-7882-b26a-fa7fa409339d",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

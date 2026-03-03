@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb442-f96c-7ca2-b6ae-3eddf3804c50",
+  "occurred_at": "2026-03-03T15:13:34.060835Z",
+  "knot_id": "foolery-7311",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added canonical known-agent labels when adding scanned agents (including OpenRouter), merged to main, pushed as d786b05, and verified remote CI workflows (CI/Changesets/Coverage Badge) succeeded.",
+    "datetime": "2026-03-03T15:13:34.060835Z",
+    "entry_id": "019cb442-f96c-7ca2-b6ae-3ec52ee648cc",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

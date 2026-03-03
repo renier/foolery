@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb453-c8a2-7e42-b305-a7260211dfe2",
+  "occurred_at": "2026-03-03T15:31:55.682726Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-ff81",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "History view  is still broken,  missing dozens of recently worked beats, also \"incorrectly says 28 closed beats — most recently updated first\"",
+    "updated_at": "2026-03-03T15:31:55.682726Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb44a-b989-7062-a48b-03c1806ead2b"
+  }
+}

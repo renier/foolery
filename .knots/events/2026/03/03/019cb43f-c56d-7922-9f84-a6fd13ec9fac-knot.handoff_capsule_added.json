@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb43f-c56d-7922-9f84-a6fd13ec9fac",
+  "occurred_at": "2026-03-03T15:10:04.141086Z",
+  "knot_id": "foolery-dbeb",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Synced terminal-store rehydrate to refresh backend startedAt (not just status) so terminal elapsed anchor tracks latest Take time for known sessions; added regression test in terminal-store-extended; validated lint, tsc, unit tests, and production build (NODE_ENV=production); committed and pushed to origin/main at 5c1d8b3.",
+    "datetime": "2026-03-03T15:10:04.141086Z",
+    "entry_id": "019cb43f-c56d-7922-9f84-a6ebd2bd86a1",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

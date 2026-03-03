@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb44c-7726-7833-b835-6492d0637541",
+  "occurred_at": "2026-03-03T15:23:56.070495Z",
+  "knot_id": "foolery-8ec0",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Reviewed and hardened c051 state-recovery path: normalized raw kno state comparisons in UI and backend, added regression tests for formatted raw state values, validated lint/typecheck/tests/build, and shipped commit d643b64 to origin/main.",
+    "datetime": "2026-03-03T15:23:56.070495Z",
+    "entry_id": "019cb44c-7726-7833-b835-6486b1ae773f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

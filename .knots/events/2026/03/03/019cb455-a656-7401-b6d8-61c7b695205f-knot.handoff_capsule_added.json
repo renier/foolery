@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb455-a656-7401-b6d8-61c7b695205f",
+  "occurred_at": "2026-03-03T15:33:57.974822Z",
+  "knot_id": "foolery-051a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Removed the obsolete Direct view and its entry points. Navigation no longer exposes the Direct tab; breakdown flows now route directly to the Breakdown view via parent id. Deleted direct-only UI/prefill/state modules and associated tests, removed direct action mapping from settings/setup surfaces, and updated README/help-facing copy and screenshot references. Validation: bun run lint (warnings only), bunx tsc --noEmit (pass), bun run test (pass), bun run build (fails with pre-existing Next prerender error on /beads and /_global-error, reproducible on pristine main).",
+    "datetime": "2026-03-03T15:33:57.974822Z",
+    "entry_id": "019cb455-a656-7401-b6d8-61b651d5623b",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

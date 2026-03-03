@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb44a-b964-7c52-8bf8-83b97ae6cccb",
+  "occurred_at": "2026-03-03T15:22:01.956256Z",
+  "knot_id": "foolery-ff81",
+  "type": "knot.created",
+  "data": {
+    "body": "The number of closed beats should be irrelevant.  More importantly, history view is missing dozens of sessions that happened in the last 12 hours alone.  it is not showing anywhere near all the sessions - all you have to do is browse the knots opened today to see that many sessions were run and almost all of them is not showing up on the history screen.  ",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "History view  is still broken,  missing dozens of recently worked beats, also \"incorrectly says 28 closed beats — most recently updated first\""
+  }
+}

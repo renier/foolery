@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb443-f023-7543-8d8f-eeccd55c483b",
+  "occurred_at": "2026-03-03T15:14:37.21936Z",
+  "knot_id": "foolery-8ec0",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Fixed stuck knot c051 (planning -> ready_for_implementation_review) by: 1) Fixing knots-backend.ts update() to detect when target state matches raw kno state (skip no-op) and force non-adjacent transitions. 2) Fixing beat-detail.tsx validNextStates() to compute transitions from actual kno state when rollback mismatch detected, adding all workflow states as escape hatches. 3) Force-set c051 state to ready_for_implementation_review via kno state --force. Commit 1724bd1.",
+    "datetime": "2026-03-03T15:15:00Z",
+    "entry_id": "019cb443-f023-7543-8d8f-eeb89ff8c474",
+    "model": "claude-opus-4-6",
+    "username": "unknown",
+    "version": "opus-4.6"
+  }
+}
