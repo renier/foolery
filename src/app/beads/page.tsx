@@ -18,6 +18,7 @@ import { AgentHistoryView } from "@/components/agent-history-view";
 import { useAppStore } from "@/stores/app-store";
 import { useTerminalStore, type QueuedBeat } from "@/stores/terminal-store";
 import { useRetryNotifications } from "@/hooks/use-retry-notifications";
+import { useShippedNotifications } from "@/hooks/use-shipped-notifications";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import type { Beat } from "@/lib/types";
@@ -182,6 +183,7 @@ function BeadsPageInner() {
   }, [parentByBeatId, shippingByBeatId]);
 
   useRetryNotifications(beats);
+  useShippedNotifications(beats);
   const partialDegradedMsg = data?.ok ? (data as { _degraded?: string })._degraded : undefined;
   const isDegradedError = queryError instanceof DegradedStoreError || Boolean(partialDegradedMsg);
   const loadError = queryError instanceof DegradedStoreError

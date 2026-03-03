@@ -19,7 +19,6 @@ import type { CreateBeatInput } from "@/lib/schemas";
 import { buildBeadBreakdownPrompt, setDirectPrefillPayload } from "@/lib/breakdown-prompt";
 import { buildBeadFocusHref, stripBeadPrefix } from "@/lib/bead-navigation";
 import type { MemoryWorkflowDescriptor } from "@/lib/types";
-import { useNotificationStore } from "@/stores/notification-store";
 
 async function addDepsForBeat(
   beatId: string,
@@ -55,7 +54,6 @@ export function CreateBeatDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
   const queryClient = useQueryClient();
-  const addNotification = useNotificationStore((s) => s.addNotification);
   const { data: workflowResult } = useQuery({
     queryKey: ["workflows", repo ?? "__default__"],
     queryFn: () => fetchWorkflows(repo ?? undefined),
@@ -108,12 +106,6 @@ export function CreateBeatDialog({
         }
         const createdId = result.data?.id;
         const shortId = createdId ? stripBeadPrefix(createdId) : "";
-        if (createdId) {
-          addNotification({
-            message: `Created bead ${createdId}`,
-            beadId: createdId,
-          });
-        }
         toast.success(createdId ? `Created bead ${createdId}` : `Created ${shortId}`, {
           action: createdId
             ? {
@@ -155,12 +147,6 @@ export function CreateBeatDialog({
         }
         const createdId2 = result.data?.id;
         const shortId2 = createdId2 ? stripBeadPrefix(createdId2) : "";
-        if (createdId2) {
-          addNotification({
-            message: `Created bead ${createdId2}`,
-            beadId: createdId2,
-          });
-        }
         toast.success(
           createdId2
             ? `Created bead ${createdId2} — ready for another`
@@ -205,10 +191,6 @@ export function CreateBeatDialog({
       }
       const createdId = result.data.id;
       const shortId = stripBeadPrefix(createdId);
-      addNotification({
-        message: `Created bead ${createdId}`,
-        beadId: createdId,
-      });
       toast.success(`Created bead ${createdId} — starting breakdown...`, {
         action: {
           label: shortId || createdId,
