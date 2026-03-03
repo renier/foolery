@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb4db-f4df-7813-b8c0-aa371231ce01",
+  "occurred_at": "2026-03-03T18:00:39.9039Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-48e6",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "history page is still pretty broken",
+    "updated_at": "2026-03-03T18:00:39.9039Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb4db-b386-7d20-a264-369c72835ea9"
+  }
+}

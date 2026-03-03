@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb4e3-4152-7111-b67c-9416cf0e2606",
+  "occurred_at": "2026-03-03T18:08:38.226301Z",
+  "knot_id": "foolery-e6d4",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed double kno-next bug: changed --expected-state flag to positional arg in nextKnot (knots.ts), updated all callers (memory-manager-commands, knots-backend, verification-orchestrator, terminal-manager) and prompt text to include expected state. Updated 5 test files. All 1827 tests pass, lint/typecheck clean.",
+    "datetime": "2026-03-03T18:08:38.226301Z",
+    "entry_id": "019cb4e3-4152-7111-b67c-940e0acb0efc",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

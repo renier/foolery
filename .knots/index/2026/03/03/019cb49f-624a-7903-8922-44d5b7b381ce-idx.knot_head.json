@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb49f-624a-7903-8922-44d5b7b381ce",
+  "occurred_at": "2026-03-03T16:54:30.212477Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-da96",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipped",
+    "terminal": true,
+    "title": "ui console should show id prefix in tabs",
+    "updated_at": "2026-03-03T16:54:30.212477Z"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb4da-5f06-7660-a7cb-2685dd1dcf9a",
+  "occurred_at": "2026-03-03T17:58:55.963717Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-p0bo",
+    "profile_id": "autopilot",
+    "state": "abandoned",
+    "terminal": true,
+    "title": "Final Cut View:  status column is overloaded incorrectly when setatus is knots:verifying",
+    "updated_at": "2026-03-03T17:58:55.963717Z"
+  }
+}

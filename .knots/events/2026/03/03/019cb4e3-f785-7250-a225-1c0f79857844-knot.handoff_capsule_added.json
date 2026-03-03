@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb4e3-f785-7250-a225-1c0f79857844",
+  "occurred_at": "2026-03-03T18:09:24.869004Z",
+  "knot_id": "foolery-48e6",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed three bugs in history page: (1) auto-focus beat list on load so first item is focused and arrow keys work immediately, (2) clamp navigation at boundaries instead of circular wrapping to prevent all-visible-beats-change after WINDOW_SIZE presses, (3) redirect focus to container div after button clicks to prevent focus loss when buttons unmount during window shift. Commit: ca2a1f8",
+    "datetime": "2026-03-03T18:09:24.869004Z",
+    "entry_id": "019cb4e3-f785-7250-a225-1bf2957c2680",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

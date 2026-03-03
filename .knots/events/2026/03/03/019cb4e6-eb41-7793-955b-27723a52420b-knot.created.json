@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb4e6-eb41-7793-955b-27723a52420b",
+  "occurred_at": "2026-03-03T18:12:38.337841Z",
+  "knot_id": "foolery-9b86",
+  "type": "knot.created",
+  "data": {
+    "body": "notifications are not actually sent when events happen.  they are sent when events are loaded.\n\nNever, ever send an event just because a beat  was loaded.  Ever.  That is the dumbest fucking implementation conceivable.\n\nThe only notifications you should send are when an agent conversation terminates, along with the latest state of the beat.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "notifications are iditoically implemented"
+  }
+}

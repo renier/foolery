@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb4db-b362-74b2-9e99-dc043aab11e0",
+  "occurred_at": "2026-03-03T18:00:23.138507Z",
+  "knot_id": "foolery-48e6",
+  "type": "knot.created",
+  "data": {
+    "body": "the first item in the list should be in focus when the page loads.\n\nit's not.\n\nyou can only press down arrrow 5 times and then the entire page because unresponsive.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "history page is still pretty broken"
+  }
+}

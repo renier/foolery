@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb49d-ed40-73e0-ac0b-0a467d8c77f0",
+  "occurred_at": "2026-03-03T16:52:54.720069Z",
+  "knot_id": "foolery-6241",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "---\n**Verification attempt 2 failed (2026-03-03 16:52)** — commit: e5198f096d40835638ad41fb04392082f4e438e5, reason: fail-requirements\n\nThe current `main` implementation still writes plaintext OpenRouter API keys to `settings.toml` when keychain storage is unavailable (`saveSettings` keeps the raw key unless `keychainSet` succeeds). That does not meet the bead requirement that `settings.toml` should contain only a sentinel (or no secret) while the real key is stored/read from OS keychain. Remove plaintext fallback by making failed keychain writes non-persistent for secrets (sentinel/empty only, or hard-fail save) and update tests that currently assert plaintext fallback behavior.",
+    "datetime": "2026-03-03T16:52:54.720069Z",
+    "entry_id": "019cb49d-ed40-73e0-ac0b-0a349ed025c1",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

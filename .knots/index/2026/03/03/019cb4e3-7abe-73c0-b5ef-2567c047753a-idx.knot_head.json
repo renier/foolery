@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb4e3-7abe-73c0-b5ef-2567c047753a",
+  "occurred_at": "2026-03-03T18:08:52.892891Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-e6d4",
+    "profile_id": "semiauto",
+    "state": "planning",
+    "terminal": false,
+    "title": "Fix double kno-next causing knots to skip action states",
+    "updated_at": "2026-03-03T18:08:52.892891Z"
+  }
+}

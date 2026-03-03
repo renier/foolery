@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb4dd-7677-7400-a065-537923b0a6ef",
+  "occurred_at": "2026-03-03T18:02:18.615807Z",
+  "knot_id": "foolery-1fbb",
+  "type": "knot.created",
+  "data": {
+    "body": "you get to the bottom and you can't scroll anymore.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "ReTakes screen isn't paginated"
+  }
+}

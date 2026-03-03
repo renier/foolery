@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb4e7-48fa-7352-9395-31afa37d1db7",
+  "occurred_at": "2026-03-03T18:13:02.330676Z",
+  "knot_id": "foolery-1fbb",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Fixed ReTakes pagination discoverability by rendering page controls above and below the list, and changed beads page wrapper to overflow-x-hidden so vertical scrolling is not clipped. Added layout regression tests for both changes. Quality gates: lint, tsc --noEmit, vitest unit, and next build (with NODE_ENV=production) all pass.",
+    "datetime": "2026-03-03T18:13:02Z",
+    "entry_id": "019cb4e7-48fa-7352-9395-319bde15a74d",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "1"
+  }
+}
