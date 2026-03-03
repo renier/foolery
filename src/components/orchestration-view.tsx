@@ -741,6 +741,7 @@ export function OrchestrationView({ onApplied }: OrchestrationViewProps) {
       repoPath: result.data.repoPath ?? activeRepo,
       agentName: result.data.agentName,
       agentModel: result.data.agentModel,
+      agentVersion: result.data.agentVersion,
       agentCommand: result.data.agentCommand,
       status: "running",
       startedAt: new Date().toISOString(),

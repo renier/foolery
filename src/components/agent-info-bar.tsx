@@ -61,6 +61,17 @@ function formatState(state: string): string {
     .join(" ");
 }
 
+function splitModelAndVersion(
+  model: string | undefined
+): { model?: string; version?: string } {
+  if (!model) return {};
+  const trimmed = model.trim();
+  // Common display shape: "ModelName 4.6" or "ModelName v4.6".
+  const match = trimmed.match(/^(.+?)\s+v?(\d+(?:\.\d+)*(?:[-a-z0-9.]*)?)$/i);
+  if (!match) return { model: trimmed };
+  return { model: match[1], version: match[2] };
+}
+
 export interface BeatInfoForBar {
   state: string;
   /** ISO timestamp of when the beat entered the current state (beat.updated). */
@@ -81,6 +92,9 @@ interface AgentInfoBarProps {
 export function AgentInfoBar({ agent, beat }: AgentInfoBarProps) {
   const cfg = VENDOR_CONFIG[agent.vendor] ?? DEFAULT_VENDOR;
   const Icon = cfg.icon;
+  const parsedModel = splitModelAndVersion(agent.model);
+  const modelLabel = parsedModel.model ?? agent.model ?? "--";
+  const versionLabel = agent.version ?? parsedModel.version ?? "--";
 
   const stateElapsed = useElapsedTime(beat?.stateChangedAt);
   const totalElapsed = useElapsedTime(beat?.createdAt);
@@ -112,12 +126,10 @@ export function AgentInfoBar({ agent, beat }: AgentInfoBarProps) {
       {/* Agent info section */}
       <Icon className={`size-3.5 ${cfg.color}`} />
       <span className={`font-medium ${cfg.color}`}>{agent.name}</span>
-      {agent.model && (
-        <>
-          <span className="text-white/20">|</span>
-          <span className="text-white/50">{agent.model}</span>
-        </>
-      )}
+      <span className="text-white/35">/</span>
+      <span className="text-white/55">{modelLabel}</span>
+      <span className="text-white/35">/</span>
+      <span className="text-white/55">{versionLabel}</span>
     </div>
   );
 }

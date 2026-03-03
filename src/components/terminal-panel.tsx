@@ -96,10 +96,16 @@ export function TerminalPanel() {
     return {
       name: activeTerminal.agentName || activeTerminal.agentCommand,
       model: formatModelDisplay(activeTerminal.agentModel),
+      version: activeTerminal.agentVersion,
       command: activeTerminal.agentCommand,
       vendor: detectVendor(activeTerminal.agentCommand),
     };
-  }, [activeTerminal?.agentCommand, activeTerminal?.agentModel, activeTerminal?.agentName]);
+  }, [
+    activeTerminal?.agentCommand,
+    activeTerminal?.agentModel,
+    activeTerminal?.agentName,
+    activeTerminal?.agentVersion,
+  ]);
   const agentInfo = sessionAgentInfo ?? fallbackAgentInfo;
 
   // Fetch beat data for the info bar (state + timestamps)
@@ -284,10 +290,7 @@ export function TerminalPanel() {
         );
       };
 
-      const launchRecoverySession = async (
-        previousSessionId: string | null,
-        source: "disconnect" | "retry"
-      ) => {
+      const launchRecoverySession = async (previousSessionId: string | null) => {
         if (recoveryInFlight) return;
         recoveryInFlight = true;
 
@@ -318,6 +321,7 @@ export function TerminalPanel() {
           repoPath: recovery.data.repoPath ?? activeRepoPath,
           agentName: recovery.data.agentName,
           agentModel: recovery.data.agentModel,
+          agentVersion: recovery.data.agentVersion,
           agentCommand: recovery.data.agentCommand,
           status: "running",
           startedAt: new Date().toISOString(),
@@ -365,7 +369,7 @@ export function TerminalPanel() {
                     action: {
                       label: retryLabel,
                       onClick: () => {
-                        void launchRecoverySession(failureHint.previousSessionId, "retry");
+                        void launchRecoverySession(failureHint.previousSessionId);
                       },
                     },
                   });

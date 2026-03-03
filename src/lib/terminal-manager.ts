@@ -510,6 +510,7 @@ export async function createSession(
         childBeatIds: waveBeatIds.length > 0 ? waveBeatIds : undefined,
         agentName: agent.label || agent.command,
         agentModel: agent.model,
+        agentVersion: agent.version,
       },
       repoPath,
     );
@@ -561,6 +562,7 @@ export async function createSession(
     repoPath: resolvedRepoPath,
     agentName: agent.label || agent.command,
     agentModel: agent.model,
+    agentVersion: agent.version,
     agentCommand: agent.command,
     status: "running",
     startedAt: new Date().toISOString(),
@@ -749,7 +751,11 @@ export async function createSession(
     console.log(`${tag} claiming ${beatId} from state=${current.state}`);
     const takeResult = await getBackend().buildTakePrompt(
       beatId,
-      { agentName: claimAgent.label || claimAgent.command, agentModel: claimAgent.model },
+      {
+        agentName: claimAgent.label || claimAgent.command,
+        agentModel: claimAgent.model,
+        agentVersion: claimAgent.version,
+      },
       repoPath,
     );
     if (!takeResult.ok || !takeResult.data) {

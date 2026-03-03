@@ -129,6 +129,7 @@ export const componentSchemas = {
       repoPath: { type: "string" },
       agentName: { type: "string" },
       agentModel: { type: "string" },
+      agentVersion: { type: "string" },
       agentCommand: { type: "string" },
       status: { type: "string", enum: ["idle", "running", "completed", "error", "aborted"] },
       startedAt: { type: "string", format: "date-time" },
@@ -328,6 +329,7 @@ export const componentSchemas = {
     properties: {
       command: { type: "string" },
       model: { type: "string" },
+      version: { type: "string" },
       label: { type: "string" },
       agentId: { type: "string" },
     },
@@ -354,6 +356,7 @@ export const componentSchemas = {
           properties: {
             command: { type: "string" },
             model: { type: "string" },
+            version: { type: "string" },
             label: { type: "string" },
           },
         },

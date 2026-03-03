@@ -328,7 +328,12 @@ export async function getActionAgent(
   const agentId = settings.actions[action] ?? "";
   if (agentId && agentId !== "default" && settings.agents[agentId]) {
     const reg = settings.agents[agentId];
-    return { command: reg.command, model: reg.model, label: reg.label };
+    return {
+      command: reg.command,
+      ...(reg.model ? { model: reg.model } : {}),
+      ...(reg.version ? { version: reg.version } : {}),
+      ...(reg.label ? { label: reg.label } : {}),
+    };
   }
   return { command: getFallbackCommand(settings) };
 }
@@ -345,7 +350,12 @@ export async function getVerificationAgent(): Promise<RegisteredAgent> {
   const agentId = settings.verification.agent ?? "";
   if (agentId && agentId !== "default" && settings.agents[agentId]) {
     const reg = settings.agents[agentId];
-    return { command: reg.command, model: reg.model, label: reg.label };
+    return {
+      command: reg.command,
+      ...(reg.model ? { model: reg.model } : {}),
+      ...(reg.version ? { version: reg.version } : {}),
+      ...(reg.label ? { label: reg.label } : {}),
+    };
   }
   return { command: getFallbackCommand(settings) };
 }
@@ -369,7 +379,15 @@ export async function addRegisteredAgent(
   agent: RegisteredAgent,
 ): Promise<FoolerySettings> {
   const current = await loadSettings();
-  const agents = { ...current.agents, [id]: { command: agent.command, model: agent.model, label: agent.label } };
+  const agents = {
+    ...current.agents,
+    [id]: {
+      command: agent.command,
+      ...(agent.model ? { model: agent.model } : {}),
+      ...(agent.version ? { version: agent.version } : {}),
+      ...(agent.label ? { label: agent.label } : {}),
+    },
+  };
   return updateSettings({ agents });
 }
 
@@ -461,7 +479,12 @@ export async function getStepAgent(
     const agentId = settings.actions[fallbackAction] ?? "";
     if (agentId && agentId !== "default" && settings.agents[agentId]) {
       const reg = settings.agents[agentId];
-      return { command: reg.command, model: reg.model, label: reg.label };
+      return {
+        command: reg.command,
+        ...(reg.model ? { model: reg.model } : {}),
+        ...(reg.version ? { version: reg.version } : {}),
+        ...(reg.label ? { label: reg.label } : {}),
+      };
     }
   }
 

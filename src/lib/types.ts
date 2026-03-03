@@ -131,6 +131,7 @@ export interface TerminalSession {
   repoPath?: string;
   agentName?: string;
   agentModel?: string;
+  agentVersion?: string;
   agentCommand?: string;
   status: TerminalSessionStatus;
   startedAt: string;
@@ -344,6 +345,7 @@ export interface ApplyBreakdownResult {
 export interface RegisteredAgent {
   command: string;
   model?: string;
+  version?: string;
   label?: string;
   /** Pool agent ID when selected via pool dispatch. */
   agentId?: string;

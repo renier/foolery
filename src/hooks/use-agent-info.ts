@@ -9,6 +9,8 @@ export interface ResolvedAgentInfo {
   name: string;
   /** Model identifier if configured, e.g. "opus-4" */
   model?: string;
+  /** Agent version if configured, e.g. "1.2.3" */
+  version?: string;
   /** CLI command path, e.g. "claude" */
   command: string;
   /** Vendor key used for icon selection */
@@ -75,6 +77,7 @@ export function useAgentInfo(action: ActionName): ResolvedAgentInfo | null {
         setInfo({
           name: registered.label || agentId,
           model: formatModelDisplay(registered.model),
+          version: registered.version,
           command,
           vendor,
         });
@@ -84,7 +87,8 @@ export function useAgentInfo(action: ActionName): ResolvedAgentInfo | null {
         const vendor = detectVendor(command);
         setInfo({
           name: command,
-          model: undefined,
+          model: formatModelDisplay(first?.model),
+          version: first?.version,
           command,
           vendor,
         });

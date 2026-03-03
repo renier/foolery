@@ -57,8 +57,9 @@ function selectWeighted(
       const reg = agents[entry.agentId]!;
       return {
         command: reg.command,
-        model: reg.model,
-        label: reg.label,
+        ...(reg.model ? { model: reg.model } : {}),
+        ...(reg.version ? { version: reg.version } : {}),
+        ...(reg.label ? { label: reg.label } : {}),
         agentId: entry.agentId,
       };
     }
@@ -69,8 +70,9 @@ function selectWeighted(
   const reg = agents[last.agentId]!;
   return {
     command: reg.command,
-    model: reg.model,
-    label: reg.label,
+    ...(reg.model ? { model: reg.model } : {}),
+    ...(reg.version ? { version: reg.version } : {}),
+    ...(reg.label ? { label: reg.label } : {}),
     agentId: last.agentId,
   };
 }

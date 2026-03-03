@@ -10,6 +10,7 @@ export interface ActiveTerminal {
   repoPath?: string;
   agentName?: string;
   agentModel?: string;
+  agentVersion?: string;
   agentCommand?: string;
   status: TerminalSessionStatus;
   startedAt: string;
@@ -195,6 +196,7 @@ export const useTerminalStore = create<TerminalState>()(
           repoPath: s.repoPath,
           agentName: s.agentName,
           agentModel: s.agentModel,
+          ...(s.agentVersion ? { agentVersion: s.agentVersion } : {}),
           agentCommand: s.agentCommand,
           status: s.status,
           startedAt: s.startedAt,
