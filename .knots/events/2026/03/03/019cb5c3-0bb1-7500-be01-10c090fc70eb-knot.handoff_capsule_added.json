@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5c3-0bb1-7500-be01-10c090fc70eb",
+  "occurred_at": "2026-03-03T22:13:04.561967Z",
+  "knot_id": "foolery-a91e",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed beats-view profile switching by making Knots profile updates call profile set with a deterministic target state (normalized from current raw knots state) and profile etag if-match. Added backend tests covering state forwarding and etag forwarding. Validation: bun run lint (warnings only), bunx tsc --noEmit, bun run test all pass; bun run build still fails on existing prerender/provider issue affecting /_not-found and /beads.",
+    "datetime": "2026-03-03T22:13:04.561967Z",
+    "entry_id": "019cb5c3-0bb1-7500-be01-10b885f790ae",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

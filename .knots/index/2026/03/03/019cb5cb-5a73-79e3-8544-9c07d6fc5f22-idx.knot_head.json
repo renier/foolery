@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb5cb-5a73-79e3-8544-9c07d6fc5f22",
+  "occurred_at": "2026-03-03T22:22:09.006889Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-a91e",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipped",
+    "terminal": true,
+    "title": "clicking on profile on beats view and selecting new profile fails",
+    "updated_at": "2026-03-03T22:22:09.006889Z"
+  }
+}

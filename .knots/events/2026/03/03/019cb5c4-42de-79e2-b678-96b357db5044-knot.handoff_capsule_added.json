@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5c4-42de-79e2-b678-96b357db5044",
+  "occurred_at": "2026-03-03T22:14:24.221993Z",
+  "knot_id": "foolery-1dea",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed terminal tab completion pulse regression by triggering pulse/auto-close only on status transition to completed (not on first-seen completed sessions and not after keep-open cancel). Added completion animation tracker helper + unit tests. Validation: bun run lint (warnings only), bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Pushed to origin/main at 5c7cbed.",
+    "datetime": "2026-03-03T22:14:24.221993Z",
+    "entry_id": "019cb5c4-42dd-7553-b8ab-8fbdb38a7d6f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

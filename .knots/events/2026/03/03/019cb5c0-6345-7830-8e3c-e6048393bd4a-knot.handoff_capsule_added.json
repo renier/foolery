@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5c0-6345-7830-8e3c-e6048393bd4a",
+  "occurred_at": "2026-03-03T22:10:10.373536Z",
+  "knot_id": "foolery-9b86",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Hardened session-exit notifications to be one-shot: duplicate exit SSE events no longer create duplicate in-app notifications. Added regression test in session-connection-manager tests. Validation in dedicated worktree: bun install --frozen-lockfile, bun run lint (warnings only), bunx tsc --noEmit (pass), bun run test (108 files passed), bun run build (fails on existing Next prerender/useContext null issue unrelated to this change). Commit pushed to origin/main: 6bb7c68719982fb5e67e8a9407bdfa0cc06f302c.",
+    "datetime": "2026-03-03T22:10:10.373536Z",
+    "entry_id": "019cb5c0-6345-7830-8e3c-e5f76948fc6a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

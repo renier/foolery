@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5cc-8ae0-7af0-ad5c-94c323252ab9",
+  "occurred_at": "2026-03-03T22:23:26.944952Z",
+  "knot_id": "foolery-1dea",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Suppressed terminal completion pulse during initial session rehydrate so persisted stale sessions (e.g. 27bb/1fbb) no longer flash on startup; pulse still fires on real completed transitions. Added completion tracker option + regression test. Validated with bun run lint, bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Pushed main at a1f686d.",
+    "datetime": "2026-03-03T22:23:26.944952Z",
+    "entry_id": "019cb5cc-8ae0-7af0-ad5c-94bdd88c399f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
