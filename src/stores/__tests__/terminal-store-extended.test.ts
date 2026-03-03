@@ -345,6 +345,16 @@ describe("rehydrateFromBackend", () => {
     expect(useTerminalStore.getState().terminals[0].status).toBe("completed");
   });
 
+  it("syncs startedAt from backend for known terminals", () => {
+    useTerminalStore.getState().upsertTerminal(
+      makeTerminal({ startedAt: "2026-01-01T00:00:00Z" })
+    );
+    useTerminalStore.getState().rehydrateFromBackend([
+      makeBackendSession({ id: "s-1", startedAt: "2026-01-01T01:00:00Z" }),
+    ]);
+    expect(useTerminalStore.getState().terminals[0].startedAt).toBe("2026-01-01T01:00:00Z");
+  });
+
   it("adopts orphaned running backend sessions", () => {
     useTerminalStore.getState().rehydrateFromBackend([
       makeBackendSession({ id: "orphan-1", beatId: "b-orphan", status: "running" }),

@@ -181,8 +181,11 @@ export const useTerminalStore = create<TerminalState>()(
           // Terminal gone from backend — mark completed
           return t.status === "running" ? { ...t, status: "completed" as const } : t;
         }
-        // Sync status from backend
-        return backend.status !== t.status ? { ...t, status: backend.status } : t;
+        // Sync backend-authoritative fields for known sessions.
+        if (backend.status !== t.status || backend.startedAt !== t.startedAt) {
+          return { ...t, status: backend.status, startedAt: backend.startedAt };
+        }
+        return t;
       });
       // Add orphaned backend sessions not in frontend state
       const knownIds = new Set(state.terminals.map((t) => t.sessionId));
