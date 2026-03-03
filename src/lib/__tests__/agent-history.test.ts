@@ -305,6 +305,84 @@ describe("readAgentHistory", () => {
     expect(history.beats.map((beat) => beat.beadId)).toEqual(["bar-1"]);
   });
 
+  it("treats worktree paths as the same repo when filtering by repoPath", async () => {
+    const repoPath = "/tmp/foolery";
+
+    await writeLog(tempDir, "repo-a/2026-02-20/root.jsonl", [
+      {
+        kind: "session_start",
+        ts: "2026-02-20T14:00:00.000Z",
+        sessionId: "root-session",
+        interactionType: "take",
+        repoPath,
+        beadIds: ["root-beat"],
+      },
+    ]);
+
+    await writeLog(tempDir, "repo-a/2026-02-20/worktree.jsonl", [
+      {
+        kind: "session_start",
+        ts: "2026-02-20T14:02:00.000Z",
+        sessionId: "worktree-session",
+        interactionType: "take",
+        repoPath: "/tmp/foolery/.claude/worktrees/agent-abc123",
+        beadIds: ["worktree-beat"],
+      },
+      {
+        kind: "prompt",
+        ts: "2026-02-20T14:02:01.000Z",
+        sessionId: "worktree-session",
+        prompt: "ID: worktree-beat\nTitle: Worktree beat",
+        source: "initial",
+      },
+      {
+        kind: "session_end",
+        ts: "2026-02-20T14:02:02.000Z",
+        sessionId: "worktree-session",
+        status: "completed",
+        exitCode: 0,
+      },
+    ]);
+
+    await writeLog(tempDir, "repo-a/2026-02-20/sibling-worktree.jsonl", [
+      {
+        kind: "session_start",
+        ts: "2026-02-20T14:03:00.000Z",
+        sessionId: "sibling-session",
+        interactionType: "take",
+        repoPath: "/tmp/foolery-wt-feature-1",
+        beadIds: ["sibling-beat"],
+      },
+    ]);
+
+    const history = await readAgentHistory({
+      logRoot: tempDir,
+      repoPath,
+    });
+
+    expect(history.beats.map((beat) => beat.beadId)).toEqual([
+      "sibling-beat",
+      "worktree-beat",
+      "root-beat",
+    ]);
+    expect(history.beats.every((beat) => beat.repoPath === repoPath)).toBe(true);
+
+    const sessionHistory = await readAgentHistory({
+      logRoot: tempDir,
+      repoPath,
+      beadId: "worktree-beat",
+      beadRepoPath: repoPath,
+    });
+    expect(sessionHistory.sessions).toHaveLength(1);
+    expect(sessionHistory.sessions[0]?.sessionId).toBe("worktree-session");
+    expect(sessionHistory.sessions[0]?.repoPath).toBe(repoPath);
+    expect(sessionHistory.sessions[0]?.entries.map((entry) => entry.kind)).toEqual([
+      "session_start",
+      "prompt",
+      "session_end",
+    ]);
+  });
+
   it("filters beat summaries by sinceHours when requested", async () => {
     const now = Date.now();
     const recentTs = new Date(now - 2 * 60 * 60 * 1000).toISOString();

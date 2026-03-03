@@ -1,6 +1,6 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, realpath, stat } from "node:fs/promises";
 import type { Dirent } from "node:fs";
-import { join } from "node:path";
+import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { gunzip as gunzipCallback } from "node:zlib";
 import { promisify } from "node:util";
 import { naturalCompare } from "@/lib/beat-sort";
@@ -16,6 +16,8 @@ import type {
 const gunzip = promisify(gunzipCallback);
 const MAX_LINE_CHARS = 120_000;
 const DEV_LOG_DIRNAME = ".foolery-logs";
+const DOT_GIT = ".git";
+const GITDIR_PREFIX = "gitdir:";
 
 interface AgentHistoryQuery {
   repoPath?: string;
@@ -75,6 +77,131 @@ function devLogRootForRepoPath(repoPath: string): string | null {
   const trimmed = repoPath.trim();
   if (!trimmed) return null;
   return join(trimmed, DEV_LOG_DIRNAME);
+}
+
+function trimPathSeparators(value: string): string {
+  return value.replace(/[\\/]+$/u, "");
+}
+
+function pathsSharePrefix(a: string, b: string): boolean {
+  return (
+    a === b ||
+    b.startsWith(`${a}/`) ||
+    b.startsWith(`${a}\\`) ||
+    a.startsWith(`${b}/`) ||
+    a.startsWith(`${b}\\`)
+  );
+}
+
+/**
+ * Fast lexical heuristics for common worktree path layouts.
+ * Used as a fallback when paths no longer exist on disk.
+ */
+function likelySameRepoPath(a: string, b: string): boolean {
+  const left = trimPathSeparators(a);
+  const right = trimPathSeparators(b);
+  if (!left || !right) return false;
+  if (pathsSharePrefix(left, right)) return true;
+
+  const leftBase = basename(left);
+  const rightBase = basename(right);
+  const leftParent = dirname(left);
+  const rightParent = dirname(right);
+  if (leftParent === rightParent) {
+    if (rightBase.startsWith(`${leftBase}-wt-`)) return true;
+    if (leftBase.startsWith(`${rightBase}-wt-`)) return true;
+  }
+
+  return false;
+}
+
+async function resolveGitDir(repoPath: string): Promise<string | null> {
+  const dotGitPath = join(repoPath, DOT_GIT);
+  let dotGitStat;
+  try {
+    dotGitStat = await stat(dotGitPath);
+  } catch {
+    return null;
+  }
+
+  if (dotGitStat.isDirectory()) {
+    return dotGitPath;
+  }
+
+  if (!dotGitStat.isFile()) {
+    return null;
+  }
+
+  let dotGitContent: string;
+  try {
+    dotGitContent = await readFile(dotGitPath, "utf-8");
+  } catch {
+    return null;
+  }
+
+  const firstLine = dotGitContent.split(/\r?\n/u, 1)[0]?.trim() ?? "";
+  if (!firstLine.toLowerCase().startsWith(GITDIR_PREFIX)) {
+    return null;
+  }
+
+  const gitDirRaw = firstLine.slice(GITDIR_PREFIX.length).trim();
+  if (!gitDirRaw) return null;
+  return isAbsolute(gitDirRaw) ? gitDirRaw : resolve(repoPath, gitDirRaw);
+}
+
+async function resolveCommonGitDir(gitDir: string): Promise<string> {
+  const commonDirPath = join(gitDir, "commondir");
+  try {
+    const raw = (await readFile(commonDirPath, "utf-8")).trim();
+    if (!raw) return gitDir;
+    return isAbsolute(raw) ? raw : resolve(gitDir, raw);
+  } catch {
+    return gitDir;
+  }
+}
+
+async function resolveRepoIdentity(repoPath: string): Promise<string | null> {
+  const trimmed = trimPathSeparators(repoPath.trim());
+  if (!trimmed) return null;
+
+  const gitDir = await resolveGitDir(trimmed);
+  if (!gitDir) return null;
+  const commonDir = await resolveCommonGitDir(gitDir);
+  try {
+    return await realpath(commonDir);
+  } catch {
+    return trimPathSeparators(commonDir);
+  }
+}
+
+function getRepoIdentity(
+  repoPath: string,
+  cache: Map<string, Promise<string | null>>,
+): Promise<string | null> {
+  const key = trimPathSeparators(repoPath.trim());
+  const cached = cache.get(key);
+  if (cached) return cached;
+  const pending = resolveRepoIdentity(key);
+  cache.set(key, pending);
+  return pending;
+}
+
+async function repoPathsEquivalent(
+  a: string,
+  b: string,
+  cache: Map<string, Promise<string | null>>,
+): Promise<boolean> {
+  const left = trimPathSeparators(a.trim());
+  const right = trimPathSeparators(b.trim());
+  if (!left || !right) return false;
+  if (left === right) return true;
+  if (likelySameRepoPath(left, right)) return true;
+
+  const [leftIdentity, rightIdentity] = await Promise.all([
+    getRepoIdentity(left, cache),
+    getRepoIdentity(right, cache),
+  ]);
+  return Boolean(leftIdentity && rightIdentity && leftIdentity === rightIdentity);
 }
 
 function resolveHistoryLogRoots(query: AgentHistoryQuery): string[] {
@@ -146,7 +273,7 @@ function parseSession(
 ): SessionParseResult | null {
   const lines = content.split("\n");
   let start: SessionStartLine | null = null;
-  let selectedSession = false;
+  let capturesEntries = false;
   let updatedAt = "";
   let endedAt: string | undefined;
   let status: string | undefined;
@@ -185,7 +312,6 @@ function parseSession(
 
       const repoPath = typeof parsed.repoPath === "string" ? parsed.repoPath : "";
       if (!repoPath) return null;
-      if (query.repoPath && query.repoPath !== repoPath) return null;
 
       // Accept both field names: beadIds (legacy) and beatIds (current logger output)
       const rawBeadIds = Array.isArray(parsed.beadIds)
@@ -207,13 +333,9 @@ function parseSession(
       };
 
       updatedAt = newerTimestamp(updatedAt, start.ts);
-      selectedSession = Boolean(
-        query.beadId &&
-          beadIds.includes(query.beadId) &&
-          (!query.beadRepoPath || query.beadRepoPath === repoPath),
-      );
+      capturesEntries = Boolean(query.beadId && beadIds.includes(query.beadId));
 
-      if (selectedSession) {
+      if (capturesEntries) {
         entries.push({
           id: `${start.sessionId}:session_start:${lineIndex}`,
           kind: "session_start",
@@ -239,7 +361,7 @@ function parseSession(
           if (!titleHints.has(beadId)) titleHints.set(beadId, title);
         }
       }
-      if (!selectedSession || !prompt) continue;
+      if (!capturesEntries || !prompt) continue;
       const promptSource = typeof parsed.source === "string" ? parsed.source : undefined;
       entries.push({
         id: `${start.sessionId}:prompt:${lineIndex}`,
@@ -252,7 +374,7 @@ function parseSession(
     }
 
     if (kind === "response") {
-      if (!selectedSession) continue;
+      if (!capturesEntries) continue;
       const raw =
         typeof parsed.raw === "string"
           ? parsed.raw
@@ -269,7 +391,7 @@ function parseSession(
     }
 
     if (kind === "beat_state") {
-      if (!selectedSession) continue;
+      if (!capturesEntries) continue;
       const state = typeof parsed.state === "string" ? parsed.state.trim() : "";
       if (state) {
         workflowStates.add(state);
@@ -283,7 +405,7 @@ function parseSession(
       if (typeof parsed.exitCode === "number" || parsed.exitCode === null) {
         exitCode = parsed.exitCode;
       }
-      if (!selectedSession) continue;
+      if (!capturesEntries) continue;
       entries.push({
         id: `${start.sessionId}:session_end:${lineIndex}`,
         kind: "session_end",
@@ -351,6 +473,7 @@ export async function readAgentHistory(
   const beatMap = new Map<string, AgentHistoryBeatSummary>();
   const selectedSessions: AgentHistorySession[] = [];
   const seenSessions = new Set<string>();
+  const repoIdentityCache = new Map<string, Promise<string | null>>();
   const sinceHours =
     typeof query.sinceHours === "number" && Number.isFinite(query.sinceHours)
       ? query.sinceHours
@@ -368,14 +491,21 @@ export async function readAgentHistory(
     if (!parsed) continue;
 
     const { start, updatedAt, endedAt, status, exitCode, entries, titleHints, workflowStates } = parsed;
-    const sessionKey = `${start.repoPath}::${start.sessionId}::${start.ts}`;
+    let effectiveRepoPath = start.repoPath;
+    if (query.repoPath) {
+      const matchesRepo = await repoPathsEquivalent(query.repoPath, start.repoPath, repoIdentityCache);
+      if (!matchesRepo) continue;
+      effectiveRepoPath = query.repoPath;
+    }
+
+    const sessionKey = `${effectiveRepoPath}::${start.sessionId}::${start.ts}`;
     if (seenSessions.has(sessionKey)) {
       continue;
     }
     seenSessions.add(sessionKey);
 
     for (const beadId of start.beadIds) {
-      const key = beadKey(start.repoPath, beadId);
+      const key = beadKey(effectiveRepoPath, beadId);
       const existing = beatMap.get(key);
       if (existing) {
         existing.lastWorkedAt = newerTimestamp(existing.lastWorkedAt, updatedAt);
@@ -390,7 +520,7 @@ export async function readAgentHistory(
       } else {
         beatMap.set(key, {
           beadId,
-          repoPath: start.repoPath,
+          repoPath: effectiveRepoPath,
           title: titleHints.get(beadId),
           lastWorkedAt: updatedAt,
           sessionCount: 1,
@@ -402,17 +532,21 @@ export async function readAgentHistory(
       }
     }
 
-    const isSelected = Boolean(
-      query.beadId &&
-        start.beadIds.includes(query.beadId) &&
-        (!query.beadRepoPath || query.beadRepoPath === start.repoPath),
-    );
+    let selectedRepoMatches = true;
+    if (query.beadRepoPath) {
+      selectedRepoMatches = await repoPathsEquivalent(
+        query.beadRepoPath,
+        start.repoPath,
+        repoIdentityCache,
+      );
+    }
+    const isSelected = Boolean(query.beadId && start.beadIds.includes(query.beadId) && selectedRepoMatches);
 
     if (isSelected) {
       selectedSessions.push({
         sessionId: start.sessionId,
         interactionType: start.interactionType,
-        repoPath: start.repoPath,
+        repoPath: effectiveRepoPath,
         beadIds: start.beadIds,
         startedAt: start.ts,
         updatedAt,
