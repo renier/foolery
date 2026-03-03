@@ -20,6 +20,11 @@ import {
   type TerminalFailureGuidance,
 } from "@/lib/terminal-failure";
 import { splitTerminalTabBeatId } from "@/lib/terminal-tab-id";
+import {
+  createCompletionAnimationTracker,
+  pruneCompletionAnimationTracker,
+  shouldAnimateCompletion,
+} from "@/lib/terminal-tab-completion";
 import type { Terminal as XtermTerminal } from "@xterm/xterm";
 import type { FitAddon as XtermFitAddon } from "@xterm/addon-fit";
 import { toast } from "sonner";
@@ -146,6 +151,7 @@ export function TerminalPanel() {
   const fitRef = useRef<XtermFitAddon | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const autoCloseTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const completionAnimationTracker = useRef(createCompletionAnimationTracker());
   const recentOutputBySession = useRef<Map<string, string>>(new Map());
   const failureHintBySession = useRef<Map<string, TerminalFailureGuidance>>(new Map());
   const hasRehydrated = useRef(false);
@@ -199,13 +205,20 @@ export function TerminalPanel() {
 
   // Auto-close tabs after process completion
   useEffect(() => {
+    const activeSessionIds = new Set(terminals.map((terminal) => terminal.sessionId));
+
     for (const terminal of terminals) {
       // Keep errored tabs open so users can inspect what failed.
       const isDone = terminal.status === "completed";
       const alreadyPending = pendingClose.has(terminal.sessionId);
       const hasTimer = autoCloseTimers.current.has(terminal.sessionId);
+      const shouldPulseCompletion = shouldAnimateCompletion(
+        completionAnimationTracker.current,
+        terminal.sessionId,
+        terminal.status,
+      );
 
-      if (isDone && !alreadyPending && !hasTimer) {
+      if (shouldPulseCompletion && !alreadyPending && !hasTimer) {
         markPendingClose(terminal.sessionId);
         const timer = setTimeout(() => {
           autoCloseTimers.current.delete(terminal.sessionId);
@@ -229,15 +242,19 @@ export function TerminalPanel() {
 
     // Clean up timers for removed terminals
     for (const [sessionId, timer] of autoCloseTimers.current) {
-      if (!terminals.some((t) => t.sessionId === sessionId)) {
+      if (!activeSessionIds.has(sessionId)) {
         clearTimeout(timer);
         autoCloseTimers.current.delete(sessionId);
       }
     }
+    pruneCompletionAnimationTracker(
+      completionAnimationTracker.current,
+      activeSessionIds,
+    );
 
     // Clean up per-session output/error hints for removed terminals.
     for (const sessionId of recentOutputBySession.current.keys()) {
-      if (!terminals.some((t) => t.sessionId === sessionId)) {
+      if (!activeSessionIds.has(sessionId)) {
         recentOutputBySession.current.delete(sessionId);
         failureHintBySession.current.delete(sessionId);
       }
@@ -247,6 +264,7 @@ export function TerminalPanel() {
   // Cleanup all timers on unmount
   useEffect(() => {
     const timers = autoCloseTimers.current;
+    const completionTracker = completionAnimationTracker.current;
     const outputs = recentOutputBySession.current;
     const hints = failureHintBySession.current;
 
@@ -255,6 +273,8 @@ export function TerminalPanel() {
         clearTimeout(timer);
       }
       timers.clear();
+      completionTracker.seenSessionIds.clear();
+      completionTracker.previousStatusBySession.clear();
       outputs.clear();
       hints.clear();
     };
