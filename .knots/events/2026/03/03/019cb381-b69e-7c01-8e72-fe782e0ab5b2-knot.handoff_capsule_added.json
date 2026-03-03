@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb381-b69e-7c01-8e72-fe782e0ab5b2",
+  "occurred_at": "2026-03-03T11:42:28.510818Z",
+  "knot_id": "foolery-4a52",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Landed on main: child/descendant beats inherit Rolling... from rolling ancestors; action column suppresses Take/Stop for inherited rolling rows; Shift+S/V/F are blocked for inherited rolling; start-session handler now blocks launching beats under rolling ancestors and lightbox header shows Rolling... instead of Take!. Gates: lint OK (warnings only), tsc OK, test OK, build still fails with pre-existing Next prerender/key issues on /_global-error and /beads.",
+    "datetime": "2026-03-03T11:42:28.510818Z",
+    "entry_id": "019cb381-b69e-7c01-8e72-fe67422b52b9",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

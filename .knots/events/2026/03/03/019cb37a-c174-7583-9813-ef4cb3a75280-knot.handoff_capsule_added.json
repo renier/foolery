@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb37a-c174-7583-9813-ef4cb3a75280",
+  "occurred_at": "2026-03-03T11:34:52.53224Z",
+  "knot_id": "foolery-6fbb",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Removed remaining legacy default-agent wording tied to the deleted settings.agent behavior (runtime comments/helper naming, verification schema text, setup wizard logs, and settings fallback test titles). Verified lint, tsc, unit tests, and production build; commit c270b6e is pushed on origin/main.",
+    "datetime": "2026-03-03T11:34:52.53224Z",
+    "entry_id": "019cb37a-c174-7583-9813-ef33ab9993c7",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

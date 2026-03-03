@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb383-d004-7eb1-bc41-11d6598d1911",
+  "occurred_at": "2026-03-03T11:44:46.084082Z",
+  "knot_id": "foolery-f646",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added explicit terminal subtitle agent version rendering by threading agentVersion through registered-agent schema/types, session payload/store, and displaying name/model/version in AgentInfoBar with model-derived fallback.",
+    "datetime": "2026-03-03T11:44:46.084082Z",
+    "entry_id": "019cb383-d004-7eb1-bc41-11c7cf3ed98e",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

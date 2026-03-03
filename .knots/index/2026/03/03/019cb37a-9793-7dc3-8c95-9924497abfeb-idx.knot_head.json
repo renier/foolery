@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb37a-9793-7dc3-8c95-9924497abfeb",
+  "occurred_at": "2026-03-03T11:34:41.811928Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-4a52",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment",
+    "terminal": false,
+    "title": "child beats should be \"rolling\" when parent is rolling",
+    "updated_at": "2026-03-03T11:34:41.811928Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb379-d063-7bb0-9e2d-44a8abd1245c"
+  }
+}
