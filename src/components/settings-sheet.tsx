@@ -16,7 +16,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SettingsAgentsSection } from "@/components/settings-agents-section";
 import { SettingsReposSection } from "@/components/settings-repos-section";
-import { SettingsVerificationSection } from "@/components/settings-verification-section";
 import { SettingsDefaultsSection } from "@/components/settings-defaults-section";
 import { SettingsOpenRouterSection } from "@/components/settings-openrouter-section";
 import { SettingsDispatchSection } from "@/components/settings-dispatch-section";
@@ -182,6 +181,7 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
                   actions={settings.actions}
                   pools={settings.pools}
                   agents={settings.agents}
+                  verification={settings.verification}
                   onDispatchModeChange={(dispatchMode) =>
                     setSettings((prev) => ({ ...prev, dispatchMode }))
                   }
@@ -191,14 +191,6 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
                   onPoolsChange={(pools) =>
                     setSettings((prev) => ({ ...prev, pools }))
                   }
-                />
-
-                <Separator />
-
-                {/* Section 3: Auto-Verification */}
-                <SettingsVerificationSection
-                  verification={settings.verification}
-                  agents={settings.agents}
                   onVerificationChange={(verification) =>
                     setSettings((prev) => ({ ...prev, verification }))
                   }

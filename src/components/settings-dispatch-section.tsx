@@ -5,12 +5,14 @@ import { Zap, Users } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SettingsActionsSection } from "@/components/settings-actions-section";
 import { SettingsPoolsSection } from "@/components/settings-pools-section";
+import { SettingsVerificationSection } from "@/components/settings-verification-section";
 import { patchSettings } from "@/lib/settings-api";
 import type { RegisteredAgent } from "@/lib/types";
 import type {
   ActionAgentMappings,
   PoolsSettings,
   DispatchMode,
+  VerificationSettings,
 } from "@/lib/schemas";
 
 interface DispatchSectionProps {
@@ -18,9 +20,11 @@ interface DispatchSectionProps {
   actions: ActionAgentMappings;
   pools: PoolsSettings;
   agents: Record<string, RegisteredAgent>;
+  verification: VerificationSettings;
   onDispatchModeChange: (mode: DispatchMode) => void;
   onActionsChange: (actions: ActionAgentMappings) => void;
   onPoolsChange: (pools: PoolsSettings) => void;
+  onVerificationChange: (verification: VerificationSettings) => void;
 }
 
 export function SettingsDispatchSection({
@@ -28,9 +32,11 @@ export function SettingsDispatchSection({
   actions,
   pools,
   agents,
+  verification,
   onDispatchModeChange,
   onActionsChange,
   onPoolsChange,
+  onVerificationChange,
 }: DispatchSectionProps) {
   async function handleModeChange(mode: string) {
     const newMode = mode as DispatchMode;
@@ -72,11 +78,18 @@ export function SettingsDispatchSection({
       </p>
 
       {dispatchMode === "actions" ? (
-        <SettingsActionsSection
-          actions={actions}
-          agents={agents}
-          onActionsChange={onActionsChange}
-        />
+        <>
+          <SettingsActionsSection
+            actions={actions}
+            agents={agents}
+            onActionsChange={onActionsChange}
+          />
+          <SettingsVerificationSection
+            verification={verification}
+            agents={agents}
+            onVerificationChange={onVerificationChange}
+          />
+        </>
       ) : (
         <SettingsPoolsSection
           pools={pools}
