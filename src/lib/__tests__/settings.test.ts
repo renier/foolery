@@ -4,11 +4,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockReadFile = vi.fn();
 const mockWriteFile = vi.fn();
 const mockMkdir = vi.fn();
+const mockChmod = vi.fn();
 
 vi.mock("node:fs/promises", () => ({
   readFile: (...args: unknown[]) => mockReadFile(...args),
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
+  chmod: (...args: unknown[]) => mockChmod(...args),
 }));
 
 import {
@@ -61,6 +63,7 @@ beforeEach(() => {
   _resetCache();
   mockMkdir.mockResolvedValue(undefined);
   mockWriteFile.mockResolvedValue(undefined);
+  mockChmod.mockResolvedValue(undefined);
 });
 
 describe("loadSettings", () => {
@@ -119,6 +122,10 @@ describe("backfillMissingSettingsDefaults", () => {
     const written = mockWriteFile.mock.calls[0][1] as string;
     expect(written).toContain("[verification]");
     expect(written).toContain('enabled = false');
+    expect(mockChmod).toHaveBeenCalledWith(
+      expect.stringContaining("settings.toml"),
+      0o600,
+    );
   });
 
   it("writes missing defaults without clobbering existing values", async () => {
@@ -189,6 +196,25 @@ describe("saveSettings", () => {
 
     const written = mockWriteFile.mock.calls[0][1] as string;
     expect(written).toContain("my-agent");
+  });
+
+  it("sets file permissions to 0600 after writing", async () => {
+    const settings = {
+      agent: { command: "my-agent" },
+      agents: {},
+      actions: DEFAULT_ACTIONS,
+      verification: { enabled: false, agent: "", maxRetries: 3 },
+      backend: { type: "auto" as const },
+      defaults: { profileId: "" },
+      openrouter: { apiKey: "", enabled: false, model: "" },
+      pools: DEFAULT_POOLS,
+      dispatchMode: "actions" as const,
+    };
+    await saveSettings(settings);
+    expect(mockChmod).toHaveBeenCalledWith(
+      expect.stringContaining("settings.toml"),
+      0o600,
+    );
   });
 });
 

@@ -1,5 +1,5 @@
 import { parse, stringify } from "smol-toml";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, chmod } from "node:fs/promises";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -186,6 +186,7 @@ export async function backfillMissingSettingsDefaults(): Promise<SettingsDefault
   if (!result.error && (result.fileMissing || result.missingPaths.length > 0)) {
     await mkdir(CONFIG_DIR, { recursive: true });
     await writeFile(SETTINGS_FILE, stringify(result.merged), "utf-8");
+    await chmod(SETTINGS_FILE, 0o600);
     changed = true;
   }
 
@@ -223,6 +224,7 @@ export async function saveSettings(
   await mkdir(CONFIG_DIR, { recursive: true });
   const toml = stringify(settings);
   await writeFile(SETTINGS_FILE, toml, "utf-8");
+  await chmod(SETTINGS_FILE, 0o600);
   cached = { value: settings, loadedAt: Date.now() };
 }
 
