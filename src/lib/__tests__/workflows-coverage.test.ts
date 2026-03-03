@@ -310,6 +310,15 @@ describe("normalizeStateForWorkflow", () => {
     expect(normalizeStateForWorkflow("done", workflow)).toBe("shipped");
     expect(normalizeStateForWorkflow("approved", workflow)).toBe("shipped");
   });
+  it("preserves explicit shipped/abandoned states even when omitted from workflow states", () => {
+    const limitedWorkflow: MemoryWorkflowDescriptor = {
+      ...workflow,
+      states: workflow.states.filter((state) => state !== "shipped" && state !== "abandoned"),
+      terminalStates: ["shipped"],
+    };
+    expect(normalizeStateForWorkflow("shipped", limitedWorkflow)).toBe("shipped");
+    expect(normalizeStateForWorkflow("abandoned", limitedWorkflow)).toBe("abandoned");
+  });
   it("remaps deferred state", () => {
     expect(normalizeStateForWorkflow("deferred", workflow)).toBe("deferred");
   });

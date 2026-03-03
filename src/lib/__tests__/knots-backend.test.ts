@@ -364,6 +364,33 @@ describe("KnotsBackend mapping behaviour", () => {
     expect((fetched.data?.metadata as Record<string, unknown>)?.knotsState).toBe("shipped");
   });
 
+  it("preserves abandoned state when profile metadata omits it", async () => {
+    const now = nowIso();
+    store.knots.set("abandon-1", {
+      id: "abandon-1",
+      title: "Abandoned knot",
+      state: "abandoned",
+      profile_id: "autopilot",
+      workflow_id: "autopilot",
+      updated_at: now,
+      body: null,
+      description: null,
+      priority: 2,
+      type: "task",
+      tags: [],
+      notes: [],
+      handoff_capsules: [],
+      workflow_etag: "etag-abandon-1",
+      created_at: now,
+    });
+
+    const listed = await new KnotsBackend("/repo").list();
+    expect(listed.ok).toBe(true);
+    const beat = listed.data?.find((item) => item.id === "abandon-1");
+    expect(beat?.state).toBe("abandoned");
+    expect(beat?.metadata?.knotsState).toBe("abandoned");
+  });
+
   it("maps addDependency blocker->blocked to blocked_by edge with reversed src/dst", async () => {
     const backend = new KnotsBackend("/repo");
     const blocker = await backend.create({
@@ -665,6 +692,36 @@ describe("KnotsBackend mapping behaviour", () => {
       expect(lastUpdateArgs?.[1]).toMatchObject({
         status: "ready_for_implementation",
         force: true,
+      });
+    });
+
+    it("keeps explicit abandoned transitions instead of remapping to initial state", async () => {
+      const backend = new KnotsBackend("/repo");
+      const now = nowIso();
+      store.knots.set("stuck-3", {
+        id: "stuck-3",
+        title: "Abandon me",
+        state: "ready_for_implementation",
+        profile_id: "autopilot",
+        workflow_id: "autopilot",
+        updated_at: now,
+        body: null,
+        description: null,
+        priority: 2,
+        type: "task",
+        tags: [],
+        notes: [],
+        handoff_capsules: [],
+        workflow_etag: "etag-stuck3",
+        created_at: now,
+      });
+
+      const result = await backend.update("stuck-3", { state: "abandoned" });
+      expect(result.ok).toBe(true);
+
+      const lastUpdateArgs = mockUpdateKnot.mock.calls.at(-1);
+      expect(lastUpdateArgs?.[1]).toMatchObject({
+        status: "abandoned",
       });
     });
   });

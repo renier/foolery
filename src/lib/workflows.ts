@@ -481,6 +481,12 @@ function remapLegacyStateForProfile(
   if (!normalized) return workflow.initialState;
   if (workflow.states.includes(normalized)) return normalized;
 
+  // Preserve explicit terminal states even when older profile definitions
+  // omit them from `states`.
+  if (normalized === "shipped" || normalized === "abandoned") {
+    return normalized;
+  }
+
   if (normalized === "open" || normalized === "idea" || normalized === "work_item") {
     return workflow.initialState;
   }
@@ -786,4 +792,3 @@ export const beadsCoarseWorkflowDescriptor = defaultWorkflowDescriptor;
 export const deriveBeadsProfileId = deriveProfileId;
 /** @deprecated Use deriveWorkflowState */
 export const deriveBeadsWorkflowState = deriveWorkflowState;
-
