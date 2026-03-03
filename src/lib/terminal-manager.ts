@@ -24,16 +24,17 @@ import type { TerminalSession, TerminalEvent } from "@/lib/types";
 import { ORCHESTRATION_WAVE_LABEL } from "@/lib/wave-slugs";
 import { onAgentComplete } from "@/lib/verification-orchestrator";
 import { updateMessageTypeIndexFromSession } from "@/lib/agent-message-type-index";
-import type { Beat, MemoryWorkflowDescriptor } from "@/lib/types";
+import type { Beat, MemoryWorkflowDescriptor, RegisteredAgent } from "@/lib/types";
 import {
   defaultWorkflowDescriptor,
   isQueueOrTerminal,
   isReviewStep,
+  priorActionStep,
   resolveStep,
   rollbackActivePhase,
   workflowDescriptorById,
 } from "@/lib/workflows";
-import { recordStepAgent } from "@/lib/agent-pool";
+import { recordStepAgent, resolvePoolAgent, getLastStepAgent } from "@/lib/agent-pool";
 
 interface SessionEntry {
   session: TerminalSession;
@@ -650,7 +651,7 @@ export async function createSession(
     ].filter(Boolean).join("\n");
   };
 
-  const buildNextTakePrompt = async (): Promise<{ prompt: string; beatState: string } | null> => {
+  const buildNextTakePrompt = async (): Promise<{ prompt: string; beatState: string; agentOverride?: RegisteredAgent } | null> => {
     const tag = `[terminal-manager] [${id}] [take-loop]`;
 
     // Fetch the beat's current state to decide whether to continue.
@@ -701,31 +702,35 @@ export async function createSession(
       return null;
     }
 
-    // Cross-agent review: stop the take loop when transitioning to a review
-    // step and a different agent is available in the pool, so a fresh take
-    // can select the alternative agent instead of reusing this one.
-    if (isReviewStep(resolved.step) && agent.agentId) {
+    // Cross-agent review: select a different agent from the pool for review
+    // steps instead of reusing the action agent. Falls back to the session
+    // agent when no alternative is available (or pools not configured).
+    let reviewAgentOverride: RegisteredAgent | undefined;
+    if (isReviewStep(resolved.step)) {
       try {
         const settings = await loadSettings();
         if (settings.dispatchMode === "pools") {
-          const pool = settings.pools[resolved.step] ?? [];
-          const alternatives = pool.filter(
-            (e) =>
-              e.weight > 0 &&
-              settings.agents[e.agentId] &&
-              e.agentId !== agent.agentId,
+          const actionStep = priorActionStep(resolved.step);
+          const excludeId = agent.agentId
+            ?? (actionStep ? getLastStepAgent(beatId, actionStep) : undefined);
+
+          const poolAgent = resolvePoolAgent(
+            resolved.step,
+            settings.pools,
+            settings.agents,
+            excludeId,
           );
-          if (alternatives.length > 0) {
+
+          if (poolAgent) {
+            reviewAgentOverride = poolAgent;
+            if (poolAgent.agentId) {
+              recordStepAgent(beatId, resolved.step, poolAgent.agentId);
+            }
             console.log(
-              `${tag} STOP: cross-agent review — step "${resolved.step}" has alternative agents` +
-              ` (current: ${agent.agentId}, alternatives: ${alternatives.map((e) => e.agentId).join(", ")})`,
+              `${tag} cross-agent review: step="${resolved.step}" ` +
+              `selected="${poolAgent.agentId ?? poolAgent.command}" ` +
+              `(excluded: ${excludeId ?? "none"})`,
             );
-            pushEvent({
-              type: "stdout",
-              data: `\x1b[33m--- Take loop stopped: cross-agent review for "${resolved.step}" (deferring to alternative agent) ---\x1b[0m\n`,
-              timestamp: Date.now(),
-            });
-            return null;
           }
         }
       } catch {
@@ -734,10 +739,11 @@ export async function createSession(
     }
 
     // Claim the same beat into its next workflow state.
+    const claimAgent = reviewAgentOverride ?? agent;
     console.log(`${tag} claiming ${beatId} from state=${current.state}`);
     const takeResult = await getBackend().buildTakePrompt(
       beatId,
-      { agentName: agent.label || agent.command, agentModel: agent.model },
+      { agentName: claimAgent.label || claimAgent.command, agentModel: claimAgent.model },
       repoPath,
     );
     if (!takeResult.ok || !takeResult.data) {
@@ -757,7 +763,7 @@ export async function createSession(
       timestamp: Date.now(),
     });
 
-    return { prompt: wrapSingleBeatPrompt(takeResult.data.prompt), beatState: current.state };
+    return { prompt: wrapSingleBeatPrompt(takeResult.data.prompt), beatState: current.state, agentOverride: reviewAgentOverride };
   };
 
   /**
@@ -843,17 +849,41 @@ export async function createSession(
   };
 
   /** Spawn a fresh agent child process for a take-loop iteration. */
-  const spawnTakeChild = (takePrompt: string, beatState?: string): void => {
-    const takeChild = spawn(agentCmd, args, {
+  const spawnTakeChild = (takePrompt: string, beatState?: string, agentOverride?: RegisteredAgent): void => {
+    // Resolve effective agent for this iteration
+    const effectiveAgent = agentOverride ?? agent;
+    const effectiveDialect = resolveDialect(effectiveAgent.command);
+    const effectiveIsInteractive = effectiveDialect === "claude";
+
+    let effectiveCmd: string;
+    let effectiveArgs: string[];
+    if (effectiveIsInteractive) {
+      effectiveCmd = effectiveAgent.command;
+      effectiveArgs = [
+        "-p",
+        "--input-format", "stream-json",
+        "--verbose",
+        "--output-format", "stream-json",
+        "--dangerously-skip-permissions",
+      ];
+      if (effectiveAgent.model) effectiveArgs.push("--model", effectiveAgent.model);
+    } else {
+      const built = buildPromptModeArgs(effectiveAgent, takePrompt);
+      effectiveCmd = built.command;
+      effectiveArgs = built.args;
+    }
+    const effectiveNormalizeEvent = createLineNormalizer(effectiveDialect);
+
+    const takeChild = spawn(effectiveCmd, effectiveArgs, {
       cwd,
       env: { ...process.env },
-      stdio: [isInteractive ? "pipe" : "ignore", "pipe", "pipe"],
+      stdio: [effectiveIsInteractive ? "pipe" : "ignore", "pipe", "pipe"],
     });
     entry.process = takeChild;
 
     console.log(`[terminal-manager] [${id}] [take-loop] iteration ${takeIteration}: pid=${takeChild.pid ?? "failed"} beat=${beatId} beat_state=${beatState ?? "unknown"}`);
 
-    let takeStdinClosed = !isInteractive;
+    let takeStdinClosed = !effectiveIsInteractive;
     let takeLineBuffer = "";
     let takeCloseInputTimer: NodeJS.Timeout | null = null;
     const takeAutoAnsweredIds = new Set<string>();
@@ -925,7 +955,7 @@ export async function createSession(
         interactionLog.logResponse(line);
         try {
           const raw = JSON.parse(line) as Record<string, unknown>;
-          const obj = (normalizeEvent(raw) ?? raw) as Record<string, unknown>;
+          const obj = (effectiveNormalizeEvent(raw) ?? raw) as Record<string, unknown>;
           takeAutoAnswerAskUser(obj);
           if (obj.type === "result") {
             takeScheduleInputClose();
@@ -1012,12 +1042,15 @@ export async function createSession(
           const nextTake = await buildNextTakePrompt();
           if (nextTake) {
             takeIteration++;
+            const switchLabel = nextTake.agentOverride
+              ? ` [agent: ${nextTake.agentOverride.label ?? nextTake.agentOverride.agentId ?? nextTake.agentOverride.command}]`
+              : "";
             pushEvent({
               type: "stdout",
-              data: `\n\x1b[36m--- Take ${takeIteration}/${MAX_TAKE_ITERATIONS} ---\x1b[0m\n`,
+              data: `\n\x1b[36m--- Take ${takeIteration}/${MAX_TAKE_ITERATIONS}${switchLabel} ---\x1b[0m\n`,
               timestamp: Date.now(),
             });
-            spawnTakeChild(nextTake.prompt, nextTake.beatState);
+            spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
             return;
           }
           console.log(`${tag} buildNextTakePrompt returned null — ending session`);
@@ -1344,13 +1377,16 @@ export async function createSession(
           const nextTake = await buildNextTakePrompt();
           if (nextTake) {
             takeIteration++;
+            const switchLabel = nextTake.agentOverride
+              ? ` [agent: ${nextTake.agentOverride.label ?? nextTake.agentOverride.agentId ?? nextTake.agentOverride.command}]`
+              : "";
             pushEvent({
               type: "stdout",
-              data: `\n\x1b[36m--- Take ${takeIteration}/${MAX_TAKE_ITERATIONS} ---\x1b[0m\n`,
+              data: `\n\x1b[36m--- Take ${takeIteration}/${MAX_TAKE_ITERATIONS}${switchLabel} ---\x1b[0m\n`,
               timestamp: Date.now(),
             });
             console.log(`${tag} starting iteration ${takeIteration}/${MAX_TAKE_ITERATIONS}`);
-            spawnTakeChild(nextTake.prompt, nextTake.beatState);
+            spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
             return;
           }
           console.log(`${tag} buildNextTakePrompt returned null — ending session`);
