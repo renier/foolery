@@ -31,6 +31,7 @@ interface BeatDetailLightboxProps {
   onOpenChange: (open: boolean) => void;
   onMoved: (newId: string, targetRepo: string) => void;
   onShipBeat?: (beat: Beat) => void;
+  isParentRollingBeat?: (beat: Beat) => boolean;
 }
 
 export function BeatDetailLightbox({
@@ -41,6 +42,7 @@ export function BeatDetailLightbox({
   onOpenChange,
   onMoved,
   onShipBeat,
+  isParentRollingBeat,
 }: BeatDetailLightboxProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -205,6 +207,7 @@ export function BeatDetailLightbox({
           handleUpdate={handleUpdate}
           handleBreakdown={handleBreakdown}
           onShipBeat={onShipBeat}
+          isParentRollingBeat={isParentRollingBeat}
           repo={repo}
           onMoved={onMoved}
         />
@@ -240,6 +243,7 @@ interface LightboxHeaderProps {
   handleUpdate: (fields: UpdateBeatInput) => Promise<void>;
   handleBreakdown: () => void;
   onShipBeat?: (beat: Beat) => void;
+  isParentRollingBeat?: (beat: Beat) => boolean;
   repo?: string;
   onMoved: (newId: string, targetRepo: string) => void;
 }
@@ -254,9 +258,12 @@ function LightboxHeader({
   handleUpdate,
   handleBreakdown,
   onShipBeat,
+  isParentRollingBeat,
   repo,
   onMoved,
 }: LightboxHeaderProps) {
+  const isInheritedRolling = beat ? (isParentRollingBeat?.(beat) ?? false) : false;
+
   return (
     <DialogHeader className="border-b border-border/70 px-3 py-2 space-y-1.5">
       <div className="flex items-start justify-between gap-2">
@@ -317,16 +324,22 @@ function LightboxHeader({
       </div>
       {beat && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <Button
-            variant="outline"
-            size="xs"
-            title="Take! -- start a session for this beat"
-            disabled={beat.state !== "open" || !onShipBeat || beat.isAgentClaimable === false}
-            onClick={() => onShipBeat?.(beat)}
-          >
-            <Clapperboard className="size-3" />
-            Take!
-          </Button>
+          {isInheritedRolling ? (
+            <span className="text-xs font-semibold text-green-700 animate-pulse">
+              Rolling...
+            </span>
+          ) : (
+            <Button
+              variant="outline"
+              size="xs"
+              title="Take! -- start a session for this beat"
+              disabled={beat.state !== "open" || !onShipBeat || beat.isAgentClaimable === false}
+              onClick={() => onShipBeat?.(beat)}
+            >
+              <Clapperboard className="size-3" />
+              Take!
+            </Button>
+          )}
           <Button
             variant="outline"
             size="xs"

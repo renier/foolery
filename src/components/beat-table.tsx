@@ -509,14 +509,32 @@ export function BeatTable({
     return collapsed;
   }, [hierarchyData, expandedIds]);
 
-  // Beats whose parent is currently rolling — they inherit rolling visual state
+  // Beats whose parent/ancestor is currently rolling — they inherit rolling visual state.
   const parentRollingBeatIds = useMemo(() => {
-    const ids = new Set<string>();
+    const childrenByParent = new Map<string, string[]>();
     for (const beat of data) {
-      if (beat.parent && shippingByBeatId[beat.parent]) {
-        ids.add(beat.id);
+      if (!beat.parent) continue;
+      const children = childrenByParent.get(beat.parent) ?? [];
+      children.push(beat.id);
+      childrenByParent.set(beat.parent, children);
+    }
+
+    const ids = new Set<string>();
+    const stack = Object.keys(shippingByBeatId).filter((beatId) => Boolean(shippingByBeatId[beatId]));
+
+    while (stack.length > 0) {
+      const parentId = stack.pop();
+      if (!parentId) continue;
+      const children = childrenByParent.get(parentId);
+      if (!children) continue;
+
+      for (const childId of children) {
+        if (ids.has(childId)) continue;
+        ids.add(childId);
+        stack.push(childId);
       }
     }
+
     return ids;
   }, [data, shippingByBeatId]);
 
@@ -619,6 +637,7 @@ export function BeatTable({
     initiateClose,
     onShipBeat,
     shippingByBeatId,
+    parentRollingBeatIds,
     hotkeyHelpOpen,
     setHotkeyHelpOpen,
     setNotesBeat,
@@ -892,6 +911,7 @@ function useBeatTableKeyboard({
   initiateClose,
   onShipBeat,
   shippingByBeatId,
+  parentRollingBeatIds,
   hotkeyHelpOpen,
   setHotkeyHelpOpen,
   setNotesBeat,
@@ -910,6 +930,7 @@ function useBeatTableKeyboard({
   initiateClose: (id: string) => void;
   onShipBeat?: (beat: Beat) => void;
   shippingByBeatId: Record<string, string>;
+  parentRollingBeatIds: Set<string>;
   hotkeyHelpOpen: boolean;
   setHotkeyHelpOpen: (fn: (prev: boolean) => boolean) => void;
   setNotesBeat: (beat: Beat | null) => void;
@@ -941,13 +962,13 @@ function useBeatTableKeyboard({
       if (handleSpaceSelect(e, rows, currentIndex, setFocusedRowId)) return;
       handleActionKeys(e, rows, currentIndex, {
         setFocusedRowId, handleUpdateBeat, initiateClose,
-        onShipBeat, shippingByBeatId, setNotesBeat, setNotesDialogOpen, setNotesRejectionMode,
+        onShipBeat, shippingByBeatId, parentRollingBeatIds, setNotesBeat, setNotesDialogOpen, setNotesRejectionMode,
         activeRepo, registeredRepos, updateUrl, setExpandedIds,
       });
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [focusedRowId, table, handleUpdateBeat, initiateClose, onShipBeat, shippingByBeatId, hotkeyHelpOpen, activeRepo, registeredRepos, updateUrl, tableContainerRef, setHotkeyHelpOpen, setNotesBeat, setNotesDialogOpen, setNotesRejectionMode, setExpandedIds, setFocusedRowId]);
+  }, [focusedRowId, table, handleUpdateBeat, initiateClose, onShipBeat, shippingByBeatId, parentRollingBeatIds, hotkeyHelpOpen, activeRepo, registeredRepos, updateUrl, tableContainerRef, setHotkeyHelpOpen, setNotesBeat, setNotesDialogOpen, setNotesRejectionMode, setExpandedIds, setFocusedRowId]);
 }
 
 /* --- Keyboard helper functions ------------------------------------------- */
@@ -1054,6 +1075,7 @@ function handleActionKeys(
     initiateClose: (id: string) => void;
     onShipBeat?: (beat: Beat) => void;
     shippingByBeatId: Record<string, string>;
+    parentRollingBeatIds: Set<string>;
     setNotesBeat: (beat: Beat | null) => void;
     setNotesDialogOpen: (open: boolean) => void;
     setNotesRejectionMode: (mode: boolean) => void;
@@ -1066,7 +1088,8 @@ function handleActionKeys(
   if (e.key === "V" && e.shiftKey) {
     if (currentIndex < 0) return;
     const beat = rows[currentIndex].original;
-    if (beat.parent && ctx.shippingByBeatId[beat.parent]) return;
+    const isInheritedRolling = ctx.parentRollingBeatIds.has(beat.id) || Boolean(beat.parent && ctx.shippingByBeatId[beat.parent]);
+    if (isInheritedRolling) return;
     if (beat.state === "shipped" || beat.state === "closed") return;
     e.preventDefault();
     ctx.handleUpdateBeat({ id: beat.id, fields: verifyBeatFields() });
@@ -1077,7 +1100,8 @@ function handleActionKeys(
   } else if (e.key === "F" && e.shiftKey) {
     if (currentIndex < 0) return;
     const beat = rows[currentIndex].original;
-    if (beat.parent && ctx.shippingByBeatId[beat.parent]) return;
+    const isInheritedRolling = ctx.parentRollingBeatIds.has(beat.id) || Boolean(beat.parent && ctx.shippingByBeatId[beat.parent]);
+    if (isInheritedRolling) return;
     if (!isVerificationState(beat)) return;
     e.preventDefault();
     ctx.setNotesBeat(beat);
@@ -1087,8 +1111,9 @@ function handleActionKeys(
     if (!ctx.onShipBeat || currentIndex < 0) return;
     const beat = rows[currentIndex].original;
     if (beat.state === "shipped" || beat.state === "closed" || beat.type === "gate") return;
-    // Block Take! when parent is rolling
-    if (beat.parent && ctx.shippingByBeatId[beat.parent]) return;
+    const isInheritedRolling = ctx.parentRollingBeatIds.has(beat.id) || Boolean(beat.parent && ctx.shippingByBeatId[beat.parent]);
+    // Block Take! when parent/ancestor is rolling
+    if (isInheritedRolling) return;
     e.preventDefault();
     ctx.onShipBeat(beat);
   } else if (e.key === "R" && e.shiftKey && (e.metaKey || e.ctrlKey)) {

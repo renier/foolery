@@ -101,7 +101,7 @@ export interface BeatColumnOpts {
   childCountMap?: Map<string, number>;
   /** Available workflow states for the state dropdown. */
   availableStates?: string[];
-  /** Beat IDs whose parent is currently rolling (inherited rolling state). */
+  /** Beat IDs whose parent/ancestor is currently rolling (inherited rolling state). */
   parentRollingBeatIds?: Set<string>;
 }
 

@@ -161,6 +161,26 @@ function BeadsPageInner() {
   });
 
   const beats = useMemo<Beat[]>(() => (data?.ok ? (data.data ?? []) : []), [data]);
+  const parentByBeatId = useMemo(() => {
+    const map = new Map<string, string | undefined>();
+    for (const beat of beats) map.set(beat.id, beat.parent);
+    return map;
+  }, [beats]);
+
+  const hasRollingAncestor = useCallback((beat: Pick<Beat, "id" | "parent">): boolean => {
+    let parentId = beat.parent;
+    const visited = new Set<string>();
+
+    while (parentId) {
+      if (shippingByBeatId[parentId]) return true;
+      if (visited.has(parentId)) break;
+      visited.add(parentId);
+      parentId = parentByBeatId.get(parentId);
+    }
+
+    return false;
+  }, [parentByBeatId, shippingByBeatId]);
+
   useRetryNotifications(beats);
   const partialDegradedMsg = data?.ok ? (data as { _degraded?: string })._degraded : undefined;
   const isDegradedError = queryError instanceof DegradedStoreError || Boolean(partialDegradedMsg);
@@ -221,6 +241,11 @@ function BeadsPageInner() {
         return;
       }
 
+      if (hasRollingAncestor(beat)) {
+        toast.info("Parent beat is already rolling");
+        return;
+      }
+
       const repo = (beat as unknown as Record<string, unknown>)._repoPath as string | undefined;
       const result = await startSession(beat.id, repo ?? activeRepo ?? undefined);
       if (!result.ok || !result.data) {
@@ -239,7 +264,7 @@ function BeadsPageInner() {
         startedAt: new Date().toISOString(),
       });
     },
-    [activeRepo, setActiveSession, terminals, upsertTerminal]
+    [activeRepo, hasRollingAncestor, setActiveSession, terminals, upsertTerminal]
   );
 
   const handleAbortShipping = useCallback(async (beatId: string) => {
@@ -461,6 +486,7 @@ function BeadsPageInner() {
           onOpenChange={handleBeatLightboxOpenChange}
           onMoved={handleMovedBeat}
           onShipBeat={handleShipBeat}
+          isParentRollingBeat={hasRollingAncestor}
         />
       )}
       {isListView && (
