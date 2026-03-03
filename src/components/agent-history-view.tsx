@@ -480,8 +480,16 @@ export function AgentHistoryView() {
   const consolePanelRef = useRef<HTMLDivElement | null>(null);
   const cachedBeatKeysRef = useRef<string[]>([]);
   const lastScrollDirectionRef = useRef<1 | -1>(1);
+  const autoFocusedBeatListRef = useRef(false);
 
   const loadedBeat = useMemo(() => parseBeatKey(loadedBeatKey), [loadedBeatKey]);
+
+  const focusBeatList = useCallback(() => {
+    const list = beatListRef.current;
+    if (!list) return;
+    if (document.activeElement === list) return;
+    list.focus({ preventScroll: true });
+  }, []);
 
   const beatsQuery = useQuery({
     queryKey: ["agent-history", "beats", activeRepo],
@@ -535,16 +543,18 @@ export function AgentHistoryView() {
   }, [beats, focusedBeatKey, loadedBeatKey]);
 
   /* Auto-focus the beat list when beats first become available */
-  const hadBeatsRef = useRef(false);
   useEffect(() => {
-    if (beats.length > 0 && !hadBeatsRef.current) {
-      hadBeatsRef.current = true;
-      beatListRef.current?.focus();
+    if (beats.length > 0 && !autoFocusedBeatListRef.current) {
+      autoFocusedBeatListRef.current = true;
+      const raf = requestAnimationFrame(() => {
+        focusBeatList();
+      });
+      return () => cancelAnimationFrame(raf);
     }
     if (beats.length === 0) {
-      hadBeatsRef.current = false;
+      autoFocusedBeatListRef.current = false;
     }
-  }, [beats.length]);
+  }, [beats.length, focusBeatList]);
 
   /* Keep window aligned with focused beat */
   useEffect(() => {
@@ -570,6 +580,7 @@ export function AgentHistoryView() {
   const moveFocusedBeat = useCallback(
     (direction: -1 | 1) => {
       if (beats.length === 0) return;
+      focusBeatList();
       lastScrollDirectionRef.current = direction;
       const currentIndex = focusedBeatKey
         ? beats.findIndex((beat) => beatKey(beat.beadId, beat.repoPath) === focusedBeatKey)
@@ -580,7 +591,7 @@ export function AgentHistoryView() {
           : Math.max(0, Math.min(beats.length - 1, currentIndex + direction));
       setFocusedBeatKey(beatKey(beats[nextIndex].beadId, beats[nextIndex].repoPath));
     },
-    [beats, focusedBeatKey],
+    [beats, focusedBeatKey, focusBeatList],
   );
 
   const focusedSummary = useMemo<AgentHistoryBeatSummary | null>(
@@ -821,7 +832,11 @@ export function AgentHistoryView() {
                     onClick={() => {
                       setFocusedBeatKey(key);
                       setLoadedBeatKey(key);
-                      beatListRef.current?.focus();
+                      focusBeatList();
+                    }}
+                    onMouseDown={(event) => {
+                      // Keep keyboard ownership on the list container while clicking rows.
+                      event.preventDefault();
                     }}
                     onKeyDown={(event) => {
                       if (event.key === "Tab") {
