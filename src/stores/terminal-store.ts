@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import type { TerminalSessionStatus } from "@/lib/types";
+import { persist } from "zustand/middleware";
+import type { TerminalSession, TerminalSessionStatus } from "@/lib/types";
 
 export interface ActiveTerminal {
   sessionId: string;
@@ -44,9 +45,12 @@ interface TerminalState {
   enqueueSceneBeats: (items: QueuedBeat[]) => void;
   dequeueSceneBeats: (count: number) => QueuedBeat[];
   clearSceneQueue: () => void;
+  rehydrateFromBackend: (backendSessions: TerminalSession[]) => void;
 }
 
-export const useTerminalStore = create<TerminalState>((set, get) => ({
+export const useTerminalStore = create<TerminalState>()(
+  persist(
+    (set, get) => ({
   panelOpen: false,
   panelMinimized: false,
   panelHeight: 35,
@@ -166,7 +170,59 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
     return taken;
   },
   clearSceneQueue: () => set({ sceneQueue: [] }),
-}));
+  rehydrateFromBackend: (backendSessions) =>
+    set((state) => {
+      const backendMap = new Map(backendSessions.map((s) => [s.id, s]));
+      // Sync persisted terminals with backend state
+      const synced = state.terminals.map((t) => {
+        const backend = backendMap.get(t.sessionId);
+        if (!backend) {
+          // Terminal gone from backend — mark completed
+          return t.status === "running" ? { ...t, status: "completed" as const } : t;
+        }
+        // Sync status from backend
+        return backend.status !== t.status ? { ...t, status: backend.status } : t;
+      });
+      // Add orphaned backend sessions not in frontend state
+      const knownIds = new Set(state.terminals.map((t) => t.sessionId));
+      const orphans: ActiveTerminal[] = backendSessions
+        .filter((s) => !knownIds.has(s.id) && s.status === "running")
+        .map((s) => ({
+          sessionId: s.id,
+          beatId: s.beatId,
+          beatTitle: s.beatTitle,
+          beatIds: s.beatIds,
+          repoPath: s.repoPath,
+          agentName: s.agentName,
+          agentModel: s.agentModel,
+          agentCommand: s.agentCommand,
+          status: s.status,
+          startedAt: s.startedAt,
+        }));
+      const terminals = [...synced, ...orphans];
+      // Fix activeSessionId if it points to a removed terminal
+      const activeValid = terminals.some((t) => t.sessionId === state.activeSessionId);
+      return {
+        terminals,
+        activeSessionId: activeValid
+          ? state.activeSessionId
+          : (terminals.at(-1)?.sessionId ?? null),
+      };
+    }),
+    }),
+    {
+      name: "foolery:terminal-store",
+      version: 1,
+      partialize: (state) => ({
+        terminals: state.terminals,
+        activeSessionId: state.activeSessionId,
+        panelOpen: state.panelOpen,
+        panelMinimized: state.panelMinimized,
+        panelHeight: state.panelHeight,
+      }),
+    },
+  ),
+);
 
 export function getActiveTerminal(
   terminals: ActiveTerminal[],

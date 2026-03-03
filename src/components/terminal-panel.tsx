@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Copy, Square, Maximize2, Minimize2, X } from "lucide-react";
 import { useTerminalStore, getActiveTerminal } from "@/stores/terminal-store";
-import { connectToSession, abortSession, startSession } from "@/lib/terminal-api";
+import { connectToSession, abortSession, startSession, listSessions } from "@/lib/terminal-api";
 import {
   detectVendor,
   formatModelDisplay,
@@ -86,6 +86,7 @@ export function TerminalPanel() {
   const autoCloseTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const recentOutputBySession = useRef<Map<string, string>>(new Map());
   const failureHintBySession = useRef<Map<string, TerminalFailureGuidance>>(new Map());
+  const hasRehydrated = useRef(false);
   const isMaximized = panelHeight > 70;
   const fallbackAgentInfo = useAgentInfo("take");
   const sessionAgentInfo = useMemo<ResolvedAgentInfo | null>(() => {
@@ -170,6 +171,17 @@ export function TerminalPanel() {
       outputs.clear();
       hints.clear();
     };
+  }, []);
+
+  // Rehydrate persisted terminals from backend on first mount
+  useEffect(() => {
+    if (hasRehydrated.current) return;
+    hasRehydrated.current = true;
+    const { terminals } = useTerminalStore.getState();
+    if (terminals.length === 0) return;
+    listSessions().then((sessions) => {
+      useTerminalStore.getState().rehydrateFromBackend(sessions);
+    });
   }, []);
 
   const handleTabClick = useCallback((sessionId: string) => {

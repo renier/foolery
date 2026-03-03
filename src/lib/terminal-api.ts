@@ -2,6 +2,17 @@ import type { TerminalSession, TerminalEvent, BdResult } from "./types";
 
 const BASE = "/api/terminal";
 
+export async function listSessions(): Promise<TerminalSession[]> {
+  try {
+    const res = await fetch(BASE);
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export async function startSession(
   beadId: string,
   repo?: string,

@@ -1,6 +1,20 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { useTerminalStore, getActiveTerminal } from "@/stores/terminal-store";
 import type { ActiveTerminal } from "@/stores/terminal-store";
+import type { TerminalSession } from "@/lib/types";
+
+// Provide a minimal localStorage polyfill for the Node test environment
+if (typeof globalThis.localStorage === "undefined") {
+  const store = new Map<string, string>();
+  globalThis.localStorage = {
+    getItem: (key: string) => store.get(key) ?? null,
+    setItem: (key: string, value: string) => { store.set(key, value); },
+    removeItem: (key: string) => { store.delete(key); },
+    clear: () => { store.clear(); },
+    get length() { return store.size; },
+    key: (index: number) => [...store.keys()][index] ?? null,
+  } as Storage;
+}
 
 function makeTerminal(overrides: Partial<ActiveTerminal> = {}): ActiveTerminal {
   return {
@@ -15,6 +29,7 @@ function makeTerminal(overrides: Partial<ActiveTerminal> = {}): ActiveTerminal {
 
 describe("terminal-store extended", () => {
   beforeEach(() => {
+    localStorage.removeItem("foolery:terminal-store");
     useTerminalStore.setState({
       panelOpen: false,
       panelHeight: 35,
@@ -254,5 +269,104 @@ describe("getActiveTerminal", () => {
 
   it("returns null when no match found", () => {
     expect(getActiveTerminal([makeTerminal()], "nonexistent")).toBeNull();
+  });
+});
+
+function makeBackendSession(overrides: Partial<TerminalSession> = {}): TerminalSession {
+  return {
+    id: "s-1",
+    beatId: "b-1",
+    beatTitle: "Test",
+    status: "running",
+    startedAt: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
+describe("persist configuration", () => {
+  beforeEach(() => {
+    localStorage.removeItem("foolery:terminal-store");
+    useTerminalStore.setState({
+      panelOpen: false,
+      panelHeight: 35,
+      terminals: [],
+      activeSessionId: null,
+      pendingClose: new Set(),
+    });
+  });
+
+  it("store has rehydrateFromBackend action", () => {
+    expect(typeof useTerminalStore.getState().rehydrateFromBackend).toBe("function");
+  });
+
+  it("non-serializable state (pendingClose, sceneQueue) resets on fresh store", () => {
+    // pendingClose and sceneQueue should always start as empty defaults
+    // since they are excluded from persist partialize
+    const state = useTerminalStore.getState();
+    expect(state.pendingClose).toBeInstanceOf(Set);
+    expect(state.sceneQueue).toEqual([]);
+  });
+});
+
+describe("rehydrateFromBackend", () => {
+  beforeEach(() => {
+    localStorage.removeItem("foolery:terminal-store");
+    useTerminalStore.setState({
+      panelOpen: false,
+      panelHeight: 35,
+      terminals: [],
+      activeSessionId: null,
+      pendingClose: new Set(),
+    });
+  });
+
+  it("marks stale running terminals as completed when absent from backend", () => {
+    useTerminalStore.getState().upsertTerminal(makeTerminal({ status: "running" }));
+    useTerminalStore.getState().rehydrateFromBackend([]);
+    expect(useTerminalStore.getState().terminals[0].status).toBe("completed");
+  });
+
+  it("does not change non-running terminals absent from backend", () => {
+    useTerminalStore.getState().upsertTerminal(makeTerminal({ status: "error" }));
+    useTerminalStore.getState().rehydrateFromBackend([]);
+    expect(useTerminalStore.getState().terminals[0].status).toBe("error");
+  });
+
+  it("syncs status from backend for known terminals", () => {
+    useTerminalStore.getState().upsertTerminal(makeTerminal({ status: "running" }));
+    useTerminalStore.getState().rehydrateFromBackend([
+      makeBackendSession({ id: "s-1", status: "completed" }),
+    ]);
+    expect(useTerminalStore.getState().terminals[0].status).toBe("completed");
+  });
+
+  it("adopts orphaned running backend sessions", () => {
+    useTerminalStore.getState().rehydrateFromBackend([
+      makeBackendSession({ id: "orphan-1", beatId: "b-orphan", status: "running" }),
+    ]);
+    const state = useTerminalStore.getState();
+    expect(state.terminals).toHaveLength(1);
+    expect(state.terminals[0].sessionId).toBe("orphan-1");
+  });
+
+  it("does not adopt completed orphan sessions", () => {
+    useTerminalStore.getState().rehydrateFromBackend([
+      makeBackendSession({ id: "orphan-1", status: "completed" }),
+    ]);
+    expect(useTerminalStore.getState().terminals).toHaveLength(0);
+  });
+
+  it("fixes activeSessionId when it points to a non-existent terminal", () => {
+    // activeSessionId references a terminal not in the array
+    useTerminalStore.setState({
+      terminals: [],
+      activeSessionId: "gone",
+    });
+    useTerminalStore.getState().rehydrateFromBackend([
+      makeBackendSession({ id: "alive", status: "running" }),
+    ]);
+    const state = useTerminalStore.getState();
+    // "gone" is not in terminals, so activeSessionId falls back to last terminal
+    expect(state.activeSessionId).toBe("alive");
   });
 });
