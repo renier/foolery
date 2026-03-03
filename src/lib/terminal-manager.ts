@@ -1251,6 +1251,10 @@ export async function createSession(
         entry.process = null;
         finishSession(1);
       }
+    } else {
+      // For one-shot (codex) agents the prompt was passed as a CLI arg;
+      // log it here so history shows what was sent.
+      interactionLog.logPrompt(takePrompt, { source: `take_${takeIteration}` });
     }
   };
 
@@ -1614,6 +1618,10 @@ export async function createSession(
       const agentDesc = `${agent.label || agent.command}${agent.model ? ` (model: ${agent.model})` : ""}`;
       throw new Error(`Failed to send initial prompt to agent: ${agentDesc}`);
     }
+  } else {
+    // For one-shot (codex) agents the prompt was passed as a CLI arg;
+    // log it here so history shows what was sent.
+    interactionLog.logPrompt(prompt, { source: "initial" });
   }
 
   return session;
