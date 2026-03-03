@@ -319,6 +319,40 @@ describe("readAgentHistory", () => {
     expect(history.beats[0]?.title).toBe("Breakdown beat");
   });
 
+  it("parses sessions when log uses beatIds field name (logger output format)", async () => {
+    await writeLog(tempDir, "repo-a/2026-02-20/logger-format.jsonl", [
+      {
+        kind: "session_start",
+        ts: "2026-02-20T16:00:00.000Z",
+        sessionId: "logger-fmt",
+        interactionType: "take",
+        repoPath: "/tmp/repo-a",
+        beatIds: ["foo-logger"], // Note: beatIds, not beadIds - matches actual logger output
+      },
+      {
+        kind: "prompt",
+        ts: "2026-02-20T16:00:01.000Z",
+        sessionId: "logger-fmt",
+        prompt: "ID: foo-logger\nTitle: Logger format beat",
+        source: "initial",
+      },
+      {
+        kind: "session_end",
+        ts: "2026-02-20T16:01:00.000Z",
+        sessionId: "logger-fmt",
+        status: "completed",
+        exitCode: 0,
+      },
+    ]);
+
+    const history = await readAgentHistory({ logRoot: tempDir });
+
+    expect(history.beats).toHaveLength(1);
+    expect(history.beats[0]?.beadId).toBe("foo-logger");
+    expect(history.beats[0]?.title).toBe("Logger format beat");
+    expect(history.beats[0]?.takeCount).toBe(1);
+  });
+
   it("does not filter out beats when session status is closed", async () => {
     await writeLog(tempDir, "repo-a/2026-02-20/closed-status.jsonl", [
       {

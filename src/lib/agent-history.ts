@@ -162,9 +162,13 @@ function parseSession(
       if (!repoPath) return null;
       if (query.repoPath && query.repoPath !== repoPath) return null;
 
-      const beadIds = Array.isArray(parsed.beadIds)
-        ? parsed.beadIds.filter(isNonEmptyString).map((value) => value.trim())
-        : [];
+      // Accept both field names: beadIds (legacy) and beatIds (current logger output)
+      const rawBeadIds = Array.isArray(parsed.beadIds)
+        ? parsed.beadIds
+        : Array.isArray(parsed.beatIds)
+          ? parsed.beatIds
+          : [];
+      const beadIds = rawBeadIds.filter(isNonEmptyString).map((value) => value.trim());
       if (beadIds.length === 0) return null;
 
       start = {
