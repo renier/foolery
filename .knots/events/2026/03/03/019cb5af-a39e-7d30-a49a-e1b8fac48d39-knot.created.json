@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb5af-a39e-7d30-a49a-e1b8fac48d39",
+  "occurred_at": "2026-03-03T21:51:52.734033Z",
+  "knot_id": "foolery-a91e",
+  "type": "knot.created",
+  "data": {
+    "body": "like title says, nothing happens.  it should change the profile",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "clicking on profile on beats view and selecting new profile fails"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb5b8-6193-7c51-bf09-fad7549db697",
+  "occurred_at": "2026-03-03T22:01:25.632194Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-9b86",
+    "profile_id": "autopilot",
+    "state": "implementation",
+    "terminal": false,
+    "title": "notifications are iditoically implemented",
+    "updated_at": "2026-03-03T22:01:25.632194Z"
+  }
+}

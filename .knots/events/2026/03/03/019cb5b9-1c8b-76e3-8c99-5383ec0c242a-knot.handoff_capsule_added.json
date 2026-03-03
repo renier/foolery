@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5b9-1c8b-76e3-8c99-5383ec0c242a",
+  "occurred_at": "2026-03-03T22:02:13.515804Z",
+  "knot_id": "foolery-a91e",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Implemented beats-view profile switching by adding knots profile-set support in backend update flow; updated backend/knots tests; validated lint+tsc+unit tests (build still fails on existing prerender issue in /_global-error and /beads on clean main). Landed on origin/main at 0ad57ceded271c97299327b847a926b3d7eacbcd.",
+    "datetime": "2026-03-03T22:02:13Z",
+    "entry_id": "019cb5b9-1c8b-76e3-8c99-537e3375dbd8",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "gpt-5-codex"
+  }
+}

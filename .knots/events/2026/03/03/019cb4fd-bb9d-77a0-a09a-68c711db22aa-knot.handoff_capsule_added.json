@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb4fd-bb9d-77a0-a09a-68c711db22aa",
+  "occurred_at": "2026-03-03T18:37:33.469939Z",
+  "knot_id": "foolery-e6d4",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added guarded nextKnot transitions in terminal-manager to always pass expectedState and treat expected-state mismatches as stale races (refresh-and-continue) instead of hard failures; added regression test terminal-manager-knots-next-guard.test.ts. Quality gates: bun run lint (warnings only), bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Pushed d0aae735c09ec9f36f3193a5962a3157b3dcf7eb to origin/main.",
+    "datetime": "2026-03-03T18:37:33.469939Z",
+    "entry_id": "019cb4fd-bb9d-77a0-a09a-68b1b38df204",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

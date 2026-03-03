@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb5b1-a3d9-7b83-8eaf-7f900583cdff",
+  "occurred_at": "2026-03-03T21:54:03.865225Z",
+  "knot_id": "foolery-1dea",
+  "type": "knot.created",
+  "data": {
+    "body": "that animation is supposed to indicate that the conversation is complete.  several commits done in recent days have completely broken and stabilized that animation, which was once very useful and cool and now is an embarassing and idiotic pile of shit.  please fix this motherfucking animation.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "27bb and 1fbb ui console tabs started flashing animation for no reason"
+  }
+}

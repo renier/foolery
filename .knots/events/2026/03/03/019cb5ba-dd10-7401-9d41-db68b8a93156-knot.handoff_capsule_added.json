@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5ba-dd10-7401-9d41-db68b8a93156",
+  "occurred_at": "2026-03-03T22:04:08.336793Z",
+  "knot_id": "foolery-9b86",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation reviewed on main: polling notification hooks are removed; notifications now fire only on session exit from SessionConnectionManager using beat title/id from terminal store. Verified quality gates in dedicated worktree: bun run lint (warnings only), bunx tsc --noEmit (pass), bun run test (108 files, 1811 tests passed), bun run build (fails on pre-existing Next prerender error in src/components/providers.tsx useState on null).",
+    "datetime": "2026-03-03T22:04:08.336793Z",
+    "entry_id": "019cb5ba-dd10-7401-9d41-db57056ea1c3",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

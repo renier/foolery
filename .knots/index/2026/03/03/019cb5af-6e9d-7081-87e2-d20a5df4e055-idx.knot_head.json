@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb5af-6e9d-7081-87e2-d20a5df4e055",
+  "occurred_at": "2026-03-03T21:51:39.165688Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-277b",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment",
+    "terminal": false,
+    "title": "notifications lightbox should close after click 'mark all as read'",
+    "updated_at": "2026-03-03T21:51:39.165688Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb5ae-cac4-7571-8fd0-7a99bf3009e4"
+  }
+}

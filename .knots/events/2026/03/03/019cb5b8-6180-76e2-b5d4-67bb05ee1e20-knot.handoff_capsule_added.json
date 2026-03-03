@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5b8-6180-76e2-b5d4-67bb05ee1e20",
+  "occurred_at": "2026-03-03T22:01:25.632194Z",
+  "knot_id": "foolery-9b86",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Removed 3 polling notification hooks (use-shipped-notifications, use-retry-notifications, use-verification-notifications) that fired in-app notifications whenever beat data was loaded on 10s polling cycles. Replaced with a single notification fired from SessionConnectionManager.connect() when a session exit event is received — the actual event boundary. Cleaned up notification store (removed lastVerificationCount/setLastVerificationCount). All quality gates pass (lint, typecheck, tests). Build has pre-existing SSR issue unrelated to this change.",
+    "datetime": "2026-03-03T22:01:25.632194Z",
+    "entry_id": "019cb5b8-6180-76e2-b5d4-67aa689769e6",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
