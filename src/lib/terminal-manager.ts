@@ -54,7 +54,7 @@ const QUEUE_TERMINAL_INVARIANT_INSTRUCTION = [
   `CRITICAL INVARIANT — QUEUE/TERMINAL STATE REQUIREMENT:`,
   `Before ending your work, you MUST ensure the knot is in a queue state (ready_for_*) or terminal state (shipped/abandoned).`,
   `Never leave work in an action state (planning, plan_review, implementation, implementation_review, shipment, shipment_review).`,
-  `If the knot is currently in an action state, run "kno next" to advance it to the next queue state before stopping.`,
+  `If the knot is currently in an action state, run "kno next <id> <currentState> --actor-kind agent" to advance it to the next queue state before stopping.`,
 ].join("\n");
 
 type JsonObject = Record<string, unknown>;

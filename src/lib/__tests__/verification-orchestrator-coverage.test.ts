@@ -285,7 +285,7 @@ describe("launchVerifier error paths", () => {
     await onAgentComplete(["test-beat"], "take", "/repo", 0);
 
     // Should transition to retry via nextKnot (not state: "open")
-    expect(nextKnotMock).toHaveBeenCalledWith("test-beat", "/repo");
+    expect(nextKnotMock).toHaveBeenCalledWith("test-beat", "/repo", { expectedState: "in_progress" });
   });
 
   it("handles verifier non-zero exit without result marker", async () => {
@@ -304,7 +304,7 @@ describe("launchVerifier error paths", () => {
 
     // Should transition to retry via nextKnot (not state: "open")
     expect(mockClose).not.toHaveBeenCalled();
-    expect(nextKnotMock).toHaveBeenCalledWith("test-beat", "/repo");
+    expect(nextKnotMock).toHaveBeenCalledWith("test-beat", "/repo", { expectedState: "in_progress" });
   });
 
   it("defaults to pass when exit code 0 but no result marker", async () => {
@@ -553,7 +553,7 @@ describe("transitionToRetry uses nextKnot", () => {
     await onAgentComplete(["test-beat"], "take", "/repo", 0);
 
     // nextKnot should have been called for the retry transition
-    expect(nextKnotMock).toHaveBeenCalledWith("test-beat", "/repo");
+    expect(nextKnotMock).toHaveBeenCalledWith("test-beat", "/repo", { expectedState: "in_progress" });
 
     // No update call should have set state: "open"
     for (const call of mockUpdate.mock.calls) {
@@ -578,7 +578,7 @@ describe("transitionToRetry uses nextKnot", () => {
     await onAgentComplete(["test-beat"], "take", "/repo", 0);
 
     // nextKnot should still be called for state advancement
-    expect(nextKnotMock).toHaveBeenCalledWith("test-beat", "/repo");
+    expect(nextKnotMock).toHaveBeenCalledWith("test-beat", "/repo", { expectedState: "in_progress" });
   });
 });
 

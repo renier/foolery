@@ -238,7 +238,7 @@ describe("retry paths", () => {
     await onAgentComplete(["foolery-test"], "take", "/repo", 0);
 
     // Should have called nextKnot to advance state (not state: "open")
-    expect(nextKnotMock).toHaveBeenCalledWith("foolery-test", "/repo");
+    expect(nextKnotMock).toHaveBeenCalledWith("foolery-test", "/repo", { expectedState: "in_progress" });
 
     // Should have called updateBead with retry labels (without state)
     const retryCall = mockUpdate.mock.calls.find(
@@ -274,7 +274,7 @@ describe("retry paths", () => {
     expect(mockClose).not.toHaveBeenCalled();
 
     // Should have called nextKnot to advance state (not state: "open")
-    expect(nextKnotMock).toHaveBeenCalledWith("foolery-test", "/repo");
+    expect(nextKnotMock).toHaveBeenCalledWith("foolery-test", "/repo", { expectedState: "in_progress" });
   });
 });
 

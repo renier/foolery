@@ -72,7 +72,6 @@ describe("nextKnot retry with exponential backoff", () => {
       expect.arrayContaining([
         "next",
         "K-0001",
-        "--expected-state",
         "planning",
         "--actor-kind",
         "agent",

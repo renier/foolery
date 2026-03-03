@@ -503,7 +503,7 @@ async function transitionToRetry(beadId: string, repoPath: string): Promise<void
     await getBackend().update(beadId, updateFields, repoPath);
   }
 
-  await nextKnot(beadId, repoPath);
+  await nextKnot(beadId, repoPath, { expectedState: beadResult.data.state });
 }
 
 // ── Utilities ───────────────────────────────────────────────
