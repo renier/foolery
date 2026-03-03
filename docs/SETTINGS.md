@@ -6,20 +6,16 @@ User-level configuration stored as TOML at `~/.config/foolery/settings.toml`.
 
 | Key             | Type   | Default    | Description                                               |
 |-----------------|--------|------------|-----------------------------------------------------------|
-| `agent.command` | string | `"claude"` | CLI command used to spawn agent sessions                  |
 | `backend.type`  | enum   | `"auto"`   | Backend selection (`auto`, `cli`, `stub`, `beads`, `knots`) |
 
 ## File Format
 
 ```toml
-[agent]
-command = "claude"
-
 [backend]
 type = "auto"
 ```
 
-Settings use TOML sections (e.g. `[agent]`) for namespacing. New categories of settings get their own section.
+Settings use TOML sections for namespacing. New categories of settings get their own section.
 
 ## How to Add a New Setting
 
@@ -29,8 +25,8 @@ In `src/lib/schemas.ts`, extend the appropriate section schema or create a new o
 
 ```typescript
 // Adding to an existing section:
-export const agentSettingsSchema = z.object({
-  command: z.string().min(1).default("claude"),
+export const backendSettingsSchema = z.object({
+  type: z.enum(["auto", "cli", "stub", "beads", "knots"]).default("auto"),
   timeout: z.number().positive().default(300),  // ← new field
 });
 
@@ -41,7 +37,7 @@ export const uiSettingsSchema = z.object({
 
 // Then add it to the top-level schema:
 export const foolerySettingsSchema = z.object({
-  agent: agentSettingsSchema.default({ command: "claude" }),
+  backend: backendSettingsSchema.default({ type: "auto" }),
   ui: uiSettingsSchema.default({ theme: "system" }),  // ← new section
 });
 ```

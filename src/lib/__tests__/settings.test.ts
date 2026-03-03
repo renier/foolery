@@ -56,7 +56,6 @@ const DEFAULT_POOLS = {
 };
 
 const DEFAULT_SETTINGS = {
-  agent: { command: "claude" },
   agents: {},
   actions: DEFAULT_ACTIONS,
   verification: { enabled: false, agent: "", maxRetries: 3 },
@@ -82,10 +81,10 @@ describe("loadSettings", () => {
     expect(settings).toEqual(DEFAULT_SETTINGS);
   });
 
-  it("parses valid TOML", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "my-agent"');
+  it("parses valid TOML with registered agents", async () => {
+    mockReadFile.mockResolvedValue('[agents.claude]\ncommand = "claude"\nlabel = "Claude"');
     const settings = await loadSettings();
-    expect(settings.agent.command).toBe("my-agent");
+    expect(settings.agents.claude.command).toBe("claude");
   });
 
   it("falls back to defaults on invalid TOML", async () => {
@@ -95,13 +94,13 @@ describe("loadSettings", () => {
   });
 
   it("fills in defaults for missing keys", async () => {
-    mockReadFile.mockResolvedValue("[agent]");
+    mockReadFile.mockResolvedValue('[actions]\ntake = ""');
     const settings = await loadSettings();
-    expect(settings.agent.command).toBe("claude");
+    expect(settings.actions.scene).toBe("");
   });
 
   it("uses cache within TTL", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "cached"');
+    mockReadFile.mockResolvedValue('[agents.claude]\ncommand = "claude"');
     await loadSettings();
     await loadSettings();
     expect(mockReadFile).toHaveBeenCalledTimes(1);
@@ -110,12 +109,11 @@ describe("loadSettings", () => {
 
 describe("inspectSettingsDefaults", () => {
   it("reports missing default keys for partial files", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "claude"');
+    mockReadFile.mockResolvedValue('[actions]\ntake = ""');
     const result = await inspectSettingsDefaults();
     expect(result.fileMissing).toBe(false);
     expect(result.error).toBeUndefined();
     expect(result.missingPaths).toContain("verification.enabled");
-    expect(result.missingPaths).toContain("actions.take");
   });
 });
 
@@ -138,7 +136,7 @@ describe("backfillMissingSettingsDefaults", () => {
   });
 
   it("writes missing defaults without clobbering existing values", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "codex"');
+    mockReadFile.mockResolvedValue('[agents.codex]\ncommand = "codex"');
     const result = await backfillMissingSettingsDefaults();
     expect(result.changed).toBe(true);
     expect(mockWriteFile).toHaveBeenCalledTimes(1);
@@ -152,8 +150,6 @@ describe("backfillMissingSettingsDefaults", () => {
     mockReadFile.mockResolvedValue(
       [
         'dispatchMode = "actions"',
-        '[agent]',
-        'command = "claude"',
         '[actions]',
         'take = ""',
         'scene = ""',
@@ -189,8 +185,7 @@ describe("backfillMissingSettingsDefaults", () => {
 describe("saveSettings", () => {
   it("writes valid TOML that round-trips", async () => {
     const settings = {
-      agent: { command: "my-agent" },
-      agents: {},
+      agents: { "my-agent": { command: "my-agent" } },
       actions: DEFAULT_ACTIONS,
       verification: { enabled: false, agent: "", maxRetries: 3 },
       backend: { type: "auto" as const },
@@ -228,13 +223,13 @@ describe("saveSettings", () => {
 });
 
 describe("getAgentCommand", () => {
-  it("returns the configured command", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "codex"');
+  it("returns the first registered agent command", async () => {
+    mockReadFile.mockResolvedValue('[agents.codex]\ncommand = "codex"');
     const cmd = await getAgentCommand();
     expect(cmd).toBe("codex");
   });
 
-  it("returns default when file is missing", async () => {
+  it("returns 'claude' when no agents registered", async () => {
     mockReadFile.mockRejectedValue(new Error("ENOENT"));
     const cmd = await getAgentCommand();
     expect(cmd).toBe("claude");
@@ -243,16 +238,14 @@ describe("getAgentCommand", () => {
 
 describe("updateSettings", () => {
   it("merges partial updates", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "old"');
-    const updated = await updateSettings({ agent: { command: "new" } });
-    expect(updated.agent.command).toBe("new");
+    mockReadFile.mockResolvedValue('[actions]\ntake = "old"');
+    const updated = await updateSettings({ actions: { take: "new" } });
+    expect(updated.actions.take).toBe("new");
     expect(mockWriteFile).toHaveBeenCalledTimes(1);
   });
 
   it("merges agents map without clobbering existing entries", async () => {
     const toml = [
-      '[agent]',
-      'command = "claude"',
       '[agents.claude]',
       'command = "claude"',
       'label = "Claude Code"',
@@ -267,7 +260,7 @@ describe("updateSettings", () => {
   });
 
   it("merges action mappings partially", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "claude"');
+    mockReadFile.mockResolvedValue("");
     const updated = await updateSettings({
       actions: { take: "codex" },
     });
@@ -311,8 +304,6 @@ describe("updateSettings", () => {
 
   it("openrouter-only update does not clobber agent config", async () => {
     const toml = [
-      '[agent]',
-      'command = "codex"',
       '[agents.claude]',
       'command = "claude"',
       'label = "Claude Code"',
@@ -336,8 +327,7 @@ describe("updateSettings", () => {
     expect(updated.openrouter.enabled).toBe(true);
     expect(updated.openrouter.apiKey).toBe("sk-or-v1-new");
 
-    // Agent/agents/actions untouched
-    expect(updated.agent.command).toBe("codex");
+    // Agents/actions untouched
     expect(updated.agents.claude).toBeDefined();
     expect(updated.agents.claude.command).toBe("claude");
     expect(updated.actions.take).toBe("claude");
@@ -372,7 +362,7 @@ describe("updateSettings", () => {
 
   it("empty partial object leaves all settings unchanged", async () => {
     const toml = [
-      '[agent]',
+      '[agents.codex]',
       'command = "codex"',
       '[openrouter]',
       'apiKey = "keep"',
@@ -383,7 +373,7 @@ describe("updateSettings", () => {
 
     const updated = await updateSettings({});
 
-    expect(updated.agent.command).toBe("codex");
+    expect(updated.agents.codex.command).toBe("codex");
     expect(updated.openrouter.apiKey).toBe("keep");
     expect(updated.openrouter.enabled).toBe(true);
     expect(updated.openrouter.model).toBe("keep-model");
@@ -447,16 +437,20 @@ describe("getRegisteredAgents", () => {
 });
 
 describe("getActionAgent", () => {
-  it("falls back to agent.command when mapping is empty string", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "claude"');
+  it("falls back to first registered agent when mapping is empty string", async () => {
+    mockReadFile.mockResolvedValue('[agents.claude]\ncommand = "claude"');
     const agent = await getActionAgent("take");
     expect(agent.command).toBe("claude");
   });
 
-  it("falls back to agent.command when mapping is legacy 'default'", async () => {
+  it("falls back to 'claude' when no agents registered and mapping is empty", async () => {
+    mockReadFile.mockRejectedValue(new Error("ENOENT"));
+    const agent = await getActionAgent("take");
+    expect(agent.command).toBe("claude");
+  });
+
+  it("falls back when mapping is legacy 'default'", async () => {
     const toml = [
-      '[agent]',
-      'command = "claude"',
       '[actions]',
       'take = "default"',
     ].join("\n");
@@ -468,8 +462,6 @@ describe("getActionAgent", () => {
 
   it("returns registered agent when action is mapped", async () => {
     const toml = [
-      '[agent]',
-      'command = "claude"',
       '[agents.codex]',
       'command = "codex"',
       'model = "o3"',
@@ -487,8 +479,6 @@ describe("getActionAgent", () => {
 
   it("falls back when mapped agent id is not registered", async () => {
     const toml = [
-      '[agent]',
-      'command = "claude"',
       '[actions]',
       'take = "missing"',
     ].join("\n");
@@ -501,7 +491,7 @@ describe("getActionAgent", () => {
 
 describe("addRegisteredAgent", () => {
   it("adds an agent to the agents map", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "claude"');
+    mockReadFile.mockResolvedValue("");
     const result = await addRegisteredAgent("gemini", {
       command: "gemini",
       label: "Google Gemini",
@@ -527,7 +517,7 @@ describe("removeRegisteredAgent", () => {
   });
 
   it("is a no-op when agent id does not exist", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "claude"');
+    mockReadFile.mockResolvedValue("");
     const result = await removeRegisteredAgent("nonexistent");
     expect(result.agents).toEqual({});
   });
@@ -537,8 +527,6 @@ describe("getStepAgent", () => {
   it("uses pool when dispatchMode is pools and pool is configured", async () => {
     const toml = [
       'dispatchMode = "pools"',
-      '[agent]',
-      'command = "default-agent"',
       '[agents.sonnet]',
       'command = "claude"',
       'model = "sonnet-4"',
@@ -559,8 +547,6 @@ describe("getStepAgent", () => {
   it("ignores pool when dispatchMode is actions even if pool is configured", async () => {
     const toml = [
       'dispatchMode = "actions"',
-      '[agent]',
-      'command = "default-agent"',
       '[agents.sonnet]',
       'command = "claude"',
       'model = "sonnet-4"',
@@ -586,8 +572,6 @@ describe("getStepAgent", () => {
   it("falls back to action mapping when pool step is empty in pools mode", async () => {
     const toml = [
       'dispatchMode = "pools"',
-      '[agent]',
-      'command = "default-agent"',
       '[agents.opus]',
       'command = "claude"',
       'model = "opus"',
@@ -609,7 +593,7 @@ describe("getStepAgent", () => {
   it("falls back to default agent when no pool and no action mapping", async () => {
     const toml = [
       'dispatchMode = "pools"',
-      '[agent]',
+      '[agents.my-default]',
       'command = "my-default"',
     ].join("\n");
     mockReadFile.mockResolvedValue(toml);
@@ -620,8 +604,6 @@ describe("getStepAgent", () => {
 
   it("defaults dispatchMode to actions when not specified", async () => {
     const toml = [
-      '[agent]',
-      'command = "default-agent"',
       '[agents.sonnet]',
       'command = "claude"',
       'model = "sonnet-4"',
@@ -652,8 +634,6 @@ describe("getStepAgent", () => {
     it("excludes prior action agent when selecting for a review step", async () => {
       const toml = [
         'dispatchMode = "pools"',
-        '[agent]',
-        'command = "default-agent"',
         '[agents.opus]',
         'command = "claude"',
         'model = "opus"',
@@ -690,8 +670,6 @@ describe("getStepAgent", () => {
     it("does not exclude when no prior agent is recorded", async () => {
       const toml = [
         'dispatchMode = "pools"',
-        '[agent]',
-        'command = "default-agent"',
         '[agents.opus]',
         'command = "claude"',
         'model = "opus"',
@@ -714,8 +692,6 @@ describe("getStepAgent", () => {
     it("does not exclude for non-review steps", async () => {
       const toml = [
         'dispatchMode = "pools"',
-        '[agent]',
-        'command = "default-agent"',
         '[agents.opus]',
         'command = "claude"',
         'model = "opus"',

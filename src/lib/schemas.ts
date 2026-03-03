@@ -92,10 +92,6 @@ export type RemoveRepoInput = z.infer<typeof removeRepoSchema>;
 
 // ── Settings schemas ────────────────────────────────────────
 
-export const agentSettingsSchema = z.object({
-  command: z.string().min(1).default("claude"),
-});
-
 // A single registered agent
 export const registeredAgentSchema = z.object({
   command: z.string().min(1),
@@ -197,7 +193,6 @@ export const poolsSettingsSchema = z
   });
 
 export const foolerySettingsSchema = z.object({
-  agent: agentSettingsSchema.default({ command: "claude" }),
   agents: agentsMapSchema,
   actions: actionAgentMappingsSchema,
   verification: verificationSettingsSchema,
@@ -209,7 +204,6 @@ export const foolerySettingsSchema = z.object({
 });
 
 export type FoolerySettings = z.infer<typeof foolerySettingsSchema>;
-export type AgentSettings = z.infer<typeof agentSettingsSchema>;
 export type RegisteredAgentConfig = z.infer<typeof registeredAgentSchema>;
 export type ActionAgentMappings = z.infer<typeof actionAgentMappingsSchema>;
 export type VerificationSettings = z.infer<typeof verificationSettingsSchema>;

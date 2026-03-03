@@ -79,7 +79,8 @@ export function useAgentInfo(action: ActionName): ResolvedAgentInfo | null {
           vendor,
         });
       } else {
-        const command = settings.agent.command;
+        const first = Object.values(settings.agents)[0];
+        const command = first?.command ?? "claude";
         const vendor = detectVendor(command);
         setInfo({
           name: command,

@@ -11,8 +11,6 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { SettingsAgentsSection } from "@/components/settings-agents-section";
 import { SettingsReposSection } from "@/components/settings-repos-section";
@@ -40,7 +38,6 @@ interface SettingsSheetProps {
 }
 
 interface SettingsData {
-  agent: { command: string };
   agents: Record<string, RegisteredAgent>;
   actions: ActionAgentMappings;
   verification: VerificationSettings;
@@ -52,7 +49,6 @@ interface SettingsData {
 }
 
 const DEFAULTS: SettingsData = {
-  agent: { command: "claude" },
   agents: {},
   actions: {
     take: "",
@@ -106,7 +102,6 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
       .then((settingsResult) => {
         if (settingsResult.ok && settingsResult.data) {
           setSettings({
-            agent: settingsResult.data.agent ?? DEFAULTS.agent,
             agents: settingsResult.data.agents ?? DEFAULTS.agents,
             actions: settingsResult.data.actions ?? DEFAULTS.actions,
             verification: settingsResult.data.verification ?? DEFAULTS.verification,
@@ -216,32 +211,6 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
                   }
                 />
 
-                <Separator />
-
-                {/* Section 6: Legacy / Default Agent */}
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium">Default Agent Command</h3>
-                  <div className="space-y-2">
-                    <Label htmlFor="agent-command">Command</Label>
-                    <Input
-                      id="agent-command"
-                      value={settings.agent.command}
-                      placeholder="claude"
-                      disabled={Object.keys(settings.agents).length > 0}
-                      onChange={(e) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          agent: { ...prev.agent, command: e.target.value },
-                        }))
-                      }
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {Object.keys(settings.agents).length > 0
-                        ? "Disabled — actions use registered agents above. Remove all agents to edit."
-                        : "Fallback command when no agent is mapped to an action."}
-                    </p>
-                  </div>
-                </div>
               </>
             )}
           </div>

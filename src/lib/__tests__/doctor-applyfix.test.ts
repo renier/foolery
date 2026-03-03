@@ -60,7 +60,6 @@ vi.mock("node:child_process", () => ({
 import { runDoctorFix } from "@/lib/doctor";
 
 const DEFAULT_SETTINGS = {
-  agent: { command: "claude" },
   agents: {},
   actions: {
     take: "",

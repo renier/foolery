@@ -347,10 +347,6 @@ export const componentSchemas = {
   FoolerySettings: {
     type: "object",
     properties: {
-      agent: {
-        type: "object",
-        properties: { command: { type: "string", default: "claude" } },
-      },
       agents: {
         type: "object",
         additionalProperties: {

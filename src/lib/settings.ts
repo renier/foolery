@@ -265,7 +265,6 @@ export async function saveSettings(
 
 /** Partial shape accepted by updateSettings for deep merging. */
 export type SettingsPartial = Partial<{
-  agent: Partial<FoolerySettings["agent"]>;
   agents: FoolerySettings["agents"];
   actions: Partial<FoolerySettings["actions"]>;
   verification: Partial<FoolerySettings["verification"]>;
@@ -287,7 +286,6 @@ export async function updateSettings(
   const current = await loadSettings();
   const merged: FoolerySettings = {
     ...current,
-    agent:        partial.agent        !== undefined ? { ...current.agent,        ...partial.agent }        : current.agent,
     agents:       partial.agents       !== undefined ? { ...current.agents,       ...partial.agents }       : current.agents,
     actions:      partial.actions      !== undefined ? { ...current.actions,      ...partial.actions }      : current.actions,
     verification: partial.verification !== undefined ? { ...current.verification, ...partial.verification } : current.verification,
@@ -302,10 +300,16 @@ export async function updateSettings(
   return validated;
 }
 
+/** Returns the command of the first registered agent, or "claude" if none exist. */
+function getDefaultCommand(settings: FoolerySettings): string {
+  const first = Object.values(settings.agents)[0];
+  return first?.command ?? "claude";
+}
+
 /** Convenience helper: returns the configured agent command (default "claude"). */
 export async function getAgentCommand(): Promise<string> {
   const settings = await loadSettings();
-  return settings.agent.command;
+  return getDefaultCommand(settings);
 }
 
 /** Returns the registered agents map. */
@@ -326,7 +330,7 @@ export async function getActionAgent(
     const reg = settings.agents[agentId];
     return { command: reg.command, model: reg.model, label: reg.label };
   }
-  return { command: settings.agent.command };
+  return { command: getDefaultCommand(settings) };
 }
 
 /** Returns the verification settings. */
@@ -343,7 +347,7 @@ export async function getVerificationAgent(): Promise<RegisteredAgent> {
     const reg = settings.agents[agentId];
     return { command: reg.command, model: reg.model, label: reg.label };
   }
-  return { command: settings.agent.command };
+  return { command: getDefaultCommand(settings) };
 }
 
 /**
@@ -462,7 +466,7 @@ export async function getStepAgent(
   }
 
   // Fall back to default agent
-  return { command: settings.agent.command };
+  return { command: getDefaultCommand(settings) };
 }
 
 /** Returns the OpenRouter settings. */

@@ -65,15 +65,13 @@ describe("getVerificationSettings (line 290)", () => {
 
 describe("getVerificationAgent (line 296)", () => {
   it("falls back to default agent command", async () => {
-    mockReadFile.mockResolvedValue('[agent]\ncommand = "claude"');
+    mockReadFile.mockRejectedValue(new Error("ENOENT"));
     const agent = await getVerificationAgent();
     expect(agent.command).toBe("claude");
   });
 
   it("returns registered agent when verification.agent is mapped", async () => {
     const toml = [
-      '[agent]',
-      'command = "claude"',
       '[agents.codex]',
       'command = "codex"',
       'model = "o3"',
@@ -91,8 +89,6 @@ describe("getVerificationAgent (line 296)", () => {
 
   it("falls back when verification agent is 'default'", async () => {
     const toml = [
-      '[agent]',
-      'command = "claude"',
       '[verification]',
       'agent = "default"',
     ].join("\n");
@@ -103,8 +99,6 @@ describe("getVerificationAgent (line 296)", () => {
 
   it("falls back when verification agent id not registered", async () => {
     const toml = [
-      '[agent]',
-      'command = "claude"',
       '[verification]',
       'agent = "nonexistent"',
     ].join("\n");

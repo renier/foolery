@@ -81,7 +81,6 @@ import {
 } from "@/lib/doctor";
 
 const DEFAULT_SETTINGS = {
-  agent: { command: "claude" },
   agents: {},
   actions: {
     take: "",
