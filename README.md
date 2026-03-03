@@ -138,7 +138,7 @@ The planning room. Select a set of beats and ask Claude to organize them into de
 
 ### Final Cut
 
-The verification queue. Every beat labeled `stage:verification` lands here. Review each one, approve it, or reject it with notes — keeping your done list honest.
+The verification queue. Every beat labeled `stage:verification` lands here. Review outcomes, capture notes, and keep your done list honest.
 
 ![Final Cut view](docs/screenshots/final-cut.png)
 
@@ -164,7 +164,7 @@ Need to stay in flow? Open the keyboard shortcut overlay for a quick map of navi
 
 - **Rapid scratch pad for small bugs and big ideas alike.** Create a beat, fire off an agent, review the result — all without leaving the keyboard.
 - **Leverage agents to organize groups of work and optimize them for parallel execution.** Ask Claude to decompose a set of tasks into dependency-aware waves, then launch them scene by scene.
-- **Track "completed" work units in a first-class way — accept or reject them with notes.** Every finished beat flows into a verification queue where you approve, reject, or annotate before it's truly done.
+- **Track "completed" work units in a first-class way.** Every finished beat flows into a verification queue where you review outcomes and annotate before it's truly done.
 - **Keyboard-first workflow.** Navigate, select, bulk-update, and trigger agent sessions entirely from the keyboard.
 - **Dependency-aware wave planning.** Visualize what's runnable, what's blocked, and what's next — across your whole project.
 - **Multi-repo support.** Switch between repositories or view beats across all of them in one place.
@@ -206,9 +206,7 @@ Shift+H to view at any time!
 | `Shift+]` / `Shift+[` | Next / previous view |
 | `Shift+R` / `⌘+Shift+R` | Next / previous repository |
 | `Shift+S` | Take! (start agent session) |
-| `Shift+V` | Verify (close) focused beat |
 | `Shift+C` | Close focused beat |
-| `Shift+F` | Reject focused beat |
 | `Shift+O` | Open notes dialog |
 | `Shift+L` | Add label to focused beat |
 | `Shift+N` | Create new beat |
