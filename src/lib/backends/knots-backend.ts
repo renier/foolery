@@ -1077,76 +1077,22 @@ export class KnotsBackend implements BackendPort {
       return ok({ prompt, claimed: false });
     }
 
-    // Single-beat Take! mode: claim the knot and return the claim prompt.
-    const claimResult = fromKnots(
-      await knots.claimKnot(beatId, rp, {
-        agentName: options?.agentName,
-        agentModel: options?.agentModel,
-        agentVersion: options?.agentVersion,
-      }),
-    );
-
-    if (claimResult.ok) {
-      return ok({
-        prompt: claimResult.data!.prompt,
-        claimed: true,
-      });
-    }
-
-    // Fallback: if kno claim fails, try to build the prompt from kno skill + kno show.
-    // This handles cases where the kno binary version lacks a skill for the current state.
-    return this.buildClaimFallbackPrompt(beatId, rp, claimResult);
-  }
-
-  private async buildClaimFallbackPrompt(
-    beatId: string,
-    rp: string,
-    claimResult: BackendResult<unknown>,
-  ): Promise<BackendResult<TakePromptResult>> {
+    // Single-beat Take! mode: show the knot and instruct the agent to claim.
     const showResult = fromKnots(await knots.showKnot(beatId, rp));
-    if (!showResult.ok) return propagateError<TakePromptResult>(claimResult);
+    if (!showResult.ok) return propagateError<TakePromptResult>(showResult);
     const knot = showResult.data!;
 
-    // Resolve the action state from the current state (strip "ready_for_" prefix)
-    const rawState = knot.state ?? "";
-    const actionState = rawState.startsWith("ready_for_")
-      ? rawState.slice("ready_for_".length)
-      : rawState;
+    const prompt = [
+      `Beat ID: ${beatId}`,
+      knot.title ? `Title: ${knot.title}` : null,
+      knot.description ? `Description: ${knot.description}` : knot.body ? `Description: ${knot.body}` : null,
+      ``,
+      `KNOTS CLAIM MODE (required):`,
+      `Run \`kno claim "${beatId}" --json\` and follow the returned \`prompt\` field verbatim.`,
+      `After completing the work, run the completion command from the claim output.`,
+    ].filter((line): line is string => line !== null).join("\n");
 
-    // Prefer a local builtin skill prompt; fall back to kno skill CLI.
-    const localSkill = BUILTIN_SKILL_PROMPTS[actionState];
-    let skillText: string | undefined = localSkill;
-    if (!skillText) {
-      const skillResult = fromKnots(await knots.skillPrompt(actionState, rp));
-      if (!skillResult.ok) return propagateError<TakePromptResult>(claimResult);
-      skillText = skillResult.data!;
-    }
-
-    // Try to advance the knot state so it's properly claimed
-    await knots.nextKnot(beatId, rp, { expectedState: rawState });
-
-    const fallbackPrompt = [
-      `# ${knot.title ?? beatId}`,
-      ``,
-      `**ID**: ${beatId}  |  **Priority**: ${knot.priority ?? "none"}  |  **Type**: ${knot.type ?? "work"}`,
-      `**Profile**: ${knot.profile_id ?? "autopilot"}  |  **State**: ${rawState}`,
-      knot.description ? `\n## Description\n\n${knot.description}` : null,
-      ``,
-      `---`,
-      ``,
-      skillText,
-      ``,
-      `## Completion`,
-      ``,
-      `\`kno next ${knot.id ?? beatId} --expected-state <currentState> --actor-kind agent\``,
-    ]
-      .filter((line): line is string => line !== null)
-      .join("\n");
-
-    return ok({
-      prompt: fallbackPrompt,
-      claimed: false,
-    });
+    return ok({ prompt, claimed: false });
   }
 
   async buildPollPrompt(

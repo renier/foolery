@@ -54,12 +54,6 @@ export interface TakePromptOptions {
   isParent?: boolean;
   /** IDs of child beats (when isParent is true). */
   childBeatIds?: string[];
-  /** Agent name for claim tracking. */
-  agentName?: string;
-  /** Agent model identifier for claim tracking. */
-  agentModel?: string;
-  /** Agent version for claim tracking. */
-  agentVersion?: string;
 }
 
 /** Result of building a Take!/Scene! prompt. */

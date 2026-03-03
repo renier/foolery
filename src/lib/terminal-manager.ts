@@ -606,9 +606,6 @@ export async function createSession(
       {
         isParent,
         childBeatIds: waveBeatIds.length > 0 ? waveBeatIds : undefined,
-        agentName: agent.label || agent.command,
-        agentModel: agent.model,
-        agentVersion: agent.version,
       },
       repoPath,
     );
@@ -883,15 +880,10 @@ export async function createSession(
     }
 
     // Claim the same beat into its next workflow state.
-    const claimAgent = reviewAgentOverride ?? agent;
     console.log(`${tag} claiming ${beatId} from state=${current.state}`);
     const takeResult = await getBackend().buildTakePrompt(
       beatId,
-      {
-        agentName: claimAgent.label || claimAgent.command,
-        agentModel: claimAgent.model,
-        agentVersion: claimAgent.version,
-      },
+      {},
       repoPath,
     );
     if (!takeResult.ok || !takeResult.data) {
@@ -935,7 +927,7 @@ export async function createSession(
       return true;
     }
 
-    console.log(`${tag} beat=${beatId} state=${current.state} — VIOLATION: action state on exit`);
+    console.warn(`${tag} [WARN] beat=${beatId} state=${current.state} — VIOLATION: action state on exit`);
     pushEvent({
       type: "stdout",
       data: `\x1b[33m--- Invariant violation: beat ${beatId} in action state "${current.state}" after agent exit ---\x1b[0m\n`,
@@ -944,7 +936,7 @@ export async function createSession(
 
     // Layer 3: advance to the next queue/terminal state via kno next
     const rolledBack = rollbackActivePhase(current.state);
-    console.log(`${tag} advancing via nextKnot (would-be rollback: ${current.state} → ${rolledBack})`);
+    console.warn(`${tag} [WARN] advancing via nextKnot (would-be rollback: ${current.state} → ${rolledBack})`);
     const nextResult = await nextKnotGuarded(beatId, current.state, repoPath);
     if (nextResult.ok) {
       pushEvent({
@@ -952,9 +944,9 @@ export async function createSession(
         data: `\x1b[33m--- Invariant fix: advanced ${beatId} from action state "${current.state}" via kno next ---\x1b[0m\n`,
         timestamp: Date.now(),
       });
-      console.log(`${tag} nextKnot succeeded for ${beatId}`);
+      console.warn(`${tag} [WARN] nextKnot succeeded for ${beatId}`);
     } else if (nextResult.expectedStateMismatch) {
-      console.log(`${tag} nextKnot skipped due stale expected state: ${nextResult.error}`);
+      console.warn(`${tag} [WARN] nextKnot skipped due stale expected state: ${nextResult.error}`);
       const refreshed = await getBackend().get(beatId, repoPath);
       if (refreshed.ok && refreshed.data) {
         const refreshedWorkflow = resolveWorkflowForBeat(refreshed.data, workflowsById, fallbackWorkflow);

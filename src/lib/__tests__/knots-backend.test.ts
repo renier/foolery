@@ -561,7 +561,7 @@ describe("KnotsBackend mapping behaviour", () => {
   });
 
   describe("buildTakePrompt", () => {
-    it("claims a specific knot and returns its prompt", async () => {
+    it("shows a knot and returns claim instructions (not pre-claimed)", async () => {
       const backend = new KnotsBackend("/repo");
       const created = await backend.create({
         title: "Claim me",
@@ -572,15 +572,14 @@ describe("KnotsBackend mapping behaviour", () => {
       expect(created.ok).toBe(true);
       const id = created.data!.id;
 
-      const result = await backend.buildTakePrompt(id, { agentName: "test-agent", agentModel: "test-model" });
+      const result = await backend.buildTakePrompt(id);
       expect(result.ok).toBe(true);
       expect(result.data?.prompt).toContain(id);
-      expect(result.data?.claimed).toBe(true);
-      expect(mockClaimKnot).toHaveBeenCalledWith(id, "/repo", {
-        agentName: "test-agent",
-        agentModel: "test-model",
-        agentVersion: undefined,
-      });
+      expect(result.data?.prompt).toContain("KNOTS CLAIM MODE");
+      expect(result.data?.prompt).toContain("kno claim");
+      expect(result.data?.claimed).toBe(false);
+      expect(mockShowKnot).toHaveBeenCalledWith(id, "/repo");
+      expect(mockClaimKnot).not.toHaveBeenCalled();
     });
   });
 
