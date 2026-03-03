@@ -264,7 +264,7 @@ function BeadsPageInner() {
         agentVersion: result.data.agentVersion,
         agentCommand: result.data.agentCommand,
         status: "running",
-        startedAt: new Date().toISOString(),
+        startedAt: result.data.startedAt,
       });
     },
     [activeRepo, hasRollingAncestor, setActiveSession, terminals, upsertTerminal]
@@ -303,7 +303,7 @@ function BeadsPageInner() {
         agentVersion: result.data.agentVersion,
         agentCommand: result.data.agentCommand,
         status: "running",
-        startedAt: new Date().toISOString(),
+        startedAt: result.data.startedAt,
       });
     },
     [activeRepo, upsertTerminal]

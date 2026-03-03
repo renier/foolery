@@ -381,7 +381,8 @@ export type VerificationEventType =
   | "retry"
   | "closed"
   | "notes-updated"
-  | "retry-session-started";
+  | "retry-session-started"
+  | "skipped-terminal";
 
 export interface VerificationEvent {
   type: VerificationEventType;
