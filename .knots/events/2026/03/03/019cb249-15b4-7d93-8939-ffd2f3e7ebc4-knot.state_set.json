@@ -1,0 +1,18 @@
+{
+  "event_id": "019cb249-15b4-7d93-8939-ffd2f3e7ebc4",
+  "occurred_at": "2026-03-03T06:01:00.084876Z",
+  "knot_id": "foolery-xmvb",
+  "type": "knot.state_set",
+  "data": {
+    "actor_kind": "agent",
+    "agent_model": "gpt-5.3-codex",
+    "agent_name": "OpenAI Codex",
+    "force": false,
+    "from": "ready_for_shipment",
+    "profile_id": "autopilot",
+    "to": "shipment"
+  },
+  "precondition": {
+    "profile_etag": "019cb248-45c1-7ee3-bbae-eaa4cd9ded39"
+  }
+}

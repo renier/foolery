@@ -1,0 +1,13 @@
+{
+  "event_id": "019cb248-45c1-7ee3-bbae-ea9d360a4731",
+  "occurred_at": "2026-03-03T06:00:06.849434Z",
+  "knot_id": "foolery-xmvb",
+  "type": "knot.state_set",
+  "data": {
+    "actor_kind": "agent",
+    "force": false,
+    "from": "implementation_review",
+    "profile_id": "autopilot",
+    "to": "ready_for_shipment"
+  }
+}

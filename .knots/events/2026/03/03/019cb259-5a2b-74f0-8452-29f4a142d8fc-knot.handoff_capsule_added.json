@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb259-5a2b-74f0-8452-29f4a142d8fc",
+  "occurred_at": "2026-03-03T06:18:46.187011Z",
+  "knot_id": "foolery-754b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed in c48372a. Added finishSession double-call guard, structured error prefixes with beat/iteration/dialect context, is_error red rendering, and stdin_prompt failure classification.",
+    "datetime": "2026-03-03T06:18:46.187011Z",
+    "entry_id": "019cb259-5a2b-74f0-8452-29ecf8284e1a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb24c-f620-7733-8207-ed993aa43433",
+  "occurred_at": "2026-03-03T06:05:14.144268Z",
+  "knot_id": "foolery-754b",
+  "type": "knot.created",
+  "data": {
+    "body": "## Problem\nWhen agent sessions fail in the UI terminal, the error output is minimal and unhelpful:\n\n```\nis_error: false\n--- Claimed knots-27ef (iteration 2) ---\n--- Take 2/10 ---\nFailed to send prompt for take iteration 2\n✗ Process exited with code 1\n✗ Process exited with code 1\n```\n\nIssues:\n1. Raw field dump: is_error: false is an internal field leaked to the user with no context\n2. No root cause shown: 'failed to send prompt' with no WHY (stdin closed, wrong dialect, etc.)\n3. Duplicate exit messages: 'Process exited with code 1' appears twice\n4. No suggested action: user has no idea what to do next\n5. stderr events are bare strings with no structured metadata\n\n## Suggested Improvements\n\n### 1. Structured error context in take-loop failures\nAdd agent dialect, beat ID, and iteration to error messages:\n```\n[take 2/10 | beat: knots-27ef | agent: codex]\nError: Failed to send prompt — agent uses CLI args, not stdin.\n```\n\n### 2. Deduplicate exit messages\nTrack whether finishSession was already called for the current iteration.\n\n### 3. Failure classification for take-loop errors\nExtend classifyTerminalFailure() to recognize take-loop specific failures.\n\n### 4. Log internal fields to console, not terminal\nFields like is_error should go to console.log, not pushEvent (user-facing terminal).\n\n### 5. Error event schema\nAdd structure beyond { type: 'stderr', data: string }:\n```typescript\npushEvent({\n  type: 'error',\n  data: message,\n  context: { beatId, iteration, dialect, phase },\n  timestamp: Date.now(),\n});\n```\n\n## Files\n- src/lib/terminal-manager.ts (error emission in spawnTakeChild and startSession)\n- src/components/terminal-panel.tsx (rendering and deduplication)",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Improve terminal error output: structured context and actionable diagnostics"
+  }
+}

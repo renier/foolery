@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb259-567f-7ff3-8b38-f1c08eace75b",
+  "occurred_at": "2026-03-03T06:18:45.247024Z",
+  "knot_id": "foolery-e09f",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed in c48372a. Wrapped take-loop stdin send with effectiveIsInteractive guard in spawnTakeChild(), matching the pattern from a59b703.",
+    "datetime": "2026-03-03T06:18:45.247024Z",
+    "entry_id": "019cb259-567f-7ff3-8b38-f1b9cdd1f6ba",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

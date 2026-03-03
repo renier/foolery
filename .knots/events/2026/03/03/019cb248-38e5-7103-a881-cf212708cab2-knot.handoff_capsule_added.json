@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb248-38e5-7103-a881-cf212708cab2",
+  "occurred_at": "2026-03-03T06:00:03.556993Z",
+  "knot_id": "foolery-xmvb",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Implemented clickable bead IDs in creation toasts and top-header notifications; added shared bead focus URL helper and unit tests. Integrated on main as cf3177f and pushed to origin/main. Gates: lint (warnings-only baseline), tsc pass, unit tests pass, build passes with NODE_ENV=production.",
+    "datetime": "2026-03-03T06:00:03Z",
+    "entry_id": "019cb248-38e4-7e00-93f6-18744df05d8e",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

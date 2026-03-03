@@ -1,0 +1,15 @@
+{
+  "event_id": "019caf8f-7bc5-7133-a8a8-912b0ce96f64",
+  "occurred_at": "2026-03-02T17:19:02.085081Z",
+  "knot_id": "foolery-9v09",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implemented API documentation: OpenAPI 3.1.0 spec served at GET /api/openapi.json (src/lib/openapi/ modular spec + src/app/api/openapi.json/route.ts), human-readable API guide at docs/API.md with domain overview, SSE streaming guide, and 6 workflow recipes for agent automation. Updated docs/MANIFEST.md to replace 190 lines of outdated inline API reference with a summary table linking to canonical docs. All 33+ API endpoints documented. Quality gates: typecheck clean, 1702 tests pass. Commit 79461d2 pushed to origin/main.",
+    "datetime": "2026-03-02T18:20:00Z",
+    "entry_id": "019caf8f-7bc5-7133-a8a8-911f3de15e49",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb255-9949-7333-be6d-693ed0b1c476",
+  "occurred_at": "2026-03-03T06:14:40.201953Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-754b",
+    "profile_id": "autopilot",
+    "state": "plan_review",
+    "terminal": false,
+    "title": "Improve terminal error output: structured context and actionable diagnostics",
+    "updated_at": "2026-03-03T06:14:40.201953Z"
+  }
+}

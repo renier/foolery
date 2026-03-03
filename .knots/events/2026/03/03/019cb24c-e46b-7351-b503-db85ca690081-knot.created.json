@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb24c-e46b-7351-b503-db85ca690081",
+  "occurred_at": "2026-03-03T06:05:09.611299Z",
+  "knot_id": "foolery-e09f",
+  "type": "knot.created",
+  "data": {
+    "body": "## Problem\nIn spawnTakeChild() (terminal-manager.ts:1089), the take-loop unconditionally calls takeSendUserTurn() to send the prompt via stdin, regardless of agent dialect. For codex agents (non-interactive), stdin is set to 'ignore' and takeStdinClosed is initialized to true, so takeSendUserTurn() always returns false, causing every take iteration after the first to immediately fail with:\n\n```\nFailed to send prompt for take iteration N\n✗ Process exited with code 1\n```\n\n## Root Cause\nCommit a59b703 fixed the initial session prompt (line 1448) by wrapping it in if (isInteractive), but the same pattern was not applied to the take-loop iteration code at line 1089.\n\nFor codex agents, the prompt is already passed as a CLI argument via buildPromptModeArgs() at line 871, so stdin send is unnecessary.\n\n## Suggested Fix\nWrap the stdin send in spawnTakeChild with an effectiveIsInteractive guard, matching the pattern used for the initial prompt:\n\n```typescript\n// terminal-manager.ts ~line 1089\nif (effectiveIsInteractive) {\n  const sent = takeSendUserTurn(takePrompt, `take_${takeIteration}`);\n  if (!sent) {\n    takeCloseInput();\n    pushEvent({ type: 'stderr', data: `Failed to send prompt...`, timestamp: Date.now() });\n    takeChild.kill('SIGTERM');\n    entry.process = null;\n    finishSession(1);\n  }\n}\n```\n\n## Files\n- src/lib/terminal-manager.ts (lines 852-1097)",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Bug: take-loop fails for codex agents - stdin prompt sent to non-interactive process"
+  }
+}

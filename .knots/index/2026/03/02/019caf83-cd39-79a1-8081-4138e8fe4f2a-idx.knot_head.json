@@ -1,0 +1,17 @@
+{
+  "event_id": "019caf83-cd39-79a1-8081-4138e8fe4f2a",
+  "occurred_at": "2026-03-02T17:06:16.505227Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-3c09",
+    "profile_id": "autopilot",
+    "state": "shipment",
+    "terminal": false,
+    "title": "Settings: When Agent Pools are configured, gray out/disable the action settings",
+    "updated_at": "2026-03-02T17:06:16.505227Z"
+  },
+  "precondition": {
+    "profile_etag": "019caf83-a899-7ed2-b824-1a16d74c3400"
+  }
+}

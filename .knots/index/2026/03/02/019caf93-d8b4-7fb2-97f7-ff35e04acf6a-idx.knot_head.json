@@ -1,0 +1,14 @@
+{
+  "event_id": "019caf93-d8b4-7fb2-97f7-ff35e04acf6a",
+  "occurred_at": "2026-03-02T17:23:48.011912Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-9v09",
+    "profile_id": "autopilot",
+    "state": "implementation_review",
+    "terminal": false,
+    "title": "Scene eastwood-uncut: exploration: api docs for openclaw or other agents",
+    "updated_at": "2026-03-02T17:23:48.011912Z"
+  }
+}
