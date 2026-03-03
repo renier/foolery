@@ -474,7 +474,7 @@ export async function nextKnot(
 ): Promise<BdResult<void>> {
   return withNextKnotSerialization(id, async () => {
     const args = ["next", id];
-    if (options?.expectedState) args.push(options.expectedState);
+    if (options?.expectedState) args.push("--expected-state", options.expectedState);
     if (options?.actorKind) args.push("--actor-kind", options.actorKind);
     const { stderr, exitCode } = await execWriteWithRetry(args, { repoPath });
     if (exitCode !== 0) return { ok: false, error: stderr || "knots next failed" };

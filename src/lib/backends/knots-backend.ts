@@ -472,7 +472,7 @@ export const BUILTIN_SKILL_PROMPTS: Readonly<Record<string, string>> = Object.fr
 
 ## Output
 - Implementation code merged and pushed to \`main\`
-- Transition: \`kno next <id> <currentState> --actor-kind agent\`
+- Transition: \`kno next <id> --expected-state <currentState> --actor-kind agent\`
 
 ## Failure Modes
 - Merge conflicts: \`kno update <id> --status ready_for_implementation --add-note "<blocker details>"\`
@@ -493,7 +493,7 @@ export const BUILTIN_SKILL_PROMPTS: Readonly<Record<string, string>> = Object.fr
    \`kno update <id> --status ready_for_implementation --add-note "No committed implementation found; rolling back to implementation."\`
 
 ## Output
-- Approved: \`kno next <id> <currentState> --actor-kind agent\`
+- Approved: \`kno next <id> --expected-state <currentState> --actor-kind agent\`
 - Needs revision: \`kno update <id> --status ready_for_implementation --add-note "<blocker details>"\`
 
 ## Failure Modes
@@ -1043,7 +1043,7 @@ export class KnotsBackend implements BackendPort {
         ...childLines,
         `- Use the returned \`prompt\` field as the source of truth for each claim iteration.`,
         `- Do not stop after the first claim/completion unless the child is already terminal.`,
-        `- If a child is left in an active state (e.g. implementation_review), run \`kno next <id> <currentState> --actor-kind agent\` once to return it to queue, then continue the claim loop.`,
+        `- If a child is left in an active state (e.g. implementation_review), run \`kno next <id> --expected-state <currentState> --actor-kind agent\` once to return it to queue, then continue the claim loop.`,
         `- Do not guess or brute-force workflow transitions outside the claim output.`,
       ].filter((line): line is string => line !== null).join("\n");
 
@@ -1111,7 +1111,7 @@ export class KnotsBackend implements BackendPort {
       ``,
       `## Completion`,
       ``,
-      `\`kno next ${knot.id ?? beatId} <currentState> --actor-kind agent\``,
+      `\`kno next ${knot.id ?? beatId} --expected-state <currentState> --actor-kind agent\``,
     ]
       .filter((line): line is string => line !== null)
       .join("\n");

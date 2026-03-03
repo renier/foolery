@@ -490,7 +490,7 @@ describe("KnotsBackend coverage: buildTakePrompt parent/scene mode", () => {
     expect(result.data?.prompt).toContain("Open child beat IDs:");
     expect(result.data?.prompt).toContain("Repeat this loop until the child reaches `shipped` or `abandoned`.");
     expect(result.data?.prompt).toContain("Do not stop after the first claim/completion unless the child is already terminal.");
-    expect(result.data?.prompt).toContain("run `kno next <id> <currentState> --actor-kind agent` once to return it to queue");
+    expect(result.data?.prompt).toContain("run `kno next <id> --expected-state <currentState> --actor-kind agent` once to return it to queue");
     // Should NOT have called claimKnot
     expect(mockClaimKnot).not.toHaveBeenCalled();
   });
