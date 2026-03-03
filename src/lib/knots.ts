@@ -462,13 +462,19 @@ export async function skillPrompt(
   return { ok: true, data: stdout };
 }
 
+export interface NextKnotOptions {
+  actorKind?: string;
+  expectedState?: string;
+}
+
 export async function nextKnot(
   id: string,
   repoPath?: string,
-  options?: { actorKind?: string },
+  options?: NextKnotOptions,
 ): Promise<BdResult<void>> {
   return withNextKnotSerialization(id, async () => {
     const args = ["next", id];
+    if (options?.expectedState) args.push("--expected-state", options.expectedState);
     if (options?.actorKind) args.push("--actor-kind", options.actorKind);
     const { stderr, exitCode } = await execWriteWithRetry(args, { repoPath });
     if (exitCode !== 0) return { ok: false, error: stderr || "knots next failed" };

@@ -282,7 +282,10 @@ async function advanceAgentOwnedActionStateToQueue(
   const tag = `[terminal-manager] [${contextLabel}] [action-heal]`;
   console.log(`${tag} advancing ${beat.id} from action state=${beat.state}`);
 
-  const nextResult = await nextKnot(beat.id, repoPath, { actorKind: "agent" });
+  const nextResult = await nextKnot(beat.id, repoPath, {
+    actorKind: "agent",
+    expectedState: beat.state,
+  });
   if (!nextResult.ok) {
     const errMsg = typeof nextResult.error === "string" ? nextResult.error : "unknown";
     console.warn(`${tag} failed to advance ${beat.id}: ${errMsg}`);
@@ -765,7 +768,10 @@ export async function createSession(
     let stepOwner = resolved ? workflow.owners?.[resolved.step] ?? "agent" : "none";
     if (resolved?.phase === StepPhase.Active && stepOwner === "agent") {
       console.log(`${tag} auto-advancing ${beatId} from active state=${current.state}`);
-      const nextResult = await nextKnot(beatId, repoPath, { actorKind: "agent" });
+      const nextResult = await nextKnot(beatId, repoPath, {
+        actorKind: "agent",
+        expectedState: current.state,
+      });
       if (!nextResult.ok) {
         const errMsg = typeof nextResult.error === "string" ? nextResult.error : "unknown";
         console.log(`${tag} STOP: auto-advance failed for ${beatId}: ${errMsg}`);
@@ -910,7 +916,10 @@ export async function createSession(
     // Layer 3: advance to the next queue/terminal state via kno next
     const rolledBack = rollbackActivePhase(current.state);
     console.log(`${tag} advancing via nextKnot (would-be rollback: ${current.state} → ${rolledBack})`);
-    const nextResult = await nextKnot(beatId, repoPath, { actorKind: "agent" });
+    const nextResult = await nextKnot(beatId, repoPath, {
+      actorKind: "agent",
+      expectedState: current.state,
+    });
     if (nextResult.ok) {
       pushEvent({
         type: "stdout",

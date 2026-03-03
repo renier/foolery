@@ -60,11 +60,24 @@ describe("nextKnot retry with exponential backoff", () => {
   });
 
   it("succeeds on first attempt without retrying", async () => {
-    const promise = nextKnot("K-0001", "/tmp/test");
+    const promise = nextKnot("K-0001", "/tmp/test", {
+      expectedState: "planning",
+      actorKind: "agent",
+    });
 
     await vi.waitFor(() => {
       expect(execFileCallbacks).toHaveLength(1);
     });
+    expect(execFileCallbacks[0].args).toEqual(
+      expect.arrayContaining([
+        "next",
+        "K-0001",
+        "--expected-state",
+        "planning",
+        "--actor-kind",
+        "agent",
+      ]),
+    );
     succeedLatest();
 
     const result = await promise;
