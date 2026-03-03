@@ -673,7 +673,7 @@ _agent_wizard() {
     for action in take scene direct breakdown; do
       _kv_set ACTION_MAP "$action" "$sole"
     done
-    _setup_log "Registered $sole as default agent for all actions."
+    _setup_log "Registered $sole for all actions."
   else
     _prompt_all_models
     _prompt_action_mappings

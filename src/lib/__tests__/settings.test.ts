@@ -589,7 +589,7 @@ describe("getStepAgent", () => {
     expect(agent.label).toBe("Claude Opus");
   });
 
-  it("falls back to default agent when no pool and no action mapping", async () => {
+  it("falls back to dispatch default when no pool and no action mapping", async () => {
     const toml = [
       'dispatchMode = "pools"',
       '[agents.my-default]',

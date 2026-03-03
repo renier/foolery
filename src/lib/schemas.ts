@@ -124,7 +124,7 @@ export const verificationSettingsSchema = z
   .object({
     /** Whether auto-verification is enabled after code-producing actions. */
     enabled: z.boolean().default(false),
-    /** Agent ID to use for verification (empty string = use default agent). */
+    /** Agent ID to use for verification (empty string = use dispatch fallback). */
     agent: z.string().default(""),
     /** Maximum automatic retry attempts before stopping. 0 = no auto-retry. */
     maxRetries: z.number().int().min(0).default(3),

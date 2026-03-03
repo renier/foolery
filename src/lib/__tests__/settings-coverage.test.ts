@@ -64,7 +64,7 @@ describe("getVerificationSettings (line 290)", () => {
 });
 
 describe("getVerificationAgent (line 296)", () => {
-  it("falls back to default agent command", async () => {
+  it("falls back to dispatch default command", async () => {
     mockReadFile.mockRejectedValue(new Error("ENOENT"));
     const agent = await getVerificationAgent();
     expect(agent.command).toBe("claude");
