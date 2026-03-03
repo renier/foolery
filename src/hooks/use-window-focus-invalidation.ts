@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { invalidateBeatListQueries } from "@/lib/beat-query-cache";
 
 /**
  * Invalidates bead-related React Query caches when the browser tab
@@ -21,9 +22,8 @@ export function useWindowFocusInvalidation(): void {
   useEffect(() => {
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
-        // Invalidate all bead queries so Final Cut view, badges,
-        // and notification hooks refetch immediately.
-        queryClient.invalidateQueries({ queryKey: ["beads"] });
+        // Refresh beat list views/badges immediately when tab visibility resumes.
+        void invalidateBeatListQueries(queryClient);
       }
     }
 

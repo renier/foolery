@@ -19,6 +19,7 @@ import {
   classifyTerminalFailure,
   type TerminalFailureGuidance,
 } from "@/lib/terminal-failure";
+import { invalidateBeatListQueries } from "@/lib/beat-query-cache";
 import type { Terminal as XtermTerminal } from "@xterm/xterm";
 import type { FitAddon as XtermFitAddon } from "@xterm/addon-fit";
 import { toast } from "sonner";
@@ -405,9 +406,7 @@ export function TerminalPanel() {
             // queries so human-action badges and notifications refresh
             // without waiting for the next polling interval.
             if (code === 0) {
-              queryClientRef.current.invalidateQueries({
-                queryKey: ["beats"],
-              });
+              void invalidateBeatListQueries(queryClientRef.current);
             }
           }
         },
