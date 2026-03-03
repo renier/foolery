@@ -51,9 +51,6 @@ assert_contains() {
 write_partial_settings() {
   mkdir -p "$CONFIG_DIR"
   cat >"$SETTINGS_FILE" <<'TOML'
-[agent]
-command = "claude"
-
 [actions]
 take = ""
 scene = ""

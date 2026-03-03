@@ -204,7 +204,6 @@ describe("saveSettings", () => {
 
   it("sets file permissions to 0600 after writing", async () => {
     const settings = {
-      agent: { command: "my-agent" },
       agents: {},
       actions: DEFAULT_ACTIONS,
       verification: { enabled: false, agent: "", maxRetries: 3 },

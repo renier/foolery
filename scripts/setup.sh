@@ -512,10 +512,7 @@ _agent_label() {
 _write_settings_toml() {
   mkdir -p "$_AGENT_CONFIG_DIR"
 
-  local default_cmd="${FOUND_AGENTS[0]:-claude}"
   {
-    printf '[agent]\ncommand = "%s"\n\n' "$default_cmd"
-
     local aid
     for aid in "${FOUND_AGENTS[@]}"; do
       local lbl
