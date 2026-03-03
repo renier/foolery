@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, Square, Maximize2, Minimize2, X } from "lucide-react";
 import { useTerminalStore, getActiveTerminal } from "@/stores/terminal-store";
 import { connectToSession, abortSession, startSession, listSessions } from "@/lib/terminal-api";
@@ -12,6 +12,8 @@ import {
   type ResolvedAgentInfo,
 } from "@/hooks/use-agent-info";
 import { AgentInfoBar } from "@/components/agent-info-bar";
+import type { BeatInfoForBar } from "@/components/agent-info-bar";
+import { fetchBeat } from "@/lib/api";
 import type { TerminalEvent } from "@/lib/types";
 import {
   classifyTerminalFailure,
@@ -99,6 +101,24 @@ export function TerminalPanel() {
     };
   }, [activeTerminal?.agentCommand, activeTerminal?.agentModel, activeTerminal?.agentName]);
   const agentInfo = sessionAgentInfo ?? fallbackAgentInfo;
+
+  // Fetch beat data for the info bar (state + timestamps)
+  const beatQuery = useQuery({
+    queryKey: ["beat", activeBeatId, activeRepoPath],
+    queryFn: () => fetchBeat(activeBeatId!, activeRepoPath),
+    enabled: !!activeBeatId,
+    refetchInterval: 15_000,
+  });
+
+  const beatInfoForBar = useMemo<BeatInfoForBar | null>(() => {
+    const beat = beatQuery.data?.data;
+    if (!beat) return null;
+    return {
+      state: beat.state,
+      stateChangedAt: beat.updated,
+      createdAt: beat.created,
+    };
+  }, [beatQuery.data?.data]);
 
   const handleAbort = useCallback(async () => {
     if (!activeTerminal) return;
@@ -558,7 +578,7 @@ export function TerminalPanel() {
         </div>
       </div>
 
-      {agentInfo && <AgentInfoBar agent={agentInfo} />}
+      {agentInfo && <AgentInfoBar agent={agentInfo} beat={beatInfoForBar} />}
 
       <div ref={termContainerRef} className="flex-1 overflow-hidden px-1 py-1" />
     </div>
