@@ -38,7 +38,7 @@ import {
   rewriteWaveTitleSlug,
 } from "@/lib/wave-slugs";
 
-interface ExistingOrchestrationData {
+export interface ExistingOrchestrationData {
   beats: Beat[];
   waves: Beat[];
   depsByWaveId: Record<string, BeatDependency[]>;
@@ -73,7 +73,7 @@ interface OrchestrationTree {
   updatedAt: string;
 }
 
-interface ParsedOrchestration {
+export interface ParsedOrchestration {
   trees: OrchestrationTree[];
   waves: WaveCard[];
 }
@@ -92,6 +92,10 @@ const MIN_ZOOM_DEPTH = 2;
 
 function isWaveBeat(beat: Beat): boolean {
   return beat.labels?.includes(ORCHESTRATION_WAVE_LABEL);
+}
+
+export function isSceneVisibleState(state: Beat["state"]): boolean {
+  return state !== "closed" && state !== "abandoned";
 }
 
 function toEpochMs(value: string | undefined): number {
@@ -135,12 +139,12 @@ function buildChildrenIndex(beats: Beat[]): Map<string, Beat[]> {
     if (!parentId) return undefined;
     const parent = byId.get(parentId);
     if (!parent) return undefined;
-    if (parent.state === "closed") return undefined;
+    if (!isSceneVisibleState(parent.state)) return undefined;
     return parent.id;
   };
 
   for (const beat of beats) {
-    if (beat.state === "closed") continue;
+    if (!isSceneVisibleState(beat.state)) continue;
     const parentId = resolveVisibleParentId(beat);
     if (!parentId) continue;
     const list = byParent.get(parentId) ?? [];
@@ -186,9 +190,9 @@ function buildNode(
   };
 }
 
-function parseExistingOrchestrations(data: ExistingOrchestrationData): ParsedOrchestration {
+export function parseExistingOrchestrations(data: ExistingOrchestrationData): ParsedOrchestration {
   const waves = data.waves
-    .filter((wave) => wave.state !== "closed")
+    .filter((wave) => isSceneVisibleState(wave.state))
     .slice()
     .sort(compareByTimestamp);
   const waveIds = new Set(waves.map((wave) => wave.id));
@@ -398,7 +402,7 @@ function buildMigrationPlan(waves: Beat[]): MigrationPlan[] {
 function statusTone(status: Beat["state"]): string {
   if (status === "in_progress") return "bg-blue-100 text-blue-700";
   if (status === "blocked") return "bg-amber-100 text-amber-800";
-  if (status === "closed") return "bg-zinc-200 text-zinc-700";
+  if (status === "closed" || status === "abandoned") return "bg-zinc-200 text-zinc-700";
   if (status === "deferred") return "bg-violet-100 text-violet-700";
   return "bg-emerald-100 text-emerald-700";
 }
@@ -865,7 +869,7 @@ export function ExistingOrchestrationsView() {
       return;
     }
     const wavesToShoot = activeTree.waves.filter(
-      (wave) => wave.beat.state !== "closed"
+      (wave) => isSceneVisibleState(wave.beat.state)
     );
     if (wavesToShoot.length === 0) {
       toast.info("All scenes in this tree are already closed");
