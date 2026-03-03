@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb439-8488-7360-a517-24cc61b135d2",
+  "occurred_at": "2026-03-03T15:03:14.312359Z",
+  "knot_id": "foolery-7311",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added OpenRouter to runtime agent scan and setup/install known-agent lists so it appears in scan-based agent lists; updated scan tests. Gates: lint pass (warnings only), typecheck pass, tests pass, build fails pre-existing on main during prerender (/beads, /_not-found) with providers hook null-context error.",
+    "datetime": "2026-03-03T15:03:14.312359Z",
+    "entry_id": "019cb439-8488-7360-a517-24ba46aa6918",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

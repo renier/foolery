@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb437-610e-7ff2-9c2a-3fcef836a94c",
+  "occurred_at": "2026-03-03T15:00:54.158978Z",
+  "knot_id": "foolery-2fb0",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Removed persistent notifications for beat creation (3 addNotification calls in create-beat-dialog.tsx). Created use-shipped-notifications.ts hook that watches for beats transitioning to shipped/closed state and fires a notification with the beat title and clickable ID. Wired into beads/page.tsx alongside existing useRetryNotifications. Toast notifications for creation kept as ephemeral feedback.",
+    "datetime": "2026-03-03T16:00:00Z",
+    "entry_id": "019cb437-610e-7ff2-9c2a-3fb3f1ad958a",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb437-9d0e-7d61-aec4-8307be5860ad",
+  "occurred_at": "2026-03-03T15:01:09.518455Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-dbeb",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation_review",
+    "terminal": false,
+    "title": "UI terminal times are incorrect",
+    "updated_at": "2026-03-03T15:01:09.518455Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb436-5d77-7e22-9d12-c45941b481d2"
+  }
+}

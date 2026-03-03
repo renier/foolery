@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb437-6121-71f0-b8a8-e0e7db1f03ea",
+  "occurred_at": "2026-03-03T15:00:54.158978Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-2fb0",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "Don't send notifications for user created beats",
+    "updated_at": "2026-03-03T15:00:54.158978Z"
+  }
+}
