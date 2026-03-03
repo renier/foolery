@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb46f-39cb-74c1-a73a-1bbbe479daa0",
+  "occurred_at": "2026-03-03T16:01:54.123834Z",
+  "knot_id": "foolery-ff81",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed missing history sessions by merging default interaction-log root with repo-local .foolery-logs for history queries, plus cross-root session dedupe. Added regression tests for production-mode repo-local log inclusion and dedupe. Quality gates: bun run lint (warnings only), bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build.",
+    "datetime": "2026-03-03T16:01:54.123834Z",
+    "entry_id": "019cb46f-39cb-74c1-a73a-1ba9199d6092",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
