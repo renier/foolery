@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb42f-1efb-7433-bf3c-afd0340998f0",
+  "occurred_at": "2026-03-03T14:51:52.955677Z",
+  "knot_id": "foolery-7311",
+  "type": "knot.created",
+  "data": {
+    "body": "exactly as title says - should be in the agent list.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "i have openrouter configured and agent selected, but it doesn't show up in agent list"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb3e2-e22c-7dd2-b141-68b9fb41f349",
+  "occurred_at": "2026-03-03T13:28:36.652427Z",
+  "knot_id": "foolery-685d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed parent auto-close gap for c051-style scene runs: regroom now evaluates the starting beat (not only ancestors), so completing all children in a parent session can auto-close/ship the parent. Added regression test for starting-parent auto-close. Validated with bun run lint, bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Landed on main and pushed.",
+    "datetime": "2026-03-03T13:28:36.652427Z",
+    "entry_id": "019cb3e2-e22c-7dd2-b141-68a6dd7187e2",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

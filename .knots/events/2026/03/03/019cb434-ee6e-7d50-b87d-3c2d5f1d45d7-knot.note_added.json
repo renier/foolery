@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb434-ee6e-7d50-b87d-3c2d5f1d45d7",
+  "occurred_at": "2026-03-03T14:58:13.742117Z",
+  "knot_id": "foolery-7311",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Root-cause hypothesis: OpenRouter is configured under [openrouter] but the agent discovery list is hard-coded to claude/codex/gemini, so OpenRouter never appears in scan-based agent lists. Plan: (1) add openrouter to known/scannable agents in runtime scan and setup scripts, (2) update tests for new scan roster, (3) run quality gates and ship.",
+    "datetime": "2026-03-03T14:58:13.742117Z",
+    "entry_id": "019cb434-ee6e-7d50-b87d-3c13dc7ba49f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

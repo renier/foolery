@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb435-3ac7-7172-b82d-553fbef6adc5",
+  "occurred_at": "2026-03-03T14:58:33.287439Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-7311",
+    "profile_id": "autopilot",
+    "state": "plan_review",
+    "terminal": false,
+    "title": "i have openrouter configured and agent selected, but it doesn't show up in agent list",
+    "updated_at": "2026-03-03T14:58:33.287439Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb434-f08a-7c71-8fef-5159391d3b89"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb3e1-e485-7292-94a8-e1b8a56019fb",
+  "occurred_at": "2026-03-03T13:27:31.71703Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-3b7b",
+    "profile_id": "autopilot",
+    "state": "ready_for_shipment_review",
+    "terminal": false,
+    "title": "remove Approve/Reject/Built For Review, checkmark, thumbsdown",
+    "updated_at": "2026-03-03T13:27:31.71703Z"
+  }
+}

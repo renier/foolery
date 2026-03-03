@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb436-5d6e-7442-a5cc-0fb8e7e1b32c",
+  "occurred_at": "2026-03-03T14:59:47.694134Z",
+  "knot_id": "foolery-dbeb",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Rebased and merged to origin/main at commit a178814. Terminal elapsed timer now anchors to latest Take session start; session startedAt now sourced from backend response; anchor utility covered by unit tests.",
+    "datetime": "2026-03-03T14:59:47Z",
+    "entry_id": "019cb436-5d6e-7442-a5cc-0fa53c3572c5",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}

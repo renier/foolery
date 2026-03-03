@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb434-887a-7340-9ad0-dd7426868a09",
+  "occurred_at": "2026-03-03T14:57:47.64224Z",
+  "knot_id": "foolery-dbeb",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Updated terminal UI timers to anchor elapsed time to latest Take execution (session startedAt) instead of knot creation time; wired startSession callsites to persist backend startedAt; added unit tests for anchor selection; gates: lint, tsc, unit tests passed, build passed with NODE_ENV=production.",
+    "datetime": "2026-03-03T14:57:47Z",
+    "entry_id": "019cb434-887a-7340-9ad0-dd6256a58f62",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}
