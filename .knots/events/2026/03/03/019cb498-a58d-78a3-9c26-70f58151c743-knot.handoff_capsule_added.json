@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb498-a58d-78a3-9c26-70f58151c743",
+  "occurred_at": "2026-03-03T16:47:08.685984Z",
+  "knot_id": "foolery-db94",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Verified OpenRouter settings section on main includes an 'Is This Secure?' trigger and dialog content covering storage, safeguards, remaining risks, and user recommendations.",
+    "datetime": "2026-03-03T16:47:08.685984Z",
+    "entry_id": "019cb498-a58d-78a3-9c26-70e81e9cb730",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb497-38d2-72e0-abb5-9e3c13e26d0c",
+  "occurred_at": "2026-03-03T16:45:35.314152Z",
+  "knot_id": "foolery-58cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Verified SECURITY.md on main documents key storage, safeguards (keychain/0600/masked display), remaining risks, and key-management recommendations per acceptance criteria.",
+    "datetime": "2026-03-03T16:45:35.314152Z",
+    "entry_id": "019cb497-38d2-72e0-abb5-9e2632010531",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

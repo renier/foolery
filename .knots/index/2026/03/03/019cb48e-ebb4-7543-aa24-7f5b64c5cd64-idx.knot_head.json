@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb48e-ebb4-7543-aa24-7f5b64c5cd64",
+  "occurred_at": "2026-03-03T16:36:31.284366Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-58cc",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment",
+    "terminal": false,
+    "title": "Document OpenRouter API key security in README",
+    "updated_at": "2026-03-03T16:36:31.284366Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb48e-e0b4-7260-a597-b7c417829533"
+  }
+}

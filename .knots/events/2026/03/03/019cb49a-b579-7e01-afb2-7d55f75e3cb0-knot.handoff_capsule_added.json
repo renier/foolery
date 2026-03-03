@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb49a-b579-7e01-afb2-7d55f75e3cb0",
+  "occurred_at": "2026-03-03T16:49:23.833407Z",
+  "knot_id": "foolery-c051",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "All child knots for OpenRouter key security are now shipped. Added additional hardening on main commit e5198f096d40835638ad41fb04392082f4e438e5 to eliminate shell interpolation in keychain CLI calls and delete keychain secret on key clear; verified docs, masking, gitignore coverage, 0600 permissions, and in-app security dialog remain in place.",
+    "datetime": "2026-03-03T16:49:23.833407Z",
+    "entry_id": "019cb49a-b579-7e01-afb2-7d42cbb0bd76",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

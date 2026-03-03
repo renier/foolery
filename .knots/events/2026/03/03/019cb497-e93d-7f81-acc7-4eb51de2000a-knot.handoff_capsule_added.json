@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb497-e93d-7f81-acc7-4eb51de2000a",
+  "occurred_at": "2026-03-03T16:46:20.477507Z",
+  "knot_id": "foolery-95b3",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Verified settings API on main masks OpenRouter keys in responses, strips masked placeholders on PUT/PATCH to preserve stored secrets, and validate API uses stored key when client sends masked/useStored payload.",
+    "datetime": "2026-03-03T16:46:20.477507Z",
+    "entry_id": "019cb497-e93d-7f81-acc7-4ea6d0e44413",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

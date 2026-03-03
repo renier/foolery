@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb490-9b47-7501-8b1c-defa2457683b",
+  "occurred_at": "2026-03-03T16:38:21.767097Z",
+  "knot_id": "foolery-ff81",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed history gap for .knots/_worktree active repo paths by canonicalizing to the parent repo when discovering related log roots. Added regression coverage to ensure beat summaries and session detail load from canonical repo-local logs when queried from .knots/_worktree. Quality gates: bun run lint (warnings only), bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Pushed commit 1ec2cd33c730874754b2d2e1365b8b9127c1b29e to origin/main.",
+    "datetime": "2026-03-03T16:38:21.767097Z",
+    "entry_id": "019cb490-9b47-7501-8b1c-dee96ad2c360",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

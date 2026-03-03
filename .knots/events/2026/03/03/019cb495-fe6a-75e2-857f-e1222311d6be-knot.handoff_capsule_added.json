@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb495-fe6a-75e2-857f-e1222311d6be",
+  "occurred_at": "2026-03-03T16:44:14.826326Z",
+  "knot_id": "foolery-da96",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Console tabs now keep beat ID prefixes for multi-project disambiguation by splitting IDs into prefix/local parts (rendered as prefix-<id>). Added unit tests for splitTerminalTabBeatId. Validation: lint passed (existing warnings), tsc passed, unit tests passed; build fails on clean origin/main with pre-existing Next prerender error on /_global-error and React key warnings. Landed and pushed commit a2ce0b35cf33ed8921ce98c87225ea05776c518a to origin/main.",
+    "datetime": "2026-03-03T16:43:53Z",
+    "entry_id": "019cb495-fe6a-75e2-857f-e115915b7733",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}

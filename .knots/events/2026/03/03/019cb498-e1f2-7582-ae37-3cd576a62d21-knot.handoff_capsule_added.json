@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb498-e1f2-7582-ae37-3cd576a62d21",
+  "occurred_at": "2026-03-03T16:47:24.14682Z",
+  "knot_id": "foolery-e108",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Confirmed saveSettings/backfill paths on main enforce chmod 0600 for settings.toml writes and tests continue asserting owner-only permission behavior.",
+    "datetime": "2026-03-03T16:47:24.14682Z",
+    "entry_id": "019cb498-e1f2-7582-ae37-3cc3b357997f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb486-8b34-7080-be83-a23b735b8c33",
+  "occurred_at": "2026-03-03T16:27:22.292036Z",
+  "knot_id": "foolery-ff81",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "History now discovers related worktree log roots (sibling -wt- dirs, nested .claude/worktrees, and .knots/_worktree) when repoPath is provided, so sessions logged from dedicated worktrees are included. Added regression tests for sibling and nested worktree root inclusion. Quality gates: bun run lint (warnings only), bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Pushed to origin/main at 0dc2cea.",
+    "datetime": "2026-03-03T16:27:22.292036Z",
+    "entry_id": "019cb486-8b34-7080-be83-a22b919257ed",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

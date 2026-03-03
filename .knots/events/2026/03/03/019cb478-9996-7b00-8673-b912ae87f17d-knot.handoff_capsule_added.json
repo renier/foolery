@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb478-9996-7b00-8673-b912ae87f17d",
+  "occurred_at": "2026-03-03T16:12:08.470268Z",
+  "knot_id": "foolery-ff81",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "History now treats worktree repo paths as equivalent to the active repo filter (including .claude/worktrees and sibling -wt- paths), merges those sessions into canonical repo rows, and includes them in beat session detail queries. Added regression test coverage in agent-history.test.ts. Quality gates passed: bun run lint (warnings only), tsc --noEmit (bunx blocked by policy), bun run test, bun run build. Pushed to origin/main at b359a28.",
+    "datetime": "2026-03-03T16:12:08.470268Z",
+    "entry_id": "019cb478-9996-7b00-8673-b90eb29d0968",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

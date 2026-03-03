@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb498-80f2-77a0-8d50-0b2ab2d12b19",
+  "occurred_at": "2026-03-03T16:46:59.314189Z",
+  "knot_id": "foolery-a1c9",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Re-verified on main that .gitignore includes settings.toml, test coverage exists in src/lib/__tests__/gitignore-settings.test.ts, and git history contains no tracked settings.toml artifacts.",
+    "datetime": "2026-03-03T16:46:59.314189Z",
+    "entry_id": "019cb498-80f2-77a0-8d50-0b1317073a88",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

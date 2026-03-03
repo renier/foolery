@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb496-84da-7120-a8eb-1e168991f8d0",
+  "occurred_at": "2026-03-03T16:44:49.242565Z",
+  "knot_id": "foolery-6241",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Hardened OpenRouter keychain storage by switching to argument-safe child_process execution (no shell interpolation), added stdin-based secret-tool storage, and delete-on-clear behavior when API key is emptied. Updated keychain/settings tests. lint, tsc, and tests pass; build fails on baseline prerender issue already present on clean main.",
+    "datetime": "2026-03-03T16:44:49.242565Z",
+    "entry_id": "019cb496-84da-7120-a8eb-1e0773746787",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

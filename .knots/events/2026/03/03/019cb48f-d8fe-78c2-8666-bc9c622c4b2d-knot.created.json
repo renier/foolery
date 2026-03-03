@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb48f-d8fe-78c2-8666-bc9c622c4b2d",
+  "occurred_at": "2026-03-03T16:37:32.03067Z",
+  "knot_id": "foolery-da96",
+  "type": "knot.created",
+  "data": {
+    "body": "since you can be executing beats from multiple projects, it's nice to have the id prefix in the tabs.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "ui console should show id prefix in tabs"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb498-4de0-7ac0-bef4-8c8b662745fd",
+  "occurred_at": "2026-03-03T16:46:46.240225Z",
+  "knot_id": "foolery-a1c9",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Re-verified on main that  includes , test coverage exists in , and git history contains no tracked  artifacts.",
+    "datetime": "2026-03-03T16:46:46.240225Z",
+    "entry_id": "019cb498-4de0-7ac0-bef4-8c79fc997880",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
