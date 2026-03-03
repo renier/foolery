@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb379-cd1d-7911-9bf5-6e2250f4a1d1",
+  "occurred_at": "2026-03-03T11:33:49.981179Z",
+  "knot_id": "foolery-4a52",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Extended parent-rolling inheritance: child beats now lock state/verify/reject controls while parent is rolling, and Shift+V/Shift+F are blocked for those children. Gates: lint/typecheck/test pass; build still fails due pre-existing Next prerender key warnings on /_global-error and /beads.",
+    "datetime": "2026-03-03T11:33:49.981179Z",
+    "entry_id": "019cb379-cd1d-7911-9bf5-6e1d6f445825",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

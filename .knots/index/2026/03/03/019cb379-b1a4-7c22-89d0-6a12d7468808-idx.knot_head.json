@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb379-b1a4-7c22-89d0-6a12d7468808",
+  "occurred_at": "2026-03-03T11:33:42.948614Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-98b4",
+    "profile_id": "autopilot",
+    "state": "shipment_review",
+    "terminal": false,
+    "title": "history console search refinements",
+    "updated_at": "2026-03-03T11:33:42.948614Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb379-4922-7100-8eb7-bb09b1c6939a"
+  }
+}
