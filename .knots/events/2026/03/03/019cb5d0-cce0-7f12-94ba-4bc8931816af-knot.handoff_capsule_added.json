@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5d0-cce0-7f12-94ba-4bc8931816af",
+  "occurred_at": "2026-03-03T22:28:05.984915Z",
+  "knot_id": "foolery-46fc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Patched beats-facing mutations to throw on failed updateBead results (retakes + beat detail lightbox) so state changes no longer silently revert; pushed commit b7fa88d0e539a2deedfcfda95549582e90aea79c to origin/main. Gates: lint pass (warnings only), tsc pass, test pass, build still fails on existing Next prerender key/useContext issue for /_global-error and /beads. Remote CI/Changesets/Coverage Badge all green for this commit.",
+    "datetime": "2026-03-03T22:28:05.984915Z",
+    "entry_id": "019cb5d0-cce0-7f12-94ba-4bba1efd696b",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

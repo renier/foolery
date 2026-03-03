@@ -1,0 +1,9 @@
+{
+  "event_id": "019cb5cf-7924-70c1-a016-7540729fe13d",
+  "occurred_at": "2026-03-03T22:26:39.012123Z",
+  "knot_id": "foolery-1dea",
+  "type": "knot.tag_add",
+  "data": {
+    "tag": "commit:a1f686de472be233a838cd303332ed63d6791664"
+  }
+}
