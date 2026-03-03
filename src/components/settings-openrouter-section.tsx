@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Globe, Eye, EyeOff, CheckCircle2, Loader2, X } from "lucide-react";
+import { Globe, Eye, EyeOff, CheckCircle2, Loader2, X, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import type { OpenRouterSettings } from "@/lib/schemas";
 import {
   fetchOpenRouterModels as fetchModelsApi,
@@ -38,6 +46,7 @@ export function SettingsOpenRouterSection({
   const [models, setModels] = useState<OpenRouterModel[] | null>(null);
   const [loadingModels, setLoadingModels] = useState(false);
   const [modelFilter, setModelFilter] = useState("");
+  const [securityDialogOpen, setSecurityDialogOpen] = useState(false);
 
   async function handleValidate() {
     if (!openrouter.apiKey.trim()) {
@@ -103,10 +112,26 @@ export function SettingsOpenRouterSection({
         />
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Connect to OpenRouter for access to 200+ AI models from multiple
-        providers with unified pricing.
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          Connect to OpenRouter for access to 200+ AI models from multiple
+          providers with unified pricing.
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-[10px] text-muted-foreground gap-1 h-6 px-2 shrink-0"
+          onClick={() => setSecurityDialogOpen(true)}
+        >
+          <ShieldCheck className="size-3" />
+          Is This Secure?
+        </Button>
+      </div>
+
+      <SecurityInfoDialog
+        open={securityDialogOpen}
+        onOpenChange={setSecurityDialogOpen}
+      />
 
       {openrouter.enabled && (
         <div className="space-y-3">
@@ -320,6 +345,80 @@ function ModelsBrowser({
         </div>
       )}
     </div>
+  );
+}
+
+interface SecurityInfoDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+function SecurityInfoDialog({ open, onOpenChange }: SecurityInfoDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="size-4" />
+            Is This Secure?
+          </DialogTitle>
+          <DialogDescription>
+            How your OpenRouter API key is protected.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 text-sm">
+          <section>
+            <h4 className="font-medium text-xs uppercase tracking-wide text-muted-foreground mb-1">
+              Storage
+            </h4>
+            <ul className="list-disc list-inside space-y-0.5 text-xs text-foreground/80">
+              <li>Stored in your OS keychain (macOS Keychain / Linux secret-service) when available.</li>
+              <li>Falls back to <code className="text-[10px] bg-muted px-1 rounded">~/.config/foolery/settings.toml</code> with owner-only permissions (0600).</li>
+              <li>Excluded from version control via <code className="text-[10px] bg-muted px-1 rounded">.gitignore</code>.</li>
+            </ul>
+          </section>
+          <section>
+            <h4 className="font-medium text-xs uppercase tracking-wide text-muted-foreground mb-1">
+              In transit
+            </h4>
+            <ul className="list-disc list-inside space-y-0.5 text-xs text-foreground/80">
+              <li>The full key never leaves the server — the browser only sees a masked version.</li>
+              <li>Validation uses the stored key server-side; the browser does not send it.</li>
+            </ul>
+          </section>
+          <section>
+            <h4 className="font-medium text-xs uppercase tracking-wide text-muted-foreground mb-1">
+              Remaining risks
+            </h4>
+            <ul className="list-disc list-inside space-y-0.5 text-xs text-foreground/80">
+              <li>Localhost HTTP traffic is unencrypted (accessible only on your machine).</li>
+              <li>The key exists in server process memory while running.</li>
+              <li>If the OS keychain is unavailable, the key is stored in a local file.</li>
+            </ul>
+          </section>
+          <section>
+            <h4 className="font-medium text-xs uppercase tracking-wide text-muted-foreground mb-1">
+              Recommendations
+            </h4>
+            <ul className="list-disc list-inside space-y-0.5 text-xs text-foreground/80">
+              <li>Use a dedicated, scoped API key for Foolery.</li>
+              <li>Rotate your key regularly at{" "}
+                <a
+                  href="https://openrouter.ai/keys"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  openrouter.ai/keys
+                </a>.
+              </li>
+              <li>Set a spend limit on your OpenRouter account.</li>
+            </ul>
+          </section>
+        </div>
+        <DialogFooter showCloseButton />
+      </DialogContent>
+    </Dialog>
   );
 }
 
