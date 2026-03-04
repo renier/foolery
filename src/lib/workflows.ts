@@ -481,6 +481,13 @@ function remapLegacyStateForProfile(
   if (!normalized) return workflow.initialState;
   if (workflow.states.includes(normalized)) return normalized;
 
+  // Knots may emit shorthand claim/action states (e.g. "impl").
+  // Normalize these aliases so active beats render and transition correctly.
+  if (normalized === "impl") {
+    if (workflow.states.includes("implementation")) return "implementation";
+    return firstActionState(workflow);
+  }
+
   // Preserve explicit terminal states even when older profile definitions
   // omit them from `states`.
   if (normalized === "shipped" || normalized === "abandoned") {

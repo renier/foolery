@@ -293,6 +293,10 @@ describe("normalizeStateForWorkflow", () => {
     const result = normalizeStateForWorkflow("in_progress", workflow);
     expect(workflow.actionStates).toContain(result);
   });
+  it("remaps impl shorthand state to implementation", () => {
+    expect(normalizeStateForWorkflow("impl", workflow)).toBe("implementation");
+    expect(normalizeStateForWorkflow("  ImPl  ", workflow)).toBe("implementation");
+  });
   it("remaps verification/reviewing to implementation_review queue", () => {
     expect(normalizeStateForWorkflow("verification", workflow)).toBe("ready_for_implementation_review");
     expect(normalizeStateForWorkflow("ready_for_review", workflow)).toBe("ready_for_implementation_review");
