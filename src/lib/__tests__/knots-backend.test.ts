@@ -694,6 +694,56 @@ describe("KnotsBackend mapping behaviour", () => {
       });
     });
 
+    it("sets force=true for rollback when raw kno metadata state is missing", async () => {
+      const backend = new KnotsBackend("/repo");
+      const now = nowIso();
+      store.knots.set("stuck-2b", {
+        id: "stuck-2b",
+        title: "Force rollback knot",
+        state: "implementation",
+        profile_id: "autopilot",
+        workflow_id: "autopilot",
+        updated_at: now,
+        body: null,
+        description: null,
+        priority: 2,
+        type: "task",
+        tags: [],
+        notes: [],
+        handoff_capsules: [],
+        workflow_etag: "etag-stuck2b",
+        created_at: now,
+      });
+
+      const listed = await backend.list();
+      expect(listed.ok).toBe(true);
+      const beat = listed.data?.find((item) => item.id === "stuck-2b");
+      expect(beat).toBeTruthy();
+      if (!beat) return;
+
+      const beatWithoutRawState = {
+        ...beat,
+        metadata: {
+          ...(beat.metadata ?? {}),
+          knotsState: undefined,
+        },
+      };
+
+      const getSpy = vi.spyOn(backend, "get").mockResolvedValue({ ok: true, data: beatWithoutRawState });
+      try {
+        const result = await backend.update("stuck-2b", { state: "ready_for_implementation" });
+        expect(result.ok).toBe(true);
+      } finally {
+        getSpy.mockRestore();
+      }
+
+      const lastUpdateArgs = mockUpdateKnot.mock.calls.at(-1);
+      expect(lastUpdateArgs?.[1]).toMatchObject({
+        status: "ready_for_implementation",
+        force: true,
+      });
+    });
+
     it("keeps explicit abandoned transitions instead of remapping to initial state", async () => {
       const backend = new KnotsBackend("/repo");
       const now = nowIso();

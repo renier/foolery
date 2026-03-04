@@ -842,15 +842,20 @@ export class KnotsBackend implements BackendPort {
       const normalizedState = workflow
         ? normalizeStateForWorkflow(input.state, workflow)
         : input.state.trim().toLowerCase();
+      const normalizedDisplayState = workflow
+        ? normalizeStateForWorkflow(current.state, workflow)
+        : current.state.trim().toLowerCase();
+      const transitionSourceState = rawKnoState ?? normalizedDisplayState;
 
-      if (rawKnoState && normalizedState === rawKnoState) {
-        // Already in this state in kno — skip to avoid "no field change" error
+      if (normalizedState === transitionSourceState) {
+        // Already in this state — skip to avoid "no field change" error.
       } else {
         patch.status = normalizedState;
-        // Force if jumping to a non-adjacent state (e.g., correcting a stuck knot)
-        if (rawKnoState) {
+        // Force if jumping to a non-adjacent state (e.g., correcting a stuck knot).
+        // Fall back to the current display state when raw metadata is unavailable.
+        if (transitionSourceState) {
           const isAdjacentTransition = (workflow?.transitions ?? []).some(
-            (t) => (t.from === rawKnoState || t.from === "*") && t.to === normalizedState,
+            (t) => (t.from === transitionSourceState || t.from === "*") && t.to === normalizedState,
           );
           if (!isAdjacentTransition) {
             patch.force = true;
