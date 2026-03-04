@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Copy, Square, Maximize2, Minimize2, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Square,
+  Maximize2,
+  Minimize2,
+  X,
+} from "lucide-react";
 import { useTerminalStore, getActiveTerminal } from "@/stores/terminal-store";
 import { abortSession, startSession, listSessions } from "@/lib/terminal-api";
 import { sessionConnections } from "@/lib/session-connection-manager";
@@ -25,6 +33,11 @@ import {
   pruneCompletionAnimationTracker,
   shouldAnimateCompletion,
 } from "@/lib/terminal-tab-completion";
+import {
+  getTerminalTabScrollAmount,
+  resolveTerminalTabStripState,
+  shouldUseCompactTerminalTabLabels,
+} from "@/lib/terminal-tab-strip";
 import type { Terminal as XtermTerminal } from "@xterm/xterm";
 import type { FitAddon as XtermFitAddon } from "@xterm/addon-fit";
 import { toast } from "sonner";
@@ -147,6 +160,8 @@ export function TerminalPanel() {
   }, [activeBeatId, activeTerminal?.startedAt, terminals]);
 
   const termContainerRef = useRef<HTMLDivElement>(null);
+  const tabStripRef = useRef<HTMLDivElement>(null);
+  const tabButtonRefs = useRef(new Map<string, HTMLButtonElement>());
   const termRef = useRef<XtermTerminal | null>(null);
   const fitRef = useRef<XtermFitAddon | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -156,6 +171,10 @@ export function TerminalPanel() {
   const failureHintBySession = useRef<Map<string, TerminalFailureGuidance>>(new Map());
   const hasRehydrated = useRef(false);
   const [completionAnimationEnabled, setCompletionAnimationEnabled] = useState(false);
+  const [tabStripState, setTabStripState] = useState(() =>
+    resolveTerminalTabStripState({ scrollLeft: 0, scrollWidth: 0, clientWidth: 0 }),
+  );
+  const [compactTabLabels, setCompactTabLabels] = useState(false);
   const isMaximized = panelHeight > 70;
   const fallbackAgentInfo = useAgentInfo("take");
   const sessionAgentInfo = useMemo<ResolvedAgentInfo | null>(() => {
@@ -203,6 +222,51 @@ export function TerminalPanel() {
   const toggleMaximize = useCallback(() => {
     setPanelHeight(isMaximized ? 35 : 80);
   }, [isMaximized, setPanelHeight]);
+
+  const syncTabStripState = useCallback(() => {
+    const tabStrip = tabStripRef.current;
+    if (!tabStrip) {
+      setTabStripState(
+        resolveTerminalTabStripState({
+          scrollLeft: 0,
+          scrollWidth: 0,
+          clientWidth: 0,
+        }),
+      );
+      setCompactTabLabels(false);
+      return;
+    }
+
+    const nextState = resolveTerminalTabStripState({
+      scrollLeft: tabStrip.scrollLeft,
+      scrollWidth: tabStrip.scrollWidth,
+      clientWidth: tabStrip.clientWidth,
+    });
+
+    setTabStripState(nextState);
+    setCompactTabLabels(
+      shouldUseCompactTerminalTabLabels(
+        nextState.hasOverflow,
+        tabStrip.clientWidth,
+        terminals.length,
+      ),
+    );
+  }, [terminals.length]);
+
+  const scrollTabStrip = useCallback(
+    (direction: -1 | 1) => {
+      const tabStrip = tabStripRef.current;
+      if (!tabStrip) return;
+      const amount = getTerminalTabScrollAmount(tabStrip.clientWidth);
+      tabStrip.scrollBy({
+        left: direction * amount,
+        behavior: "smooth",
+      });
+      requestAnimationFrame(syncTabStripState);
+      window.setTimeout(syncTabStripState, 180);
+    },
+    [syncTabStripState],
+  );
 
   // Auto-close tabs after process completion
   useEffect(() => {
@@ -504,10 +568,57 @@ export function TerminalPanel() {
 
   useEffect(() => {
     if (!panelOpen) return;
-    const handleResize = () => fitRef.current?.fit();
+    const handleResize = () => {
+      fitRef.current?.fit();
+      syncTabStripState();
+    };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [panelOpen]);
+  }, [panelOpen, syncTabStripState]);
+
+  useEffect(() => {
+    if (!panelOpen) return;
+    const frame = requestAnimationFrame(syncTabStripState);
+    return () => cancelAnimationFrame(frame);
+  }, [panelOpen, panelHeight, terminals.length, syncTabStripState]);
+
+  useEffect(() => {
+    if (!panelOpen || !activeSessionKey) return;
+    const button = tabButtonRefs.current.get(activeSessionKey);
+    if (!button) return;
+    button.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+    requestAnimationFrame(syncTabStripState);
+  }, [activeSessionKey, panelOpen, syncTabStripState, terminals.length]);
+
+  useEffect(() => {
+    if (!panelOpen || !tabStripState.hasOverflow) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTextInputTarget =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target?.isContentEditable;
+      if (isTextInputTarget) return;
+
+      if (event.altKey && event.shiftKey && event.key === "ArrowLeft") {
+        event.preventDefault();
+        scrollTabStrip(-1);
+      }
+
+      if (event.altKey && event.shiftKey && event.key === "ArrowRight") {
+        event.preventDefault();
+        scrollTabStrip(1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [panelOpen, scrollTabStrip, tabStripState.hasOverflow]);
 
   if (terminals.length === 0) return null;
 
@@ -522,62 +633,123 @@ export function TerminalPanel() {
     >
       <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-[#16162a] px-3 py-1.5">
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pb-0.5">
-            {terminals.map((terminal) => {
-              const isActive = terminal.sessionId === activeTerminal?.sessionId;
-              const isRunning = terminal.status === "running";
-              const isPending = pendingClose.has(terminal.sessionId);
-              const beatIdParts = splitTerminalTabBeatId(terminal.beatId);
-              return (
-                <button
-                  key={terminal.sessionId}
-                  type="button"
-                  className={`group inline-flex items-center gap-1.5 rounded px-2 py-1 text-[11px] ${
-                    isPending
-                      ? "animate-pulse bg-amber-500/30 text-amber-200"
-                      : isActive
-                        ? "bg-white/15 text-white"
-                        : "bg-white/5 text-white/70 hover:bg-white/10"
+          <div className="flex min-w-0 flex-1 items-center gap-1">
+            {tabStripState.hasOverflow && (
+              <button
+                type="button"
+                className="shrink-0 rounded border border-white/10 p-1 text-white/55 transition-colors enabled:hover:border-white/30 enabled:hover:bg-white/10 enabled:hover:text-white disabled:opacity-30"
+                aria-label="Scroll terminal tabs left"
+                title="Scroll tabs left (Alt+Shift+Left)"
+                onClick={() => scrollTabStrip(-1)}
+                disabled={!tabStripState.canScrollLeft}
+              >
+                <ChevronLeft className="size-3.5" />
+              </button>
+            )}
+
+            <div className="relative min-w-0 flex-1">
+              {tabStripState.hasOverflow && (
+                <div
+                  className={`pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-[#16162a] to-transparent transition-opacity ${
+                    tabStripState.canScrollLeft ? "opacity-100" : "opacity-0"
                   }`}
-                  onClick={() => handleTabClick(terminal.sessionId)}
-                  title={isPending ? "Click to keep open" : `${terminal.beatId} - ${terminal.beatTitle}`}
-                >
-                  <span className="font-mono">
-                    {beatIdParts.prefix ? (
-                      <>
-                        <span className="text-white/45">{beatIdParts.prefix}-</span>
-                        {beatIdParts.localId}
-                      </>
-                    ) : (
-                      beatIdParts.localId
-                    )}
-                  </span>
-                  {terminal.beatTitle && (
-                    <span className="truncate text-white/50">
-                      {terminal.beatTitle.slice(0, 40)}
-                    </span>
-                  )}
-                  {isRunning ? (
-                    <span className="inline-block size-1.5 rounded-full bg-blue-400 animate-pulse" />
-                  ) : (
-                    <span
-                      className={`rounded p-0.5 ${
-                        terminal.status === "completed"
-                          ? "text-green-400 hover:bg-white/10 hover:text-green-300"
-                          : "text-white/55 hover:bg-white/10 hover:text-white"
-                      }`}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        removeTerminal(terminal.sessionId);
+                />
+              )}
+              <div
+                ref={tabStripRef}
+                className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pb-0.5"
+                onScroll={syncTabStripState}
+              >
+                {terminals.map((terminal) => {
+                  const isActive = terminal.sessionId === activeTerminal?.sessionId;
+                  const isRunning = terminal.status === "running";
+                  const isPending = pendingClose.has(terminal.sessionId);
+                  const beatIdParts = splitTerminalTabBeatId(terminal.beatId);
+                  return (
+                    <button
+                      key={terminal.sessionId}
+                      ref={(node) => {
+                        if (node) {
+                          tabButtonRefs.current.set(terminal.sessionId, node);
+                        } else {
+                          tabButtonRefs.current.delete(terminal.sessionId);
+                        }
                       }}
-                      title="Close tab"
+                      type="button"
+                      className={`group inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded border px-2 py-1 text-[11px] transition-colors ${
+                        compactTabLabels ? "max-w-[150px]" : "max-w-[270px]"
+                      } ${
+                        isPending
+                          ? "animate-pulse border-amber-400/40 bg-amber-500/30 text-amber-200"
+                          : isActive
+                            ? "border-white/25 bg-white/15 text-white"
+                            : "border-transparent bg-white/5 text-white/70 hover:border-white/20 hover:bg-white/10"
+                      }`}
+                      onClick={() => handleTabClick(terminal.sessionId)}
+                      title={
+                        isPending
+                          ? "Click to keep open"
+                          : `${terminal.beatId}${terminal.beatTitle ? ` - ${terminal.beatTitle}` : ""}`
+                      }
                     >
-                      <X className="size-3" />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                      <span className="truncate font-mono">
+                        {beatIdParts.prefix ? (
+                          <>
+                            <span className="text-white/45">{beatIdParts.prefix}-</span>
+                            {beatIdParts.localId}
+                          </>
+                        ) : (
+                          beatIdParts.localId
+                        )}
+                      </span>
+                      {!compactTabLabels && terminal.beatTitle && (
+                        <span className="max-w-[160px] truncate text-white/50">
+                          {terminal.beatTitle}
+                        </span>
+                      )}
+                      {isRunning ? (
+                        <span className="inline-block size-1.5 shrink-0 rounded-full bg-blue-400 animate-pulse" />
+                      ) : (
+                        <span
+                          className={`shrink-0 rounded p-0.5 ${
+                            terminal.status === "completed"
+                              ? "text-green-400 hover:bg-white/10 hover:text-green-300"
+                              : "text-white/55 hover:bg-white/10 hover:text-white"
+                          }`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            removeTerminal(terminal.sessionId);
+                          }}
+                          title="Close tab"
+                        >
+                          <X className="size-3" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {tabStripState.hasOverflow && (
+                <div
+                  className={`pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#16162a] to-transparent transition-opacity ${
+                    tabStripState.canScrollRight ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              )}
+            </div>
+
+            {tabStripState.hasOverflow && (
+              <button
+                type="button"
+                className="shrink-0 rounded border border-white/10 p-1 text-white/55 transition-colors enabled:hover:border-white/30 enabled:hover:bg-white/10 enabled:hover:text-white disabled:opacity-30"
+                aria-label="Scroll terminal tabs right"
+                title="Scroll tabs right (Alt+Shift+Right)"
+                onClick={() => scrollTabStrip(1)}
+                disabled={!tabStripState.canScrollRight}
+              >
+                <ChevronRight className="size-3.5" />
+              </button>
+            )}
           </div>
 
           {activeTerminal &&
