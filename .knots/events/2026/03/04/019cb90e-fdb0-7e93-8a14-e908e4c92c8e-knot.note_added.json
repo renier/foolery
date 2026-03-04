@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb90e-fdb0-7e93-8a14-e908e4c92c8e",
+  "occurred_at": "2026-03-04T13:34:53.360705Z",
+  "knot_id": "foolery-f34e",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "ReTake: this was never in any way fixed.  i still can't see any shipped beats in the ReTakes view.",
+    "datetime": "2026-03-04T13:34:53.360705Z",
+    "entry_id": "019cb90e-fdb0-7e93-8a14-e8f76f715d5a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

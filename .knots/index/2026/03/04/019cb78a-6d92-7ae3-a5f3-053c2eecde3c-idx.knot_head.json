@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb78a-6d92-7ae3-a5f3-053c2eecde3c",
+  "occurred_at": "2026-03-04T06:30:28.488716Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-f8d5",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipped",
+    "terminal": true,
+    "title": "beat detail:  Take button is grayed out / disabled ",
+    "updated_at": "2026-03-04T06:30:28.488716Z"
+  }
+}

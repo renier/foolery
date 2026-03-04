@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb5d6-316a-7f12-ae4d-66bb92ec3f90",
+  "occurred_at": "2026-03-03T22:33:59.39708Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-vdk0.3.3",
+    "profile_id": "autopilot",
+    "state": "abandoned",
+    "terminal": true,
+    "title": "Render model catalog with cost columns",
+    "updated_at": "2026-03-03T22:33:59.39708Z"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5f3-4698-7712-8448-556bd99d5481",
+  "occurred_at": "2026-03-03T23:05:45.368023Z",
+  "knot_id": "foolery-355d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Removed transition-lock cruft: deleted isTransitionLocked, rollbackActivePhase, LABEL_TRANSITION_VERIFICATION, and TransitionLockBadge. Active beat states (planning, implementation, etc.) now display correctly in UI. All 1823 tests pass, lint/typecheck clean. Merged to main as 7a144716ca3176bd140402302139e97af9b20423.",
+    "datetime": "2026-03-03T23:05:45.368023Z",
+    "entry_id": "019cb5f3-4698-7712-8448-5555a25a05bf",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

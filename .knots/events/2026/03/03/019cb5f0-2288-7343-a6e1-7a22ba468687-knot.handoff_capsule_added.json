@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5f0-2288-7343-a6e1-7a22ba468687",
+  "occurred_at": "2026-03-03T23:02:19.528747Z",
+  "knot_id": "foolery-0e20",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Shipment verified: all 3 commits (cac9268, 9946118, c560ff5) are on origin/main. 1830/1830 tests pass. The fix adds interactionLog.logPrompt() in terminal-manager.ts for non-claude dialect paths, and two test files cover initial and take-loop prompt logging for Codex one-shot agents.",
+    "datetime": "2026-03-03T23:02:19.528747Z",
+    "entry_id": "019cb5f0-2288-7343-a6e1-7a1a36216afc",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

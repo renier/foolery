@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5e0-c531-72c1-b572-f66c1a5c7f2f",
+  "occurred_at": "2026-03-03T22:45:32.593364Z",
+  "knot_id": "foolery-0e20",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed: Added interactionLog.logPrompt() calls in both the initial session and take-loop spawn paths for non-interactive (Codex) agents. Previously, when dialect \\!== 'claude', the prompt was passed as a CLI arg but never logged to history, making it invisible in history logs. Two else branches added in terminal-manager.ts (lines ~1617 and ~1254). All tests pass (1819/1819), typecheck clean.",
+    "datetime": "2026-03-03T22:45:32.593364Z",
+    "entry_id": "019cb5e0-c531-72c1-b572-f65d0b39d876",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

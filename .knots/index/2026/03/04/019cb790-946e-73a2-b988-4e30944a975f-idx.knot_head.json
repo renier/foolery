@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb790-946e-73a2-b988-4e30944a975f",
+  "occurred_at": "2026-03-04T06:37:11.662017Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-87ec",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment_review",
+    "terminal": false,
+    "title": "beats view: 355d and de46, can't alter state",
+    "updated_at": "2026-03-04T06:37:11.662017Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb78f-c807-79e3-b964-430c575d8498"
+  }
+}

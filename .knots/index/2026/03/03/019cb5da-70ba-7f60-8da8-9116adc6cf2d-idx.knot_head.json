@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb5da-70ba-7f60-8da8-9116adc6cf2d",
+  "occurred_at": "2026-03-03T22:38:37.754845Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-3440",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "OpenRouter models don't show up in model list",
+    "updated_at": "2026-03-03T22:38:37.754845Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb5da-28e7-77a2-b1a4-0af3052d554a"
+  }
+}

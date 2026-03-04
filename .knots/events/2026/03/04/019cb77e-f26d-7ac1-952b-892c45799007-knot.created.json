@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb77e-f26d-7ac1-952b-892c45799007",
+  "occurred_at": "2026-03-04T06:17:56.077017Z",
+  "knot_id": "foolery-87ec",
+  "type": "knot.created",
+  "data": {
+    "body": "when clicking in state (Impl) the only options are deferred and abandoned.  i should be able to roll the state forward or backward and I cannot.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "beats view: 355d and de46, can't alter state"
+  }
+}

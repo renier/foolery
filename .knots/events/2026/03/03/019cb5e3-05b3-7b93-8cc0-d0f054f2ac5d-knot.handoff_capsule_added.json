@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5e3-05b3-7b93-8cc0-d0f054f2ac5d",
+  "occurred_at": "2026-03-03T22:48:00.179816Z",
+  "knot_id": "foolery-3440",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added OpenRouter selected-model dispatch support via virtual agent id openrouter:selected; surfaced in Simple action mappings and Advanced pools, with runtime resolution to fallback command + selected OpenRouter model. Added coverage in openrouter/settings tests. Gates: lint and tsc passed, unit tests passed, build fails on existing Next prerender error on /_global-error and /beads.",
+    "datetime": "2026-03-03T22:47:49Z",
+    "entry_id": "019cb5e3-05b3-7b93-8cc0-d0ec9336ba3c",
+    "model": "unknown",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

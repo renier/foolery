@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb5ee-a445-7b32-9d5b-f6f107322dbd",
+  "occurred_at": "2026-03-03T23:00:41.669172Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-0e20",
+    "profile_id": "autopilot",
+    "state": "ready_for_shipment",
+    "terminal": false,
+    "title": "History:  Codex history logs don't show initial or loop app prompts.",
+    "updated_at": "2026-03-03T23:00:41.669172Z"
+  }
+}

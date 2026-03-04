@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5e5-930f-7272-ac84-e5747ef60b2e",
+  "occurred_at": "2026-03-03T22:50:47.439334Z",
+  "knot_id": "foolery-0e20",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added regression coverage for Codex one-shot history logging: initial prompt () and take-loop prompts () in terminal-manager tests; validated lint, typecheck, full unit tests, and build (build passes with NODE_ENV=production due local non-standard NODE_ENV environment).",
+    "datetime": "2026-03-03T22:50:47.439334Z",
+    "entry_id": "019cb5e5-930f-7272-ac84-e56fbb72f0cb",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

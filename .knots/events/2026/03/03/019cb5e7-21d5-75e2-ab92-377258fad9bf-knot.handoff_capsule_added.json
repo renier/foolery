@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5e7-21d5-75e2-ab92-377258fad9bf",
+  "occurred_at": "2026-03-03T22:52:29.525022Z",
+  "knot_id": "foolery-6d3b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Reviewed implementation from e509b57. Code correctly filters abandoned knots from scenes view using isSceneVisibleState() at 4 points: wave filtering, parent visibility, child beats, and shoot-all action. Tests pass. Already pushed to origin/main.",
+    "datetime": "2026-03-03T22:52:29.525022Z",
+    "entry_id": "019cb5e7-21d5-75e2-ab92-3763826c9b02",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

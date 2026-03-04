@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb916-6ccf-75b2-9966-c6a87a63a1cd",
+  "occurred_at": "2026-03-04T13:43:00.559488Z",
+  "knot_id": "foolery-90e4",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "All children shipped. foolery-41e0 implemented click-to-copy for all beat ID locations in agent-history-view.tsx (beat list row, detail panel header, detail content grid, conversation log header) using clipboard API + sonner toast. Commit 2e22584 on origin/main. Quality gates passed (lint, tsc, test, build).",
+    "datetime": "2026-03-04T13:43:00.559488Z",
+    "entry_id": "019cb916-6ccf-75b2-9966-c690e11ba81b",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5e3-b05b-7922-9fbb-401c2782543c",
+  "occurred_at": "2026-03-03T22:48:43.867457Z",
+  "knot_id": "foolery-6d3b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Filtered Scenes view to hide abandoned waves and abandoned grouped descendants; added parser tests for wave and child filtering.",
+    "datetime": "2026-03-03T22:48:43Z",
+    "entry_id": "019cb5e3-b05b-7922-9fbb-400dc053ae9e",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "5"
+  }
+}

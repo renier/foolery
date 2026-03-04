@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb79b-4d65-7eb3-80c9-64c976f10380",
+  "occurred_at": "2026-03-04T06:48:54.373354Z",
+  "knot_id": "foolery-de46",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review passed. State abbreviation (Implementation→Impl) correctly implemented in beat-state-badge.tsx. State column uses percentage width (15%) via meta.widthPercent with table-fixed layout so it grows and title column shrinks accordingly. All quality gates pass: typecheck clean, 1832 tests green, lint clean on relevant files.",
+    "datetime": "2026-03-04T06:48:54.373354Z",
+    "entry_id": "019cb79b-4d65-7eb3-80c9-64b39ef6aebc",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

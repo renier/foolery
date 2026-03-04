@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb780-e1b2-7063-9a20-96f3918f973c",
+  "occurred_at": "2026-03-04T06:20:02.866785Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-87ec",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "beats view: 355d and de46, can't alter state",
+    "updated_at": "2026-03-04T06:20:02.866785Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb77e-f28b-7793-a759-984899d5f3f5"
+  }
+}

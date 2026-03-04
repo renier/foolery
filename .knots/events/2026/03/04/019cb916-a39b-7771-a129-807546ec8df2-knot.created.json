@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb916-a39b-7771-a129-807546ec8df2",
+  "occurred_at": "2026-03-04T13:43:14.587168Z",
+  "knot_id": "foolery-f73a",
+  "type": "knot.created",
+  "data": {
+    "body": "Add queued rollback target for active states in beat state dropdowns and add regression tests.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Allow backward state edits from active beat states"
+  }
+}

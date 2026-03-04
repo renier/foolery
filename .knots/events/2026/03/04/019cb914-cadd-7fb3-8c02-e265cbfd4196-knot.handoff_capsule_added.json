@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb914-cadd-7fb3-8c02-e265cbfd4196",
+  "occurred_at": "2026-03-04T13:41:13.565844Z",
+  "knot_id": "foolery-41e0",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implemented click-to-copy for Beat ID in history detail panel/header () with clipboard success/failure toast feedback. Validated via bun run lint, bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Change is on origin/main at commit 2e22584.",
+    "datetime": "2026-03-04T13:41:13.565844Z",
+    "entry_id": "019cb914-cadd-7fb3-8c02-e250816e7ad2",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

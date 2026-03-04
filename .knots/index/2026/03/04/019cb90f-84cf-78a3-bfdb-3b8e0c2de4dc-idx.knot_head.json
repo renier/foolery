@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb90f-84cf-78a3-bfdb-3b8e0c2de4dc",
+  "occurred_at": "2026-03-04T13:35:27.95169Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-41e0",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "history view:  beat id should be click-to-copy",
+    "updated_at": "2026-03-04T13:35:27.95169Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb795-c7d0-7d63-a232-a2e3630bb0f5"
+  }
+}

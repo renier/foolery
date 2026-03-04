@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5e3-26ee-7c80-9477-a9c4486a9d20",
+  "occurred_at": "2026-03-03T22:48:08.686174Z",
+  "knot_id": "foolery-3440",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Meta: implementation completed and pushed to origin/main as commit 7ecc119aa781152d1d4e583ee3edd99d97149779.",
+    "datetime": "2026-03-03T22:47:49Z",
+    "entry_id": "019cb5e3-26ee-7c80-9477-a9b1908b87f7",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1.0"
+  }
+}

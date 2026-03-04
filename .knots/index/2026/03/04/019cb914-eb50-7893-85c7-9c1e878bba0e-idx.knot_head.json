@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb914-eb50-7893-85c7-9c1e878bba0e",
+  "occurred_at": "2026-03-04T13:41:21.866599Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-41e0",
+    "profile_id": "autopilot",
+    "state": "ready_for_shipment",
+    "terminal": false,
+    "title": "history view:  beat id should be click-to-copy",
+    "updated_at": "2026-03-04T13:41:21.866599Z"
+  }
+}

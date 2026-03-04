@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb5e8-41dd-76b0-8c96-1dd5647d809d",
+  "occurred_at": "2026-03-03T22:53:43.25605Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-6d3b",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipped",
+    "terminal": true,
+    "title": "Scenes view:  shows Abandoned knots and shouldn't",
+    "updated_at": "2026-03-03T22:53:43.25605Z"
+  }
+}

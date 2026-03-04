@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb916-6cdc-7ee3-945c-faf26cf56004",
+  "occurred_at": "2026-03-04T13:43:00.572781Z",
+  "knot_id": "foolery-ae6b",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan: expose backward state edits from active workflow states by adding the queued companion state (ready_for_<active_state>) to validNextStates in both beat dropdown entry points (table + detail), then add regression tests for both implementations. Risks: duplicated helper logic in two components; mitigate by mirroring changes and asserting with unit tests. Validation: run lint, typecheck, focused tests, full test suite, and build.",
+    "datetime": "2026-03-04T13:43:00.572781Z",
+    "entry_id": "019cb916-6cdc-7ee3-945c-faecbec5e7dd",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

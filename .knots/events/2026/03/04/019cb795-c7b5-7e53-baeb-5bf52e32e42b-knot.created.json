@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb795-c7b5-7e53-baeb-5bf52e32e42b",
+  "occurred_at": "2026-03-04T06:42:52.469932Z",
+  "knot_id": "foolery-41e0",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says.  i should be able to click on it and copy it",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "history view:  beat id should be click-to-copy"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb5dc-a0bc-74f0-8cfd-bf1466db2233",
+  "occurred_at": "2026-03-03T22:41:01.116412Z",
+  "knot_id": "foolery-0e20",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says, we can't see what we sent codex, so we can't debug why codex doesn't call kno claim",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "History:  Codex history logs don't show initial or loop app prompts."
+  }
+}

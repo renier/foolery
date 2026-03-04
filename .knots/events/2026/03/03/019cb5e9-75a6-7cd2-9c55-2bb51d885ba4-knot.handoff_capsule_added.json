@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb5e9-75a6-7cd2-9c55-2bb51d885ba4",
+  "occurred_at": "2026-03-03T22:55:02.054705Z",
+  "knot_id": "foolery-0e20",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation verified and pushed. Two commits on main: cac9268 adds interactionLog.logPrompt() calls in the else branches for both initial session and take-loop paths when dialect\\!='claude' (Codex one-shot agents), so prompts passed as CLI args are now visible in history logs. 9946118 adds regression tests covering both initial prompt (source: initial) and take-loop prompt (source: take_2) logging for one-shot agents. All 1829 tests pass, typecheck clean.",
+    "datetime": "2026-03-03T23:55:00Z",
+    "entry_id": "019cb5e9-75a6-7cd2-9c55-2badf0dbef88",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "opus-4.6"
+  }
+}

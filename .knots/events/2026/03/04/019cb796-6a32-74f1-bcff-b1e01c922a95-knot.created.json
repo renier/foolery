@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb796-6a32-74f1-bcff-b1e01c922a95",
+  "occurred_at": "2026-03-04T06:43:34.066213Z",
+  "knot_id": "foolery-f34e",
+  "type": "knot.created",
+  "data": {
+    "body": "should show all beats in \"Shipped\" state.  Shows absolutely nothing.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "ReTakes: Totally broken, shows nothing"
+  }
+}

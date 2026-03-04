@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb910-b6c0-7700-988f-bdac6da2affe",
+  "occurred_at": "2026-03-04T13:36:46.272163Z",
+  "knot_id": "foolery-41e0",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation plan for foolery-41e0:\n1) Update `src/components/agent-history-view.tsx` so beat IDs in the History UI are clickable copy targets.\n2) Reuse existing clipboard/toast interaction patterns used in other beat views.\n3) Provide clear affordance (cursor/title/hover) and non-blocking success/failure feedback.\n4) Run focused tests for agent history component behavior if present, then run required quality gates (lint, typecheck, test, build).\nRisks: Clipboard API can fail in unsupported contexts; mitigation is error toast and no crash.",
+    "datetime": "2026-03-04T13:36:46.272163Z",
+    "entry_id": "019cb910-b6c0-7700-988f-bd9d5b0a5240",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

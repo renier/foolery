@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb784-d006-7802-bfb8-7f04ddd1dc66",
+  "occurred_at": "2026-03-04T06:24:20.486954Z",
+  "knot_id": "foolery-f8d5",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Fixed disabled Take button in beat detail opened from create-toast link by removing open-state-only gating and using explicit take eligibility rules for queue states; added unit tests for canTakeBeat. Quality gates: lint passed, tsc passed, unit tests passed, build failed due pre-existing Next.js prerender/providers error reproduced on main.",
+    "datetime": "2026-03-04T06:24:20Z",
+    "entry_id": "019cb784-d006-7802-bfb8-7ef217615fcf",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb917-b32c-70c2-8e1c-c2f320be6a76",
+  "occurred_at": "2026-03-04T13:44:24.10388Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-debf",
+    "profile_id": "autopilot",
+    "state": "implementation",
+    "terminal": false,
+    "title": "History: Increase font size by 1pt",
+    "updated_at": "2026-03-04T13:44:24.10388Z"
+  }
+}

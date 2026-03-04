@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb916-773c-7132-ae3e-57b8ca1da075",
+  "occurred_at": "2026-03-04T13:43:03.223431Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-90e4",
+    "profile_id": "autopilot",
+    "state": "shipped",
+    "terminal": true,
+    "title": "History view beat-id UX umbrella",
+    "updated_at": "2026-03-04T13:43:03.223431Z"
+  }
+}

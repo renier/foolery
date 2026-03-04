@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb793-c1aa-7223-8750-0e12fb41d2c4",
+  "occurred_at": "2026-03-04T06:40:39.850636Z",
+  "knot_id": "foolery-87ec",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "---\n**Verification attempt 1 failed (2026-03-04 06:40)** — commit: ad1c97701cb19a8c5568708867749a7690aa9b14, reason: fail-bugs\n\nCommit ad1c977 updates ready-state filtering, but it does not normalize the displayed `Impl` state to workflow `implementation`, so transition lookup still fails and users only see `deferred`/`abandoned`. This is a bug in `validNextStates` for both beats list and detail paths; normalize `impl` to `implementation` (and keep test coverage for that case) so forward/backward workflow transitions are available.",
+    "datetime": "2026-03-04T06:40:39.850636Z",
+    "entry_id": "019cb793-c1aa-7223-8750-0e045d0fc23c",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

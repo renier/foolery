@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb784-79ba-7520-8132-3c8ef5975c0c",
+  "occurred_at": "2026-03-04T06:23:58.38938Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-87ec",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "beats view: 355d and de46, can't alter state",
+    "updated_at": "2026-03-04T06:23:58.38938Z"
+  }
+}

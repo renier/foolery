@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb912-5e95-79d3-bfa8-268f73004bd4",
+  "occurred_at": "2026-03-04T13:38:34.773581Z",
+  "knot_id": "foolery-ae6b",
+  "type": "knot.created",
+  "data": {
+    "body": "f34e doesn't allow me to roll the state backwards - only to abandoned, deferred, or forward.\n\ni should be able to roll it backward.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Still can't edit beat state"
+  }
+}

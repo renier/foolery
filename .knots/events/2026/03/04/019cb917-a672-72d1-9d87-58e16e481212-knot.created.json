@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb917-a672-72d1-9d87-58e16e481212",
+  "occurred_at": "2026-03-04T13:44:20.850721Z",
+  "knot_id": "foolery-b83f",
+  "type": "knot.created",
+  "data": {
+    "body": "currently the text on some of the tabs will wrap and scrunch up.\n\nuse your front end design skills to come up with a nicer way of displaying tabs when real estate is crunched.  some suggestions, which you are NOT limited to, are:\n\ntruncating tab labels to just show the beat id (with project prefix)\nnavigation arrows to indicate scrollability with hotkeys and mouse.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "ui terminals:  better handling of tabs when browser width can't accomodate the tabs"
+  }
+}

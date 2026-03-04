@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb910-c9ba-7c51-b3c2-10c44ddd3b4a",
+  "occurred_at": "2026-03-04T13:36:51.130251Z",
+  "knot_id": "foolery-90e4",
+  "type": "knot.created",
+  "data": {
+    "body": "Parent knot created during planning decomposition for foolery-41e0",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "History view beat-id UX umbrella"
+  }
+}

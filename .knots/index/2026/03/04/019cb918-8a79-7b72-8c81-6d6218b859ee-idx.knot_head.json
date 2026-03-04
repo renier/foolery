@@ -1,0 +1,17 @@
+{
+  "event_id": "019cb918-8a79-7b72-8c81-6d6218b859ee",
+  "occurred_at": "2026-03-04T13:45:19.225566Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-ae6b",
+    "profile_id": "autopilot",
+    "state": "plan_review",
+    "terminal": false,
+    "title": "Still can't edit beat state",
+    "updated_at": "2026-03-04T13:45:19.225566Z"
+  },
+  "precondition": {
+    "profile_etag": "019cb917-714a-7272-9472-710787ff2ef8"
+  }
+}

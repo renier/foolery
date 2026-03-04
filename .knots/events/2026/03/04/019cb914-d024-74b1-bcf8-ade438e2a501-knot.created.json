@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb914-d024-74b1-bcf8-ade438e2a501",
+  "occurred_at": "2026-03-04T13:41:14.91631Z",
+  "knot_id": "foolery-debf",
+  "type": "knot.created",
+  "data": {
+    "body": "Let's make all the fonts 1pt (or 1 unit) bigger, it's a bit too hard to read now.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "History: Increase font size by 1pt"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb5d1-80ee-7380-822a-37642e8e67b9",
+  "occurred_at": "2026-03-03T22:28:52.063877Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-1dea",
+    "profile_id": "autopilot",
+    "state": "shipped",
+    "terminal": true,
+    "title": "27bb and 1fbb ui console tabs started flashing animation for no reason",
+    "updated_at": "2026-03-03T22:28:52.063877Z"
+  }
+}

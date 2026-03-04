@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb915-32e5-7ad1-a61e-dc3e30c51485",
+  "occurred_at": "2026-03-04T13:41:40.197139Z",
+  "knot_id": "foolery-9918",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed ReTake dialog: changed state from 'in_progress' to 'ready_for_implementation' in retakes-view.tsx, and updated dialog copy in retake-dialog.tsx to match. All tests pass (1833/1833).",
+    "datetime": "2026-03-04T13:41:40.197139Z",
+    "entry_id": "019cb915-32e5-7ad1-a61e-dc2bdb3db0c5",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

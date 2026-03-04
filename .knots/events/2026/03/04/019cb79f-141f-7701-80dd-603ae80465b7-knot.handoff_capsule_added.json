@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb79f-141f-7701-80dd-603ae80465b7",
+  "occurred_at": "2026-03-04T06:53:01.855081Z",
+  "knot_id": "foolery-de46",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implemented Beats view state-column sizing refinement: state column now has content-aware growth with min width, table uses auto layout so state width is taken from title column, and Implementation remains abbreviated as Impl in badges. Quality gates: lint pass (warnings only), typecheck pass, tests pass (1832), build still fails on baseline prerender/useContext issue reproducible on unmodified main.",
+    "datetime": "2026-03-04T06:53:01.855081Z",
+    "entry_id": "019cb79f-141f-7701-80dd-6026870de52b",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

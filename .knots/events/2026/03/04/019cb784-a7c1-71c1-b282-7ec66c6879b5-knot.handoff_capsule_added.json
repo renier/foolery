@@ -1,0 +1,15 @@
+{
+  "event_id": "019cb784-a7c1-71c1-b282-7ec66c6879b5",
+  "occurred_at": "2026-03-04T06:24:10.177398Z",
+  "knot_id": "foolery-87ec",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Fixed workflow state dropdown so active states (e.g., implementation) keep ready_for_* transitions; Impl no longer limits options to deferred/abandoned. Updated beat-columns + beat-detail validNextStates and added coverage tests. Lint/typecheck/test pass; build fails with existing prerender issue on /_global-error and /beads (useContext null).",
+    "datetime": "2026-03-04T06:24:10Z",
+    "entry_id": "019cb784-a7c1-71c1-b282-7eb93cd1f4fb",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

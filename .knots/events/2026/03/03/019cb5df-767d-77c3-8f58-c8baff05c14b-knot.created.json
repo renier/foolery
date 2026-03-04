@@ -1,0 +1,12 @@
+{
+  "event_id": "019cb5df-767d-77c3-8f58-c8baff05c14b",
+  "occurred_at": "2026-03-03T22:44:06.909409Z",
+  "knot_id": "foolery-6d3b",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says.  pretty basic.  Shouldn't show grouped beats if they are abandoned.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Scenes view:  shows Abandoned knots and shouldn't"
+  }
+}

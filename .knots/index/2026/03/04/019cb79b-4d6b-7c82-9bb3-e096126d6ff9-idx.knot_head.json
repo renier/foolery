@@ -1,0 +1,14 @@
+{
+  "event_id": "019cb79b-4d6b-7c82-9bb3-e096126d6ff9",
+  "occurred_at": "2026-03-04T06:48:54.373354Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-de46",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_shipment_review",
+    "terminal": false,
+    "title": "Beats View: States over run column to the right",
+    "updated_at": "2026-03-04T06:48:54.373354Z"
+  }
+}
