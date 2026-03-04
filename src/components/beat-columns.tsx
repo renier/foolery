@@ -88,6 +88,14 @@ export function validNextStates(
     }
   }
 
+  // Allow direct rollback from active rows to their queued companion state.
+  if (!effectiveState.startsWith("ready_for_")) {
+    const queuedCompanion = `ready_for_${effectiveState}`;
+    if ((workflow.states ?? []).includes(queuedCompanion)) {
+      next.add(queuedCompanion);
+    }
+  }
+
   // When stuck (rolled back), also add all non-terminal workflow states as force targets.
   if (isRolledBack) {
     for (const state of workflow.states ?? []) {

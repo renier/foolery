@@ -72,6 +72,11 @@ describe("beat-columns validNextStates", () => {
     expect(result).toContain("ready_for_implementation_review");
   });
 
+  it("includes same-step queued rollback target for active rows", () => {
+    const result = validNextStates("implementation", workflow);
+    expect(result).toContain("ready_for_implementation");
+  });
+
   it("normalizes short impl state to implementation for transitions", () => {
     const result = validNextStates("impl", workflow);
     expect(result).toContain("ready_for_implementation_review");
