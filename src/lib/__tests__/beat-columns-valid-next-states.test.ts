@@ -61,10 +61,15 @@ describe("beat-columns validNextStates", () => {
     expect(validNextStates(undefined, workflow)).toEqual([]);
   });
 
-  it("filters ready_for_* states in normal flow", () => {
+  it("filters ready_for_* states for queued rows in normal flow", () => {
     const result = validNextStates("ready_for_planning", workflow);
     expect(result).toContain("planning");
     expect(result.some((state) => state.startsWith("ready_for_"))).toBe(false);
+  });
+
+  it("includes ready_for_* targets for active rows in normal flow", () => {
+    const result = validNextStates("implementation", workflow);
+    expect(result).toContain("ready_for_implementation_review");
   });
 
   it("computes from raw kno state and includes queued escape hatches when rolled back", () => {

@@ -58,6 +58,7 @@ export function validNextStates(
 ): string[] {
   if (!currentState) return [];
   const normalized = currentState.trim().toLowerCase();
+  const isQueuedDisplayState = normalized.startsWith("ready_for_");
   const normalizedRawKnoState = rawKnoState?.trim().toLowerCase();
 
   // If the raw kno state differs from the display state, the knot is stuck in an
@@ -90,11 +91,12 @@ export function validNextStates(
   next.delete(normalized);
   if (normalizedRawKnoState) next.delete(normalizedRawKnoState);
 
-  // Only filter out ready_for_* states when NOT rolled back (normal flow).
-  if (isRolledBack) {
+  // Keep queue-to-queue transitions hidden for queued rows, but allow queue
+  // targets from active rows so users can advance/rollback action states.
+  if (isRolledBack || !isQueuedDisplayState) {
     return Array.from(next);
   }
-  return Array.from(next).filter((s) => !s.startsWith("ready"));
+  return Array.from(next).filter((s) => !s.startsWith("ready_for_"));
 }
 
 function formatStateName(state: string): string {

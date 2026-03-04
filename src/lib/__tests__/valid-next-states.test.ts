@@ -61,12 +61,12 @@ describe("validNextStates", () => {
     expect(validNextStates(undefined, workflow)).toEqual([]);
   });
 
-  it("returns normal transitions without ready_for_* states", () => {
+  it("returns queued-row transitions without ready_for_* states", () => {
     const result = validNextStates("ready_for_planning", workflow);
     expect(result).toContain("planning");
     expect(result).toContain("deferred");
     expect(result).toContain("abandoned");
-    // Should not include ready_for_* states in normal flow
+    // Queued rows should not list queue-to-queue targets in normal flow
     expect(result.some((s) => s.startsWith("ready_for_"))).toBe(false);
   });
 
@@ -120,9 +120,9 @@ describe("validNextStates", () => {
   });
 
   describe("normal flow (no rollback)", () => {
-    it("does not include ready_for_* states", () => {
+    it("includes ready_for_* targets for active rows", () => {
       const result = validNextStates("planning", workflow);
-      expect(result.some((s) => s.startsWith("ready_for_"))).toBe(false);
+      expect(result).toContain("ready_for_plan_review");
     });
 
     it("does not include the current state", () => {
