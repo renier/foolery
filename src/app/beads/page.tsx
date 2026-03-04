@@ -7,7 +7,7 @@ import { fetchBeads } from "@/lib/api";
 import { startSession, abortSession } from "@/lib/terminal-api";
 import { BeatTable } from "@/components/beat-table";
 import { BeatDetailLightbox } from "@/components/beat-detail-lightbox";
-import { FilterBar } from "@/components/filter-bar";
+import { FilterBar, type ViewPhase } from "@/components/filter-bar";
 import { MergeBeatsDialog } from "@/components/merge-beats-dialog";
 import { ExistingOrchestrationsView } from "@/components/existing-orchestrations-view";
 import { FinalCutView } from "@/components/final-cut-view";
@@ -56,20 +56,23 @@ function BeadsPageInner() {
   const detailBeatId = searchParams.get("bead");
   const detailRepo = searchParams.get("detailRepo") ?? undefined;
   const viewParam = searchParams.get("view");
-  const beadsView: "list" | "existing" | "finalcut" | "retakes" | "history" | "breakdown" =
-    viewParam === "existing"
-      ? "existing"
-      : viewParam === "finalcut"
-        ? "finalcut"
-        : viewParam === "retakes"
-          ? "retakes"
-          : viewParam === "history"
-            ? "history"
-            : viewParam === "breakdown"
-              ? "breakdown"
-              : "list";
+  const beadsView: "queues" | "active" | "existing" | "finalcut" | "retakes" | "history" | "breakdown" =
+    viewParam === "active"
+      ? "active"
+      : viewParam === "existing"
+        ? "existing"
+        : viewParam === "finalcut"
+          ? "finalcut"
+          : viewParam === "retakes"
+            ? "retakes"
+            : viewParam === "history"
+              ? "history"
+              : viewParam === "breakdown"
+                ? "breakdown"
+                : "queues";
   const isExistingOrchestrationView = beadsView === "existing";
-  const isListView = beadsView === "list";
+  const isListView = beadsView === "queues" || beadsView === "active";
+  const viewPhase: ViewPhase = beadsView === "active" ? "active" : "queues";
   const isFinalCutView = beadsView === "finalcut";
   const isRetakesView = beadsView === "retakes";
   const isHistoryView = beadsView === "history";
@@ -408,6 +411,7 @@ function BeadsPageInner() {
       {isListView && (
         <div className="mb-2 flex h-10 items-center border-b border-border/60 pb-2">
           <FilterBar
+            viewPhase={viewPhase}
             selectedIds={selectedIds}
             onBulkUpdate={handleBulkUpdate}
             onClearSelection={handleClearSelection}
