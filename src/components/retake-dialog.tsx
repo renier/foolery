@@ -57,7 +57,7 @@ export function RetakeDialog({ bead, open, onOpenChange, onConfirm, isPending }:
         </DialogHeader>
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            This will reopen the beat as <span className="font-semibold text-foreground">in_progress</span> for
+            This will reopen the beat as <span className="font-semibold text-foreground">ready_for_implementation</span> for
             regression investigation.
             {commitSha && (
               <>

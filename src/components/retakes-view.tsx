@@ -566,7 +566,7 @@ export function RetakesView() {
       if (commitSha) labels.push(`regression:${commitSha}`);
 
       const fields: UpdateBeatInput = {
-        state: "in_progress",
+        state: "ready_for_implementation",
         labels: labels.length > 0 ? labels : undefined,
         notes: notes
           ? `${bead.notes ? bead.notes + "\n" : ""}ReTake: ${notes}`
