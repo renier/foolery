@@ -9,6 +9,7 @@ import type { Beat, BeatDependency, MemoryWorkflowDescriptor } from "@/lib/types
 import type { UpdateBeatInput } from "@/lib/schemas";
 import { fetchBead, fetchDeps, fetchWorkflows, addDep } from "@/lib/api";
 import { updateBeatOrThrow } from "@/lib/update-beat-mutation";
+import { canTakeBeat } from "@/lib/beat-take-eligibility";
 import { BeatDetail } from "@/components/beat-detail";
 import { DepTree } from "@/components/dep-tree";
 import { RelationshipPicker } from "@/components/relationship-picker";
@@ -325,7 +326,7 @@ function LightboxHeader({
               variant="outline"
               size="xs"
               title="Take! -- start a session for this beat"
-              disabled={beat.state !== "open" || !onShipBeat || beat.isAgentClaimable === false}
+              disabled={!onShipBeat || !canTakeBeat(beat)}
               onClick={() => onShipBeat?.(beat)}
             >
               <Clapperboard className="size-3" />
