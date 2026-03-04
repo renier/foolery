@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, List, Film, Scissors, RotateCcw, Settings, UserRoundCheck, X, History, PartyPopper } from "lucide-react";
+import { Plus, List, Film, Scissors, RotateCcw, Settings, UserRoundCheck, X, History, PartyPopper, Zap, Inbox } from "lucide-react";
 import Image from "next/image";
 import { VersionBadge } from "@/components/version-badge";
 import { RepoSwitcher } from "@/components/repo-switcher";
@@ -36,18 +36,20 @@ export function AppHeader() {
   const isBeadsRoute =
     pathname === "/beads" || pathname.startsWith("/beads/");
   const viewParam = searchParams.get("view");
-  const beadsView: "list" | "existing" | "finalcut" | "retakes" | "history" | "breakdown" =
-    viewParam === "existing"
-      ? "existing"
-      : viewParam === "finalcut"
-        ? "finalcut"
-        : viewParam === "retakes"
-          ? "retakes"
-          : viewParam === "history"
-            ? "history"
-          : viewParam === "breakdown"
-            ? "breakdown"
-            : "list";
+  const beadsView: "queues" | "active" | "existing" | "finalcut" | "retakes" | "history" | "breakdown" =
+    viewParam === "active"
+      ? "active"
+      : viewParam === "existing"
+        ? "existing"
+        : viewParam === "finalcut"
+          ? "finalcut"
+          : viewParam === "retakes"
+            ? "retakes"
+            : viewParam === "history"
+              ? "history"
+              : viewParam === "breakdown"
+                ? "breakdown"
+                : "queues";
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
@@ -78,8 +80,8 @@ export function AppHeader() {
 
   useEffect(() => {
     if (!isBeadsRoute || !canCreate) return;
-    // Shift+N only opens create dialog on Beats list view
-    if (beadsView !== "list") return;
+    // Shift+N only opens create dialog on Beats list views (queues/active)
+    if (beadsView !== "queues" && beadsView !== "active") return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "N" && e.shiftKey) {
         if (document.querySelector('[role="dialog"]')) return;
@@ -157,10 +159,16 @@ export function AppHeader() {
     setCreateOpen(true);
   };
 
-  const setBeadsView = useCallback((view: "list" | "existing" | "finalcut" | "retakes" | "history" | "breakdown") => {
+  const setBeadsView = useCallback((view: "queues" | "active" | "existing" | "finalcut" | "retakes" | "history" | "breakdown") => {
     const params = new URLSearchParams(searchParams.toString());
-    if (view === "list") params.delete("view");
+    if (view === "queues") params.delete("view");
     else params.set("view", view);
+    // Reset state filter to the phase default when switching between queues/active
+    if (view === "queues") {
+      params.set("state", "queued");
+    } else if (view === "active") {
+      params.set("state", "in_action");
+    }
     const qs = params.toString();
     router.push(`/beads${qs ? `?${qs}` : ""}`);
   }, [searchParams, router]);
@@ -168,7 +176,7 @@ export function AppHeader() {
   // Shift+] / Shift+[ to cycle views
   useEffect(() => {
     if (!isBeadsRoute) return;
-    const views = ["list", "existing", "finalcut", "retakes", "history"] as const;
+    const views = ["queues", "active", "existing", "finalcut", "retakes", "history"] as const;
     type CyclableView = (typeof views)[number];
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.querySelector('[role="dialog"]')) return;
@@ -208,7 +216,7 @@ export function AppHeader() {
   }, [isBeadsRoute, toggleTerminalPanel]);
 
   // Button config changes per view: hidden on Scenes/Breakdown/History, "Wrap!" on Final Cut, "Add" on Beats
-  const showActionButton = beadsView === "list" || beadsView === "finalcut";
+  const showActionButton = beadsView === "queues" || beadsView === "active" || beadsView === "finalcut";
 
   const actionButton = (() => {
     if (beadsView === "finalcut") {
@@ -349,13 +357,23 @@ export function AppHeader() {
                 <div className="flex items-center gap-1 rounded-lg border bg-muted/20 p-1">
                   <Button
                     size="lg"
-                    variant={beadsView === "list" ? "default" : "ghost"}
+                    variant={beadsView === "queues" ? "default" : "ghost"}
                     className="h-8 gap-1.5 px-2.5"
-                    title="Beat list view"
-                    onClick={() => setBeadsView("list")}
+                    title="Queue beats (ready for action)"
+                    onClick={() => setBeadsView("queues")}
                   >
-                    <List className="size-4" />
-                    Beats
+                    <Inbox className="size-4" />
+                    Queues
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant={beadsView === "active" ? "default" : "ghost"}
+                    className="h-8 gap-1.5 px-2.5"
+                    title="Active beats (in progress)"
+                    onClick={() => setBeadsView("active")}
+                  >
+                    <Zap className="size-4" />
+                    Active
                   </Button>
                   <Button
                     size="lg"

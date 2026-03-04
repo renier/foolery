@@ -31,7 +31,28 @@ function formatLabel(val: string): string {
     .join(" ");
 }
 
+export type ViewPhase = "queues" | "active";
+
+const QUEUE_STATES = [
+  "ready_for_planning",
+  "ready_for_plan_review",
+  "ready_for_implementation",
+  "ready_for_implementation_review",
+  "ready_for_shipment",
+  "ready_for_shipment_review",
+] as const;
+
+const ACTIVE_STATES = [
+  "planning",
+  "plan_review",
+  "implementation",
+  "implementation_review",
+  "shipment",
+  "shipment_review",
+] as const;
+
 interface FilterBarProps {
+  viewPhase?: ViewPhase;
   selectedIds?: string[];
   onBulkUpdate?: (fields: UpdateBeatInput) => void;
   onClearSelection?: () => void;
@@ -128,32 +149,41 @@ export function BulkEditControls({
   );
 }
 
-function FilterControls() {
+function FilterControls({ viewPhase }: { viewPhase?: ViewPhase }) {
   const { filters, activeRepo, registeredRepos } = useAppStore();
   const updateUrl = useUpdateUrl();
 
   const activeRepoEntry = registeredRepos.find((r) => r.path === activeRepo);
   const isBeadsProject = activeRepoEntry?.memoryManagerType === "beads";
 
+  // Determine the phase-level default and allowed states
+  const phaseDefault = viewPhase === "active" ? "in_action" : "queued";
+  const phaseStates = viewPhase === "active" ? ACTIVE_STATES : QUEUE_STATES;
+
   const hasNonDefaultFilters =
-    filters.state !== "queued" || (isBeadsProject && filters.type) || filters.priority !== undefined;
+    filters.state !== phaseDefault || (isBeadsProject && filters.type) || filters.priority !== undefined;
 
   return (
     <div className="flex items-center gap-1 overflow-x-auto">
       <Select
-        value={filters.state ?? "all"}
+        value={filters.state ?? phaseDefault}
         onValueChange={(v) => {
-          updateUrl({ state: v === "all" ? undefined : v });
+          updateUrl({ state: v === phaseDefault ? phaseDefault : v });
           (document.activeElement as HTMLElement)?.blur?.();
         }}
       >
-        <SelectTrigger className="w-[140px] h-7">
+        <SelectTrigger className="w-[220px] h-7">
           <SelectValue placeholder="State" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="queued">Queued</SelectItem>
-          <SelectItem value="in_action">In Action</SelectItem>
-          <SelectItem value="all">All States</SelectItem>
+          <SelectItem value={phaseDefault}>
+            All {viewPhase === "active" ? "Active" : "Queued"}
+          </SelectItem>
+          {phaseStates.map((s) => (
+            <SelectItem key={s} value={s}>
+              {formatLabel(s)}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
@@ -206,7 +236,7 @@ function FilterControls() {
           variant="ghost"
           size="sm"
           title="Clear all filters"
-          onClick={() => updateUrl({ state: "queued", type: undefined, priority: undefined })}
+          onClick={() => updateUrl({ state: phaseDefault, type: undefined, priority: undefined })}
         >
           <X className="h-4 w-4 mr-1" />
           Clear
@@ -217,6 +247,7 @@ function FilterControls() {
 }
 
 export function FilterBar({
+  viewPhase,
   selectedIds,
   onBulkUpdate,
   onClearSelection,
@@ -234,5 +265,5 @@ export function FilterBar({
       />
     );
   }
-  return <FilterControls />;
+  return <FilterControls viewPhase={viewPhase} />;
 }
