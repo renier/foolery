@@ -38,6 +38,7 @@ const HOTKEY_SECTIONS: HotkeySection[] = [
     title: "Panels",
     hotkeys: [
       { key: "Shift+T", description: "Toggle/minimize terminal panel" },
+      { key: "Alt+Shift+← / →", description: "Scroll terminal tabs" },
     ],
   },
 ];
