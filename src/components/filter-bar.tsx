@@ -179,6 +179,10 @@ function FilterControls({ viewPhase }: { viewPhase?: ViewPhase }) {
   // Determine the phase-level default and allowed states
   const phaseDefault = viewPhase === "active" ? "in_action" : "queued";
   const phaseStates = viewPhase === "active" ? ACTIVE_STATES : QUEUE_STATES;
+  const selectedState =
+    filters.state && (filters.state === phaseDefault || phaseStates.includes(filters.state))
+      ? filters.state
+      : phaseDefault;
 
   const hasNonDefaultFilters =
     filters.state !== phaseDefault || (isBeadsProject && filters.type) || filters.priority !== undefined;
@@ -186,7 +190,7 @@ function FilterControls({ viewPhase }: { viewPhase?: ViewPhase }) {
   return (
     <div className="flex items-center gap-1 overflow-x-auto">
       <Select
-        value={filters.state ?? phaseDefault}
+        value={selectedState}
         onValueChange={(v) => {
           updateUrl({ state: v === phaseDefault ? phaseDefault : v });
           (document.activeElement as HTMLElement)?.blur?.();
@@ -196,9 +200,7 @@ function FilterControls({ viewPhase }: { viewPhase?: ViewPhase }) {
           <SelectValue placeholder="State" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={phaseDefault}>
-            All {viewPhase === "active" ? "Active" : "Queued"}
-          </SelectItem>
+          <SelectItem value={phaseDefault}>All</SelectItem>
           {phaseStates.map((s) => (
             <SelectItem key={s} value={s}>
               {formatLabel(s)}
