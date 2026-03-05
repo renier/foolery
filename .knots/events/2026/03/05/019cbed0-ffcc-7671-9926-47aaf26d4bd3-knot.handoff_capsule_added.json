@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbed0-ffcc-7671-9926-47aaf26d4bd3",
+  "occurred_at": "2026-03-05T16:24:53.96417Z",
+  "knot_id": "foolery-ef46",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "In src/lib/verification-orchestrator.ts, transitionToRetry now dispatches retry advancement inline by resolveMemoryManagerType(repoPath): knots keeps nextKnot(expectedState=currentState) and beads calls nextBeat(currentState, repoPath). Quality gates in dedicated worktree: bun run lint (warnings-only baseline), bunx tsc --noEmit, bun run test (2030 total), NODE_ENV=production bun run build.",
+    "datetime": "2026-03-05T16:24:53.96417Z",
+    "entry_id": "019cbed0-ffcc-7671-9926-479106e0f624",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

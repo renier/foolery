@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbec9-b136-7791-a132-baf1b338f9dd",
+  "occurred_at": "2026-03-05T16:16:55.094186Z",
+  "knot_id": "foolery-ef46",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Code edits required by this run: implement transitionToRetry dispatch via resolveMemoryManagerType (knots->nextKnot, beads->nextBeat). Moving back to implementation queue per implementation_review prompt.",
+    "datetime": "2026-03-05T16:16:55.094186Z",
+    "entry_id": "019cbec9-b136-7791-a132-bae3cb9000b8",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

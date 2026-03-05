@@ -1,0 +1,14 @@
+{
+  "event_id": "019cbebb-3e04-7651-9c76-9f05f011268a",
+  "occurred_at": "2026-03-05T16:01:08.100471Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-ff25",
+    "profile_id": "autopilot",
+    "state": "ready_for_implementation",
+    "terminal": false,
+    "title": "shift-r  and cmd-shift-r does not work right, doesn't cycle through the repositories",
+    "updated_at": "2026-03-05T16:01:08.100471Z"
+  }
+}

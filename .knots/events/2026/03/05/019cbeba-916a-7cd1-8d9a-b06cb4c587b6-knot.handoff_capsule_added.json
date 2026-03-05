@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbeba-916a-7cd1-8d9a-b06cb4c587b6",
+  "occurred_at": "2026-03-05T16:00:23.914666Z",
+  "knot_id": "foolery-ff25",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Moved Shift+R (forward) and Cmd/Ctrl+Shift+R (reverse) repo cycling from beat-table.tsx to app-header.tsx as global shortcuts. Both now work on all beats screens (queues, active, finalcut, retakes, history) and wrap cyclically. Removed duplicate handlers from beat-table. All tests pass (1952/1952).",
+    "datetime": "2026-03-05T16:00:23.914666Z",
+    "entry_id": "019cbeba-916a-7cd1-8d9a-b058087ebc71",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

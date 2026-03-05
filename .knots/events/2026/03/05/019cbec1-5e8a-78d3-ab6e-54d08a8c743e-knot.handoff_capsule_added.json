@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbec1-5e8a-78d3-ab6e-54d08a8c743e",
+  "occurred_at": "2026-03-05T16:07:49.642425Z",
+  "knot_id": "foolery-ef46",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "transitionToRetry now resolves memory manager type in-function and dispatches retry advancement through typed routing: knots -> nextKnot(expectedState), beads -> nextBeat(currentState). Added assertions in verification orchestrator test suites to verify resolveMemoryManagerType('/repo') is used for dispatch decisions. Gates in worktree: bun run lint (warnings only), bunx tsc --noEmit pass, bun run test pass (2022 total), NODE_ENV=production bun run build pass.",
+    "datetime": "2026-03-05T16:07:33Z",
+    "entry_id": "019cbec1-5e8a-78d3-ab6e-54c7c12db308",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-05"
+  }
+}

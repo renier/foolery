@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbec3-f554-74f1-8c95-cdb1f5904f98",
+  "occurred_at": "2026-03-05T16:10:39.316321Z",
+  "knot_id": "foolery-ef46",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Source edits required in this run for transitionToRetry dispatch verification.",
+    "datetime": "2026-03-05T16:10:39.316321Z",
+    "entry_id": "019cbec3-f554-74f1-8c95-cda194d0eef7",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

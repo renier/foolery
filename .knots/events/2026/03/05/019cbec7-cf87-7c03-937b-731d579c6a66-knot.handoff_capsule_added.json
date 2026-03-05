@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbec7-cf87-7c03-937b-731d579c6a66",
+  "occurred_at": "2026-03-05T16:14:51.78356Z",
+  "knot_id": "foolery-ef46",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Source edit delivered in verification-orchestrator.ts: transitionToRetry now dispatches state advancement inline via resolveMemoryManagerType(repoPath), preserving knots path (nextKnot with expectedState) and using beads path (nextBeat with currentState). Validation in dedicated worktree: bun run lint (warnings-only baseline), bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build. Integrated to main as 9325f26c8aaf and pushed to origin/main.",
+    "datetime": "2026-03-05T16:14:51Z",
+    "entry_id": "019cbec7-cf87-7c03-937b-7300a3d1212d",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "1"
+  }
+}

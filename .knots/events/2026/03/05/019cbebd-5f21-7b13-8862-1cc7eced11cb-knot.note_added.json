@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbebd-5f21-7b13-8862-1cc7eced11cb",
+  "occurred_at": "2026-03-05T16:03:27.649759Z",
+  "knot_id": "foolery-ef46",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Source edits are required for this run: implement transitionToRetry() dispatch via resolveMemoryManagerType() with knots->nextKnot and beads->nextBeat, then re-run validation.",
+    "datetime": "2026-03-05T16:03:27.649759Z",
+    "entry_id": "019cbebd-5f21-7b13-8862-1cb5cab7ba2d",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

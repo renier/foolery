@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbec6-3b1e-7343-84a5-137d176f9d65",
+  "occurred_at": "2026-03-05T16:13:08.254957Z",
+  "knot_id": "foolery-ff25",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Verified: Shift+R cycles forward with wraparound, Cmd/Ctrl+Shift+R cycles backward with wraparound, both work on all screens via global capture-phase listener in AppHeader. cycleRepoPath uses modular arithmetic for wraparound. All 1962 tests pass. Code on main, pushed to origin.",
+    "datetime": "2026-03-05T16:13:08.254957Z",
+    "entry_id": "019cbec6-3b1e-7343-84a5-136846ba4900",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

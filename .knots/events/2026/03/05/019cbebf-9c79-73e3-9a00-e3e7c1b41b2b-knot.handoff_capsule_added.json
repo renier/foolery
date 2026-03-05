@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbebf-9c79-73e3-9a00-e3e7c1b41b2b",
+  "occurred_at": "2026-03-05T16:05:54.425643Z",
+  "knot_id": "foolery-ff25",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Implemented global repo-cycle hotkeys: Shift+R now cycles forward with wraparound and Cmd/Ctrl+Shift+R cycles backward with wraparound across all Beats screens via AppHeader global listener. Added shared helpers getRepoCycleDirection/cycleRepoPath with tests plus a layout guard test to keep behavior global. Quality gates: bun run lint, bunx tsc --noEmit, bun run test (1962 pass), bun run build passes with NODE_ENV=production (session default NODE_ENV caused prior non-standard-env build failure). Commit: 9f4d5e61bcf2.",
+    "datetime": "2026-03-05T16:05:24Z",
+    "entry_id": "019cbebf-9c79-73e3-9a00-e3dfbd4f566a",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}

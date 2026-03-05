@@ -1,0 +1,14 @@
+{
+  "event_id": "019cbec7-cf96-77a3-8a6b-c0a6f3c27eb9",
+  "occurred_at": "2026-03-05T16:14:51.78356Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "knot_id": "foolery-ef46",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "Phase 7: Verification orchestrator dispatch",
+    "updated_at": "2026-03-05T16:14:51.78356Z"
+  }
+}

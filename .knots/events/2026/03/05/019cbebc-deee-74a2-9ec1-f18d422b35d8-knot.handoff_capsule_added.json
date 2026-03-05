@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbebc-deee-74a2-9ec1-f18d422b35d8",
+  "occurred_at": "2026-03-05T16:02:54.830205Z",
+  "knot_id": "foolery-ef46",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Shipment complete. Implementation of transitionToRetry() dispatch by resolveMemoryManagerType() is on main and pushed to origin/main. CI green (CI, Coverage Badge, Changesets all passing). Commits tagged: 7852e8ea608e (original dispatch), 69c52a7e8d0a (clarification). advanceRetryState() routes knots->nextKnot, beads->nextBeat.",
+    "datetime": "2026-03-05T16:02:54.830205Z",
+    "entry_id": "019cbebc-deee-74a2-9ec1-f17980f2023c",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

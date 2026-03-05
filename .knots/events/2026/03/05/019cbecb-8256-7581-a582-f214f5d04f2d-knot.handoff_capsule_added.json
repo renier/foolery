@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbecb-8256-7581-a582-f214f5d04f2d",
+  "occurred_at": "2026-03-05T16:18:54.16628Z",
+  "knot_id": "foolery-ff25",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Adjusted global Shift+R / Cmd+Shift+R repo cycling to read activeRepo + repo registry from useAppStore.getState() at keypress time, eliminating stale-closure stalls at list boundaries; kept wraparound behavior and all-screen scope. Updated beats-page layout guard test accordingly. Quality gates in worktree passed: bun run lint (warnings only), bunx tsc --noEmit, bun run test (1962 pass), NODE_ENV=production bun run build.",
+    "datetime": "2026-03-05T16:18:54.16628Z",
+    "entry_id": "019cbecb-8256-7581-a582-f20303bf2488",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbec4-77cf-7d61-8b73-4fd4749522cf",
+  "occurred_at": "2026-03-05T16:11:12.719042Z",
+  "knot_id": "foolery-ff25",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Made Shift+R and Cmd/Ctrl+Shift+R repo cycling global to all app screens by removing beats-route gating in AppHeader, using a capture-phase keydown listener, and keeping wraparound behavior via cycleRepoPath. Updated beats page layout guard test to assert global binding and capture listener. Quality gates in isolated worktree: bun run lint (warnings only), bunx tsc --noEmit, bun run test (1962 passed), NODE_ENV=production bun run build all pass.",
+    "datetime": "2026-03-05T16:11:12.719042Z",
+    "entry_id": "019cbec4-77cf-7d61-8b73-4fc7e09db9f7",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

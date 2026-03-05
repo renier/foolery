@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbeb9-9e9f-7822-906c-bbc85675a540",
+  "occurred_at": "2026-03-05T15:59:21.759582Z",
+  "knot_id": "foolery-ef46",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Refactored transitionToRetry() to route retry-state advancement through an explicit memory-manager dispatch helper (knots -> nextKnot with expectedState, beads -> nextBeat). Added retry transition dispatch tests in verification-orchestrator.test for both manager types. Gates run in worktree: bun run lint (warnings only), bunx tsc --noEmit pass, bun run test pass (2021 total), NODE_ENV=production bun run build pass.",
+    "datetime": "2026-03-05T15:59:21Z",
+    "entry_id": "019cbeb9-9e9f-7822-906c-bbb24803ead8",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}
