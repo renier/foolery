@@ -39,7 +39,6 @@ import {
   type VerificationEventType,
 } from "@/lib/verification-workflow";
 import { resolveMemoryManagerType } from "@/lib/memory-manager-commands";
-import type { MemoryManagerType } from "@/lib/memory-managers";
 import type { ActionName } from "@/lib/types";
 
 // ── Configuration ───────────────────────────────────────────
@@ -505,21 +504,12 @@ async function transitionToRetry(beatId: string, repoPath: string): Promise<void
     await getBackend().update(beatId, updateFields, repoPath);
   }
 
-  const memoryManagerType = resolveMemoryManagerType(repoPath);
-  await advanceRetryState(beatId, beatResult.data.state, repoPath, memoryManagerType);
-}
-
-async function advanceRetryState(
-  beatId: string,
-  currentState: string,
-  repoPath: string,
-  memoryManagerType: MemoryManagerType,
-): Promise<void> {
-  if (memoryManagerType === "knots") {
+  const currentState = beatResult.data.state;
+  if (resolveMemoryManagerType(repoPath) === "knots") {
     await nextKnot(beatId, repoPath, { expectedState: currentState });
-  } else {
-    await nextBeat(beatId, currentState, repoPath);
+    return;
   }
+  await nextBeat(beatId, currentState, repoPath);
 }
 
 // ── Utilities ───────────────────────────────────────────────
