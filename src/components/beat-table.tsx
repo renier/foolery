@@ -152,6 +152,8 @@ function repoPathForBeat(beat: Beat | undefined): string | undefined {
 export function BeatTable({
   data,
   showRepoColumn = false,
+  showAgentColumns = false,
+  agentInfoByBeatId = {},
   onSelectionChange,
   selectionVersion,
   searchQuery,
@@ -162,6 +164,8 @@ export function BeatTable({
 }: {
   data: Beat[];
   showRepoColumn?: boolean;
+  showAgentColumns?: boolean;
+  agentInfoByBeatId?: Record<string, import("@/components/beat-columns").AgentInfo>;
   onSelectionChange?: (ids: string[]) => void;
   selectionVersion?: number;
   searchQuery?: string;
@@ -432,6 +436,8 @@ export function BeatTable({
   const columns = useMemo(
     () => getBeatColumns({
       showRepoColumn,
+      showAgentColumns,
+      agentInfoByBeatId,
       onUpdateBeat: (id, fields, repoPath) => handleUpdateBeat({ id, fields, repoPath }),
       onTitleClick: (beat) => {
         if (onOpenBeat) {
@@ -457,7 +463,7 @@ export function BeatTable({
       childCountMap,
       parentRollingBeatIds,
     }),
-    [showRepoColumn, handleUpdateBeat, onOpenBeat, searchParams, router, onShipBeat, shippingByBeatId, onAbortShipping, allLabels, initiateClose, collapsedIds, handleToggleCollapse, childCountMap, parentRollingBeatIds]
+    [showRepoColumn, showAgentColumns, agentInfoByBeatId, handleUpdateBeat, onOpenBeat, searchParams, router, onShipBeat, shippingByBeatId, onAbortShipping, allLabels, initiateClose, collapsedIds, handleToggleCollapse, childCountMap, parentRollingBeatIds]
   );
 
   const handleRowFocus = useCallback((beat: Beat) => {

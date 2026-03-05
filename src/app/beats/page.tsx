@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import type { Beat } from "@/lib/types";
 import type { UpdateBeatInput } from "@/lib/schemas";
+import type { AgentInfo } from "@/components/beat-columns";
 import { updateBeatOrThrow } from "@/lib/update-beat-mutation";
 
 const DEGRADED_ERROR_PREFIX = "Unable to interact with beats store";
@@ -182,6 +183,38 @@ function BeatsPageInner() {
         ? data.error ?? "Failed to load beats."
         : null;
   const showRepoColumn = !activeRepo && registeredRepos.length > 1;
+  const isActiveView = beatsView === "active";
+
+  const agentInfoByBeatId = useMemo<Record<string, AgentInfo>>(() => {
+    if (!isActiveView) return {};
+    const map: Record<string, AgentInfo> = {};
+
+    // Populate from handoff capsules in beat metadata (last capsule wins).
+    for (const beat of beats) {
+      const capsules = beat.metadata?.knotsHandoffCapsules;
+      if (Array.isArray(capsules) && capsules.length > 0) {
+        const last = capsules[capsules.length - 1] as Record<string, unknown>;
+        map[beat.id] = {
+          agentName: typeof last.agentname === "string" ? last.agentname : undefined,
+          model: typeof last.model === "string" ? last.model : undefined,
+          version: typeof last.version === "string" ? last.version : undefined,
+        };
+      }
+    }
+
+    // Override with live terminal data for currently running sessions.
+    for (const terminal of terminals) {
+      if (terminal.status === "running") {
+        map[terminal.beatId] = {
+          agentName: terminal.agentName ?? map[terminal.beatId]?.agentName,
+          model: terminal.agentModel ?? map[terminal.beatId]?.model,
+          version: terminal.agentVersion ?? map[terminal.beatId]?.version,
+        };
+      }
+    }
+
+    return map;
+  }, [isActiveView, beats, terminals]);
 
   const { mutate: bulkUpdate } = useMutation({
     mutationFn: async ({ ids, fields }: { ids: string[]; fields: UpdateBeatInput }) => {
@@ -441,6 +474,8 @@ function BeatsPageInner() {
               <BeatTable
                 data={beats}
                 showRepoColumn={showRepoColumn}
+                showAgentColumns={isActiveView}
+                agentInfoByBeatId={agentInfoByBeatId}
                 onSelectionChange={handleSelectionChange}
                 selectionVersion={selectionVersion}
                 searchQuery={searchQuery}

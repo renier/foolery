@@ -139,8 +139,16 @@ function relativeTime(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString();
 }
 
+export interface AgentInfo {
+  agentName?: string;
+  model?: string;
+  version?: string;
+}
+
 export interface BeatColumnOpts {
   showRepoColumn?: boolean;
+  showAgentColumns?: boolean;
+  agentInfoByBeatId?: Record<string, AgentInfo>;
   onUpdateBeat?: UpdateBeatFn;
   onTitleClick?: (beat: Beat) => void;
   onShipBeat?: (beat: Beat) => void;
@@ -306,6 +314,8 @@ function TitleCell({ beat, onTitleClick, onUpdateBeat, allLabels }: {
 
 export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDef<Beat>[] {
   const showRepoColumn = typeof opts === "boolean" ? opts : (opts.showRepoColumn ?? false);
+  const showAgentColumns = typeof opts === "boolean" ? false : (opts.showAgentColumns ?? false);
+  const agentInfoByBeatId = typeof opts === "boolean" ? {} : (opts.agentInfoByBeatId ?? {});
   const onUpdateBeat = typeof opts === "boolean" ? undefined : opts.onUpdateBeat;
   const onTitleClick = typeof opts === "boolean" ? undefined : opts.onTitleClick;
   const onShipBeat = typeof opts === "boolean" ? undefined : opts.onShipBeat;
@@ -604,6 +614,46 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
       );
     },
   });
+
+  // Agent info columns: show agent name, model, and version in the active view.
+  if (showAgentColumns) {
+    const agentCell = (beatId: string, field: keyof AgentInfo) => {
+      const info = agentInfoByBeatId[beatId];
+      const value = info?.[field];
+      if (!value) return <span className="text-muted-foreground text-xs">&mdash;</span>;
+      return <span className="text-xs font-mono truncate" title={value}>{value}</span>;
+    };
+
+    columns.push(
+      {
+        id: "agentName",
+        header: "Agent",
+        size: 90,
+        minSize: 70,
+        maxSize: 120,
+        enableSorting: false,
+        cell: ({ row }) => agentCell(row.original.id, "agentName"),
+      },
+      {
+        id: "agentModel",
+        header: "Model",
+        size: 110,
+        minSize: 80,
+        maxSize: 150,
+        enableSorting: false,
+        cell: ({ row }) => agentCell(row.original.id, "model"),
+      },
+      {
+        id: "agentVersion",
+        header: "Version",
+        size: 70,
+        minSize: 50,
+        maxSize: 90,
+        enableSorting: false,
+        cell: ({ row }) => agentCell(row.original.id, "version"),
+      },
+    );
+  }
 
   // Action column: shows Take!/Scene!/Rolling... buttons as the last column
   if (onShipBeat) {
