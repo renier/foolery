@@ -254,23 +254,22 @@ function StepPoolEditor({
       ) : (
         <div className="space-y-1.5">
           {entries.map((entry, idx) => {
-            const pct =
-              totalWeight > 0
-                ? Math.round((entry.weight / totalWeight) * 100)
-                : 0;
+            const ratio = totalWeight > 0 ? entry.weight / totalWeight : 0;
+            const pct = Math.round(ratio * 100);
             const agent = agents[entry.agentId];
             const pricing = resolveOpenRouterPricing(
               openRouterModels,
               agent?.model,
             );
+            const label = formatPoolAgentLabel(entry.agentId, agent);
             return (
               <div
                 key={entry.agentId}
                 className="flex items-center gap-2"
               >
-                <div className="min-w-[180px]">
-                  <span className="text-sm block truncate">
-                    {formatPoolAgentLabel(entry.agentId, agent)}
+                <div className="w-[140px] sm:w-[220px] min-w-0 shrink-0">
+                  <span className="text-sm block truncate" title={label}>
+                    {label}
                   </span>
                   {pricing && (
                     <span
@@ -285,7 +284,7 @@ function StepPoolEditor({
                   type="number"
                   min={0}
                   step={1}
-                  className="h-7 w-[70px] px-2 text-sm"
+                  className="h-7 w-[64px] sm:w-[74px] px-2 text-sm shrink-0"
                   value={entry.weight}
                   onChange={(e) => {
                     const next = [...entries];
@@ -296,14 +295,14 @@ function StepPoolEditor({
                     onChange(next);
                   }}
                 />
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                <div className="flex-1 min-w-0 h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: `${pct}%` }}
+                    style={{ width: `${ratio * 100}%` }}
                   />
                 </div>
-                <span className="text-xs text-muted-foreground w-[36px] text-right">
-                  {pct}%
+                <span className="text-xs text-muted-foreground w-[58px] sm:w-[72px] text-right tabular-nums shrink-0">
+                  w{entry.weight} · {pct}%
                 </span>
                 <Button
                   variant="ghost"
