@@ -247,24 +247,31 @@ export function AppHeader() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isBeatsRoute]);
 
-  // Shift+R cycles repos forward; Cmd/Ctrl+Shift+R cycles backward (all Beats screens).
+  // Shift+R cycles repos forward; Cmd/Ctrl+Shift+R cycles backward (all app screens).
   useEffect(() => {
-    if (!isBeatsRoute) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       const direction = getRepoCycleDirection(e);
       if (!direction) return;
       if (document.querySelector('[role="dialog"]')) return;
-      const target = e.target as HTMLElement;
-      if (target.tagName === "TEXTAREA" || target.tagName === "INPUT" || target.tagName === "SELECT") return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLSelectElement ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
       e.preventDefault();
+      e.stopPropagation();
       const repos = registeredRepos.map((r) => r.path);
       const nextRepo = cycleRepoPath(repos, activeRepo, direction);
       if (!nextRepo || nextRepo === activeRepo) return;
       updateUrl({ repo: nextRepo });
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isBeatsRoute, activeRepo, registeredRepos, updateUrl]);
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () => window.removeEventListener("keydown", handleKeyDown, { capture: true });
+  }, [activeRepo, registeredRepos, updateUrl]);
 
   // Button config changes per view: hidden on History, "Wrap!" on Final Cut, "Add" on Beats
   const showActionButton = beatsView === "queues" || beatsView === "active" || beatsView === "finalcut";
