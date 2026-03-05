@@ -89,6 +89,7 @@ class SessionConnectionManager {
             addNotification({
               message: `"${terminal.beatTitle}" session ${status}`,
               beatId: terminal.beatId,
+              repoPath: terminal.repoPath,
             });
           }
 

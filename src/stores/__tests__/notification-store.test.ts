@@ -88,4 +88,11 @@ describe("notification store", () => {
     expect(n.beatId).toBe("foolery-42");
   });
 
+  it("stores optional repoPath on notification", () => {
+    const store = useNotificationStore.getState();
+    store.addNotification({ message: "Beat ready", repoPath: "/repos/foolery" });
+
+    const n = useNotificationStore.getState().notifications[0];
+    expect(n.repoPath).toBe("/repos/foolery");
+  });
 });

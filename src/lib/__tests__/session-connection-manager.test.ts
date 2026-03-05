@@ -28,7 +28,13 @@ vi.mock("../terminal-api", () => ({
 
 // Mock the terminal store
 const mockUpdateStatus = vi.fn();
-const mockTerminals: Array<{ sessionId: string; status: string; beatId: string; beatTitle: string }> = [];
+const mockTerminals: Array<{
+  sessionId: string;
+  status: string;
+  beatId: string;
+  beatTitle: string;
+  repoPath?: string;
+}> = [];
 let storeSubscribers: Array<() => void> = [];
 
 vi.mock("@/stores/terminal-store", () => ({
@@ -245,7 +251,13 @@ describe("SessionConnectionManager", () => {
   });
 
   it("exit event fires in-app notification with beat info", () => {
-    mockTerminals.push({ sessionId: "sess-notif", status: "running", beatId: "beat-42", beatTitle: "Fix login bug" });
+    mockTerminals.push({
+      sessionId: "sess-notif",
+      status: "running",
+      beatId: "beat-42",
+      beatTitle: "Fix login bug",
+      repoPath: "/repos/foolery",
+    });
     sessionConnections.connect("sess-notif");
 
     capturedOnEvent!({ type: "exit", data: "0", timestamp: Date.now() });
@@ -253,11 +265,18 @@ describe("SessionConnectionManager", () => {
     expect(mockAddNotification).toHaveBeenCalledWith({
       message: '"Fix login bug" session completed',
       beatId: "beat-42",
+      repoPath: "/repos/foolery",
     });
   });
 
   it("exit event with non-zero code fires error notification", () => {
-    mockTerminals.push({ sessionId: "sess-notif-err", status: "running", beatId: "beat-43", beatTitle: "Deploy service" });
+    mockTerminals.push({
+      sessionId: "sess-notif-err",
+      status: "running",
+      beatId: "beat-43",
+      beatTitle: "Deploy service",
+      repoPath: "/repos/deploy",
+    });
     sessionConnections.connect("sess-notif-err");
 
     capturedOnEvent!({ type: "exit", data: "1", timestamp: Date.now() });
@@ -265,6 +284,7 @@ describe("SessionConnectionManager", () => {
     expect(mockAddNotification).toHaveBeenCalledWith({
       message: '"Deploy service" session exited with error',
       beatId: "beat-43",
+      repoPath: "/repos/deploy",
     });
   });
 

@@ -16,6 +16,10 @@ interface RepoMatch {
   path: string;
 }
 
+function normalizeToken(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 function getPathBasename(path: string): string | null {
   if (!path) return null;
   const parts = path.split(/[\\/]+/).filter((part) => part.length > 0);
@@ -31,6 +35,9 @@ export function findRepoForBeatId<T extends RepoMatch>(
   beatId: string,
   repos: readonly T[],
 ): T | null {
+  const normalizedBeatId = normalizeToken(beatId);
+  if (!normalizedBeatId.includes("-")) return null;
+
   let match: T | null = null;
   let longestPrefixLength = -1;
   for (const repo of repos) {
@@ -39,14 +46,31 @@ export function findRepoForBeatId<T extends RepoMatch>(
     if (basename) prefixes.add(basename);
 
     for (const prefix of prefixes) {
-      if (!beatId.startsWith(`${prefix}-`)) continue;
-      if (prefix.length > longestPrefixLength) {
+      const normalizedPrefix = normalizeToken(prefix);
+      if (!normalizedPrefix) continue;
+      if (!normalizedBeatId.startsWith(`${normalizedPrefix}-`)) continue;
+      if (normalizedPrefix.length > longestPrefixLength) {
         match = repo;
-        longestPrefixLength = prefix.length;
+        longestPrefixLength = normalizedPrefix.length;
       }
     }
   }
   return match;
+}
+
+/**
+ * Resolve the repo path for beat focus.
+ * Prefers an explicit repoPath carried by the notification, then falls back
+ * to matching the beat ID prefix against registered repos.
+ */
+export function resolveBeatRepoPath<T extends RepoMatch>(
+  beatId: string,
+  repos: readonly T[],
+  explicitRepoPath?: string | null,
+): string | null {
+  const normalizedExplicit = explicitRepoPath?.trim();
+  if (normalizedExplicit) return normalizedExplicit;
+  return findRepoForBeatId(beatId, repos)?.path ?? null;
 }
 
 interface BuildBeatFocusHrefOptions {

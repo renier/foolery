@@ -4,6 +4,7 @@ export interface Notification {
   id: string;
   message: string;
   beatId?: string;
+  repoPath?: string;
   timestamp: number;
   read: boolean;
 }

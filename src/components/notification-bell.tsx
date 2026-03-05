@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { buildBeatFocusHref, findRepoForBeatId } from "@/lib/beat-navigation";
+import { buildBeatFocusHref, resolveBeatRepoPath } from "@/lib/beat-navigation";
 import { markAllNotificationsReadAndClose } from "@/components/notification-bell-actions";
 import {
   useNotificationStore,
@@ -27,14 +27,20 @@ export function NotificationBell() {
   const markAllRead = useNotificationStore((s) => s.markAllRead);
   const registeredRepos = useAppStore((s) => s.registeredRepos);
   const setActiveRepo = useAppStore((s) => s.setActiveRepo);
-  const focusBeat = (beatId: string) => {
-    const repo = findRepoForBeatId(beatId, registeredRepos);
-    if (repo) setActiveRepo(repo.path);
+  const focusBeat = (beatId: string, explicitRepoPath?: string) => {
+    const normalizedBeatId = beatId.trim();
+    if (!normalizedBeatId) return;
+    const repoPath = resolveBeatRepoPath(
+      normalizedBeatId,
+      registeredRepos,
+      explicitRepoPath,
+    );
+    if (repoPath) setActiveRepo(repoPath);
     router.push(
       buildBeatFocusHref(
-        beatId,
+        normalizedBeatId,
         searchParams.toString(),
-        repo ? { repo: repo.path, detailRepo: repo.path } : undefined,
+        repoPath ? { repo: repoPath, detailRepo: repoPath } : undefined,
       ),
     );
   };
@@ -84,7 +90,7 @@ function NotificationList({
   onFocusBeat,
 }: {
   notifications: readonly Notification[];
-  onFocusBeat: (beatId: string) => void;
+  onFocusBeat: (beatId: string, explicitRepoPath?: string) => void;
 }) {
   if (notifications.length === 0) {
     return (
@@ -97,30 +103,30 @@ function NotificationList({
   return (
     <ul className="max-h-64 overflow-y-auto">
       {notifications.map((n) => {
-          const beatId = n.beatId;
-          return (
-            <li
-              key={n.id}
-              className={`border-b px-3 py-2 text-sm last:border-b-0 ${
-                n.read ? "text-muted-foreground" : "bg-muted/30"
-              }`}
-            >
-              <p className="leading-snug">{n.message}</p>
-              {beatId ? (
-                <button
-                  type="button"
-                  className="mt-1 block font-mono text-[11px] text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline"
-                  title={`Focus ${beatId}`}
-                  onClick={() => onFocusBeat(beatId)}
-                >
-                  {beatId}
-                </button>
-              ) : null}
-              <time className="mt-0.5 block text-[10px] text-muted-foreground">
-                {new Date(n.timestamp).toLocaleTimeString()}
-              </time>
-            </li>
-          );
+        const beatId = n.beatId?.trim();
+        return (
+          <li
+            key={n.id}
+            className={`border-b px-3 py-2 text-sm last:border-b-0 ${
+              n.read ? "text-muted-foreground" : "bg-muted/30"
+            }`}
+          >
+            <p className="leading-snug">{n.message}</p>
+            {beatId ? (
+              <button
+                type="button"
+                className="mt-1 block font-mono text-[11px] text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline"
+                title={`Focus ${beatId}`}
+                onClick={() => onFocusBeat(beatId, n.repoPath)}
+              >
+                {beatId}
+              </button>
+            ) : null}
+            <time className="mt-0.5 block text-[10px] text-muted-foreground">
+              {new Date(n.timestamp).toLocaleTimeString()}
+            </time>
+          </li>
+        );
       })}
     </ul>
   );

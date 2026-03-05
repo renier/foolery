@@ -3,6 +3,7 @@ import {
   buildBeatFocusHref,
   extractBeatPrefix,
   findRepoForBeatId,
+  resolveBeatRepoPath,
   stripBeatPrefix,
 } from "@/lib/beat-navigation";
 
@@ -110,5 +111,33 @@ describe("findRepoForBeatId", () => {
         { name: "team-repo", path: "C:\\work\\foolery" },
       ]),
     ).toEqual({ name: "team-repo", path: "C:\\work\\foolery" });
+  });
+
+  it("matches prefixes case-insensitively", () => {
+    expect(
+      findRepoForBeatId("foolery-xmvb", [
+        { name: "Foolery", path: "/Repos/Foolery" },
+      ]),
+    ).toEqual({ name: "Foolery", path: "/Repos/Foolery" });
+  });
+});
+
+describe("resolveBeatRepoPath", () => {
+  it("prefers explicit repoPath from notification metadata", () => {
+    expect(
+      resolveBeatRepoPath(
+        "foolery-xmvb",
+        [{ name: "foolery", path: "/repos/foolery" }],
+        "/repos/custom",
+      ),
+    ).toBe("/repos/custom");
+  });
+
+  it("falls back to beat prefix matching when explicit repoPath is missing", () => {
+    expect(
+      resolveBeatRepoPath("foolery-xmvb", [
+        { name: "foolery", path: "/repos/foolery" },
+      ]),
+    ).toBe("/repos/foolery");
   });
 });
