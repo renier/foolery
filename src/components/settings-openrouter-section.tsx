@@ -103,8 +103,10 @@ export function SettingsOpenRouterSection({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Globe className="size-4 text-muted-foreground" />
-          <h3 className="text-sm font-medium">OpenRouter</h3>
+          <Globe className="size-4 text-primary drop-shadow-[0_0_8px_rgba(137,87,255,0.45)]" />
+          <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">
+            OpenRouter
+          </h3>
         </div>
         <Switch
           checked={openrouter.enabled}
@@ -114,15 +116,15 @@ export function SettingsOpenRouterSection({
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
+      <div className="flex items-center justify-between rounded-lg border border-accent/45 bg-gradient-to-r from-primary/20 via-primary/8 to-accent/20 px-3 py-2 ring-1 ring-primary/20">
+        <p className="text-xs text-primary/95">
           Connect to OpenRouter for access to 200+ AI models from multiple
           providers with unified pricing.
         </p>
         <Button
           variant="ghost"
           size="sm"
-          className="text-[10px] text-muted-foreground gap-1 h-6 px-2 shrink-0"
+          className="h-6 shrink-0 gap-1 border border-primary/35 bg-primary/12 px-2 text-[10px] text-primary hover:border-accent/60 hover:bg-accent/20"
           onClick={() => setSecurityDialogOpen(true)}
         >
           <ShieldCheck className="size-3" />
@@ -187,14 +189,17 @@ interface SelectedModelBadgeProps {
 
 function SelectedModelBadge({ modelId, model, onClear }: SelectedModelBadgeProps) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-accent/45 bg-gradient-to-r from-accent/24 via-background/75 to-primary/20 p-2 ring-1 ring-accent/20">
       <Label className="text-xs">Selected Model</Label>
-      <Badge variant="outline" className="gap-1 font-mono text-[11px]">
+      <Badge
+        variant="outline"
+        className="gap-1 border-primary/55 bg-gradient-to-r from-primary/18 via-background/80 to-accent/18 font-mono text-[11px]"
+      >
         {modelId}
         <button
           type="button"
           onClick={onClear}
-          className="ml-0.5 rounded-full hover:bg-muted"
+          className="ml-0.5 rounded-full hover:bg-accent/22"
           aria-label="Clear selected model"
         >
           <X className="size-3" />
@@ -236,7 +241,7 @@ function ApiKeyField({
   const isMasked = apiKey.includes("...");
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5 rounded-lg border border-primary/45 bg-gradient-to-r from-primary/18 via-background/80 to-accent/20 p-2.5 ring-1 ring-primary/20">
       <Label className="text-xs">API Key</Label>
       <div className="flex gap-2">
         <div className="relative flex-1">
@@ -245,12 +250,12 @@ function ApiKeyField({
             value={apiKey}
             onChange={(e) => onApiKeyChange(e.target.value)}
             placeholder="sk-or-v1-..."
-            className="pr-9"
+            className="border-primary/55 bg-gradient-to-r from-primary/14 via-background/82 to-accent/14 pr-9 focus-visible:ring-accent/45"
           />
           <Button
             variant="ghost"
             size="sm"
-            className="absolute right-0 top-0 h-full px-2"
+            className="absolute right-0 top-0 h-full px-2 text-primary hover:bg-primary/14 hover:text-primary"
             onClick={onToggleShow}
           >
             {showKey ? (
@@ -263,6 +268,7 @@ function ApiKeyField({
         <Button
           variant="outline"
           size="sm"
+          className="border-accent/55 bg-gradient-to-r from-accent/18 via-background/85 to-primary/16 hover:border-primary/60 hover:bg-primary/20"
           onClick={onValidate}
           disabled={validating || !apiKey.trim()}
         >
@@ -287,7 +293,7 @@ function ApiKeyField({
           href="https://openrouter.ai/keys"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline"
+          className="text-primary underline decoration-accent/80 underline-offset-2"
         >
           openrouter.ai/keys
         </a>
@@ -318,12 +324,13 @@ function ModelsBrowser({
   onSelectModel,
 }: ModelsBrowserProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 rounded-lg border border-accent/40 bg-gradient-to-r from-accent/16 via-background/80 to-primary/16 p-2.5 ring-1 ring-accent/18">
       <div className="flex items-center justify-between">
         <Label className="text-xs">Available Models</Label>
         <Button
           variant="outline"
           size="sm"
+          className="border-primary/50 bg-gradient-to-r from-primary/16 via-background/85 to-accent/14 hover:border-accent/65 hover:bg-accent/20"
           onClick={onLoadModels}
           disabled={loadingModels}
         >
@@ -346,7 +353,7 @@ function ModelsBrowser({
             placeholder="Filter models..."
             value={modelFilter}
             onChange={(e) => onFilterChange(e.target.value)}
-            className="h-7 text-xs"
+            className="h-7 border-primary/50 bg-gradient-to-r from-primary/14 via-background/84 to-accent/14 text-xs"
           />
           <ModelsTable
             models={filteredModels ?? []}
@@ -370,13 +377,13 @@ interface SecurityInfoDialogProps {
 function SecurityInfoDialog({ open, onOpenChange }: SecurityInfoDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="border-primary/60 bg-gradient-to-br from-primary/28 via-background/90 to-accent/24 shadow-xl shadow-primary/20 sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ShieldCheck className="size-4" />
+            <ShieldCheck className="size-4 text-primary" />
             Is This Secure?
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-primary/90">
             How your OpenRouter API key is protected.
           </DialogDescription>
         </DialogHeader>
@@ -421,7 +428,7 @@ function SecurityInfoDialog({ open, onOpenChange }: SecurityInfoDialogProps) {
                   href="https://openrouter.ai/keys"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline"
+                  className="text-primary underline decoration-accent/80 underline-offset-2"
                 >
                   openrouter.ai/keys
                 </a>.
@@ -444,9 +451,9 @@ interface ModelsTableProps {
 
 function ModelsTable({ models, selectedModelId, onSelectModel }: ModelsTableProps) {
   return (
-    <div className="max-h-[240px] overflow-y-auto rounded-md border">
+    <div className="max-h-[240px] overflow-y-auto rounded-md border border-primary/45 bg-gradient-to-br from-primary/12 via-background/86 to-accent/12 ring-1 ring-primary/20">
       <table className="w-full text-[11px]">
-        <thead className="sticky top-0 bg-background border-b">
+        <thead className="sticky top-0 border-b border-primary/35 bg-gradient-to-r from-primary/24 via-background to-accent/20">
           <tr className="text-left text-muted-foreground">
             <th className="px-2 py-1.5 font-medium">Model</th>
             <th className="px-2 py-1.5 font-medium text-right">Context</th>
@@ -465,8 +472,8 @@ function ModelsTable({ models, selectedModelId, onSelectModel }: ModelsTableProp
                 aria-selected={isSelected}
                 className={`border-b border-border/50 cursor-pointer transition-colors ${
                   isSelected
-                    ? "bg-primary/10 hover:bg-primary/15"
-                    : "hover:bg-muted/50"
+                    ? "bg-gradient-to-r from-primary/26 to-accent/22 hover:from-primary/32 hover:to-accent/28"
+                    : "hover:bg-accent/14"
                 }`}
                 onClick={() => onSelectModel(model.id)}
                 onKeyDown={(e) => {
