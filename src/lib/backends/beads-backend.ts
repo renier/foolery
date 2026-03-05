@@ -451,11 +451,8 @@ export class BeadsBackend implements BackendPort {
       return ok({ prompt, claimed: false });
     }
 
-    const claimResult = tryClaimBeat(beat, rp);
+    const claimResult = await this.claimBeat(beat, rp);
     if (claimResult) {
-      applyUpdate(beat, { state: claimResult.target });
-      beat.updated = isoNow();
-      await this.flush(rp);
       const richPrompt = getBeatsSkillPrompt(claimResult.step, beatId, claimResult.target);
       return ok({ prompt: richPrompt, claimed: true });
     }
@@ -484,38 +481,36 @@ export class BeadsBackend implements BackendPort {
     }
 
     const beat = claimable[0]!;
-    const claimResult = tryClaimBeat(beat, rp);
+    const claimResult = await this.claimBeat(beat, rp);
     if (!claimResult) {
       return backendError("NOT_FOUND", "No claimable beats available");
     }
 
-    applyUpdate(beat, { state: claimResult.target });
-    beat.updated = isoNow();
-    await this.flush(rp);
     const prompt = getBeatsSkillPrompt(claimResult.step, beat.id, claimResult.target);
     return ok({ prompt, claimedId: beat.id });
   }
-}
 
-// ── Claim helper ────────────────────────────────────────────────
+  private async claimBeat(
+    beat: Beat,
+    repoPath: string,
+  ): Promise<{ target: string; step: import("@/lib/workflows").WorkflowStep } | null> {
+    const resolved = resolveStep(beat.state);
+    if (!resolved || resolved.phase !== StepPhase.Queued) return null;
+    if (!beat.isAgentClaimable) return null;
 
-function tryClaimBeat(
-  beat: Beat,
-  _rp: string,
-): { target: string; step: import("@/lib/workflows").WorkflowStep } | null {
-  const resolved = resolveStep(beat.state);
-  if (!resolved || resolved.phase !== StepPhase.Queued) return null;
-  if (!beat.isAgentClaimable) return null;
+    const profileId = beat.profileId ?? beat.workflowId;
+    const workflow = builtinProfileDescriptor(profileId);
+    const target = forwardTransitionTarget(beat.state, workflow);
+    if (!target) return null;
 
-  const profileId = beat.profileId ?? beat.workflowId;
-  const workflow = builtinProfileDescriptor(profileId);
-  const target = forwardTransitionTarget(beat.state, workflow);
-  if (!target) return null;
+    const activeResolved = resolveStep(target);
+    if (!activeResolved) return null;
 
-  const activeResolved = resolveStep(target);
-  if (!activeResolved) return null;
-
-  return { target, step: activeResolved.step };
+    applyUpdate(beat, { state: target });
+    beat.updated = isoNow();
+    await this.flush(repoPath);
+    return { target, step: activeResolved.step };
+  }
 }
 
 // ── Internal helpers (kept below 75 lines each) ─────────────────
