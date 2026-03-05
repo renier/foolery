@@ -577,9 +577,9 @@ function OpenRouterAgentRow({
 }) {
   const displayLabel = formatOpenRouterAgentLabel(agentKey, label, model);
   return (
-    <div className="flex items-center justify-between rounded-lg border border-accent/35 bg-gradient-to-r from-accent/10 via-background/80 to-primary/10 px-3 py-2">
+    <div className="flex items-center justify-between rounded-lg border border-accent/45 bg-gradient-to-r from-accent/18 via-background/78 to-primary/18 px-3 py-2 ring-1 ring-accent/15">
       <div className="flex items-center gap-2 min-w-0">
-        <Globe className="size-3.5 text-muted-foreground shrink-0" />
+        <Globe className="size-3.5 text-accent shrink-0" />
         <span className="text-sm font-medium truncate">{displayLabel}</span>
         <Badge variant="secondary" className="text-[10px] shrink-0">
           {model}
@@ -713,13 +713,20 @@ function OpenRouterAgentPanel({
   );
 
   return (
-    <div className="rounded-lg border border-accent/35 bg-gradient-to-br from-accent/10 via-background/85 to-primary/10 p-3 space-y-3">
+    <div className="rounded-lg border border-accent/50 bg-gradient-to-br from-accent/22 via-background/76 to-primary/24 p-3 space-y-3 shadow-md ring-1 ring-accent/20">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Globe className="size-4 text-accent" />
-          <span className="text-xs font-medium">Add from OpenRouter</span>
+          <Globe className="size-4 text-accent drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
+          <span className="bg-gradient-to-r from-accent to-primary bg-clip-text text-xs font-medium text-transparent">
+            Add from OpenRouter
+          </span>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hover:bg-primary/15 hover:text-primary"
+          onClick={onClose}
+        >
           <X className="size-3.5" />
         </Button>
       </div>
@@ -735,12 +742,12 @@ function OpenRouterAgentPanel({
                 onOpenRouterChange({ ...openrouter, apiKey: e.target.value })
               }
               placeholder="sk-or-v1-..."
-              className="pr-9"
+              className="border-primary/50 bg-background/82 pr-9"
             />
             <Button
               variant="ghost"
               size="sm"
-              className="absolute right-0 top-0 h-full px-2"
+              className="absolute right-0 top-0 h-full px-2 hover:bg-primary/15 hover:text-primary"
               onClick={() => setShowKey(!showKey)}
             >
               {showKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
@@ -749,6 +756,7 @@ function OpenRouterAgentPanel({
           <Button
             variant="outline"
             size="sm"
+            className="border-accent/55 bg-accent/14 hover:bg-accent/24"
             onClick={handleValidate}
             disabled={validating || !openrouter.apiKey.trim()}
           >
@@ -774,6 +782,7 @@ function OpenRouterAgentPanel({
           <Button
             variant="outline"
             size="sm"
+            className="border-primary/55 bg-primary/12 hover:bg-primary/20"
             onClick={handleLoadModels}
             disabled={loadingModels}
           >
@@ -792,11 +801,11 @@ function OpenRouterAgentPanel({
               placeholder="Filter models..."
               value={modelFilter}
               onChange={(e) => setModelFilter(e.target.value)}
-              className="h-7 text-xs"
+              className="h-7 border-primary/50 bg-background/82 text-xs"
             />
-            <div className="max-h-[200px] overflow-y-auto rounded-lg border border-primary/25 bg-background/80">
+            <div className="max-h-[200px] overflow-y-auto rounded-lg border border-primary/40 bg-background/78 ring-1 ring-primary/15">
               <table className="w-full text-[11px]">
-                <thead className="sticky top-0 border-b bg-gradient-to-r from-primary/8 via-background to-accent/8">
+                <thead className="sticky top-0 border-b border-primary/35 bg-gradient-to-r from-primary/20 via-background to-accent/18">
                   <tr className="text-left text-muted-foreground">
                     <th className="px-2 py-1.5 font-medium w-6"></th>
                     <th className="px-2 py-1.5 font-medium">Model</th>
@@ -819,8 +828,8 @@ function OpenRouterAgentPanel({
                           alreadyAdded
                             ? "opacity-50"
                             : isSelected
-                            ? "bg-gradient-to-r from-primary/14 to-accent/12 hover:from-primary/18 hover:to-accent/16"
-                            : "hover:bg-accent/10"
+                            ? "bg-gradient-to-r from-primary/24 to-accent/22 hover:from-primary/30 hover:to-accent/28"
+                            : "hover:bg-accent/16"
                         }`}
                         onClick={() => !alreadyAdded && toggleModel(model.id)}
                         onKeyDown={(e) => {
@@ -869,6 +878,7 @@ function OpenRouterAgentPanel({
               </p>
               <Button
                 size="sm"
+                className="bg-gradient-to-r from-primary to-accent text-primary-foreground"
                 disabled={selected.size === 0}
                 onClick={handleAddSelected}
               >

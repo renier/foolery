@@ -32,13 +32,13 @@ export function SettingsDefaultsSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Settings2 className="size-4 text-primary" />
+        <Settings2 className="size-4 text-primary drop-shadow-[0_0_8px_rgba(137,87,255,0.45)]" />
         <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">
           Defaults
         </h3>
       </div>
 
-      <div className="space-y-2 rounded-lg border border-accent/40 bg-gradient-to-r from-accent/14 via-background/85 to-primary/16 p-3">
+      <div className="space-y-2 rounded-lg border border-accent/50 bg-gradient-to-r from-accent/24 via-background/78 to-primary/24 p-3 shadow-md ring-1 ring-accent/20">
         <Label htmlFor="default-profile" className="text-sm">
           Default Workflow Profile
         </Label>
@@ -53,7 +53,7 @@ export function SettingsDefaultsSection({
         >
           <SelectTrigger
             id="default-profile"
-            className="w-full border-primary/45 bg-background/90"
+            className="w-full border-primary/55 bg-background/84 hover:border-accent/55"
           >
             <SelectValue placeholder="Select profile..." />
           </SelectTrigger>

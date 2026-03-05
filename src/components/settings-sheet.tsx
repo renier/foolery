@@ -56,13 +56,14 @@ function SettingsSectionCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/20 via-background/85 to-accent/18 p-4 shadow-md backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/45 hover:shadow-lg",
+        "group relative overflow-hidden rounded-2xl border border-primary/45 bg-gradient-to-br from-primary/28 via-background/78 to-accent/24 p-4 shadow-lg ring-1 ring-primary/18 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/60 hover:ring-accent/30 hover:shadow-xl",
         className,
       )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
-      <div className="pointer-events-none absolute -top-16 -right-14 h-36 w-36 rounded-full bg-primary/30 opacity-80 blur-3xl transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="pointer-events-none absolute -bottom-16 -left-14 h-36 w-36 rounded-full bg-accent/25 opacity-75 blur-3xl transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/14 via-transparent to-accent/12" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/90 to-transparent" />
+      <div className="pointer-events-none absolute -top-16 -right-14 h-40 w-40 rounded-full bg-primary/34 opacity-85 blur-3xl transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute -bottom-16 -left-14 h-40 w-40 rounded-full bg-accent/30 opacity-80 blur-3xl transition-opacity duration-300 group-hover:opacity-100" />
       <div className="relative">{children}</div>
     </div>
   );
@@ -154,16 +155,19 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="relative overflow-hidden border-primary/40 bg-gradient-to-br from-primary/14 via-background/96 to-accent/12 sm:max-w-xl">
+      <SheetContent className="relative overflow-hidden border-primary/55 bg-gradient-to-br from-primary/26 via-background/88 to-accent/24 sm:max-w-xl">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -right-16 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
-          <div className="absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+          <div className="absolute -top-24 -right-16 h-72 w-72 rounded-full bg-primary/30 blur-3xl" />
+          <div className="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-accent/28 blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/16 via-transparent to-accent/14" />
+          <div className="absolute inset-0 bg-[linear-gradient(140deg,transparent_0%,rgba(255,255,255,0.05)_48%,transparent_100%)]" />
         </div>
 
         <div className="relative z-10 flex h-full flex-col">
           <SheetHeader>
-            <SheetTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Settings</SheetTitle>
+            <SheetTitle className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+              Settings
+            </SheetTitle>
             <SheetDescription>
               Configuration stored in ~/.config/foolery/settings.toml
             </SheetDescription>
@@ -237,18 +241,18 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
             </div>
           </div>
 
-          <Separator className="bg-gradient-to-r from-transparent via-primary/55 to-transparent" />
-          <SheetFooter className="bg-gradient-to-r from-primary/10 via-background/88 to-accent/10 px-4 py-3">
+          <Separator className="bg-gradient-to-r from-transparent via-primary/70 to-transparent" />
+          <SheetFooter className="border-t border-primary/35 bg-gradient-to-r from-primary/16 via-background/82 to-accent/14 px-4 py-3">
             <Button
               variant="outline"
-              className="border-primary/45 bg-background/85 hover:border-accent/45 hover:bg-accent/15"
+              className="border-primary/55 bg-background/80 hover:border-accent/60 hover:bg-accent/18"
               onClick={handleReset}
               disabled={saving}
             >
               Reset to Defaults
             </Button>
             <Button
-              className="bg-gradient-to-r from-primary via-primary to-accent text-primary-foreground shadow-md hover:opacity-95"
+              className="bg-gradient-to-r from-primary via-primary to-accent text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-95"
               onClick={handleSave}
               disabled={saving || loading}
             >
