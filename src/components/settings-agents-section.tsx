@@ -2,20 +2,30 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Bot, Scan, Plus, Pencil, Trash2, Check, X } from "lucide-react";
+import { Bot, Scan, Plus, Pencil, Trash2, Check, X, Globe, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import type { RegisteredAgent, ScannedAgent } from "@/lib/types";
+import type { OpenRouterModel } from "@/lib/openrouter";
+import {
+  formatPricing,
+  openrouterAgentId,
+  isOpenRouterAgentId,
+  formatOpenRouterAgentLabel,
+} from "@/lib/openrouter";
 import {
   addAgent,
   removeAgent,
   scanAgents,
   saveActions,
+  patchSettings,
+  fetchOpenRouterModels as fetchModelsApi,
+  validateOpenRouterKey,
 } from "@/lib/settings-api";
 import { formatModelDisplay } from "@/hooks/use-agent-info";
-import type { ActionAgentMappings } from "@/lib/schemas";
+import type { ActionAgentMappings, OpenRouterSettings } from "@/lib/schemas";
 
 const KNOWN_AGENT_LABELS: Record<string, string> = {
   claude: "Claude Code",
@@ -40,11 +50,15 @@ async function setDefaultAgentForActions(agentId: string) {
 interface AgentsSectionProps {
   agents: Record<string, RegisteredAgent>;
   onAgentsChange: (agents: Record<string, RegisteredAgent>) => void;
+  openrouter: OpenRouterSettings;
+  onOpenRouterChange: (openrouter: OpenRouterSettings) => void;
 }
 
 export function SettingsAgentsSection({
   agents,
   onAgentsChange,
+  openrouter,
+  onOpenRouterChange,
 }: AgentsSectionProps) {
   const [scanning, setScanning] = useState(false);
   const [scannedAgents, setScannedAgents] = useState<ScannedAgent[] | null>(
@@ -52,6 +66,7 @@ export function SettingsAgentsSection({
   );
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showOpenRouterPanel, setShowOpenRouterPanel] = useState(false);
 
   async function handleScan() {
     setScanning(true);
@@ -148,6 +163,14 @@ export function SettingsAgentsSection({
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowOpenRouterPanel(!showOpenRouterPanel)}
+          >
+            <Globe className="size-3.5 mr-1" />
+            OpenRouter
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setShowAddForm(true)}
           >
             <Plus className="size-3.5 mr-1" />
@@ -155,6 +178,14 @@ export function SettingsAgentsSection({
           </Button>
         </div>
       </div>
+
+      {showOpenRouterPanel && (
+        <OpenRouterAgentPanel
+          openrouter={openrouter}
+          onOpenRouterChange={onOpenRouterChange}
+          onClose={() => setShowOpenRouterPanel(false)}
+        />
+      )}
 
       {scannedAgents && (
         <ScannedAgentsList
@@ -182,10 +213,10 @@ export function SettingsAgentsSection({
         />
       )}
 
-      {agentEntries.length === 0 ? (
+      {agentEntries.length === 0 && Object.keys(openrouter.agents).length === 0 ? (
         <p className="text-xs text-muted-foreground">
-          No agents registered. Use Scan to detect installed CLIs or add
-          manually.
+          No agents registered. Use Scan to detect installed CLIs, add
+          manually, or add from OpenRouter.
         </p>
       ) : (
         <div className="space-y-2">
@@ -208,6 +239,23 @@ export function SettingsAgentsSection({
                 }
               }}
               onRemove={() => handleRemove(id)}
+            />
+          ))}
+          {openrouter.enabled && Object.entries(openrouter.agents).map(([key, entry]) => (
+            <OpenRouterAgentRow
+              key={`or-${key}`}
+              agentKey={key}
+              model={entry.model}
+              label={entry.label}
+              onRemove={() => {
+                const next = { ...openrouter.agents };
+                delete next[key];
+                const updated = { ...openrouter, agents: next };
+                onOpenRouterChange(updated);
+                patchSettings({ openrouter: updated }).catch(() =>
+                  toast.error("Failed to save")
+                );
+              }}
             />
           ))}
         </div>
@@ -500,6 +548,310 @@ function AgentEditRow({
         >
           <Check className="size-3.5" />
         </Button>
+      </div>
+    </div>
+  );
+}
+
+/* ── OpenRouter agent row (read-only display) ────────────── */
+
+function OpenRouterAgentRow({
+  agentKey,
+  model,
+  label,
+  onRemove,
+}: {
+  agentKey: string;
+  model: string;
+  label: string;
+  onRemove: () => void;
+}) {
+  const displayLabel = formatOpenRouterAgentLabel(agentKey, label, model);
+  return (
+    <div className="flex items-center justify-between rounded-md border px-3 py-2">
+      <div className="flex items-center gap-2 min-w-0">
+        <Globe className="size-3.5 text-muted-foreground shrink-0" />
+        <span className="text-sm font-medium truncate">{displayLabel}</span>
+        <Badge variant="secondary" className="text-[10px] shrink-0">
+          {model}
+        </Badge>
+      </div>
+      <Button variant="ghost" size="sm" onClick={onRemove}>
+        <Trash2 className="size-3.5 text-destructive" />
+      </Button>
+    </div>
+  );
+}
+
+/* ── OpenRouter agent panel (API key + model browser) ────── */
+
+function OpenRouterAgentPanel({
+  openrouter,
+  onOpenRouterChange,
+  onClose,
+}: {
+  openrouter: OpenRouterSettings;
+  onOpenRouterChange: (or: OpenRouterSettings) => void;
+  onClose: () => void;
+}) {
+  const [showKey, setShowKey] = useState(false);
+  const [validating, setValidating] = useState(false);
+  const [keyValid, setKeyValid] = useState<boolean | null>(null);
+  const [models, setModels] = useState<OpenRouterModel[] | null>(null);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [modelFilter, setModelFilter] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const isMasked = openrouter.apiKey.includes("...");
+
+  async function handleValidate() {
+    if (!openrouter.apiKey.trim()) {
+      toast.error("Enter an API key first");
+      return;
+    }
+    setValidating(true);
+    setKeyValid(null);
+    try {
+      const res = await validateOpenRouterKey(openrouter.apiKey);
+      if (res.ok && res.data?.valid) {
+        setKeyValid(true);
+        toast.success("API key is valid");
+      } else {
+        setKeyValid(false);
+        toast.error("API key is invalid");
+      }
+    } catch {
+      toast.error("Validation request failed");
+    } finally {
+      setValidating(false);
+    }
+  }
+
+  async function handleLoadModels() {
+    setLoadingModels(true);
+    try {
+      const res = await fetchModelsApi();
+      if (res.ok && res.data) {
+        setModels(res.data);
+        toast.success(`Loaded ${res.data.length} models`);
+      } else {
+        toast.error(res.error ?? "Failed to load models");
+      }
+    } catch {
+      toast.error("Failed to fetch models");
+    } finally {
+      setLoadingModels(false);
+    }
+  }
+
+  function toggleModel(modelId: string) {
+    const next = new Set(selected);
+    if (next.has(modelId)) {
+      next.delete(modelId);
+    } else {
+      next.add(modelId);
+    }
+    setSelected(next);
+  }
+
+  async function handleAddSelected() {
+    if (selected.size === 0) return;
+    const nextAgents = { ...openrouter.agents };
+    for (const modelId of selected) {
+      const key = modelId.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+      const matchedModel = models?.find((m) => m.id === modelId);
+      nextAgents[key] = {
+        model: modelId,
+        label: matchedModel?.name ?? modelId,
+      };
+    }
+    const updated: OpenRouterSettings = {
+      ...openrouter,
+      enabled: true,
+      agents: nextAgents,
+    };
+    onOpenRouterChange(updated);
+    try {
+      await patchSettings({ openrouter: updated });
+      toast.success(`Added ${selected.size} OpenRouter model(s)`);
+      setSelected(new Set());
+    } catch {
+      toast.error("Failed to save");
+    }
+  }
+
+  const filteredModels = models?.filter(
+    (m) =>
+      m.name.toLowerCase().includes(modelFilter.toLowerCase()) ||
+      m.id.toLowerCase().includes(modelFilter.toLowerCase()),
+  );
+
+  return (
+    <div className="rounded-md border p-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Globe className="size-4 text-muted-foreground" />
+          <span className="text-xs font-medium">Add from OpenRouter</span>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          <X className="size-3.5" />
+        </Button>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">API Key</Label>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Input
+              type={showKey ? "text" : "password"}
+              value={openrouter.apiKey}
+              onChange={(e) =>
+                onOpenRouterChange({ ...openrouter, apiKey: e.target.value })
+              }
+              placeholder="sk-or-v1-..."
+              className="pr-9"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 top-0 h-full px-2"
+              onClick={() => setShowKey(!showKey)}
+            >
+              {showKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            </Button>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleValidate}
+            disabled={validating || !openrouter.apiKey.trim()}
+          >
+            {validating ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : keyValid === true ? (
+              <CheckCircle2 className="size-3.5 text-green-500" />
+            ) : (
+              "Validate"
+            )}
+          </Button>
+        </div>
+        {isMasked && (
+          <p className="text-[10px] text-muted-foreground">
+            Key is stored server-side. Clear and type a new key to update.
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs">Models</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLoadModels}
+            disabled={loadingModels}
+          >
+            {loadingModels ? (
+              <>
+                <Loader2 className="size-3.5 mr-1 animate-spin" />
+                Loading...
+              </>
+            ) : models ? "Refresh" : "Browse Models"}
+          </Button>
+        </div>
+
+        {models && (
+          <div className="space-y-2">
+            <Input
+              placeholder="Filter models..."
+              value={modelFilter}
+              onChange={(e) => setModelFilter(e.target.value)}
+              className="h-7 text-xs"
+            />
+            <div className="max-h-[200px] overflow-y-auto rounded-md border">
+              <table className="w-full text-[11px]">
+                <thead className="sticky top-0 bg-background border-b">
+                  <tr className="text-left text-muted-foreground">
+                    <th className="px-2 py-1.5 font-medium w-6"></th>
+                    <th className="px-2 py-1.5 font-medium">Model</th>
+                    <th className="px-2 py-1.5 font-medium text-right">Prompt</th>
+                    <th className="px-2 py-1.5 font-medium text-right">Completion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(filteredModels ?? []).map((model) => {
+                    const isSelected = selected.has(model.id);
+                    const alreadyAdded = Object.values(openrouter.agents).some(
+                      (a) => a.model === model.id,
+                    );
+                    return (
+                      <tr
+                        key={model.id}
+                        role="button"
+                        tabIndex={0}
+                        className={`border-b border-border/50 cursor-pointer transition-colors ${
+                          alreadyAdded
+                            ? "opacity-50"
+                            : isSelected
+                            ? "bg-primary/10 hover:bg-primary/15"
+                            : "hover:bg-muted/50"
+                        }`}
+                        onClick={() => !alreadyAdded && toggleModel(model.id)}
+                        onKeyDown={(e) => {
+                          if ((e.key === "Enter" || e.key === " ") && !alreadyAdded) {
+                            e.preventDefault();
+                            toggleModel(model.id);
+                          }
+                        }}
+                      >
+                        <td className="px-2 py-1.5">
+                          {alreadyAdded ? (
+                            <Check className="size-3 text-green-500" />
+                          ) : isSelected ? (
+                            <Check className="size-3 text-primary" />
+                          ) : null}
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <div className="font-medium truncate max-w-[180px]" title={model.id}>
+                            {model.name}
+                          </div>
+                        </td>
+                        <td className="px-2 py-1.5 text-right">
+                          <Badge variant="secondary" className="text-[9px] font-mono">
+                            {formatPricing(model.pricing.prompt)}
+                          </Badge>
+                        </td>
+                        <td className="px-2 py-1.5 text-right">
+                          <Badge variant="secondary" className="text-[9px] font-mono">
+                            {formatPricing(model.pricing.completion)}
+                          </Badge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {(filteredModels ?? []).length === 0 && (
+                <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+                  No models match filter
+                </p>
+              )}
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground">
+                {selected.size} selected
+              </p>
+              <Button
+                size="sm"
+                disabled={selected.size === 0}
+                onClick={handleAddSelected}
+              >
+                <Plus className="size-3.5 mr-1" />
+                Add Selected
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

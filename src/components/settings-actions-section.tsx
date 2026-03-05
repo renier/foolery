@@ -21,6 +21,8 @@ import {
   OPENROUTER_SELECTED_AGENT_ID,
   formatOpenRouterSelectedAgentLabel,
   getSelectedOpenRouterModel,
+  openrouterAgentId,
+  formatOpenRouterAgentLabel,
 } from "@/lib/openrouter";
 import type { LucideIcon } from "lucide-react";
 
@@ -67,16 +69,23 @@ export function SettingsActionsSection({
   onActionsChange,
   disabled,
 }: ActionsSectionProps) {
+  // Build OpenRouter virtual agent IDs from all configured agents
+  const orAgentIds: string[] = openrouter.enabled
+    ? Object.keys(openrouter.agents).map((key) => openrouterAgentId(key))
+    : [];
+
+  // Legacy support: keep OPENROUTER_SELECTED_AGENT_ID if still referenced in actions
   const selectedOpenRouterModel = getSelectedOpenRouterModel(openrouter);
-  const actionUsesOpenRouter = Object.values(actions).includes(
+  const actionUsesLegacyOpenRouter = Object.values(actions).includes(
     OPENROUTER_SELECTED_AGENT_ID,
   );
-  const includeOpenRouterOption =
+  const includeLegacyOption =
     (selectedOpenRouterModel && openrouter.enabled) ||
-    (selectedOpenRouterModel && actionUsesOpenRouter);
+    (selectedOpenRouterModel && actionUsesLegacyOpenRouter);
 
   const optionIds = Array.from(new Set([
-    ...(includeOpenRouterOption ? [OPENROUTER_SELECTED_AGENT_ID] : []),
+    ...(includeLegacyOption ? [OPENROUTER_SELECTED_AGENT_ID] : []),
+    ...orAgentIds,
     ...Object.keys(agents),
   ]));
 
@@ -137,9 +146,19 @@ export function SettingsActionsSection({
                         </SelectItem>
                       );
                     }
+                    if (id.startsWith("openrouter:")) {
+                      const key = id.slice("openrouter:".length);
+                      const entry = openrouter.agents[key];
+                      if (!entry) return null;
+                      return (
+                        <SelectItem key={id} value={id}>
+                          {formatOpenRouterAgentLabel(key, entry.label, entry.model)}
+                        </SelectItem>
+                      );
+                    }
                     return (
                       <SelectItem key={id} value={id}>
-                        {agents[id].label ?? id}
+                        {agents[id]?.label ?? id}
                       </SelectItem>
                     );
                   })}

@@ -19,6 +19,10 @@ import {
   OPENROUTER_SELECTED_AGENT_ID,
   formatOpenRouterSelectedAgentLabel,
   getSelectedOpenRouterModel,
+  openrouterAgentId,
+  isOpenRouterAgentId,
+  openrouterAgentKey,
+  formatOpenRouterAgentLabel,
 } from "@/lib/openrouter";
 import type {
   RegisteredAgent,
@@ -333,6 +337,49 @@ function resolveSelectedOpenRouterAgentConfig(
   };
 }
 
+/**
+ * Returns virtual agents for all entries in openrouter.agents.
+ * Each entry maps to an agent keyed by "openrouter:<agentKey>".
+ * Only returns agents when OpenRouter is enabled and has agents configured.
+ */
+export function resolveOpenRouterAgents(
+  settings: FoolerySettings,
+): Record<string, RegisteredAgentConfig> {
+  if (!settings.openrouter.enabled) return {};
+  const result: Record<string, RegisteredAgentConfig> = {};
+  const fallbackCommand = getFallbackCommand(settings);
+  for (const [key, entry] of Object.entries(settings.openrouter.agents)) {
+    if (!entry.model?.trim()) continue;
+    const id = openrouterAgentId(key);
+    result[id] = {
+      command: fallbackCommand,
+      model: entry.model,
+      label: formatOpenRouterAgentLabel(key, entry.label, entry.model),
+    };
+  }
+  return result;
+}
+
+/**
+ * Resolve a single OpenRouter virtual agent by its full ID (e.g. "openrouter:default").
+ * Returns null if OpenRouter is not enabled or the agent key is not found.
+ */
+function resolveOpenRouterAgentById(
+  settings: FoolerySettings,
+  agentId: string,
+): RegisteredAgentConfig | null {
+  if (!isOpenRouterAgentId(agentId)) return null;
+  if (!settings.openrouter.enabled) return null;
+  const key = openrouterAgentKey(agentId);
+  const entry = settings.openrouter.agents[key];
+  if (!entry?.model?.trim()) return null;
+  return {
+    command: getFallbackCommand(settings),
+    model: entry.model,
+    label: formatOpenRouterAgentLabel(key, entry.label, entry.model),
+  };
+}
+
 /** Returns the dispatch fallback command for unmapped actions/steps. */
 export async function getAgentCommand(): Promise<string> {
   const settings = await loadSettings();
@@ -361,6 +408,17 @@ export async function getActionAgent(
         ...(selected.model ? { model: selected.model } : {}),
         ...(selected.version ? { version: selected.version } : {}),
         ...(selected.label ? { label: selected.label } : {}),
+      };
+    }
+  }
+  if (isOpenRouterAgentId(agentId)) {
+    const orAgent = resolveOpenRouterAgentById(settings, agentId);
+    if (orAgent) {
+      return {
+        command: orAgent.command,
+        ...(orAgent.model ? { model: orAgent.model } : {}),
+        ...(orAgent.version ? { version: orAgent.version } : {}),
+        ...(orAgent.label ? { label: orAgent.label } : {}),
       };
     }
   }
@@ -490,7 +548,9 @@ export async function getStepAgent(
   if (settings.dispatchMode === "pools") {
     const poolAgents: Record<string, RegisteredAgentConfig> = {
       ...settings.agents,
+      ...resolveOpenRouterAgents(settings),
     };
+    // Legacy: single selected OpenRouter model
     const selected = resolveSelectedOpenRouterAgentConfig(settings);
     if (selected) {
       poolAgents[OPENROUTER_SELECTED_AGENT_ID] = selected;
@@ -531,6 +591,17 @@ export async function getStepAgent(
           ...(selected.model ? { model: selected.model } : {}),
           ...(selected.version ? { version: selected.version } : {}),
           ...(selected.label ? { label: selected.label } : {}),
+        };
+      }
+    }
+    if (isOpenRouterAgentId(agentId)) {
+      const orAgent = resolveOpenRouterAgentById(settings, agentId);
+      if (orAgent) {
+        return {
+          command: orAgent.command,
+          ...(orAgent.model ? { model: orAgent.model } : {}),
+          ...(orAgent.version ? { version: orAgent.version } : {}),
+          ...(orAgent.label ? { label: orAgent.label } : {}),
         };
       }
     }

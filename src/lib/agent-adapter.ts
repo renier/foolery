@@ -12,7 +12,7 @@ import type { RegisteredAgent } from "@/lib/types";
 
 // ── Types ───────────────────────────────────────────────────
 
-export type AgentDialect = "claude" | "codex";
+export type AgentDialect = "claude" | "codex" | "openrouter";
 
 export interface PromptModeArgs {
   command: string;
@@ -29,7 +29,10 @@ export function resolveDialect(command: string): AgentDialect {
   const base = command.includes("/")
     ? command.slice(command.lastIndexOf("/") + 1)
     : command;
-  return base.toLowerCase().includes("codex") ? "codex" : "claude";
+  const lower = base.toLowerCase();
+  if (lower.includes("openrouter")) return "openrouter";
+  if (lower.includes("codex")) return "codex";
+  return "claude";
 }
 
 // ── 2) Arg building ────────────────────────────────────────
@@ -64,7 +67,7 @@ export function buildPromptModeArgs(
     return { command: agent.command, args };
   }
 
-  // claude (default)
+  // openrouter and claude share the same arg shape
   const args = [
     "-p",
     prompt,
@@ -94,7 +97,7 @@ export function buildPromptModeArgs(
 export function createLineNormalizer(
   dialect: AgentDialect,
 ): (parsed: unknown) => Record<string, unknown> | null {
-  if (dialect === "claude") {
+  if (dialect === "claude" || dialect === "openrouter") {
     return (parsed) => {
       if (!parsed || typeof parsed !== "object") return null;
       return parsed as Record<string, unknown>;

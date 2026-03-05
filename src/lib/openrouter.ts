@@ -8,6 +8,7 @@
 
 const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
 export const OPENROUTER_SELECTED_AGENT_ID = "openrouter:selected";
+export const OPENROUTER_AGENT_PREFIX = "openrouter:";
 
 interface OpenRouterSelectionLike {
   enabled?: boolean;
@@ -196,6 +197,31 @@ export interface OpenRouterPricingDisplay {
   modelId: string;
   prompt: string;
   completion: string;
+}
+
+/** Build a virtual agent ID from an openrouter.agents map key. */
+export function openrouterAgentId(agentKey: string): string {
+  return `${OPENROUTER_AGENT_PREFIX}${agentKey}`;
+}
+
+/** Check if an agent ID refers to an OpenRouter virtual agent. */
+export function isOpenRouterAgentId(agentId: string): boolean {
+  return agentId.startsWith(OPENROUTER_AGENT_PREFIX);
+}
+
+/** Extract the agents-map key from an OpenRouter virtual agent ID. */
+export function openrouterAgentKey(agentId: string): string {
+  return agentId.slice(OPENROUTER_AGENT_PREFIX.length);
+}
+
+/** Format a label for an OpenRouter agent entry. */
+export function formatOpenRouterAgentLabel(
+  agentKey: string,
+  label: string | undefined,
+  modelId: string,
+): string {
+  if (label?.trim()) return label.trim();
+  return `OpenRouter (${modelId || agentKey})`;
 }
 
 /** Resolve and format prompt/completion pricing for a model reference. */

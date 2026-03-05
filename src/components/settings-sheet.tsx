@@ -15,7 +15,6 @@ import { Separator } from "@/components/ui/separator";
 import { SettingsAgentsSection } from "@/components/settings-agents-section";
 import { SettingsReposSection } from "@/components/settings-repos-section";
 import { SettingsDefaultsSection } from "@/components/settings-defaults-section";
-import { SettingsOpenRouterSection } from "@/components/settings-openrouter-section";
 import { SettingsDispatchSection } from "@/components/settings-dispatch-section";
 import { fetchSettings, saveSettings } from "@/lib/settings-api";
 import type { RegisteredAgent } from "@/lib/types";
@@ -166,6 +165,10 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
                   onAgentsChange={(agents) =>
                     setSettings((prev) => ({ ...prev, agents }))
                   }
+                  openrouter={settings.openrouter}
+                  onOpenRouterChange={(openrouter) =>
+                    setSettings((prev) => ({ ...prev, openrouter }))
+                  }
                 />
 
                 <Separator />
@@ -202,15 +205,6 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
                   }
                 />
 
-                <Separator />
-
-                {/* Section 5: OpenRouter */}
-                <SettingsOpenRouterSection
-                  openrouter={settings.openrouter}
-                  onOpenRouterChange={(openrouter) =>
-                    setSettings((prev) => ({ ...prev, openrouter }))
-                  }
-                />
 
               </>
             )}

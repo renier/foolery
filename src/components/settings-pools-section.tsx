@@ -19,6 +19,8 @@ import {
   formatOpenRouterSelectedAgentLabel,
   getSelectedOpenRouterModel,
   resolveOpenRouterPricing,
+  openrouterAgentId,
+  formatOpenRouterAgentLabel,
 } from "@/lib/openrouter";
 import type { OpenRouterModel } from "@/lib/openrouter";
 import type { RegisteredAgent } from "@/lib/types";
@@ -79,20 +81,34 @@ export function SettingsPoolsSection({
   onPoolsChange,
   disabled,
 }: PoolsSectionProps) {
+  // Add all configured OpenRouter agents as selectable options
+  const selectableAgents: Record<string, RegisteredAgent> = {
+    ...agents,
+  };
+  if (openrouter.enabled) {
+    const fallbackCommand = Object.values(agents)[0]?.command ?? "claude";
+    for (const [key, entry] of Object.entries(openrouter.agents)) {
+      if (!entry.model?.trim()) continue;
+      const id = openrouterAgentId(key);
+      selectableAgents[id] = {
+        command: fallbackCommand,
+        model: entry.model,
+        label: formatOpenRouterAgentLabel(key, entry.label, entry.model),
+      };
+    }
+  }
+
+  // Legacy: keep single selected OpenRouter model if still referenced in pools
   const selectedOpenRouterModel = getSelectedOpenRouterModel(openrouter);
-  const poolsUseOpenRouter = ALL_STEPS.some((step) =>
+  const poolsUseLegacyOpenRouter = ALL_STEPS.some((step) =>
     (pools[step] ?? []).some(
       (entry) => entry.agentId === OPENROUTER_SELECTED_AGENT_ID,
     ),
   );
-  const includeOpenRouterOption =
-    (selectedOpenRouterModel && openrouter.enabled) ||
-    (selectedOpenRouterModel && poolsUseOpenRouter);
-
-  const selectableAgents: Record<string, RegisteredAgent> = {
-    ...agents,
-  };
-  if (includeOpenRouterOption && selectedOpenRouterModel) {
+  if (
+    selectedOpenRouterModel &&
+    (openrouter.enabled || poolsUseLegacyOpenRouter)
+  ) {
     selectableAgents[OPENROUTER_SELECTED_AGENT_ID] = {
       command: Object.values(agents)[0]?.command ?? "claude",
       model: selectedOpenRouterModel,

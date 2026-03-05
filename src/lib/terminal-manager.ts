@@ -709,7 +709,7 @@ export async function createSession(
   console.log(`[terminal-manager]   prompt: ${prompt.slice(0, 120)}...`);
 
   const dialect = resolveDialect(agent.command);
-  const isInteractive = dialect === "claude";
+  const isInteractive = dialect === "claude" || dialect === "openrouter";
 
   // For interactive (claude) sessions, use stream-json stdin; for codex, use one-shot prompt mode
   let agentCmd: string;
@@ -1003,7 +1003,7 @@ export async function createSession(
     // Resolve effective agent for this iteration
     const effectiveAgent = agentOverride ?? agent;
     const effectiveDialect = resolveDialect(effectiveAgent.command);
-    const effectiveIsInteractive = effectiveDialect === "claude";
+    const effectiveIsInteractive = effectiveDialect === "claude" || effectiveDialect === "openrouter";
 
     let effectiveCmd: string;
     let effectiveArgs: string[];
@@ -1026,7 +1026,7 @@ export async function createSession(
 
     const takeChild = spawn(effectiveCmd, effectiveArgs, {
       cwd,
-      env: { ...process.env },
+      env: childEnv,
       stdio: [effectiveIsInteractive ? "pipe" : "ignore", "pipe", "pipe"],
     });
     entry.process = takeChild;
@@ -1256,9 +1256,20 @@ export async function createSession(
     }
   };
 
+  // Inject OPENROUTER_API_KEY into child env when the agent has a model that
+  // might route through OpenRouter (the shim or any openrouter-dialect agent).
+  const childEnv = { ...process.env } as NodeJS.ProcessEnv;
+  if (dialect === "openrouter" || agent.label?.includes("OpenRouter")) {
+    try {
+      const settings = await loadSettings();
+      const orKey = settings.openrouter.apiKey;
+      if (orKey) childEnv.OPENROUTER_API_KEY = orKey;
+    } catch { /* best-effort */ }
+  }
+
   const child = spawn(agentCmd, args, {
     cwd,
-    env: { ...process.env },
+    env: childEnv,
     stdio: [isInteractive ? "pipe" : "ignore", "pipe", "pipe"],
   });
   entry.process = child;
