@@ -519,24 +519,23 @@ const SCANNABLE_AGENTS: readonly ScannableAgent[] = [
 ] as const;
 
 function isVersionedCommandName(command: string, baseCommand: string): boolean {
-  if (!command.startsWith(baseCommand) || command === baseCommand) {
-    return false;
-  }
-  const suffix = command.slice(baseCommand.length);
-  if (suffix.startsWith("-")) {
-    return /^-\d+(?:\.\d+)*$/.test(suffix);
-  }
-  return /^\d+(?:\.\d+)*$/.test(suffix);
+  return parseVersionedCommand(command, baseCommand) !== null;
 }
 
-function parseVersionSegments(
+function parseVersionedCommand(
   command: string,
   baseCommand: string,
-): number[] | null {
+): { segments: number[]; prerelease?: string } | null {
+  if (!command.startsWith(baseCommand) || command === baseCommand) {
+    return null;
+  }
   const suffix = command.slice(baseCommand.length);
-  const normalized = suffix.startsWith("-") ? suffix.slice(1) : suffix;
-  if (!/^\d+(?:\.\d+)*$/.test(normalized)) return null;
-  return normalized.split(".").map((segment) => Number(segment));
+  const match = suffix.match(/^-?(\d+(?:\.\d+)*)(?:-([0-9a-z][0-9a-z.-]*))?$/i);
+  if (!match) return null;
+  return {
+    segments: match[1].split(".").map((segment) => Number(segment)),
+    ...(match[2] ? { prerelease: match[2] } : {}),
+  };
 }
 
 function compareVersionSegmentsDesc(left: number[], right: number[]): number {
@@ -582,11 +581,24 @@ async function findVersionedExecutable(
   if (candidates.length === 0) return null;
 
   candidates.sort((left, right) => {
-    const leftVersion = parseVersionSegments(left.command, baseCommand);
-    const rightVersion = parseVersionSegments(right.command, baseCommand);
+    const leftVersion = parseVersionedCommand(left.command, baseCommand);
+    const rightVersion = parseVersionedCommand(right.command, baseCommand);
     if (leftVersion && rightVersion) {
-      const compared = compareVersionSegmentsDesc(leftVersion, rightVersion);
+      const compared = compareVersionSegmentsDesc(
+        leftVersion.segments,
+        rightVersion.segments,
+      );
       if (compared !== 0) return compared;
+      if (leftVersion.prerelease && !rightVersion.prerelease) return 1;
+      if (!leftVersion.prerelease && rightVersion.prerelease) return -1;
+      if (leftVersion.prerelease && rightVersion.prerelease) {
+        const prereleaseCompared = rightVersion.prerelease.localeCompare(
+          leftVersion.prerelease,
+          undefined,
+          { numeric: true, sensitivity: "base" },
+        );
+        if (prereleaseCompared !== 0) return prereleaseCompared;
+      }
     }
     return right.command.localeCompare(left.command);
   });

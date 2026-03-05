@@ -118,4 +118,58 @@ describe("scanForAgents", () => {
       else process.env.PATH = originalPath;
     }
   });
+
+  it("supports prerelease versioned chatgpt binaries", async () => {
+    mockExecCb.mockRejectedValue(new Error("not found"));
+    mockReaddir.mockImplementation(async (directory: string) => {
+      if (directory === "/mock/bin") {
+        return ["chatgpt-5.1", "chatgpt-6-preview", "chatgpt-beta"];
+      }
+      return [];
+    });
+    mockAccess.mockResolvedValue(undefined);
+
+    const originalPath = process.env.PATH;
+    process.env.PATH = "/mock/bin";
+    try {
+      const agents = await scanForAgents();
+      const chatgpt = agents.find((a) => a.id === "chatgpt");
+      expect(chatgpt).toEqual({
+        id: "chatgpt",
+        command: "chatgpt-6-preview",
+        path: "/mock/bin/chatgpt-6-preview",
+        installed: true,
+      });
+    } finally {
+      if (originalPath === undefined) delete process.env.PATH;
+      else process.env.PATH = originalPath;
+    }
+  });
+
+  it("prefers stable release over prerelease for matching version", async () => {
+    mockExecCb.mockRejectedValue(new Error("not found"));
+    mockReaddir.mockImplementation(async (directory: string) => {
+      if (directory === "/mock/bin") {
+        return ["chatgpt-6-rc1", "chatgpt-6"];
+      }
+      return [];
+    });
+    mockAccess.mockResolvedValue(undefined);
+
+    const originalPath = process.env.PATH;
+    process.env.PATH = "/mock/bin";
+    try {
+      const agents = await scanForAgents();
+      const chatgpt = agents.find((a) => a.id === "chatgpt");
+      expect(chatgpt).toEqual({
+        id: "chatgpt",
+        command: "chatgpt-6",
+        path: "/mock/bin/chatgpt-6",
+        installed: true,
+      });
+    } finally {
+      if (originalPath === undefined) delete process.env.PATH;
+      else process.env.PATH = originalPath;
+    }
+  });
 });
