@@ -451,10 +451,15 @@ export class BeadsBackend implements BackendPort {
       return ok({ prompt, claimed: false });
     }
 
-    const claimResult = await this.claimBeat(beat, rp);
-    if (claimResult) {
-      const richPrompt = getBeatsSkillPrompt(claimResult.step, beatId, claimResult.target);
-      return ok({ prompt: richPrompt, claimed: true });
+    const shouldClaim =
+      resolveStep(beat.state)?.phase === StepPhase.Queued &&
+      beat.isAgentClaimable;
+    if (shouldClaim) {
+      const claimResult = await this.claimBeat(beat, rp);
+      if (claimResult) {
+        const richPrompt = getBeatsSkillPrompt(claimResult.step, beatId, claimResult.target);
+        return ok({ prompt: richPrompt, claimed: true });
+      }
     }
 
     const prompt = [
