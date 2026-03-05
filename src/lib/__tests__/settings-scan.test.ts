@@ -38,7 +38,7 @@ describe("scanForAgents", () => {
     mockExecCb.mockResolvedValue({ stdout: "/usr/local/bin/claude\n", stderr: "" });
 
     const agents = await scanForAgents();
-    expect(agents).toHaveLength(4); // claude, codex, gemini, openrouter
+    expect(agents).toHaveLength(5); // claude, codex, chatgpt, gemini, openrouter
     const claude = agents.find((a) => a.id === "claude");
     expect(claude?.installed).toBe(true);
     expect(claude?.path).toBe("/usr/local/bin/claude");
@@ -49,7 +49,7 @@ describe("scanForAgents", () => {
     mockExecCb.mockRejectedValue(new Error("not found"));
 
     const agents = await scanForAgents();
-    expect(agents).toHaveLength(4);
+    expect(agents).toHaveLength(5);
     for (const agent of agents) {
       expect(agent.installed).toBe(false);
       expect(agent.path).toBe("");
@@ -67,20 +67,22 @@ describe("scanForAgents", () => {
     const agents = await scanForAgents();
     const claude = agents.find((a) => a.id === "claude");
     const codex = agents.find((a) => a.id === "codex");
+    const chatgpt = agents.find((a) => a.id === "chatgpt");
     const gemini = agents.find((a) => a.id === "gemini");
     const openrouterAgent = agents.find((a) => a.id === "openrouter-agent");
 
     expect(claude?.installed).toBe(true);
     expect(codex?.installed).toBe(false);
+    expect(chatgpt?.installed).toBe(false);
     expect(gemini?.installed).toBe(false);
     expect(openrouterAgent?.installed).toBe(false);
   });
 
-  it("scans for exactly claude, codex, gemini, and openrouter", async () => {
+  it("scans for exactly claude, codex, chatgpt, gemini, and openrouter", async () => {
     mockExecCb.mockRejectedValue(new Error("not found"));
 
     const agents = await scanForAgents();
     const ids = agents.map((a) => a.id);
-    expect(ids).toEqual(["claude", "codex", "gemini", "openrouter-agent"]);
+    expect(ids).toEqual(["claude", "codex", "chatgpt", "gemini", "openrouter-agent"]);
   });
 });

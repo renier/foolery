@@ -18,6 +18,14 @@ describe("resolveDialect", () => {
     expect(resolveDialect("/opt/Codex/bin/codex")).toBe("codex");
   });
 
+  it("returns 'codex' for bare command 'chatgpt'", () => {
+    expect(resolveDialect("chatgpt")).toBe("codex");
+  });
+
+  it("returns 'codex' for full path to chatgpt binary", () => {
+    expect(resolveDialect("/usr/local/bin/chatgpt")).toBe("codex");
+  });
+
   it("returns 'claude' for bare command 'claude'", () => {
     expect(resolveDialect("claude")).toBe("claude");
   });

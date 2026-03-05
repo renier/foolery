@@ -23,7 +23,7 @@ export interface PromptModeArgs {
 
 /**
  * Determine CLI dialect from a command string.
- * Any path or name containing "codex" → codex; everything else → claude.
+ * Any path or name containing "codex" or "chatgpt" → codex; everything else → claude.
  */
 export function resolveDialect(command: string): AgentDialect {
   const base = command.includes("/")
@@ -31,7 +31,7 @@ export function resolveDialect(command: string): AgentDialect {
     : command;
   const lower = base.toLowerCase();
   if (lower.includes("openrouter")) return "openrouter";
-  if (lower.includes("codex")) return "codex";
+  if (lower.includes("codex") || lower.includes("chatgpt")) return "codex";
   return "claude";
 }
 

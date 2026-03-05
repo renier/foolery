@@ -28,6 +28,7 @@ import type { ActionAgentMappings, OpenRouterSettings } from "@/lib/schemas";
 const KNOWN_AGENT_LABELS: Record<string, string> = {
   claude: "Claude Code",
   codex: "OpenAI Codex",
+  chatgpt: "OpenAI ChatGPT",
   gemini: "Google Gemini",
   openrouter: "OpenRouter",
 };
