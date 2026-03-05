@@ -237,6 +237,32 @@ describe("normalizeFromJsonl", () => {
     expect(beat.invariants).toEqual([{ kind: "Scope", condition: "src/lib" }]);
     expect(beat.notes).toBeUndefined();
   });
+
+  it("keeps notes unchanged when invariant header has no valid invariant lines", () => {
+    const raw: RawBead = {
+      id: "inv-invalid-1",
+      title: "Invariant marker only",
+      notes: "Operator note\n\n[Invariants]\nnot-an-invariant\nTail note",
+    };
+
+    const beat = normalizeFromJsonl(raw);
+    expect(beat.invariants).toBeUndefined();
+    expect(beat.notes).toBe("Operator note\n\n[Invariants]\nnot-an-invariant\nTail note");
+  });
+
+  it("trims invariant conditions while parsing notes", () => {
+    const raw: RawBead = {
+      id: "inv-trim-1",
+      title: "Invariant trim",
+      notes: "[Invariants]\nScope:   src/lib/components   \nState:   must remain queued   ",
+    };
+
+    const beat = normalizeFromJsonl(raw);
+    expect(beat.invariants).toEqual([
+      { kind: "Scope", condition: "src/lib/components" },
+      { kind: "State", condition: "must remain queued" },
+    ]);
+  });
 });
 
 // ── denormalizeToJsonl ──────────────────────────────────────────
@@ -350,6 +376,27 @@ describe("denormalizeToJsonl", () => {
 
     const raw = denormalizeToJsonl(beat);
     expect(raw.notes).toBe("[Invariants]\nScope: src/lib");
+  });
+
+  it("skips blank invariant conditions when embedding notes", () => {
+    const beat: Beat = {
+      id: "inv-5",
+      title: "Invariant blank",
+      notes: "Operator note",
+      type: "task",
+      state: "open",
+      priority: 2,
+      labels: [],
+      invariants: [
+        { kind: "Scope", condition: "   " },
+        { kind: "State", condition: " must remain queued " },
+      ],
+      created: "2026-01-01T00:00:00Z",
+      updated: "2026-01-01T00:00:00Z",
+    };
+
+    const raw = denormalizeToJsonl(beat);
+    expect(raw.notes).toBe("Operator note\n\n[Invariants]\nState: must remain queued");
   });
 });
 

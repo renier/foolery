@@ -92,11 +92,19 @@ function parseInvariantsFromNotes(notes: string | undefined): { invariants: Inva
     if (!line) { endIdx = i + 1; continue; }
     const match = INVARIANT_LINE_RE.exec(line);
     if (match) {
-      invariants.push({ kind: match[1] as InvariantKind, condition: match[2]! });
+      const condition = match[2]?.trim();
+      if (condition) {
+        invariants.push({ kind: match[1] as InvariantKind, condition });
+      }
       endIdx = i + 1;
     } else {
       break;
     }
+  }
+
+  if (invariants.length === 0) {
+    // If no valid invariant lines were parsed, treat header text as normal notes.
+    return { invariants: [], cleanNotes: notes };
   }
 
   const remaining = lines.slice(endIdx).join("\n").trim();
@@ -106,9 +114,13 @@ function parseInvariantsFromNotes(notes: string | undefined): { invariants: Inva
 
 function embedInvariantsInNotes(notes: string | undefined, invariants: Invariant[] | undefined): string | undefined {
   if (!invariants?.length) return notes;
+  const normalized = invariants
+    .map((inv) => ({ kind: inv.kind, condition: inv.condition.trim() }))
+    .filter((inv) => inv.condition.length > 0);
+  if (normalized.length === 0) return notes;
   const section = [
     INVARIANTS_HEADER,
-    ...invariants.map((inv) => `${inv.kind}: ${inv.condition}`),
+    ...normalized.map((inv) => `${inv.kind}: ${inv.condition}`),
   ].join("\n");
   return notes ? `${notes}\n\n${section}` : section;
 }
