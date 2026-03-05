@@ -139,6 +139,26 @@ describe("loadSettings", () => {
     });
   });
 
+  it("deduplicates openrouter.agents that point at the same model", async () => {
+    const toml = [
+      "[openrouter]",
+      "enabled = true",
+      "[openrouter.agents.default]",
+      'model = "mistralai/devstral-small:free"',
+      'label = "OpenRouter (mistralai/devstral-small:free)"',
+      "[openrouter.agents.devmistral]",
+      'model = "mistralai/devstral-small:free"',
+      'label = "Devmistral"',
+    ].join("\n");
+    mockReadFile.mockResolvedValue(toml);
+
+    const settings = await loadSettings();
+    expect(Object.keys(settings.openrouter.agents)).toEqual(["default"]);
+    expect(settings.openrouter.agents.default?.model).toBe(
+      "mistralai/devstral-small:free",
+    );
+  });
+
   it("uses cache within TTL", async () => {
     mockReadFile.mockResolvedValue('[agents.claude]\ncommand = "claude"');
     await loadSettings();

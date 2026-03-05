@@ -74,22 +74,20 @@ export function SettingsActionsSection({
     ? Object.keys(openrouter.agents).map((key) => openrouterAgentId(key))
     : [];
 
-  // Legacy support: keep OPENROUTER_SELECTED_AGENT_ID if still referenced in actions
+  // Legacy support: keep OPENROUTER_SELECTED_AGENT_ID only while an action still references it.
   const selectedOpenRouterModel = getSelectedOpenRouterModel(openrouter);
-  const actionUsesLegacyOpenRouter = Object.values(actions).includes(
+  const hasLegacySelection = Object.values(actions).includes(
     OPENROUTER_SELECTED_AGENT_ID,
   );
-  const includeLegacyOption =
-    (selectedOpenRouterModel && openrouter.enabled) ||
-    (selectedOpenRouterModel && actionUsesLegacyOpenRouter);
 
-  const optionIds = Array.from(new Set([
-    ...(includeLegacyOption ? [OPENROUTER_SELECTED_AGENT_ID] : []),
+  const baseOptionIds = Array.from(new Set([
     ...orAgentIds,
     ...Object.keys(agents),
   ]));
 
-  const hasOptions = optionIds.length > 0;
+  const hasOptions = baseOptionIds.length > 0 || Boolean(
+    hasLegacySelection && selectedOpenRouterModel,
+  );
 
   async function handleChange(action: ActionName, value: string) {
     const updated = { ...actions, [action]: value };
@@ -113,6 +111,13 @@ export function SettingsActionsSection({
       <div className="space-y-3">
         {ACTION_DEFS.map((def) => {
           const Icon = def.icon;
+          const includeLegacyOption = Boolean(
+            selectedOpenRouterModel &&
+            actions[def.name] === OPENROUTER_SELECTED_AGENT_ID,
+          );
+          const optionIds = includeLegacyOption
+            ? [OPENROUTER_SELECTED_AGENT_ID, ...baseOptionIds]
+            : baseOptionIds;
           return (
             <div
               key={def.name}
@@ -130,7 +135,7 @@ export function SettingsActionsSection({
               <Select
                 value={actions[def.name] || ""}
                 onValueChange={(v) => handleChange(def.name, v)}
-                disabled={disabled || !hasOptions}
+                disabled={disabled || optionIds.length === 0}
               >
                 <SelectTrigger className="w-[140px] shrink-0">
                   <SelectValue placeholder={hasOptions ? "select agent" : "no agents"} />

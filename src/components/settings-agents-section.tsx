@@ -11,8 +11,6 @@ import type { RegisteredAgent, ScannedAgent } from "@/lib/types";
 import type { OpenRouterModel } from "@/lib/openrouter";
 import {
   formatPricing,
-  openrouterAgentId,
-  isOpenRouterAgentId,
   formatOpenRouterAgentLabel,
 } from "@/lib/openrouter";
 import {
@@ -36,6 +34,10 @@ const KNOWN_AGENT_LABELS: Record<string, string> = {
 
 function defaultAgentLabel(id: string): string {
   return KNOWN_AGENT_LABELS[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+}
+
+function normalizeModelId(model: string): string {
+  return model.trim().toLowerCase();
 }
 
 async function setDefaultAgentForActions(agentId: string) {
@@ -657,13 +659,30 @@ function OpenRouterAgentPanel({
   async function handleAddSelected() {
     if (selected.size === 0) return;
     const nextAgents = { ...openrouter.agents };
+    const existingModelIds = new Set(
+      Object.values(nextAgents)
+        .map((agent) => normalizeModelId(agent.model))
+        .filter(Boolean),
+    );
+    let addedCount = 0;
     for (const modelId of selected) {
+      const normalizedModelId = normalizeModelId(modelId);
+      if (!normalizedModelId || existingModelIds.has(normalizedModelId)) {
+        continue;
+      }
       const key = modelId.replace(/[^a-z0-9]/gi, "-").toLowerCase();
       const matchedModel = models?.find((m) => m.id === modelId);
       nextAgents[key] = {
         model: modelId,
         label: matchedModel?.name ?? modelId,
       };
+      existingModelIds.add(normalizedModelId);
+      addedCount += 1;
+    }
+    if (addedCount === 0) {
+      toast.info("Selected OpenRouter models are already registered");
+      setSelected(new Set());
+      return;
     }
     const updated: OpenRouterSettings = {
       ...openrouter,
@@ -673,7 +692,7 @@ function OpenRouterAgentPanel({
     onOpenRouterChange(updated);
     try {
       await patchSettings({ openrouter: updated });
-      toast.success(`Added ${selected.size} OpenRouter model(s)`);
+      toast.success(`Added ${addedCount} OpenRouter model(s)`);
       setSelected(new Set());
     } catch {
       toast.error("Failed to save");
@@ -782,7 +801,7 @@ function OpenRouterAgentPanel({
                   {(filteredModels ?? []).map((model) => {
                     const isSelected = selected.has(model.id);
                     const alreadyAdded = Object.values(openrouter.agents).some(
-                      (a) => a.model === model.id,
+                      (a) => normalizeModelId(a.model) === normalizeModelId(model.id),
                     );
                     return (
                       <tr

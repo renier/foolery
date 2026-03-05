@@ -116,10 +116,7 @@ export function SettingsPoolsSection({
       (entry) => entry.agentId === OPENROUTER_SELECTED_AGENT_ID,
     ),
   );
-  if (
-    selectedOpenRouterModel &&
-    (openrouter.enabled || poolsUseLegacyOpenRouter)
-  ) {
+  if (selectedOpenRouterModel && poolsUseLegacyOpenRouter) {
     selectableAgents[OPENROUTER_SELECTED_AGENT_ID] = {
       command: Object.values(agents)[0]?.command ?? "claude",
       model: selectedOpenRouterModel,
@@ -127,8 +124,11 @@ export function SettingsPoolsSection({
     };
   }
 
-  const agentIds = Object.keys(selectableAgents);
-  const hasAgents = agentIds.length > 0;
+  // Prevent adding new legacy selected-model entries in pools.
+  const agentIds = Object.keys(selectableAgents).filter(
+    (id) => id !== OPENROUTER_SELECTED_AGENT_ID,
+  );
+  const hasAgents = agentIds.length > 0 || poolsUseLegacyOpenRouter;
   const hasModeledAgents = agentIds.some(
     (id) => Boolean(selectableAgents[id]?.model?.trim()),
   );

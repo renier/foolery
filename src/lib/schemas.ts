@@ -158,6 +158,32 @@ export const openrouterAgentsMapSchema = z
 
 const LEGACY_OPENROUTER_AGENT_ID = "default";
 
+function normalizeOpenRouterModel(modelId: string): string {
+  return modelId.trim().toLowerCase();
+}
+
+function dedupeOpenRouterAgentsByModel(
+  agents: Record<string, { model: string; label: string }>,
+): Record<string, { model: string; label: string }> {
+  const deduped: Record<string, { model: string; label: string }> = {};
+  const seenModelIds = new Set<string>();
+
+  for (const [key, entry] of Object.entries(agents)) {
+    const model = entry.model.trim();
+    if (!model) {
+      deduped[key] = { ...entry, model };
+      continue;
+    }
+
+    const normalized = normalizeOpenRouterModel(model);
+    if (seenModelIds.has(normalized)) continue;
+    seenModelIds.add(normalized);
+    deduped[key] = { ...entry, model };
+  }
+
+  return deduped;
+}
+
 // OpenRouter provider settings
 export const openrouterSettingsSchema = z
   .object({
@@ -172,9 +198,20 @@ export const openrouterSettingsSchema = z
   })
   .default({ apiKey: "", enabled: false, agents: {}, model: "" })
   .transform((openrouter) => {
-    if (Object.keys(openrouter.agents).length > 0) return openrouter;
+    const dedupedAgents = dedupeOpenRouterAgentsByModel(openrouter.agents);
+    if (Object.keys(dedupedAgents).length > 0) {
+      return {
+        ...openrouter,
+        agents: dedupedAgents,
+      };
+    }
     const legacyModel = openrouter.model.trim();
-    if (!legacyModel) return openrouter;
+    if (!legacyModel) {
+      return {
+        ...openrouter,
+        agents: dedupedAgents,
+      };
+    }
     return {
       ...openrouter,
       agents: {

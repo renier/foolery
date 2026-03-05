@@ -152,6 +152,20 @@ describe("openrouter schema migration", () => {
     expect(result.agents["custom"].model).toBe("openai/gpt-4o");
   });
 
+  it("deduplicates openrouter.agents entries that target the same model", async () => {
+    const { openrouterSettingsSchema } = await import("@/lib/schemas");
+    const result = openrouterSettingsSchema.parse({
+      apiKey: "sk-test",
+      enabled: true,
+      agents: {
+        default: { model: "mistralai/devstral-small:free", label: "OpenRouter (mistralai/devstral-small:free)" },
+        devmistral: { model: "mistralai/devstral-small:free", label: "Devmistral" },
+      },
+    });
+    expect(Object.keys(result.agents)).toEqual(["default"]);
+    expect(result.agents["default"].model).toBe("mistralai/devstral-small:free");
+  });
+
   it("leaves agents empty when no legacy model", async () => {
     const { openrouterSettingsSchema } = await import("@/lib/schemas");
     const result = openrouterSettingsSchema.parse({
