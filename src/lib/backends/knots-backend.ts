@@ -143,17 +143,42 @@ function normalizePriority(raw: number | null | undefined): 0 | 1 | 2 | 3 | 4 {
   return 2;
 }
 
-function normalizeInvariants(invariants: readonly Invariant[] | undefined): Invariant[] {
+function parseInvariant(input: unknown): Invariant | null {
+  if (!input) return null;
+
+  if (typeof input === "string") {
+    const match = /^(Scope|State)\s*:\s*(.+)$/.exec(input.trim());
+    if (!match) return null;
+    const condition = match[2]?.trim();
+    if (!condition) return null;
+    return { kind: match[1] as Invariant["kind"], condition };
+  }
+
+  if (typeof input === "object") {
+    const record = input as Record<string, unknown>;
+    const kind = record.kind;
+    const rawCondition = record.condition;
+    if ((kind === "Scope" || kind === "State") && typeof rawCondition === "string") {
+      const condition = rawCondition.trim();
+      if (!condition) return null;
+      return { kind, condition };
+    }
+  }
+
+  return null;
+}
+
+function normalizeInvariants(invariants: readonly unknown[] | undefined): Invariant[] {
   if (!invariants?.length) return [];
   const seen = new Set<string>();
   const normalized: Invariant[] = [];
   for (const inv of invariants) {
-    const condition = inv.condition.trim();
-    if (!condition) continue;
-    const key = `${inv.kind}:${condition}`;
+    const parsed = parseInvariant(inv);
+    if (!parsed) continue;
+    const key = `${parsed.kind}:${parsed.condition}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    normalized.push({ kind: inv.kind, condition });
+    normalized.push(parsed);
   }
   return normalized;
 }

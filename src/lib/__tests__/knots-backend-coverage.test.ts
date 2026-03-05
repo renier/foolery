@@ -1156,6 +1156,28 @@ describe("KnotsBackend coverage: toBeat edge cases", () => {
     ]);
   });
 
+  it("normalizes mixed invariant payload shapes from knots output", async () => {
+    const backend = new KnotsBackend("/repo");
+    insertKnot({
+      id: "INV2",
+      title: "Invariant mixed payload",
+      invariants: [
+        { kind: "Scope", condition: "  src/lib  " },
+        { kind: "Scope", condition: "src/lib" },
+        "State: must stay queued",
+        "State:   must stay queued   ",
+        "invalid",
+      ] as unknown as MockKnot["invariants"],
+    });
+
+    const result = await backend.get("INV2");
+    expect(result.ok).toBe(true);
+    expect(result.data?.invariants).toEqual([
+      { kind: "Scope", condition: "src/lib" },
+      { kind: "State", condition: "must stay queued" },
+    ]);
+  });
+
   it("uses body when description is missing", async () => {
     const backend = new KnotsBackend("/repo");
     insertKnot({
