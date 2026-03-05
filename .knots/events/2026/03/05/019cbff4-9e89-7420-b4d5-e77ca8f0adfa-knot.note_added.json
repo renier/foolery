@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbff4-9e89-7420-b4d5-e77ca8f0adfa",
+  "occurred_at": "2026-03-05T21:43:25.577442Z",
+  "knot_id": "foolery-faf2",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan: 1) Add extractBeatPrefix to beat-navigation.ts. 2) Show full beatId in notification-bell.tsx instead of stripped. 3) In focusBeat callback, resolve repo by prefix from registeredRepos and switch activeRepo before navigating.",
+    "datetime": "2026-03-05T21:43:25.577442Z",
+    "entry_id": "019cbff4-9e89-7420-b4d5-e76a8c1fa885",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbfea-aa3f-78b0-ac99-6b8af046c1c8",
+  "occurred_at": "2026-03-05T21:32:33.21591Z",
+  "knot_id": "foolery-1be4",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added beads-workflow-integration.test.ts with 53 tests covering: forwardTransitionTarget across all 6 profiles, nextBeat/claimBeat across profiles with error cases, BeadsBackend.buildTakePrompt claim flow variations, BeadsBackend.buildPollPrompt priority selection, advanceGuarded dispatch. All 243+ tests pass including knots regression. Pushed to main as 271f29088b5a.",
+    "datetime": "2026-03-05T21:32:33.21591Z",
+    "entry_id": "019cbfea-aa3f-78b0-ac99-6b7a37baadc9",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbff1-2bc8-7343-9b70-f84771fb25ab",
+  "occurred_at": "2026-03-05T21:39:39.592791Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-7814",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "terminal": false,
+    "title": "Settings: Advanced: Bar sizes don't match percentages",
+    "updated_at": "2026-03-05T21:39:39.592791Z"
+  }
+}

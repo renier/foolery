@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbff2-bbab-73d2-a0c6-e527b15ab9ec",
+  "occurred_at": "2026-03-05T21:41:21.963821Z",
+  "knot_id": "foolery-b0c4",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan: inspect settings option registration path for advanced model/provider dropdown, locate where Devmistral is injected twice, deduplicate the source registration, add a guard to prevent future duplicate registrations at merge/build time, and add/adjust tests to assert uniqueness of dropdown entries. Validate with focused tests plus project quality gates where feasible.",
+    "datetime": "2026-03-05T21:41:21.963821Z",
+    "entry_id": "019cbff2-bbab-73d2-a0c6-e51f71f05b96",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

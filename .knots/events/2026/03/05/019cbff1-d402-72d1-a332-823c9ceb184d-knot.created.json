@@ -1,0 +1,12 @@
+{
+  "event_id": "019cbff1-d402-72d1-a332-823c9ceb184d",
+  "occurred_at": "2026-03-05T21:40:22.658878Z",
+  "knot_id": "foolery-0df2",
+  "type": "knot.created",
+  "data": {
+    "body": "everything is black and white, super boring.  get some purple and green in there",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Settings:  Add some color and some pizazz"
+  }
+}

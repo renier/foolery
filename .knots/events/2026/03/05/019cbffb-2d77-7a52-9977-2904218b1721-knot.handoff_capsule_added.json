@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbffb-2d77-7a52-9977-2904218b1721",
+  "occurred_at": "2026-03-05T21:50:35.383162Z",
+  "knot_id": "foolery-7814",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Replaced individual per-row pool bars with a single color-coded stacked horizontal bar. Each agent gets a distinct color segment proportional to its weight. Below the bar, agent rows show color dot, truncated name, weight input, and percentage. All quality gates pass. Commit bf6acab pushed to origin/main.",
+    "datetime": "2026-03-05T21:50:35.383162Z",
+    "entry_id": "019cbffb-2d77-7a52-9977-28f8bdee022e",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

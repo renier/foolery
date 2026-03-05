@@ -1,0 +1,12 @@
+{
+  "event_id": "019cbfef-106e-7513-a0ef-8e6941a66a1e",
+  "occurred_at": "2026-03-05T21:37:21.518802Z",
+  "knot_id": "foolery-b0c4",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says, probably registered twice.  should be cleaned up, code should be added to prevent double registration.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Settings: Devmistral shown twice in advanced pulldown"
+  }
+}

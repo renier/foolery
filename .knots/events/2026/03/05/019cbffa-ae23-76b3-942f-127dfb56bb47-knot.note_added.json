@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbffa-ae23-76b3-942f-127dfb56bb47",
+  "occurred_at": "2026-03-05T21:50:02.787248Z",
+  "knot_id": "foolery-faf2",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review found a regression: notification cross-project focus preserves existing repo query param, then UrlStateSync restores wrong activeRepo. Needs explicit repo param override when beat prefix resolves to another registered repo, plus tests.",
+    "datetime": "2026-03-05T21:50:02.787248Z",
+    "entry_id": "019cbffa-ae23-76b3-942f-12605134b18f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

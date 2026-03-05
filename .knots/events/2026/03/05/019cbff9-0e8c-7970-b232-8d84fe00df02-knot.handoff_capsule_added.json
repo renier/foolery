@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbff9-0e8c-7970-b232-8d84fe00df02",
+  "occurred_at": "2026-03-05T21:48:16.396778Z",
+  "knot_id": "foolery-faf2",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed two bugs in notification bell: 1) Beat IDs now show full prefix (e.g. foolery-xmvb instead of just xmvb) so users can identify which project a notification is from. 2) Clicking a beat link from a different project now auto-switches activeRepo to the correct project before navigating, preventing beat not found errors. Changes in: beat-navigation.ts (added extractBeatPrefix), notification-bell.tsx (show full ID + switch repo on click), beat-navigation.test.ts (tests for extractBeatPrefix).",
+    "datetime": "2026-03-05T21:48:16.396778Z",
+    "entry_id": "019cbff9-0e8c-7970-b232-8d7b1e213cd2",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

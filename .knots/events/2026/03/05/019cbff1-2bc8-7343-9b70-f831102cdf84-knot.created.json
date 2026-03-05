@@ -1,0 +1,12 @@
+{
+  "event_id": "019cbff1-2bc8-7343-9b70-f831102cdf84",
+  "occurred_at": "2026-03-05T21:39:39.592791Z",
+  "knot_id": "foolery-7814",
+  "type": "knot.created",
+  "data": {
+    "body": "whether it's 50/50 or 33/33/33, the bar sizes should match the weight and scale.  This might mean truncating the model name, but the bars should share left alignment and show the weight.\n\nalternatively, we could try a color coded horizontal stack with sliders.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Settings: Advanced: Bar sizes don't match percentages"
+  }
+}

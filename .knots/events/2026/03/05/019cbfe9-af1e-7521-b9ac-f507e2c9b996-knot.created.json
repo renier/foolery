@@ -1,0 +1,12 @@
+{
+  "event_id": "019cbfe9-af1e-7521-b9ac-f507e2c9b996",
+  "occurred_at": "2026-03-05T21:31:28.926497Z",
+  "knot_id": "foolery-faf2",
+  "type": "knot.created",
+  "data": {
+    "body": "the notification has two problems\n- doesn't show the project prefix - which it needs to because it can be from a different project\n- when it's from a different project, clicking on the bead id link doesn't work because foolery looks in the active project - not the actual project of the bead.  in this case foolery shoudl switch projects and then loook for the bead.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "clicking on beat link in notification from different project results in \"beat not found\""
+  }
+}

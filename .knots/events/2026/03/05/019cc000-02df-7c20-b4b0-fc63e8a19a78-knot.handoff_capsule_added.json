@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc000-02df-7c20-b4b0-fc63e8a19a78",
+  "occurred_at": "2026-03-05T21:55:52.159742Z",
+  "knot_id": "foolery-0df2",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Enhanced settings UI with stronger purple/green styling: gradient-tinted sheet background, colored section cards, upgraded dispatch/action/pool cards, and richer repos/agents/defaults visuals while preserving behavior. Quality gates: bun run lint (warnings only, 0 errors), bunx tsc --noEmit, bun run test (1908 passed), NODE_ENV=production bun run build (success). Branch: worktree-foolery-0df2-pizazz-2, commit 65aeb36f70de.",
+    "datetime": "2026-03-05T21:55:52Z",
+    "entry_id": "019cc000-02df-7c20-b4b0-fc5c2f06d76a",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbff7-397f-7823-abf8-9ef0d14e8f90",
+  "occurred_at": "2026-03-05T21:46:16.319344Z",
+  "knot_id": "foolery-0df2",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added purple/green color theme to settings UI. Updated globals.css with purple primary (oklch hue 290) and green accent (oklch hue 155) for both light/dark modes. Added colored icons to all settings section headers. All 1905 tests pass, lint clean. Pushed as 593b03c.",
+    "datetime": "2026-03-05T21:46:16.319344Z",
+    "entry_id": "019cbff7-397f-7823-abf8-9ee38b9dac64",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

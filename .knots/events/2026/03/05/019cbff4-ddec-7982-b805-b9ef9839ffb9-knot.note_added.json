@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbff4-ddec-7982-b805-b9ef9839ffb9",
+  "occurred_at": "2026-03-05T21:43:41.804467Z",
+  "knot_id": "foolery-d46a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation plan:\n1. Add Invariant type and invariants field to Beat interface (types.ts)\n2. Add invariants to KnotRecord, KnotUpdateInput, KnotClaimPrompt (knots.ts)\n3. Add invariant CLI args to updateKnot() (knots.ts)\n4. Add invariant fields to create/update schemas (schemas.ts)\n5. Map invariants in toBeat() for knots-backend (knots-backend.ts)\n6. Emulate invariants via notes field for beads-backend (beads-backend.ts, beads-jsonl-dto.ts)\n7. Add tests for invariant support",
+    "datetime": "2026-03-05T21:43:41.804467Z",
+    "entry_id": "019cbff4-ddec-7982-b805-b9da51e53214",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbffd-3840-7863-afd0-9373b0431105",
+  "occurred_at": "2026-03-05T21:52:49.216709Z",
+  "knot_id": "foolery-b0c4",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Fixed duplicate OpenRouter model registration that caused Devmistral/OpenRouter entries to appear twice in settings dropdowns. Added schema-level deduplication for openrouter.agents, prevented duplicate model additions in the OpenRouter panel, and limited legacy openrouter:selected options to active legacy mappings in dispatch UI. Added regression tests for schema and settings load deduplication; lint/tsc/tests/build passed (build under NODE_ENV=production).",
+    "datetime": "2026-03-05T21:52:49Z",
+    "entry_id": "019cbffd-3840-7863-afd0-936403ffd8fa",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}

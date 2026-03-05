@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbff7-1140-7602-a9bc-26fd220a2df0",
+  "occurred_at": "2026-03-05T21:46:06.016357Z",
+  "knot_id": "foolery-7814",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Adjusted Settings > Advanced > Agent Pools row layout so bars share a fixed alignment despite long model names; labels are truncated with tooltip, bar fill uses exact weight ratio, and each row now shows weight + percent (wN · P%). Quality checks: lint, tsc, tests passed; build passes with NODE_ENV=production (default env had NODE_ENV=development). Commit: c797305 pushed to origin/main.",
+    "datetime": "2026-03-05T21:46:06.016357Z",
+    "entry_id": "019cbff7-1140-7602-a9bc-26e18aad31a0",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

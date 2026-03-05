@@ -1,0 +1,12 @@
+{
+  "event_id": "019cbff7-800a-7af2-85f1-a6fe4adad450",
+  "occurred_at": "2026-03-05T21:46:34.378633Z",
+  "knot_id": "foolery-5f5b",
+  "type": "knot.created",
+  "data": {
+    "body": "codex has a new chatgpt version - scan should find it.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "settings: scan should check for new model versions"
+  }
+}

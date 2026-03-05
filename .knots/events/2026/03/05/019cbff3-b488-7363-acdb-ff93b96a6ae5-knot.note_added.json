@@ -1,0 +1,15 @@
+{
+  "event_id": "019cbff3-b488-7363-acdb-ff93b96a6ae5",
+  "occurred_at": "2026-03-05T21:42:25.672057Z",
+  "knot_id": "foolery-7814",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan: adjust Settings > Advanced > Agent Pools row layout so all percentage bars share a fixed left origin and common track width, even with long model names; truncate agent/model labels to a bounded width; display both raw weight and computed percent next to bars; keep existing pool edit behavior and persistence. Files: src/components/settings-pools-section.tsx (row layout + display text). Validation: bun run lint, bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-05T21:42:25.672057Z",
+    "entry_id": "019cbff3-b488-7363-acdb-ff8ed0ab95da",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

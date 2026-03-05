@@ -1,0 +1,12 @@
+{
+  "event_id": "019cbfec-aab6-72a2-8788-338f96a0c37f",
+  "occurred_at": "2026-03-05T21:34:44.406227Z",
+  "knot_id": "foolery-d46a",
+  "type": "knot.created",
+  "data": {
+    "body": "latest version of knots has an Invariant array field and type.  Let's add support for that in foolery.\n\nfor knots it is easy because it is a native field/type\nfor beads we will emulate this in the \"notes\" field",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Add support for invariants"
+  }
+}
