@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc00e-a081-7140-8ce3-d29f1ea2c29d",
+  "occurred_at": "2026-03-05T22:11:50.017739Z",
+  "knot_id": "foolery-0df2",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Amplified settings UI with stronger purple/green visual styling across the settings sheet and sections: richer gradient shell, glow accents, bolder borders/hover states, dispatch mode card polish, repos card/list upgrades, pools purple-green palette refresh, and stronger action/default control surfaces. Quality gates: bun run lint (warnings only), bunx tsc --noEmit, bun run test (1926 passed), NODE_ENV=production bun run build (success). Agent metadata: codex / gpt-5 / v1. Feature branch commit: edb68dbb462d. Integrated on main as 2f9e25a8919e and pushed to origin/main.",
+    "datetime": "2026-03-05T22:11:33Z",
+    "entry_id": "019cc00e-a081-7140-8ce3-d28b054cc043",
+    "model": "unknown",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

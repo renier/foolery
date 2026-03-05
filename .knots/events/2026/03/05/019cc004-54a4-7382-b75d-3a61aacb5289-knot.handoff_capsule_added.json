@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc004-54a4-7382-b75d-3a61aacb5289",
+  "occurred_at": "2026-03-05T22:00:35.236501Z",
+  "knot_id": "foolery-d46a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added invariant coverage for knots and beads: CLI invariant flags, knots backend mapping/patch serialization, beads notes emulation parsing/embedding, and add/remove/clear mutation flows. Lint/typecheck/tests passed; build passes with NODE_ENV=production.",
+    "datetime": "2026-03-05T22:00:35.236501Z",
+    "entry_id": "019cc004-54a4-7382-b75d-3a52a453546f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc00f-41a7-7070-abd9-519414dfdbd0",
+  "occurred_at": "2026-03-05T22:12:31.271825Z",
+  "knot_id": "foolery-d46a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Hardened beads invariant notes parsing: only consume [Invariants] when at least one valid invariant line exists, trim parsed conditions, and skip blank conditions when embedding. Added focused DTO tests for malformed sections and normalization. Gates: lint (warnings only), tsc --noEmit, test, build (NODE_ENV=production).",
+    "datetime": "2026-03-05T22:12:15Z",
+    "entry_id": "019cc00f-41a7-7070-abd9-518e3cb4bc53",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-05"
+  }
+}

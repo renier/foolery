@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc005-34e9-77d2-b858-be2b59c12372",
+  "occurred_at": "2026-03-05T22:01:32.64935Z",
+  "knot_id": "foolery-faf2",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation needed: cross-project notification beat focus currently matches repo by registered name only; add fallback matching against repo path basename and tests.",
+    "datetime": "2026-03-05T22:01:32.64935Z",
+    "entry_id": "019cc005-34e9-77d2-b858-be11cae85f1a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

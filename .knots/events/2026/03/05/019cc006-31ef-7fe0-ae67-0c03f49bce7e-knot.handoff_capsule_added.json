@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc006-31ef-7fe0-ae67-0c03f49bce7e",
+  "occurred_at": "2026-03-05T22:02:37.423103Z",
+  "knot_id": "foolery-b0c4",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed remaining test failures from OpenRouter dedup implementation: updated 3 test files to expect 'openrouter-agent' command instead of fallback 'codex', and updated scannable agent ID from 'openrouter' to 'openrouter-agent'. All 1915 tests pass, lint/tsc/build clean.",
+    "datetime": "2026-03-05T22:02:37.423103Z",
+    "entry_id": "019cc006-31ef-7fe0-ae67-0bf1a1bf7023",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

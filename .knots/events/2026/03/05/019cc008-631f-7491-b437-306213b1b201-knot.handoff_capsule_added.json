@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc008-631f-7491-b437-306213b1b201",
+  "occurred_at": "2026-03-05T22:05:01.087832Z",
+  "knot_id": "foolery-faf2",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implemented robust cross-project beat focus resolution by matching beat ID prefixes against both registered repo names and repo path basenames; added tests for alias-name fallback, longest basename match, and Windows paths; validated lint/typecheck/tests; build passes with NODE_ENV=production (default env still shows existing prerender issue).",
+    "datetime": "2026-03-05T22:05:01Z",
+    "entry_id": "019cc008-631f-7491-b437-305353436b78",
+    "model": "unknown",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

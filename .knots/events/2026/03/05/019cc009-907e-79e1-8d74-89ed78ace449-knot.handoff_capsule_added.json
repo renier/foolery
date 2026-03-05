@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc009-907e-79e1-8d74-89ed78ace449",
+  "occurred_at": "2026-03-05T22:06:18.238443Z",
+  "knot_id": "foolery-d46a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Invariant support fully implemented and merged to main. Key commits: d895ece (core implementation), 030aa54 (test coverage), ba49661 (merge). All 1926 tests pass, typecheck clean. Code already pushed to origin/main.",
+    "datetime": "2026-03-05T22:06:18.238443Z",
+    "entry_id": "019cc009-907e-79e1-8d74-89d707b6a131",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

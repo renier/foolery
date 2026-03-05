@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc004-95c9-7403-b25e-6bc927284395",
+  "occurred_at": "2026-03-05T22:00:51.913414Z",
+  "knot_id": "foolery-0df2",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Integrated on local main as commit a23144d4afe6 and pushed. origin/main now contains this commit (followed by newer commit 030aa54 from concurrent work). Knot advanced to ready_for_implementation_review.",
+    "datetime": "2026-03-05T22:00:51Z",
+    "entry_id": "019cc004-95c9-7403-b25e-6bb68ff694b4",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}

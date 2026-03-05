@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc00f-87f1-7e21-878a-a2b3bdf5d81b",
+  "occurred_at": "2026-03-05T22:12:49.265781Z",
+  "knot_id": "foolery-b0c4",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added runtime dedupe guard for OpenRouter virtual-agent registration so advanced settings dropdowns cannot show duplicate model entries even if duplicate agent keys exist. Wired dedupe into actions dropdown, pools selectable agent assembly, and resolveOpenRouterAgents; added regression tests for listUniqueOpenRouterAgentKeys. Quality gates: lint (warnings only), tsc, unit tests passed; build passes under NODE_ENV=production (plain build fails in this environment due non-standard NODE_ENV).",
+    "datetime": "2026-03-05T22:12:49.265781Z",
+    "entry_id": "019cc00f-87f1-7e21-878a-a2a4b2d83870",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

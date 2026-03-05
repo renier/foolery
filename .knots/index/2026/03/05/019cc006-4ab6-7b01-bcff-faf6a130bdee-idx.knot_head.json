@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc006-4ab6-7b01-bcff-faf6a130bdee",
+  "occurred_at": "2026-03-05T22:02:43.766106Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-b0c4",
+    "profile_id": "autopilot",
+    "state": "ready_for_shipment",
+    "terminal": false,
+    "title": "Settings: Devmistral shown twice in advanced pulldown",
+    "updated_at": "2026-03-05T22:02:43.766106Z"
+  }
+}

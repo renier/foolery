@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc00c-9c80-7260-8559-d1f75a2cb4ef",
+  "occurred_at": "2026-03-05T22:09:37.920977Z",
+  "knot_id": "foolery-d46a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Shipment review found follow-up: beads invariants notes parser strips '[Invariants]' marker even when no valid invariants follow; returning to implementation for robustness fix and tests.",
+    "datetime": "2026-03-05T22:09:37.920977Z",
+    "entry_id": "019cc00c-9c80-7260-8559-d1ee13d7a74a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
