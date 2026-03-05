@@ -35,6 +35,7 @@ import {
   builtinProfileDescriptor,
   builtinWorkflowDescriptors,
   deriveWorkflowRuntimeState,
+  forwardTransitionTarget,
   mapStatusToDefaultWorkflowState,
   normalizeStateForWorkflow,
   resolveStep,
@@ -42,6 +43,7 @@ import {
   withWorkflowProfileLabel,
   withWorkflowStateLabel,
 } from "@/lib/workflows";
+import { getBeatsSkillPrompt } from "@/lib/beats-skill-prompts";
 
 // ── Capabilities ────────────────────────────────────────────────
 
@@ -449,6 +451,15 @@ export class BeadsBackend implements BackendPort {
       return ok({ prompt, claimed: false });
     }
 
+    const claimResult = tryClaimBeat(beat, rp);
+    if (claimResult) {
+      applyUpdate(beat, { state: claimResult.target });
+      beat.updated = isoNow();
+      await this.flush(rp);
+      const richPrompt = getBeatsSkillPrompt(claimResult.step, beatId, claimResult.target);
+      return ok({ prompt: richPrompt, claimed: true });
+    }
+
     const prompt = [
       `Beat ID: ${beatId}`,
       `Use \`${showCmd}\` to inspect full details before starting.`,
@@ -457,11 +468,54 @@ export class BeadsBackend implements BackendPort {
   }
 
   async buildPollPrompt(
-    _options?: PollPromptOptions,
-    _repoPath?: string,
+    options?: PollPromptOptions,
+    repoPath?: string,
   ): Promise<BackendResult<PollPromptResult>> {
-    return backendError("UNAVAILABLE", "This backend does not support poll-based prompt building");
+    const rp = this.resolvePath(repoPath);
+    const readyResult = await this.listReady(undefined, rp);
+    if (!readyResult.ok) return readyResult as BackendResult<never>;
+
+    const claimable = readyResult.data!
+      .filter((b) => b.isAgentClaimable)
+      .sort((a, b) => (a.priority ?? 999) - (b.priority ?? 999));
+
+    if (claimable.length === 0) {
+      return backendError("NOT_FOUND", "No claimable beats available");
+    }
+
+    const beat = claimable[0]!;
+    const claimResult = tryClaimBeat(beat, rp);
+    if (!claimResult) {
+      return backendError("NOT_FOUND", "No claimable beats available");
+    }
+
+    applyUpdate(beat, { state: claimResult.target });
+    beat.updated = isoNow();
+    await this.flush(rp);
+    const prompt = getBeatsSkillPrompt(claimResult.step, beat.id, claimResult.target);
+    return ok({ prompt, claimedId: beat.id });
   }
+}
+
+// ── Claim helper ────────────────────────────────────────────────
+
+function tryClaimBeat(
+  beat: Beat,
+  _rp: string,
+): { target: string; step: import("@/lib/workflows").WorkflowStep } | null {
+  const resolved = resolveStep(beat.state);
+  if (!resolved || resolved.phase !== StepPhase.Queued) return null;
+  if (!beat.isAgentClaimable) return null;
+
+  const profileId = beat.profileId ?? beat.workflowId;
+  const workflow = builtinProfileDescriptor(profileId);
+  const target = forwardTransitionTarget(beat.state, workflow);
+  if (!target) return null;
+
+  const activeResolved = resolveStep(target);
+  if (!activeResolved) return null;
+
+  return { target, step: activeResolved.step };
 }
 
 // ── Internal helpers (kept below 75 lines each) ─────────────────

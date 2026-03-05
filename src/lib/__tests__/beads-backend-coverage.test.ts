@@ -318,7 +318,7 @@ describe("BeadsBackend coverage: applyFilters edge cases", () => {
 });
 
 describe("BeadsBackend coverage: buildTakePrompt", () => {
-  it("returns prompt for single beat", async () => {
+  it("claims queued agent-claimable beat and returns rich prompt", async () => {
     const { backend } = createBackendWithRepo();
 
     const created = await backend.create({
@@ -331,8 +331,82 @@ describe("BeadsBackend coverage: buildTakePrompt", () => {
 
     const result = await backend.buildTakePrompt(created.data!.id);
     expect(result.ok).toBe(true);
+    expect(result.data?.claimed).toBe(true);
+    // Rich prompt should contain the beat ID and step-specific content
+    expect(result.data?.prompt).toContain(created.data!.id);
+
+    // Beat should now be in an active state
+    const beat = await backend.get(created.data!.id);
+    expect(beat.ok).toBe(true);
+    expect(beat.data!.state).not.toBe("ready_for_planning");
+  });
+
+  it("returns simple prompt for non-claimable beat (already active)", async () => {
+    const { backend } = createBackendWithRepo();
+
+    const created = await backend.create({
+      title: "Active beat",
+      type: "task",
+      priority: 2,
+      labels: [],
+    });
+    expect(created.ok).toBe(true);
+
+    // Move to active state first
+    await backend.update(created.data!.id, { state: "planning" });
+
+    const result = await backend.buildTakePrompt(created.data!.id);
+    expect(result.ok).toBe(true);
     expect(result.data?.prompt).toContain(`Beat ID: ${created.data!.id}`);
     expect(result.data?.prompt).toContain("bd show");
+    expect(result.data?.claimed).toBe(false);
+  });
+
+  it("returns simple prompt for non-claimable beat (already active)", async () => {
+    const { backend } = createBackendWithRepo();
+
+    const created = await backend.create({
+      title: "Active beat",
+      type: "task",
+      priority: 2,
+      labels: [],
+    });
+    expect(created.ok).toBe(true);
+
+    // Move to an active state (not queued phase, so not claimable)
+    await backend.update(created.data!.id, { state: "planning" });
+
+    const beat = await backend.get(created.data!.id);
+    expect(beat.data!.isAgentClaimable).toBe(false);
+
+    const result = await backend.buildTakePrompt(created.data!.id);
+    expect(result.ok).toBe(true);
+    expect(result.data?.prompt).toContain(`Beat ID: ${created.data!.id}`);
+    expect(result.data?.prompt).toContain("bd show");
+    expect(result.data?.claimed).toBe(false);
+  });
+
+  it("returns simple prompt for human-gated queued beat", async () => {
+    const { backend } = createBackendWithRepo();
+
+    const created = await backend.create({
+      title: "Human queue",
+      type: "task",
+      priority: 2,
+      labels: [],
+      profileId: "semiauto",
+    });
+    expect(created.ok).toBe(true);
+
+    // Move to ready_for_plan_review which is human-owned in semiauto
+    await backend.update(created.data!.id, { state: "ready_for_plan_review" });
+
+    const beat = await backend.get(created.data!.id);
+    expect(beat.data!.isAgentClaimable).toBe(false);
+
+    const result = await backend.buildTakePrompt(created.data!.id);
+    expect(result.ok).toBe(true);
+    expect(result.data?.prompt).toContain(`Beat ID: ${created.data!.id}`);
     expect(result.data?.claimed).toBe(false);
   });
 
@@ -374,13 +448,63 @@ describe("BeadsBackend coverage: buildTakePrompt", () => {
 });
 
 describe("BeadsBackend coverage: buildPollPrompt", () => {
-  it("returns UNAVAILABLE error", async () => {
+  it("claims the highest-priority claimable beat", async () => {
+    const { backend } = createBackendWithRepo();
+
+    // Create beats with different priorities
+    const low = await backend.create({
+      title: "Low priority",
+      type: "task",
+      priority: 3,
+      labels: [],
+    });
+    const high = await backend.create({
+      title: "High priority",
+      type: "task",
+      priority: 1,
+      labels: [],
+    });
+    expect(low.ok).toBe(true);
+    expect(high.ok).toBe(true);
+
+    const result = await backend.buildPollPrompt();
+    expect(result.ok).toBe(true);
+    // Should claim the highest-priority (lowest number) beat
+    expect(result.data?.claimedId).toBe(high.data!.id);
+    expect(result.data?.prompt).toBeTruthy();
+
+    // Verify the beat was transitioned to active state
+    const beat = await backend.get(high.data!.id);
+    expect(beat.ok).toBe(true);
+    expect(beat.data!.state).not.toBe("ready_for_planning");
+  });
+
+  it("returns NOT_FOUND when no claimable beats exist", async () => {
     const { backend } = createBackendWithRepo();
 
     const result = await backend.buildPollPrompt();
     expect(result.ok).toBe(false);
-    expect(result.error?.code).toBe("UNAVAILABLE");
-    expect(result.error?.message).toContain("poll-based");
+    expect(result.error?.code).toBe("NOT_FOUND");
+    expect(result.error?.message).toContain("No claimable beats available");
+  });
+
+  it("skips non-agent-claimable beats (active state)", async () => {
+    const { backend } = createBackendWithRepo();
+
+    const created = await backend.create({
+      title: "Active beat",
+      type: "task",
+      priority: 1,
+      labels: [],
+    });
+    expect(created.ok).toBe(true);
+
+    // Move to an active state so it is not in listReady
+    await backend.update(created.data!.id, { state: "planning" });
+
+    const result = await backend.buildPollPrompt();
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe("NOT_FOUND");
   });
 });
 
