@@ -476,42 +476,71 @@ export function RetakesView() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["beats", "retakes", activeRepo, registeredRepos.length],
     queryFn: async () => {
+      type RepoRetakesResult =
+        | { ok: true; data: Beat[] }
+        | { ok: false; error: string };
+
       const params: Record<string, string> = {};
-      if (activeRepo) {
-        const result = await fetchBeats(params, activeRepo);
-        if (result.ok && result.data) {
-          const repo = registeredRepos.find((r) => r.path === activeRepo);
-          result.data = result.data
-            .filter((beat) => isRetakeSourceState(beat.state))
-            .map((beat) => ({
-              ...beat,
-              _repoPath: activeRepo,
-              _repoName: repo?.name ?? activeRepo,
-            })) as typeof result.data;
+      const toRetakeCandidates = (items: Beat[]): Beat[] =>
+        items.filter((beat) => isRetakeSourceState(beat.state));
+
+      const loadRepoRetakes = async (repoPath: string, repoName?: string): Promise<RepoRetakesResult> => {
+        const result = await fetchBeats(params, repoPath);
+        if (!result.ok) {
+          return { ok: false, error: result.error ?? `Failed to load retake beats for ${repoPath}` };
         }
-        return result;
+        const filtered = toRetakeCandidates(result.data ?? []);
+        return {
+          ok: true,
+          data: filtered.map((beat) => ({
+            ...beat,
+            _repoPath: repoPath,
+            _repoName: repoName ?? repoPath,
+          })) as Beat[],
+        };
+      };
+
+      if (activeRepo) {
+        const activeRepoResult = await loadRepoRetakes(
+          activeRepo,
+          registeredRepos.find((repo) => repo.path === activeRepo)?.name
+        );
+        if (activeRepoResult.ok) {
+          return { ok: true as const, data: activeRepoResult.data };
+        }
+        if (registeredRepos.length > 0) {
+          const fallbackResults = await Promise.all(
+            registeredRepos.map((repo) => loadRepoRetakes(repo.path, repo.name))
+          );
+          const merged = fallbackResults.flatMap((result) => (result.ok ? result.data : []));
+          if (merged.length > 0) {
+            return { ok: true as const, data: merged };
+          }
+        }
+        throw new Error(activeRepoResult.error);
       }
       if (registeredRepos.length > 0) {
         const results = await Promise.all(
-          registeredRepos.map(async (repo) => {
-            const result = await fetchBeats(params, repo.path);
-            if (!result.ok || !result.data) return [];
-            return result.data
-              .filter((beat) => isRetakeSourceState(beat.state))
-              .map((beat) => ({
-                ...beat,
-                _repoPath: repo.path,
-                _repoName: repo.name,
-              }));
-          })
+          registeredRepos.map((repo) => loadRepoRetakes(repo.path, repo.name))
         );
-        return { ok: true as const, data: results.flat() };
+        const merged = results.flatMap((result) => (result.ok ? result.data : []));
+        if (merged.length > 0) {
+          return { ok: true as const, data: merged };
+        }
+        const firstError = results.find((result) => !result.ok);
+        if (firstError && !firstError.ok) {
+          throw new Error(firstError.error);
+        }
+        return { ok: true as const, data: [] as Beat[] };
       }
       const result = await fetchBeats(params);
-      if (result.ok && result.data) {
-        result.data = result.data.filter((beat) => isRetakeSourceState(beat.state));
+      if (!result.ok) {
+        throw new Error(result.error ?? "Failed to load retake beats.");
       }
-      return result;
+      return {
+        ok: true as const,
+        data: toRetakeCandidates(result.data ?? []),
+      };
     },
     // Keep ReTakes populated even when no explicit repo is selected in single-repo mode.
     enabled: true,
@@ -640,9 +669,11 @@ export function RetakesView() {
   }
 
   if (error) {
+    const message = error instanceof Error ? error.message : "Failed to load retake beats.";
     return (
-      <div className="flex items-center justify-center py-6 text-sm text-destructive">
-        Failed to load retake beats.
+      <div className="flex flex-col items-center justify-center gap-1 py-6 text-sm text-destructive">
+        <p>Failed to load retake beats.</p>
+        {message !== "Failed to load retake beats." ? <p className="text-xs text-muted-foreground">{message}</p> : null}
       </div>
     );
   }
