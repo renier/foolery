@@ -102,7 +102,7 @@ describe("scanForAgents (line 345-357)", () => {
     });
 
     const results = await scanForAgents();
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(5);
 
     const claude = results.find((r) => r.id === "claude");
     expect(claude?.installed).toBe(true);
