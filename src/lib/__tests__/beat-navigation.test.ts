@@ -86,4 +86,29 @@ describe("findRepoForBeatId", () => {
       findRepoForBeatId("unowned-123", [{ name: "foolery", path: "/repos/foolery" }]),
     ).toBeNull();
   });
+
+  it("matches by repo path basename when repo display name differs", () => {
+    expect(
+      findRepoForBeatId("foolery-xmvb", [
+        { name: "foolery-prod", path: "/Users/dev/foolery" },
+      ]),
+    ).toEqual({ name: "foolery-prod", path: "/Users/dev/foolery" });
+  });
+
+  it("prefers longest matching basename prefix", () => {
+    expect(
+      findRepoForBeatId("my-project-123", [
+        { name: "alias-one", path: "/repos/my" },
+        { name: "alias-two", path: "/repos/my-project" },
+      ]),
+    ).toEqual({ name: "alias-two", path: "/repos/my-project" });
+  });
+
+  it("supports Windows-style repo paths", () => {
+    expect(
+      findRepoForBeatId("foolery-xmvb", [
+        { name: "team-repo", path: "C:\\work\\foolery" },
+      ]),
+    ).toEqual({ name: "team-repo", path: "C:\\work\\foolery" });
+  });
 });

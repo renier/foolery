@@ -16,19 +16,34 @@ interface RepoMatch {
   path: string;
 }
 
+function getPathBasename(path: string): string | null {
+  if (!path) return null;
+  const parts = path.split(/[\\/]+/).filter((part) => part.length > 0);
+  return parts.length > 0 ? parts[parts.length - 1] : null;
+}
+
 /**
- * Resolve which registered repo owns a beat ID by matching `<repo-name>-` prefix.
- * Uses the longest matching repo name so hyphenated repo names are handled correctly.
+ * Resolve which registered repo owns a beat ID by matching `<project-prefix>-`.
+ * Prefixes are matched against both the stored repo name and the repo path basename.
+ * Uses the longest matching prefix so hyphenated project names are handled correctly.
  */
 export function findRepoForBeatId<T extends RepoMatch>(
   beatId: string,
   repos: readonly T[],
 ): T | null {
   let match: T | null = null;
+  let longestPrefixLength = -1;
   for (const repo of repos) {
-    if (!beatId.startsWith(`${repo.name}-`)) continue;
-    if (!match || repo.name.length > match.name.length) {
-      match = repo;
+    const prefixes = new Set<string>([repo.name]);
+    const basename = getPathBasename(repo.path);
+    if (basename) prefixes.add(basename);
+
+    for (const prefix of prefixes) {
+      if (!beatId.startsWith(`${prefix}-`)) continue;
+      if (prefix.length > longestPrefixLength) {
+        match = repo;
+        longestPrefixLength = prefix.length;
+      }
     }
   }
   return match;
