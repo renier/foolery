@@ -755,6 +755,24 @@ const STATE_PIPELINE_ORDER: ReadonlyMap<string, number> = new Map([
   ["shipped", 12],
 ]);
 
+/**
+ * Compare two workflow states by pipeline priority.
+ * Known workflow states sort ahead of unknown states.
+ */
+export function compareWorkflowStatePriority(left: string, right: string): number {
+  const leftIndex = STATE_PIPELINE_ORDER.get(left);
+  const rightIndex = STATE_PIPELINE_ORDER.get(right);
+
+  if (leftIndex !== undefined && rightIndex !== undefined) {
+    if (leftIndex !== rightIndex) return leftIndex - rightIndex;
+    return left.localeCompare(right);
+  }
+
+  if (leftIndex !== undefined) return -1;
+  if (rightIndex !== undefined) return 1;
+  return left.localeCompare(right);
+}
+
 /** Returns true when the transition moves backward through the workflow pipeline. */
 export function isRollbackTransition(from: string, to: string): boolean {
   const fromIndex = STATE_PIPELINE_ORDER.get(from);

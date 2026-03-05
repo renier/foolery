@@ -13,7 +13,7 @@ import { useUpdateUrl } from "@/hooks/use-update-url";
 import { X, Clapperboard, Merge } from "lucide-react";
 import type { BeatPriority } from "@/lib/types";
 import type { UpdateBeatInput } from "@/lib/schemas";
-import { builtinWorkflowDescriptors } from "@/lib/workflows";
+import { builtinWorkflowDescriptors, compareWorkflowStatePriority } from "@/lib/workflows";
 
 const commonTypes: string[] = [
   "bug",
@@ -33,7 +33,7 @@ function formatLabel(val: string): string {
 
 export type ViewPhase = "queues" | "active";
 
-const QUEUE_STATES = [
+const FALLBACK_QUEUE_STATES = [
   "ready_for_planning",
   "ready_for_plan_review",
   "ready_for_implementation",
@@ -42,7 +42,7 @@ const QUEUE_STATES = [
   "ready_for_shipment_review",
 ] as const;
 
-const ACTIVE_STATES = [
+const FALLBACK_ACTIVE_STATES = [
   "planning",
   "plan_review",
   "implementation",
@@ -50,6 +50,26 @@ const ACTIVE_STATES = [
   "shipment",
   "shipment_review",
 ] as const;
+
+function collectPhaseStates(phase: ViewPhase, fallbackStates: readonly string[]): string[] {
+  const states = new Set<string>();
+
+  for (const workflow of builtinWorkflowDescriptors()) {
+    const phaseStates = phase === "active" ? workflow.actionStates : workflow.queueStates;
+    for (const state of phaseStates ?? []) {
+      states.add(state);
+    }
+  }
+
+  if (states.size === 0) {
+    return [...fallbackStates].sort(compareWorkflowStatePriority);
+  }
+
+  return [...states].sort(compareWorkflowStatePriority);
+}
+
+const QUEUE_STATES = collectPhaseStates("queues", FALLBACK_QUEUE_STATES);
+const ACTIVE_STATES = collectPhaseStates("active", FALLBACK_ACTIVE_STATES);
 
 interface FilterBarProps {
   viewPhase?: ViewPhase;

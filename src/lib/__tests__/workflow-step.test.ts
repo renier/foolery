@@ -7,6 +7,7 @@ import {
   isReviewStep,
   priorActionStep,
   builtinProfileDescriptor,
+  compareWorkflowStatePriority,
 } from "@/lib/workflows";
 import type { MemoryWorkflowOwners } from "@/lib/types";
 
@@ -184,5 +185,35 @@ describe("priorActionStep", () => {
     expect(priorActionStep(WorkflowStep.Planning)).toBeNull();
     expect(priorActionStep(WorkflowStep.Implementation)).toBeNull();
     expect(priorActionStep(WorkflowStep.Shipment)).toBeNull();
+  });
+});
+
+describe("compareWorkflowStatePriority", () => {
+  it("orders known workflow states by pipeline order", () => {
+    const states = [
+      "shipment_review",
+      "ready_for_implementation",
+      "planning",
+      "ready_for_planning",
+      "implementation",
+    ];
+
+    expect(states.sort(compareWorkflowStatePriority)).toEqual([
+      "ready_for_planning",
+      "planning",
+      "ready_for_implementation",
+      "implementation",
+      "shipment_review",
+    ]);
+  });
+
+  it("sorts unknown states after known states", () => {
+    const states = ["custom_beta", "ready_for_shipment", "custom_alpha"];
+
+    expect(states.sort(compareWorkflowStatePriority)).toEqual([
+      "ready_for_shipment",
+      "custom_alpha",
+      "custom_beta",
+    ]);
   });
 });
