@@ -294,6 +294,42 @@ describe("retry paths", () => {
   });
 });
 
+describe("retry transition dispatch", () => {
+  it("uses nextKnot when memory manager type is knots", async () => {
+    getVerificationSettingsMock.mockResolvedValue({ enabled: true, agent: "", maxRetries: 3 });
+    resolveMemoryManagerTypeMock.mockReturnValue("knots");
+
+    mockGet.mockResolvedValue({
+      ok: true,
+      data: makeBeat({
+        labels: ["stage:verification"],
+      }),
+    });
+
+    await onAgentComplete(["foolery-test"], "take", "/repo", 0);
+
+    expect(nextKnotMock).toHaveBeenCalledWith("foolery-test", "/repo", { expectedState: "in_progress" });
+    expect(nextBeatMock).not.toHaveBeenCalled();
+  });
+
+  it("uses nextBeat when memory manager type is beads", async () => {
+    getVerificationSettingsMock.mockResolvedValue({ enabled: true, agent: "", maxRetries: 3 });
+    resolveMemoryManagerTypeMock.mockReturnValue("beads");
+
+    mockGet.mockResolvedValue({
+      ok: true,
+      data: makeBeat({
+        labels: ["stage:verification"],
+      }),
+    });
+
+    await onAgentComplete(["foolery-test"], "take", "/repo", 0);
+
+    expect(nextBeatMock).toHaveBeenCalledWith("foolery-test", "in_progress", "/repo");
+    expect(nextKnotMock).not.toHaveBeenCalled();
+  });
+});
+
 // ── Test: idempotency (xmg8.4.3) ───────────────────────────
 
 describe("idempotency", () => {

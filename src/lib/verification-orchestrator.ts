@@ -504,11 +504,15 @@ async function transitionToRetry(beatId: string, repoPath: string): Promise<void
     await getBackend().update(beatId, updateFields, repoPath);
   }
 
+  await advanceRetryState(beatId, beatResult.data.state, repoPath);
+}
+
+async function advanceRetryState(beatId: string, currentState: string, repoPath: string): Promise<void> {
   const memoryManagerType = resolveMemoryManagerType(repoPath);
   if (memoryManagerType === "knots") {
-    await nextKnot(beatId, repoPath, { expectedState: beatResult.data.state });
+    await nextKnot(beatId, repoPath, { expectedState: currentState });
   } else {
-    await nextBeat(beatId, beatResult.data.state, repoPath);
+    await nextBeat(beatId, currentState, repoPath);
   }
 }
 
