@@ -176,47 +176,6 @@ export function CreateBeatDialog({
     }
   }
 
-  async function handleBreakdown(data: CreateBeatInput) {
-    if (submittingRef.current) return;
-    submittingRef.current = true;
-    setIsSubmitting(true);
-    try {
-      const payload = withSelectedProfile(data);
-
-      const result = await createBead(payload, repo ?? undefined);
-      if (!result.ok || !result.data?.id) {
-        toast.error(result.error ?? "Failed to create parent beat");
-        return;
-      }
-      const createdId = result.data.id;
-      const shortId = stripBeadPrefix(createdId);
-      toast.success(`Created bead ${createdId} — starting breakdown...`, {
-        action: {
-          label: shortId || createdId,
-          onClick: () => {
-            router.push(
-              buildBeadFocusHref(createdId, searchParams.toString(), {
-                detailRepo: repo,
-              }),
-            );
-          },
-        },
-      });
-      onOpenChange(false);
-      queryClient.invalidateQueries({ queryKey: ["beads"] });
-
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("view", "breakdown");
-      params.set("parent", result.data.id);
-      params.delete("bead");
-      params.delete("detailRepo");
-      router.push(`/beads?${params.toString()}`);
-    } finally {
-      submittingRef.current = false;
-      setIsSubmitting(false);
-    }
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -237,7 +196,6 @@ export function CreateBeatDialog({
           }}
           onSubmit={handleSubmit}
           onCreateMore={handleCreateMore}
-          onBreakdown={handleBreakdown}
           isSubmitting={isSubmitting}
         />
       </DialogContent>

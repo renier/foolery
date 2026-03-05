@@ -36,15 +36,13 @@ export function AppHeader() {
   const isBeadsRoute =
     pathname === "/beads" || pathname.startsWith("/beads/");
   const viewParam = searchParams.get("view");
-  const beadsView: "queues" | "active" | "finalcut" | "retakes" | "history" | "breakdown" =
+  const beadsView: "queues" | "active" | "finalcut" | "retakes" | "history" =
     viewParam === "active"
       ? "active"
       : viewParam === "retakes"
         ? "retakes"
         : viewParam === "history"
           ? "history"
-        : viewParam === "breakdown"
-          ? "breakdown"
           : viewParam === "finalcut"
             ? "finalcut"
             : "queues";
@@ -157,7 +155,7 @@ export function AppHeader() {
     setCreateOpen(true);
   };
 
-  const setBeadsView = useCallback((view: "queues" | "active" | "finalcut" | "retakes" | "history" | "breakdown") => {
+  const setBeadsView = useCallback((view: "queues" | "active" | "finalcut" | "retakes" | "history") => {
     const params = new URLSearchParams(searchParams.toString());
     if (view === "queues") params.delete("view");
     else params.set("view", view);
@@ -181,7 +179,7 @@ export function AppHeader() {
       const target = e.target as HTMLElement;
       if (target.tagName === "TEXTAREA" || target.tagName === "INPUT" || target.tagName === "SELECT") return;
 
-      // Breakdown is not in the tab cycle; treat it as index 0 (list)
+      // Unknown or legacy non-tab view values default to the first tab.
       const idx = views.indexOf(beadsView as CyclableView);
       const safeIdx = idx === -1 ? 0 : idx;
 
@@ -213,7 +211,7 @@ export function AppHeader() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isBeadsRoute, toggleTerminalPanel]);
 
-  // Button config changes per view: hidden on Breakdown/History, "Wrap!" on Final Cut, "Add" on Beats
+  // Button config changes per view: hidden on History, "Wrap!" on Final Cut, "Add" on Beats
   const showActionButton = beadsView === "queues" || beadsView === "active" || beadsView === "finalcut";
 
   const actionButton = (() => {

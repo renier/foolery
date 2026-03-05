@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Zap } from "lucide-react";
 import { RelationshipPicker } from "@/components/relationship-picker";
 
 const PRIORITIES = [0, 1, 2, 3, 4] as const;
@@ -35,7 +34,6 @@ type BeatFormProps =
       hideTypeSelector?: boolean;
       onSubmit: (data: CreateBeatInput, deps?: RelationshipDeps) => void;
       onCreateMore?: (data: CreateBeatInput, deps?: RelationshipDeps) => void;
-      onBreakdown?: (data: CreateBeatInput) => void;
       isSubmitting?: boolean;
     }
   | {
@@ -47,7 +45,6 @@ type BeatFormProps =
 export function BeatForm(props: BeatFormProps) {
   const { mode, defaultValues, onSubmit } = props;
   const onCreateMore = props.mode === "create" ? props.onCreateMore : undefined;
-  const onBreakdown = props.mode === "create" ? props.onBreakdown : undefined;
   const isSubmitting = props.mode === "create" ? props.isSubmitting : false;
   const workflows = props.mode === "create" ? (props.workflows ?? []) : [];
   const hideTypeSelector = props.mode === "create" ? (props.hideTypeSelector ?? false) : false;
@@ -96,12 +93,6 @@ export function BeatForm(props: BeatFormProps) {
       onCreateMore(data as CreateBeatInput, { blocks, blockedBy });
       setBlocks([]);
       setBlockedBy([]);
-    }
-  });
-
-  const handleBreakdownClick = form.handleSubmit((data) => {
-    if (onBreakdown) {
-      onBreakdown(data as CreateBeatInput);
     }
   });
 
@@ -229,19 +220,6 @@ export function BeatForm(props: BeatFormProps) {
             disabled={isSubmitting}
           >
             Create More
-          </Button>
-        )}
-        {onBreakdown && (
-          <Button
-            title="Create and decompose into sub-tasks with AI"
-            type="button"
-            variant="outline"
-            className="gap-1"
-            onClick={handleBreakdownClick}
-            disabled={isSubmitting}
-          >
-            <Zap className="size-3.5" />
-            Breakdown
           </Button>
         )}
       </div>

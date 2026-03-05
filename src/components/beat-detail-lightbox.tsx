@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Clapperboard, Zap } from "lucide-react";
+import { Clapperboard } from "lucide-react";
 import { toast } from "sonner";
 import type { Beat, BeatDependency, MemoryWorkflowDescriptor } from "@/lib/types";
 import type { UpdateBeatInput } from "@/lib/schemas";
@@ -45,8 +44,6 @@ export function BeatDetailLightbox({
   onShipBeat,
   isParentRollingBeat,
 }: BeatDetailLightboxProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [blocksIds, setBlocksIds] = useState<string[]>([]);
   const [blockedByIds, setBlockedByIds] = useState<string[]>([]);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -159,18 +156,6 @@ export function BeatDetailLightbox({
     return workflows[0] ?? null;
   }, [workflowResult, beat]);
 
-  const handleBreakdown = useCallback(() => {
-    if (!beatId) return;
-
-    onOpenChange(false);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("view", "breakdown");
-    params.set("parent", beatId);
-    params.delete("bead");
-    params.delete("detailRepo");
-    router.push(`/beads?${params.toString()}`);
-  }, [beatId, onOpenChange, searchParams, router]);
-
   const deps: BeatDependency[] = depsData?.ok ? (depsData.data ?? []) : [];
 
   if (!beatId) return null;
@@ -198,7 +183,6 @@ export function BeatDetailLightbox({
           setIsEditingTitle={setIsEditingTitle}
           setEditTitleValue={setEditTitleValue}
           handleUpdate={handleUpdate}
-          handleBreakdown={handleBreakdown}
           onShipBeat={onShipBeat}
           isParentRollingBeat={isParentRollingBeat}
           repo={repo}
@@ -234,7 +218,6 @@ interface LightboxHeaderProps {
   setIsEditingTitle: (v: boolean) => void;
   setEditTitleValue: (v: string) => void;
   handleUpdate: (fields: UpdateBeatInput) => Promise<void>;
-  handleBreakdown: () => void;
   onShipBeat?: (beat: Beat) => void;
   isParentRollingBeat?: (beat: Beat) => boolean;
   repo?: string;
@@ -249,7 +232,6 @@ function LightboxHeader({
   setIsEditingTitle,
   setEditTitleValue,
   handleUpdate,
-  handleBreakdown,
   onShipBeat,
   isParentRollingBeat,
   repo,
@@ -333,15 +315,6 @@ function LightboxHeader({
               Take!
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="xs"
-            title="Break this beat down into hierarchical tasks"
-            onClick={handleBreakdown}
-          >
-            <Zap className="size-3" />
-            Breakdown
-          </Button>
           <MoveToProjectDialog
             beat={beat}
             currentRepo={repo}

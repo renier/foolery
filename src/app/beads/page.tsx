@@ -11,7 +11,6 @@ import { FilterBar, type ViewPhase } from "@/components/filter-bar";
 import { MergeBeatsDialog } from "@/components/merge-beats-dialog";
 import { FinalCutView } from "@/components/final-cut-view";
 import { RetakesView } from "@/components/retakes-view";
-import { BreakdownView } from "@/components/breakdown-view";
 import { AgentHistoryView } from "@/components/agent-history-view";
 import { useAppStore } from "@/stores/app-store";
 import { useTerminalStore, type QueuedBeat } from "@/stores/terminal-store";
@@ -55,7 +54,7 @@ function BeadsPageInner() {
   const detailBeatId = searchParams.get("bead");
   const detailRepo = searchParams.get("detailRepo") ?? undefined;
   const viewParam = searchParams.get("view");
-  const beadsView: "queues" | "active" | "finalcut" | "retakes" | "history" | "breakdown" =
+  const beadsView: "queues" | "active" | "finalcut" | "retakes" | "history" =
     viewParam === "active"
       ? "active"
       : viewParam === "finalcut"
@@ -64,15 +63,12 @@ function BeadsPageInner() {
           ? "retakes"
           : viewParam === "history"
             ? "history"
-            : viewParam === "breakdown"
-              ? "breakdown"
-              : "queues";
+            : "queues";
   const isListView = beadsView === "queues" || beadsView === "active";
   const viewPhase: ViewPhase = beadsView === "active" ? "active" : "queues";
   const isFinalCutView = beadsView === "finalcut";
   const isRetakesView = beadsView === "retakes";
   const isHistoryView = beadsView === "history";
-  const isBreakdownView = beadsView === "breakdown";
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectionVersion, setSelectionVersion] = useState(0);
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
@@ -424,8 +420,6 @@ function BeadsPageInner() {
           <RetakesView />
         ) : isHistoryView ? (
           <AgentHistoryView />
-        ) : isBreakdownView ? (
-          <BreakdownView />
         ) : (
           <div className="overflow-x-auto">
           {isLoading ? (
