@@ -422,6 +422,27 @@ describe("updateKnot", () => {
     expect(addTagArgs[0]).toBe("--add-tag=valid");
   });
 
+  it("serializes invariant mutations", async () => {
+    responseQueue.push({});
+
+    await updateKnot(
+      "42",
+      {
+        addInvariants: ["Scope:src/lib", "", "   "],
+        removeInvariants: ["State:must remain queued", " "],
+        clearInvariants: true,
+      },
+      "/repo",
+    );
+
+    const callArgs = execFileCallArgs[0]!;
+    const addInvArgs = callArgs.filter((arg: string) => arg.startsWith("--add-invariant="));
+    const removeInvArgs = callArgs.filter((arg: string) => arg.startsWith("--remove-invariant="));
+    expect(addInvArgs).toEqual(["--add-invariant=Scope:src/lib"]);
+    expect(removeInvArgs).toEqual(["--remove-invariant=State:must remain queued"]);
+    expect(callArgs).toContain("--clear-invariants");
+  });
+
   it("returns error on non-zero exit", async () => {
     responseQueue.push({
       error: { name: "Error", message: "fail", code: 1 as unknown as string } as unknown as NodeJS.ErrnoException,

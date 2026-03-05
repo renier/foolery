@@ -34,6 +34,7 @@ interface MockKnot {
   notes: Array<Record<string, unknown>>;
   handoff_capsules: Array<Record<string, unknown>>;
   steps?: Array<Record<string, unknown>>;
+  invariants?: Array<{ kind: "Scope" | "State"; condition: string }>;
   workflow_etag: string;
   profile_etag?: string;
   created_at: string;
@@ -53,6 +54,16 @@ const store = {
 
 function nowIso(): string {
   return new Date().toISOString();
+}
+
+function parseInvariantToken(value: string): { kind: "Scope" | "State"; condition: string } | null {
+  const [rawKind, ...rest] = value.split(":");
+  const kind = rawKind?.trim();
+  const condition = rest.join(":").trim();
+  if ((kind === "Scope" || kind === "State") && condition.length > 0) {
+    return { kind, condition };
+  }
+  return null;
 }
 
 function nextId(): string {
@@ -156,6 +167,7 @@ const mockNewKnot = vi.fn(
       tags: [],
       notes: [],
       handoff_capsules: [],
+      invariants: undefined,
       workflow_etag: `${id}-etag`,
       created_at: now,
     });
@@ -197,6 +209,33 @@ const mockUpdateKnot = vi.fn(
         datetime: nowIso(),
       });
     }
+
+    const addInvariants = Array.isArray(input.addInvariants)
+      ? input.addInvariants
+        .filter((v): v is string => typeof v === "string")
+        .map(parseInvariantToken)
+        .filter((inv): inv is { kind: "Scope" | "State"; condition: string } => inv !== null)
+      : [];
+    const removeInvariants = Array.isArray(input.removeInvariants)
+      ? input.removeInvariants
+        .filter((v): v is string => typeof v === "string")
+        .map(parseInvariantToken)
+        .filter((inv): inv is { kind: "Scope" | "State"; condition: string } => inv !== null)
+      : [];
+    if (input.clearInvariants === true) {
+      knot.invariants = undefined;
+    }
+    if (removeInvariants.length > 0) {
+      const removeSet = new Set(removeInvariants.map((inv) => `${inv.kind}:${inv.condition}`));
+      knot.invariants = (knot.invariants ?? []).filter((inv) => !removeSet.has(`${inv.kind}:${inv.condition}`));
+      if (knot.invariants.length === 0) knot.invariants = undefined;
+    }
+    if (addInvariants.length > 0) {
+      const existing = new Set((knot.invariants ?? []).map((inv) => `${inv.kind}:${inv.condition}`));
+      const toAdd = addInvariants.filter((inv) => !existing.has(`${inv.kind}:${inv.condition}`));
+      knot.invariants = [...(knot.invariants ?? []), ...toAdd];
+    }
+
     knot.updated_at = nowIso();
     return { ok: true as const };
   },
@@ -407,6 +446,7 @@ function insertKnot(overrides: Partial<MockKnot> & { id: string }): void {
     notes: overrides.notes ?? [],
     handoff_capsules: overrides.handoff_capsules ?? [],
     steps: overrides.steps ?? [],
+    invariants: overrides.invariants,
     workflow_etag: overrides.workflow_etag ?? "etag",
     profile_etag: overrides.profile_etag,
     created_at: overrides.created_at ?? now,
@@ -923,6 +963,28 @@ describe("KnotsBackend coverage: create with extra fields", () => {
     expect(mockAddEdge).toHaveBeenCalled();
   });
 
+  it("serializes create invariants as knots addInvariants patch", async () => {
+    const backend = new KnotsBackend("/repo");
+
+    const result = await backend.create({
+      title: "Invariant create",
+      type: "task",
+      priority: 2,
+      labels: [],
+      invariants: [
+        { kind: "Scope", condition: "src/lib" },
+        { kind: "State", condition: "must stay queued" },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
+    const patchCall = mockUpdateKnot.mock.calls.find((c) => Array.isArray(c[1]?.addInvariants));
+    expect(patchCall?.[1]?.addInvariants).toEqual([
+      "Scope:src/lib",
+      "State:must stay queued",
+    ]);
+  });
+
   it("returns error when profiles are empty", async () => {
     mockListProfiles.mockResolvedValueOnce({
       ok: true as const,
@@ -1055,6 +1117,25 @@ describe("KnotsBackend coverage: query matchExpression fields", () => {
 });
 
 describe("KnotsBackend coverage: toBeat edge cases", () => {
+  it("maps knot invariants to beat invariants", async () => {
+    const backend = new KnotsBackend("/repo");
+    insertKnot({
+      id: "INV1",
+      title: "Invariant mapping",
+      invariants: [
+        { kind: "Scope", condition: "src/lib" },
+        { kind: "State", condition: "must stay queued" },
+      ],
+    });
+
+    const result = await backend.get("INV1");
+    expect(result.ok).toBe(true);
+    expect(result.data?.invariants).toEqual([
+      { kind: "Scope", condition: "src/lib" },
+      { kind: "State", condition: "must stay queued" },
+    ]);
+  });
+
   it("uses body when description is missing", async () => {
     const backend = new KnotsBackend("/repo");
     insertKnot({
@@ -1226,6 +1307,29 @@ describe("KnotsBackend coverage: update with state change", () => {
     const calls = mockUpdateKnot.mock.calls;
     const noteCall = calls.find((c) => c[1]?.addNote === "A new note");
     expect(noteCall).toBeDefined();
+  });
+
+  it("serializes invariant add/remove/clear updates", async () => {
+    const backend = new KnotsBackend("/repo");
+    insertKnot({
+      id: "IU1",
+      title: "Invariant update",
+      invariants: [{ kind: "State", condition: "must stay queued" }],
+    });
+
+    const result = await backend.update("IU1", {
+      addInvariants: [{ kind: "Scope", condition: "src/lib" }],
+      removeInvariants: [{ kind: "State", condition: "must stay queued" }],
+      clearInvariants: true,
+    });
+    expect(result.ok).toBe(true);
+
+    const lastUpdateCall = mockUpdateKnot.mock.calls.at(-1);
+    expect(lastUpdateCall?.[1]).toMatchObject({
+      addInvariants: ["Scope:src/lib"],
+      removeInvariants: ["State:must stay queued"],
+      clearInvariants: true,
+    });
   });
 
   it("skips updateKnot when no patch fields set", async () => {

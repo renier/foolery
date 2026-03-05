@@ -8,7 +8,7 @@
  */
 
 import { afterEach, describe, expect, it } from "vitest";
-import { mkdtempSync, mkdirSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { BeadsBackend } from "@/lib/backends/beads-backend";
@@ -849,5 +849,88 @@ describe("BeadsBackend coverage: update with state change", () => {
     });
     expect(result.ok).toBe(false);
     expect(result.error?.code).toBe("INVALID_INPUT");
+  });
+});
+
+describe("BeadsBackend coverage: invariant emulation in notes", () => {
+  it("persists create invariants into notes while keeping visible notes clean", async () => {
+    const { backend, repo } = createBackendWithRepo();
+
+    const created = await backend.create({
+      title: "Invariant create",
+      type: "task",
+      priority: 2,
+      labels: [],
+      notes: "Operator note",
+      invariants: [{ kind: "Scope", condition: "src/lib" }],
+    });
+    expect(created.ok).toBe(true);
+
+    const fetched = await backend.get(created.data!.id);
+    expect(fetched.ok).toBe(true);
+    expect(fetched.data!.notes).toBe("Operator note");
+    expect(fetched.data!.invariants).toEqual([{ kind: "Scope", condition: "src/lib" }]);
+
+    const rawLines = readFileSync(join(repo, ".beads", "issues.jsonl"), "utf-8")
+      .split("\n")
+      .filter(Boolean);
+    const raw = JSON.parse(rawLines[0]!) as { notes?: string };
+    expect(raw.notes).toContain("[Invariants]");
+    expect(raw.notes).toContain("Scope: src/lib");
+  });
+
+  it("supports add/remove/clear invariant updates", async () => {
+    const { backend, repo } = createBackendWithRepo();
+
+    const created = await backend.create({
+      title: "Invariant updates",
+      type: "task",
+      priority: 2,
+      labels: [],
+      notes: "Persistent note",
+    });
+    expect(created.ok).toBe(true);
+
+    const addResult = await backend.update(created.data!.id, {
+      addInvariants: [
+        { kind: "Scope", condition: "src/lib" },
+        { kind: "State", condition: "must stay queued" },
+      ],
+    });
+    expect(addResult.ok).toBe(true);
+
+    const afterAdd = await backend.get(created.data!.id);
+    expect(afterAdd.ok).toBe(true);
+    expect(afterAdd.data!.invariants).toEqual([
+      { kind: "Scope", condition: "src/lib" },
+      { kind: "State", condition: "must stay queued" },
+    ]);
+
+    const removeResult = await backend.update(created.data!.id, {
+      removeInvariants: [{ kind: "Scope", condition: "src/lib" }],
+    });
+    expect(removeResult.ok).toBe(true);
+
+    const afterRemove = await backend.get(created.data!.id);
+    expect(afterRemove.ok).toBe(true);
+    expect(afterRemove.data!.invariants).toEqual([
+      { kind: "State", condition: "must stay queued" },
+    ]);
+
+    const clearResult = await backend.update(created.data!.id, {
+      clearInvariants: true,
+    });
+    expect(clearResult.ok).toBe(true);
+
+    const afterClear = await backend.get(created.data!.id);
+    expect(afterClear.ok).toBe(true);
+    expect(afterClear.data!.invariants).toBeUndefined();
+    expect(afterClear.data!.notes).toBe("Persistent note");
+
+    const rawLines = readFileSync(join(repo, ".beads", "issues.jsonl"), "utf-8")
+      .split("\n")
+      .filter(Boolean);
+    const raw = JSON.parse(rawLines[0]!) as { notes?: string };
+    expect(raw.notes).toBe("Persistent note");
   });
 });

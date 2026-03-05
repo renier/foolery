@@ -209,6 +209,34 @@ describe("normalizeFromJsonl", () => {
     expect(beat.created).toBe("2026-01-01T00:00:00Z");
     expect(beat.updated).toBe("2026-02-01T00:00:00Z");
   });
+
+  it("parses invariant section from notes and removes it from visible notes", () => {
+    const raw: RawBead = {
+      id: "inv-1",
+      title: "Invariant parse",
+      notes: "Operator note\n\n[Invariants]\nScope: src/lib\nState: remain queued\n\nTail note",
+    };
+
+    const beat = normalizeFromJsonl(raw);
+
+    expect(beat.invariants).toEqual([
+      { kind: "Scope", condition: "src/lib" },
+      { kind: "State", condition: "remain queued" },
+    ]);
+    expect(beat.notes).toBe("Operator note\n\nTail note");
+  });
+
+  it("parses invariant-only notes into invariants and clears notes", () => {
+    const raw: RawBead = {
+      id: "inv-2",
+      title: "Invariant only",
+      notes: "[Invariants]\nScope: src/lib",
+    };
+
+    const beat = normalizeFromJsonl(raw);
+    expect(beat.invariants).toEqual([{ kind: "Scope", condition: "src/lib" }]);
+    expect(beat.notes).toBeUndefined();
+  });
 });
 
 // ── denormalizeToJsonl ──────────────────────────────────────────
@@ -282,6 +310,46 @@ describe("denormalizeToJsonl", () => {
     expect(raw.estimated_minutes).toBeUndefined();
     expect(raw.closed_at).toBeUndefined();
     expect(raw.metadata).toBeUndefined();
+  });
+
+  it("embeds invariants into notes when present", () => {
+    const beat: Beat = {
+      id: "inv-3",
+      title: "Invariant write",
+      notes: "Operator note",
+      type: "task",
+      state: "open",
+      priority: 2,
+      labels: [],
+      invariants: [
+        { kind: "Scope", condition: "src/lib" },
+        { kind: "State", condition: "remain queued" },
+      ],
+      created: "2026-01-01T00:00:00Z",
+      updated: "2026-01-01T00:00:00Z",
+    };
+
+    const raw = denormalizeToJsonl(beat);
+    expect(raw.notes).toBe(
+      "Operator note\n\n[Invariants]\nScope: src/lib\nState: remain queued",
+    );
+  });
+
+  it("writes invariant section when beat has invariants but no notes", () => {
+    const beat: Beat = {
+      id: "inv-4",
+      title: "Invariant section only",
+      type: "task",
+      state: "open",
+      priority: 2,
+      labels: [],
+      invariants: [{ kind: "Scope", condition: "src/lib" }],
+      created: "2026-01-01T00:00:00Z",
+      updated: "2026-01-01T00:00:00Z",
+    };
+
+    const raw = denormalizeToJsonl(beat);
+    expect(raw.notes).toBe("[Invariants]\nScope: src/lib");
   });
 });
 
@@ -378,6 +446,27 @@ describe("round-trip: normalize -> denormalize -> normalize", () => {
 
     const restored = normalizeFromJsonl(serialized);
     expect(restored.estimate).toBe(45);
+  });
+
+  it("round-trips invariants through notes emulation", () => {
+    const beat: Beat = {
+      id: "inv-5",
+      title: "Invariant round-trip",
+      notes: "Visible note",
+      type: "task",
+      state: "ready_for_planning",
+      priority: 2,
+      labels: [],
+      invariants: [{ kind: "State", condition: "must end queued" }],
+      created: "2026-01-01T00:00:00Z",
+      updated: "2026-01-01T00:00:00Z",
+    };
+
+    const serialized = denormalizeToJsonl(beat);
+    const restored = normalizeFromJsonl(serialized);
+
+    expect(restored.notes).toBe("Visible note");
+    expect(restored.invariants).toEqual([{ kind: "State", condition: "must end queued" }]);
   });
 
   it("round-trips timestamp field mappings", () => {
