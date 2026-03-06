@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Bot, Scan, Plus, Pencil, Trash2, Check, X, ChevronsUpDown } from "lucide-react";
+import { Scan, Plus, Pencil, Trash2, Check, X, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,7 @@ import {
   scanAgents,
   saveActions,
 } from "@/lib/settings-api";
+import { stripCommonModelLabelPrefix } from "@/lib/model-labels";
 import type { ActionAgentMappings } from "@/lib/schemas";
 
 function resolveSelectedOption(
@@ -341,41 +342,6 @@ function ScannedAgentsList({
 /** Threshold at which we switch from a plain Select to a searchable combobox. */
 const SEARCHABLE_THRESHOLD = 10;
 
-/**
- * Find and strip the longest common prefix that ends at a separator
- * (e.g. "/" or ":") so labels stay meaningful but repetitive provider
- * prefixes like "openrouter/anthropic/" are removed.
- */
-function stripCommonPrefix(labels: string[]): { stripped: string[]; prefix: string } {
-  if (labels.length <= 1) return { stripped: labels, prefix: "" };
-  const first = labels[0];
-  let prefixLen = first.length;
-  for (const label of labels) {
-    prefixLen = Math.min(prefixLen, label.length);
-    for (let i = 0; i < prefixLen; i++) {
-      if (label[i] !== first[i]) {
-        prefixLen = i;
-        break;
-      }
-    }
-  }
-  // Snap back to the last separator so we don't cut mid-word
-  const separators = /[/:@.]/;
-  let snapIdx = 0;
-  for (let i = prefixLen - 1; i >= 0; i--) {
-    if (separators.test(first[i])) {
-      snapIdx = i + 1; // include the separator in the prefix
-      break;
-    }
-  }
-  if (snapIdx <= 1) return { stripped: labels, prefix: "" };
-  const prefix = first.slice(0, snapIdx);
-  return {
-    stripped: labels.map((l) => l.slice(snapIdx)),
-    prefix,
-  };
-}
-
 function SearchableOptionCombobox({
   options,
   value,
@@ -389,7 +355,7 @@ function SearchableOptionCombobox({
 
   // Strip common prefixes for shorter display labels
   const rawLabels = options.map((o) => o.label);
-  const { stripped, prefix } = stripCommonPrefix(rawLabels);
+  const { stripped } = stripCommonModelLabelPrefix(rawLabels);
   const displayMap = new Map(options.map((o, i) => [o.id, stripped[i]]));
 
   const selectedDisplay = value ? (displayMap.get(value) ?? value) : "select model/version";
@@ -708,4 +674,3 @@ function AgentEditRow({
     </div>
   );
 }
-
