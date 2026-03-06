@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc1c6-9e99-7710-9d11-746e76dd664e",
+  "occurred_at": "2026-03-06T06:12:25.359711Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-0df2",
+    "profile_id": "autopilot",
+    "state": "shipment",
+    "terminal": false,
+    "title": "Settings:  Add some color and some pizazz",
+    "updated_at": "2026-03-06T06:12:25.359711Z"
+  }
+}
