@@ -86,8 +86,26 @@ class SessionConnectionManager {
               : conn.exitCode === 0
                 ? "completed"
                 : "exited with error";
+
+            // Extract last stderr content for error context
+            let errorDetail = "";
+            if (conn.exitCode !== 0 && !isDisconnect) {
+              const stderrEvents = conn.buffer.filter((e) => e.type === "stderr");
+              const lastStderr = stderrEvents
+                .slice(-3)
+                .map((e) => e.data.trim())
+                .filter(Boolean)
+                .join(" ")
+                .slice(0, 200);
+              if (lastStderr) {
+                errorDetail = ` — ${lastStderr}`;
+              } else {
+                errorDetail = ` (exit code ${conn.exitCode}, no error output captured)`;
+              }
+            }
+
             addNotification({
-              message: `"${terminal.beatTitle}" session ${status}`,
+              message: `"${terminal.beatTitle}" session ${status}${errorDetail}`,
               beatId: terminal.beatId,
               repoPath: terminal.repoPath,
             });

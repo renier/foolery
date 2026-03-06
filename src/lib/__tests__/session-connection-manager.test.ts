@@ -282,7 +282,7 @@ describe("SessionConnectionManager", () => {
     capturedOnEvent!({ type: "exit", data: "1", timestamp: Date.now() });
 
     expect(mockAddNotification).toHaveBeenCalledWith({
-      message: '"Deploy service" session exited with error',
+      message: '"Deploy service" session exited with error (exit code 1, no error output captured)',
       beatId: "beat-43",
       repoPath: "/repos/deploy",
     });

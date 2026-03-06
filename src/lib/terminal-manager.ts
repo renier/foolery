@@ -1318,7 +1318,9 @@ export async function createSession(
       takeChild.stdout?.removeAllListeners();
       takeChild.stderr?.removeAllListeners();
       entry.process = null;
-      finishSession(1);
+      enforceQueueTerminalInvariant().finally(() => {
+        finishSession(1);
+      });
     });
 
     // Log beat state before sending the take-loop prompt.
@@ -1674,7 +1676,12 @@ export async function createSession(
       return;
     }
 
-    finishSession(code ?? 1);
+    // Non-take-loop session ended — still enforce invariant to avoid
+    // leaving the beat stranded in an active state.
+    (async () => {
+      await enforceQueueTerminalInvariant();
+      finishSession(code ?? 1);
+    })();
   });
 
   child.on("error", (err) => {
@@ -1686,13 +1693,15 @@ export async function createSession(
     stdinClosed = true;
     pushEvent({
       type: "stderr",
-      data: `Process error: ${err.message}`,
+      data: `Process error: ${err.message}\n`,
       timestamp: Date.now(),
     });
     child.stdout?.removeAllListeners();
     child.stderr?.removeAllListeners();
     entry.process = null;
-    finishSession(1);
+    enforceQueueTerminalInvariant().finally(() => {
+      finishSession(1);
+    });
   });
 
   // Log beat state before the initial prompt (iteration 1).
