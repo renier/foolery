@@ -5,6 +5,7 @@ import {
   recordStepAgent,
   getLastStepAgent,
   _resetStepAgentMap,
+  swapPoolAgent,
 } from "@/lib/agent-pool";
 import type { PoolEntry } from "@/lib/types";
 import type { RegisteredAgentConfig, PoolsSettings } from "@/lib/schemas";
@@ -271,5 +272,40 @@ describe("step agent tracking", () => {
     expect(getLastStepAgent("beat-1", WorkflowStep.Implementation)).toBe(
       "sonnet",
     );
+  });
+});
+
+describe("swapPoolAgent", () => {
+  it("swaps an existing pool agent while preserving weight and order", () => {
+    const pool: PoolEntry[] = [
+      { agentId: "claude", weight: 2 },
+      { agentId: "sonnet", weight: 1 },
+    ];
+    const swapped = swapPoolAgent(pool, "claude", "codex");
+    expect(swapped).toEqual([
+      { agentId: "codex", weight: 2 },
+      { agentId: "sonnet", weight: 1 },
+    ]);
+  });
+
+  it("returns the original entries when source agent is missing", () => {
+    const pool: PoolEntry[] = [{ agentId: "claude", weight: 2 }];
+    const swapped = swapPoolAgent(pool, "codex", "sonnet");
+    expect(swapped).toBe(pool);
+  });
+
+  it("returns the original entries for no-op swaps", () => {
+    const pool: PoolEntry[] = [{ agentId: "claude", weight: 2 }];
+    const swapped = swapPoolAgent(pool, "claude", "claude");
+    expect(swapped).toBe(pool);
+  });
+
+  it("returns the original entries when replacement already exists in pool", () => {
+    const pool: PoolEntry[] = [
+      { agentId: "claude", weight: 2 },
+      { agentId: "sonnet", weight: 1 },
+    ];
+    const swapped = swapPoolAgent(pool, "claude", "sonnet");
+    expect(swapped).toBe(pool);
   });
 });

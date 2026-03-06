@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { fetchOpenRouterModels as fetchOpenRouterModelsApi, savePools } from "@/lib/settings-api";
+import { swapPoolAgent } from "@/lib/agent-pool";
 import {
   OPENROUTER_SELECTED_AGENT_ID,
   formatOpenRouterSelectedAgentLabel,
@@ -237,13 +238,31 @@ function StepPoolEditor({
   onChange: (entries: PoolEntry[]) => void;
 }) {
   const [addingAgent, setAddingAgent] = useState(false);
+  const [swapFromSelection, setSwapFromSelection] = useState("");
+  const [swapToSelection, setSwapToSelection] = useState("");
 
   // Agents not yet in this pool
   const availableIds = agentIds.filter(
     (id) => !entries.some((e) => e.agentId === id),
   );
+  const poolAgentIds = entries.map((entry) => entry.agentId);
 
   const totalWeight = entries.reduce((sum, e) => sum + e.weight, 0);
+
+  const swapFromAgentId = poolAgentIds.includes(swapFromSelection)
+    ? swapFromSelection
+    : (poolAgentIds[0] ?? "");
+  const swapToAgentId =
+    agentIds.includes(swapToSelection) && swapToSelection !== swapFromAgentId
+      ? swapToSelection
+      : ((agentIds.find((id) => id !== swapFromAgentId) ?? agentIds[0]) ?? "");
+
+  const canSwap =
+    poolAgentIds.length > 0 &&
+    agentIds.length > 1 &&
+    swapFromAgentId.length > 0 &&
+    swapToAgentId.length > 0 &&
+    swapFromAgentId !== swapToAgentId;
 
   return (
     <div className="rounded-xl border border-primary/18 bg-background/60 p-3 space-y-2">
@@ -362,6 +381,98 @@ function StepPoolEditor({
               );
             })}
           </div>
+
+          {poolAgentIds.length > 0 && agentIds.length > 1 && (
+            <div className="mt-2 rounded-lg border border-primary/15 bg-background/70 p-2.5">
+              <p className="text-[11px] font-medium text-foreground">
+                Swap Agent
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                Replace a pooled agent with another while keeping weight.
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Select value={swapFromAgentId} onValueChange={setSwapFromSelection}>
+                  <SelectTrigger className="h-7 w-[170px] border-primary/20 bg-background/80">
+                    <SelectValue placeholder="current agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {poolAgentIds.map((id) => {
+                      const agent = agents[id];
+                      const pricing = resolveOpenRouterPricing(
+                        openRouterModels,
+                        agent?.model,
+                      );
+                      return (
+                        <SelectItem key={id} value={id}>
+                          <div className="flex w-full items-center justify-between gap-2">
+                            <span className="truncate">{formatPoolAgentLabel(id, agent)}</span>
+                            {pricing && (
+                              <span className="text-[10px] font-mono text-muted-foreground">
+                                P {pricing.prompt} / C {pricing.completion}
+                              </span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                <span className="text-xs text-muted-foreground">to</span>
+                <Select value={swapToAgentId} onValueChange={setSwapToSelection}>
+                  <SelectTrigger className="h-7 w-[190px] border-primary/20 bg-background/80">
+                    <SelectValue placeholder="replacement agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agentIds.map((id) => {
+                      const agent = agents[id];
+                      const pricing = resolveOpenRouterPricing(
+                        openRouterModels,
+                        agent?.model,
+                      );
+                      return (
+                        <SelectItem key={id} value={id}>
+                          <div className="flex w-full items-center justify-between gap-2">
+                            <span className="truncate">{formatPoolAgentLabel(id, agent)}</span>
+                            {pricing && (
+                              <span className="text-[10px] font-mono text-muted-foreground">
+                                P {pricing.prompt} / C {pricing.completion}
+                              </span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 border-primary/20 bg-background/80"
+                  disabled={!canSwap}
+                  onClick={() => {
+                    if (!swapFromAgentId || !swapToAgentId) return;
+                    if (swapFromAgentId === swapToAgentId) return;
+
+                    if (entries.some((entry) => entry.agentId === swapToAgentId)) {
+                      toast.error("Replacement agent is already in this pool");
+                      return;
+                    }
+
+                    const swapped = swapPoolAgent(entries, swapFromAgentId, swapToAgentId);
+                    if (swapped === entries) {
+                      toast.error("Unable to swap selected agents");
+                      return;
+                    }
+
+                    onChange(swapped);
+                    setSwapFromSelection(swapToAgentId);
+                  }}
+                >
+                  Swap
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

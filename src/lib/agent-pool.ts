@@ -82,6 +82,29 @@ export function resolvePoolAgent(
   return selectFromPool(pool, agents, excludeAgentId);
 }
 
+/**
+ * Replace one agentId in a pool with another while preserving weight/order.
+ * Returns the original entries when the swap cannot be applied.
+ */
+export function swapPoolAgent(
+  entries: PoolEntry[],
+  fromAgentId: string,
+  toAgentId: string,
+): PoolEntry[] {
+  if (fromAgentId === toAgentId) return entries;
+  const fromIndex = entries.findIndex((entry) => entry.agentId === fromAgentId);
+  if (fromIndex < 0) return entries;
+
+  const targetExists = entries.some(
+    (entry, idx) => idx !== fromIndex && entry.agentId === toAgentId,
+  );
+  if (targetExists) return entries;
+
+  const next = [...entries];
+  next[fromIndex] = { ...next[fromIndex]!, agentId: toAgentId };
+  return next;
+}
+
 function toAgentTarget(
   reg: RegisteredAgentConfig | RegisteredAgent,
   agentId?: string,
