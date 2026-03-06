@@ -83,7 +83,8 @@ export function resolvePoolAgent(
 }
 
 /**
- * Replace one agentId in a pool with another while preserving weight/order.
+ * Replace one agentId in a pool with another while preserving total weight.
+ * If the replacement agent already exists, merge weights and remove source.
  * Returns the original entries when the swap cannot be applied.
  */
 export function swapPoolAgent(
@@ -95,10 +96,17 @@ export function swapPoolAgent(
   const fromIndex = entries.findIndex((entry) => entry.agentId === fromAgentId);
   if (fromIndex < 0) return entries;
 
-  const targetExists = entries.some(
+  const toIndex = entries.findIndex(
     (entry, idx) => idx !== fromIndex && entry.agentId === toAgentId,
   );
-  if (targetExists) return entries;
+  if (toIndex >= 0) {
+    const fromWeight = entries[fromIndex]!.weight;
+    return entries
+      .map((entry, idx) =>
+        idx === toIndex ? { ...entry, weight: entry.weight + fromWeight } : entry,
+      )
+      .filter((_, idx) => idx !== fromIndex);
+  }
 
   const next = [...entries];
   next[fromIndex] = { ...next[fromIndex]!, agentId: toAgentId };

@@ -300,12 +300,25 @@ describe("swapPoolAgent", () => {
     expect(swapped).toBe(pool);
   });
 
-  it("returns the original entries when replacement already exists in pool", () => {
+  it("merges weights when replacement already exists in pool", () => {
     const pool: PoolEntry[] = [
       { agentId: "claude", weight: 2 },
       { agentId: "sonnet", weight: 1 },
     ];
     const swapped = swapPoolAgent(pool, "claude", "sonnet");
-    expect(swapped).toBe(pool);
+    expect(swapped).toEqual([{ agentId: "sonnet", weight: 3 }]);
+  });
+
+  it("merges into existing replacement and preserves other entries order", () => {
+    const pool: PoolEntry[] = [
+      { agentId: "sonnet", weight: 1 },
+      { agentId: "claude", weight: 2 },
+      { agentId: "codex", weight: 3 },
+    ];
+    const swapped = swapPoolAgent(pool, "codex", "sonnet");
+    expect(swapped).toEqual([
+      { agentId: "sonnet", weight: 4 },
+      { agentId: "claude", weight: 2 },
+    ]);
   });
 });

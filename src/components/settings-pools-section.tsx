@@ -326,21 +326,11 @@ function GlobalSwapAgent({
       ? swapToSelection
       : ((agentIds.find((id) => id !== swapFromAgentId) ?? agentIds[0]) ?? "");
 
-  // Check if toAgent is already in ALL pools that contain fromAgent
-  const toInAllPools =
-    swapToAgentId.length > 0 &&
-    ALL_STEPS.every((step) => {
-      const stepEntries = pools[step] ?? [];
-      if (!stepEntries.some((e) => e.agentId === swapFromAgentId)) return true;
-      return stepEntries.some((e) => e.agentId === swapToAgentId);
-    });
-
   const canSwap =
     pooledAgentIds.length > 0 &&
     swapFromAgentId.length > 0 &&
     swapToAgentId.length > 0 &&
-    swapFromAgentId !== swapToAgentId &&
-    !toInAllPools;
+    swapFromAgentId !== swapToAgentId;
 
   async function handleGlobalSwap() {
     if (!swapFromAgentId || !swapToAgentId) return;
@@ -387,7 +377,6 @@ function GlobalSwapAgent({
       agents={agents}
       agentIds={agentIds}
       pooledAgentIds={pooledAgentIds}
-      pools={pools}
       swapFromAgentId={swapFromAgentId}
       swapToAgentId={swapToAgentId}
       canSwap={canSwap}
@@ -402,7 +391,6 @@ function GlobalSwapAgentUI({
   agents,
   agentIds,
   pooledAgentIds,
-  pools,
   swapFromAgentId,
   swapToAgentId,
   canSwap,
@@ -413,7 +401,6 @@ function GlobalSwapAgentUI({
   agents: Record<string, RegisteredAgent>;
   agentIds: string[];
   pooledAgentIds: string[];
-  pools: PoolsSettings;
   swapFromAgentId: string;
   swapToAgentId: string;
   canSwap: boolean;
@@ -448,29 +435,11 @@ function GlobalSwapAgentUI({
             <SelectValue placeholder="replacement agent" />
           </SelectTrigger>
           <SelectContent>
-            {agentIds.map((id) => {
-              const inAllPools =
-                id !== swapFromAgentId &&
-                ALL_STEPS.every((step) => {
-                  const se = pools[step] ?? [];
-                  if (!se.some((e) => e.agentId === swapFromAgentId)) return true;
-                  return se.some((e) => e.agentId === id);
-                });
-              return (
-                <SelectItem key={id} value={id} disabled={inAllPools}>
-                  <div className="flex w-full items-center justify-between gap-2">
-                    <span className="truncate">
-                      {formatPoolAgentLabel(id, agents[id])}
-                    </span>
-                    {inAllPools && (
-                      <span className="text-[10px] text-muted-foreground">
-                        already in all pools
-                      </span>
-                    )}
-                  </div>
-                </SelectItem>
-              );
-            })}
+            {agentIds.map((id) => (
+              <SelectItem key={id} value={id} disabled={id === swapFromAgentId}>
+                {formatPoolAgentLabel(id, agents[id])}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Button
