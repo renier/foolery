@@ -5,9 +5,6 @@ import { toast } from "sonner";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -152,15 +149,6 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="overflow-hidden border-primary/20 bg-background sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
-            Settings
-          </SheetTitle>
-          <SheetDescription className="text-muted-foreground/90">
-            Configuration stored in ~/.config/foolery/settings.toml
-          </SheetDescription>
-        </SheetHeader>
-
         <div className="px-4 pt-2 flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-3 py-4">
             {/* Section: Repositories (independent data, always rendered) */}

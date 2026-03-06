@@ -150,7 +150,7 @@ export function SettingsAgentsSection({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bot className="size-4 text-primary" />
-          <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">Agents</h3>
+          <h3 className="text-sm font-medium text-foreground">Agents</h3>
         </div>
         <div className="flex items-center gap-2">
           <Button

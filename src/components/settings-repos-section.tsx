@@ -75,7 +75,7 @@ export function SettingsReposSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FolderKanban className="size-4 text-accent" />
-          <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">Repositories</h3>
+          <h3 className="text-sm font-medium text-foreground">Repositories</h3>
         </div>
         <Button size="sm" variant="outline" className="border-accent/30 bg-background/70 hover:bg-accent/10" onClick={() => setBrowseOpen(true)}>
           <Plus className="mr-1 h-3.5 w-3.5" />
