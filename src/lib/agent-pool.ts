@@ -1,7 +1,7 @@
 import type { PoolEntry, RegisteredAgent } from "@/lib/types";
 import type { AgentTarget, CliAgentTarget } from "@/lib/types-agent-target";
 import type { PoolsSettings, RegisteredAgentConfig } from "@/lib/schemas";
-import type { WorkflowStep } from "@/lib/workflows";
+import { WorkflowStep } from "@/lib/workflows";
 
 /**
  * Select an agent from a weighted pool using weighted random selection.
@@ -122,6 +122,50 @@ export function swapPoolAgent(
         : entry,
     )
     .filter((_, idx) => idx === firstFromIndex || !removeIndexes.has(idx));
+}
+
+const DEFAULT_POOL_STEPS = Object.values(WorkflowStep) as WorkflowStep[];
+
+export interface SwapPoolsAgentResult {
+  affectedSteps: number;
+  updates: Partial<PoolsSettings>;
+  updatedPools: PoolsSettings;
+}
+
+/**
+ * Globally replace a pooled agent across workflow steps.
+ * Returns per-step updates, affected step count, and the merged pools object.
+ */
+export function swapPoolsAgent(
+  pools: PoolsSettings,
+  fromAgentId: string,
+  toAgentId: string,
+  steps: readonly WorkflowStep[] = DEFAULT_POOL_STEPS,
+): SwapPoolsAgentResult {
+  if (!fromAgentId || !toAgentId || fromAgentId === toAgentId) {
+    return { affectedSteps: 0, updates: {}, updatedPools: pools };
+  }
+
+  const updates: Partial<PoolsSettings> = {};
+  let affectedSteps = 0;
+  for (const step of steps) {
+    const stepEntries = pools[step];
+    const swappedEntries = swapPoolAgent(stepEntries, fromAgentId, toAgentId);
+    if (swappedEntries !== stepEntries) {
+      updates[step] = swappedEntries;
+      affectedSteps += 1;
+    }
+  }
+
+  if (affectedSteps === 0) {
+    return { affectedSteps: 0, updates: {}, updatedPools: pools };
+  }
+
+  return {
+    affectedSteps,
+    updates,
+    updatedPools: { ...pools, ...updates },
+  };
 }
 
 function toAgentTarget(

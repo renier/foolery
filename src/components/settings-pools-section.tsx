@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { savePools } from "@/lib/settings-api";
-import { swapPoolAgent } from "@/lib/agent-pool";
+import { swapPoolsAgent } from "@/lib/agent-pool";
 import { formatAgentDisplayLabel } from "@/lib/agent-identity";
 import type { RegisteredAgent } from "@/lib/types";
 import type { PoolEntry, PoolsSettings } from "@/lib/schemas";
@@ -336,24 +336,17 @@ function GlobalSwapAgent({
     if (!swapFromAgentId || !swapToAgentId) return;
     if (swapFromAgentId === swapToAgentId) return;
 
-    const updates: Partial<PoolsSettings> = {};
-    let swapCount = 0;
-    for (const step of ALL_STEPS) {
-      const stepEntries = pools[step] ?? [];
-      if (stepEntries.some((e) => e.agentId === swapFromAgentId)) {
-        const swapped = swapPoolAgent(stepEntries, swapFromAgentId, swapToAgentId);
-        if (swapped !== stepEntries) {
-          updates[step] = swapped;
-          swapCount++;
-        }
-      }
-    }
-    if (swapCount === 0) {
+    const { updates, affectedSteps, updatedPools } = swapPoolsAgent(
+      pools,
+      swapFromAgentId,
+      swapToAgentId,
+      ALL_STEPS,
+    );
+    if (affectedSteps === 0) {
       toast.error("Agent not found in any pool");
       return;
     }
-    const updated = { ...pools, ...updates };
-    onPoolsChange(updated);
+    onPoolsChange(updatedPools);
     try {
       const res = await savePools(updates);
       if (!res.ok) {
@@ -365,7 +358,7 @@ function GlobalSwapAgent({
       return;
     }
     toast.success(
-      `Swapped agent across ${swapCount} step${swapCount > 1 ? "s" : ""}`,
+      `Swapped agent across ${affectedSteps} step${affectedSteps > 1 ? "s" : ""}`,
     );
     setSwapFromSelection(swapToAgentId);
   }

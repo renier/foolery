@@ -6,6 +6,7 @@ import {
   getLastStepAgent,
   _resetStepAgentMap,
   swapPoolAgent,
+  swapPoolsAgent,
 } from "@/lib/agent-pool";
 import type { PoolEntry } from "@/lib/types";
 import type { RegisteredAgentConfig, PoolsSettings } from "@/lib/schemas";
@@ -347,5 +348,57 @@ describe("swapPoolAgent", () => {
       { agentId: "sonnet", weight: 1 },
       { agentId: "codex", weight: 9 },
     ]);
+  });
+});
+
+describe("swapPoolsAgent", () => {
+  const basePools: PoolsSettings = {
+    planning: [{ agentId: "claude", weight: 1 }],
+    plan_review: [],
+    implementation: [
+      { agentId: "sonnet", weight: 2 },
+      { agentId: "claude", weight: 3 },
+    ],
+    implementation_review: [{ agentId: "claude", weight: 4 }],
+    shipment: [{ agentId: "codex", weight: 1 }],
+    shipment_review: [],
+  };
+
+  it("swaps the source agent across all workflow steps that contain it", () => {
+    const result = swapPoolsAgent(basePools, "claude", "codex");
+    expect(result.affectedSteps).toBe(3);
+    expect(result.updates).toEqual({
+      planning: [{ agentId: "codex", weight: 1 }],
+      implementation: [
+        { agentId: "sonnet", weight: 2 },
+        { agentId: "codex", weight: 3 },
+      ],
+      implementation_review: [{ agentId: "codex", weight: 4 }],
+    });
+    expect(result.updatedPools).toEqual({
+      planning: [{ agentId: "codex", weight: 1 }],
+      plan_review: [],
+      implementation: [
+        { agentId: "sonnet", weight: 2 },
+        { agentId: "codex", weight: 3 },
+      ],
+      implementation_review: [{ agentId: "codex", weight: 4 }],
+      shipment: [{ agentId: "codex", weight: 1 }],
+      shipment_review: [],
+    });
+  });
+
+  it("returns original pools when no steps contain the source agent", () => {
+    const result = swapPoolsAgent(basePools, "nonexistent", "codex");
+    expect(result.affectedSteps).toBe(0);
+    expect(result.updates).toEqual({});
+    expect(result.updatedPools).toBe(basePools);
+  });
+
+  it("returns original pools for no-op swaps", () => {
+    const result = swapPoolsAgent(basePools, "claude", "claude");
+    expect(result.affectedSteps).toBe(0);
+    expect(result.updates).toEqual({});
+    expect(result.updatedPools).toBe(basePools);
   });
 });
