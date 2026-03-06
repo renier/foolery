@@ -183,7 +183,7 @@ export function SettingsPoolsSection({
       <div className={disabled ? "space-y-4 opacity-50 pointer-events-none" : "space-y-4"}>
         <div className="flex items-center gap-2">
           <Users className="size-4 text-primary" />
-          <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">Agent Pools</h3>
+          <h3 className="text-sm font-medium text-foreground">Agent Pools</h3>
         </div>
         <p className="text-xs text-muted-foreground">
           Register agents first, then configure pools here.
@@ -196,7 +196,7 @@ export function SettingsPoolsSection({
     <div className={disabled ? "space-y-4 opacity-50 pointer-events-none" : "space-y-4"}>
       <div className="flex items-center gap-2">
         <Users className="size-4 text-primary" />
-        <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">Agent Pools</h3>
+        <h3 className="text-sm font-medium text-foreground">Agent Pools</h3>
       </div>
       <p className="text-xs text-muted-foreground">
         Configure weighted agent distribution for each workflow step.

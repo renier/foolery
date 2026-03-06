@@ -152,7 +152,7 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
         <div className="px-4 pt-2 flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-3 py-4">
             {/* Section: Repositories (independent data, always rendered) */}
-            <SettingsSectionCard className="border-accent/25">
+            <SettingsSectionCard className="border-primary/25">
               <div ref={reposSectionRef}>
                 <SettingsReposSection />
               </div>

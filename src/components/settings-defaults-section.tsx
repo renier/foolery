@@ -33,7 +33,7 @@ export function SettingsDefaultsSection({
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Settings2 className="size-4 text-primary" />
-        <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">Defaults</h3>
+        <h3 className="text-sm font-medium text-foreground">Defaults</h3>
       </div>
 
       <div className="space-y-2 rounded-xl border border-accent/20 bg-background/60 p-3">

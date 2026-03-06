@@ -71,7 +71,7 @@ export function SettingsReposSection() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 rounded-xl border border-primary/18 bg-background/60 p-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FolderKanban className="size-4 text-accent" />
@@ -106,7 +106,7 @@ function EmptyReposState({ onBrowse }: { onBrowse: () => void }) {
     .join(", ");
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-accent/35 bg-accent/6 py-8 text-center">
+    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-accent/35 bg-accent/6 py-8 text-center">
       <Database className="mb-3 size-8 text-accent" />
       <p className="text-sm font-medium mb-1">No repositories registered</p>
       <p className="text-xs text-muted-foreground mb-3 max-w-[260px]">
