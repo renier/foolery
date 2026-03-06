@@ -9,14 +9,18 @@ export interface AgentIdentityLike {
   command?: string;
   provider?: string;
   model?: string;
+  flavor?: string;
   version?: string;
   label?: string;
+  kind?: "cli" | "openrouter";
 }
 
 export interface AgentOptionSeed {
   provider?: string;
   model?: string;
+  flavor?: string;
   version?: string;
+  modelId?: string;
 }
 
 const PROVIDER_LABELS: Record<Exclude<AgentProviderId, "unknown">, string> = {
@@ -27,6 +31,7 @@ const PROVIDER_LABELS: Record<Exclude<AgentProviderId, "unknown">, string> = {
 };
 
 const MODEL_LABELS: Record<string, string> = {
+  claude: "Claude",
   codex: "Codex",
   "codex-spark": "Codex Spark",
   "codex-max": "Codex Max",
@@ -40,6 +45,19 @@ const MODEL_LABELS: Record<string, string> = {
   pro: "Pro",
   flash: "Flash",
   "flash-lite": "Flash Lite",
+  "opus-1m": "Opus (1M context)",
+  "sonnet-1m": "Sonnet (1M context)",
+  preview: "Preview",
+  devstral: "Devstral",
+};
+
+const OPENROUTER_PROVIDER_LABELS: Record<string, string> = {
+  mistralai: "MistralAI",
+  openai: "OpenAI",
+  anthropic: "Anthropic",
+  google: "Google",
+  meta: "Meta",
+  "meta-llama": "Meta",
 };
 
 function cleanValue(value?: string): string | undefined {
@@ -71,82 +89,156 @@ export function providerLabel(provider?: string, command?: string): string | und
   return PROVIDER_LABELS[detected];
 }
 
-function normalizeCodexModel(rawModel?: string): { model?: string; version?: string } {
+function normalizeCodexModel(
+  rawModel?: string,
+): { model?: string; flavor?: string; version?: string } {
   const cleaned = cleanValue(rawModel)?.toLowerCase();
-  if (!cleaned) return { model: "codex" };
-  if (
-    !cleaned.includes("gpt") &&
-    !cleaned.includes("chatgpt") &&
-    !cleaned.includes("codex")
-  ) {
+  if (!cleaned) return {};
+  if (!cleaned.includes("gpt") && !cleaned.includes("chatgpt") && !cleaned.includes("codex")) {
     return { model: rawModel?.trim() };
   }
+
   const versionMatch = cleaned.match(/(?:gpt|chatgpt)-?(\d+(?:\.\d+)*)/i);
+  const model = cleaned.includes("chatgpt") ? "chatgpt" : "gpt";
+  const flavor = cleaned.includes("codex-max")
+    ? "codex-max"
+    : cleaned.includes("codex-mini")
+      ? "codex-mini"
+      : cleaned.includes("codex-spark")
+        ? "codex-spark"
+        : cleaned.includes("codex")
+          ? "codex"
+          : undefined;
+
   return {
-    model: cleaned.includes("chatgpt") ? "chatgpt" : "codex",
+    model,
+    ...(flavor ? { flavor } : {}),
     ...(versionMatch?.[1] ? { version: versionMatch[1] } : {}),
   };
 }
 
-function normalizeClaudeModel(rawModel?: string): { model?: string; version?: string } {
+function normalizeClaudeModel(
+  rawModel?: string,
+): { model?: string; flavor?: string; version?: string } {
   const cleaned = cleanValue(rawModel)?.toLowerCase();
   if (!cleaned) return {};
 
   const familyMatch = cleaned.match(/(opus|sonnet|haiku)/i);
   const versionMatch = cleaned.match(/(?:opus|sonnet|haiku)[- ](\d+(?:[-.]\d+)*)/i);
   const normalizedVersion = versionMatch?.[1]?.replace(/-/g, ".");
+  const hasOneMillionContext = cleaned.includes("1m");
+  const flavor = familyMatch?.[1]
+    ? `${familyMatch[1].toLowerCase()}${hasOneMillionContext ? "-1m" : ""}`
+    : undefined;
 
   return {
-    ...(familyMatch?.[1] ? { model: familyMatch[1].toLowerCase() } : {}),
+    ...(familyMatch?.[1] ? { model: "claude" } : {}),
+    ...(flavor ? { flavor } : {}),
     ...(normalizedVersion ? { version: normalizedVersion } : {}),
   };
 }
 
-function normalizeGeminiModel(rawModel?: string): { model?: string; version?: string } {
+function normalizeGeminiModel(
+  rawModel?: string,
+): { model?: string; flavor?: string; version?: string } {
   const cleaned = cleanValue(rawModel)?.toLowerCase();
   if (!cleaned) return { model: "gemini" };
   const versionMatch = cleaned.match(/gemini[- ](\d+(?:\.\d+)*)/i);
-  const familyMatch = cleaned.match(/(pro|flash-lite|flash)/i);
+  const familyMatch = cleaned.match(/(pro|flash-lite|flash)(?:-(preview))?/i);
+  const flavor = familyMatch?.[1]
+    ? `${familyMatch[1].toLowerCase()}${familyMatch[2] ? `-${familyMatch[2].toLowerCase()}` : ""}`
+    : undefined;
   return {
-    model: familyMatch?.[1]?.toLowerCase() ?? "gemini",
+    model: "gemini",
+    ...(flavor ? { flavor } : {}),
     ...(versionMatch?.[1] ? { version: versionMatch[1] } : {}),
+  };
+}
+
+function normalizeOpenRouterModel(
+  rawModel?: string,
+): { provider?: string; model?: string; flavor?: string; version?: string } {
+  const cleaned = cleanValue(rawModel)?.toLowerCase();
+  if (!cleaned) return {};
+
+  const withoutSuffix = cleaned.includes(":")
+    ? cleaned.slice(0, cleaned.indexOf(":"))
+    : cleaned;
+  const [rawProvider, rawModelName = withoutSuffix] = withoutSuffix.split("/", 2);
+  const provider = OPENROUTER_PROVIDER_LABELS[rawProvider] ?? cleanValue(rawProvider);
+
+  if (rawProvider === "mistralai" && rawModelName.startsWith("devstral")) {
+    return {
+      provider: "MistralAI",
+      model: "devstral",
+      version: "2",
+    };
+  }
+
+  const normalizedModel = cleanValue(rawModelName)
+    ?.split("-")
+    .map((part) => formatModelDisplay(part) ?? part)
+    .join(" ");
+
+  return {
+    ...(provider ? { provider } : {}),
+    ...(normalizedModel ? { model: normalizedModel } : {}),
   };
 }
 
 export function normalizeAgentIdentity(agent: AgentIdentityLike): {
   provider?: string;
   model?: string;
+  flavor?: string;
   version?: string;
 } {
+  const source = agent.kind === "openrouter" || agent.command === "openrouter-agent"
+    ? "orapi"
+    : "cli";
   const provider = providerLabel(agent.provider, agent.command);
   const version = cleanValue(agent.version);
+  const flavor = cleanValue(agent.flavor);
+  const rawModel = cleanValue(agent.model);
+  if (source === "orapi") {
+    const normalized = normalizeOpenRouterModel(rawModel);
+    return {
+      ...(normalized.provider ? { provider: normalized.provider } : {}),
+      ...(normalized.model ? { model: normalized.model } : {}),
+      ...(flavor ?? normalized.flavor ? { flavor: flavor ?? normalized.flavor } : {}),
+      ...(version ?? normalized.version ? { version: version ?? normalized.version } : {}),
+    };
+  }
   if (provider === "OpenAI") {
-    const normalized = normalizeCodexModel(agent.model);
+    const normalized = normalizeCodexModel(rawModel);
     return {
       provider,
       ...(normalized.model ? { model: normalized.model } : {}),
+      ...(flavor ?? normalized.flavor ? { flavor: flavor ?? normalized.flavor } : {}),
       ...(version ?? normalized.version ? { version: version ?? normalized.version } : {}),
     };
   }
   if (provider === "Claude") {
-    const normalized = normalizeClaudeModel(agent.model);
+    const normalized = normalizeClaudeModel(rawModel);
     return {
       provider,
       ...(normalized.model ? { model: normalized.model } : {}),
+      ...(flavor ?? normalized.flavor ? { flavor: flavor ?? normalized.flavor } : {}),
       ...(version ?? normalized.version ? { version: version ?? normalized.version } : {}),
     };
   }
   if (provider === "Gemini") {
-    const normalized = normalizeGeminiModel(agent.model);
+    const normalized = normalizeGeminiModel(rawModel);
     return {
       provider,
       ...(normalized.model ? { model: normalized.model } : {}),
+      ...(flavor ?? normalized.flavor ? { flavor: flavor ?? normalized.flavor } : {}),
       ...(version ?? normalized.version ? { version: version ?? normalized.version } : {}),
     };
   }
   return {
     ...(provider ? { provider } : {}),
-    ...(cleanValue(agent.model) ? { model: cleanValue(agent.model) } : {}),
+    ...(rawModel ? { model: rawModel } : {}),
+    ...(flavor ? { flavor } : {}),
     ...(version ? { version } : {}),
   };
 }
@@ -167,78 +259,67 @@ export function formatModelDisplay(model?: string): string | undefined {
   return MODEL_LABELS[lower] ?? cleaned;
 }
 
-export function formatAgentOptionLabel(option: AgentOptionSeed): string {
-  const provider = providerLabel(option.provider);
+export function formatFlavorDisplay(flavor?: string): string | undefined {
+  return formatModelDisplay(flavor);
+}
+
+export function detectAgentSource(agent: AgentIdentityLike): "cli" | "orapi" {
+  return agent.kind === "openrouter" || agent.command === "openrouter-agent"
+    ? "orapi"
+    : "cli";
+}
+
+export function formatAgentFamily(option: AgentOptionSeed): string {
+  const provider = providerLabel(option.provider, option.model);
   const model = formatModelDisplay(option.model);
+  const flavor = formatFlavorDisplay(option.flavor);
+
+  if (provider === "OpenAI" && model === "GPT") {
+    return [model, flavor].filter(Boolean).join(" ");
+  }
+  if (provider === "Claude") {
+    return [provider, flavor].filter(Boolean).join(" ");
+  }
+  if (provider === "Gemini") {
+    return [provider, flavor].filter(Boolean).join(" ");
+  }
+  return [provider, model, flavor].filter(Boolean).join(" ");
+}
+
+export function formatAgentOptionLabel(option: AgentOptionSeed): string {
   const version = cleanValue(option.version);
-  return [provider, model, version].filter(Boolean).join(" ");
+  return [formatAgentFamily(option), version].filter(Boolean).join(" ");
+}
+
+export function formatAgentDisplayLabel(
+  agent: AgentIdentityLike,
+  options?: { includeSource?: boolean },
+): string {
+  const source = detectAgentSource(agent);
+  const explicitLabel = cleanValue(agent.label);
+  const normalized = normalizeAgentIdentity(agent);
+  const base = formatAgentOptionLabel({
+    provider: normalized.provider ?? agent.provider,
+    model: normalized.model ?? agent.model,
+    flavor: normalized.flavor ?? agent.flavor,
+    version: normalized.version ?? agent.version,
+  }) || explicitLabel || cleanValue(agent.command) || "Unknown";
+  if (!options?.includeSource) return base;
+  return `${base} (${source})`;
 }
 
 export function buildAgentOptionId(
   agentId: string,
   option: AgentOptionSeed,
 ): string {
+  const modelId = cleanValue(option.modelId)?.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  if (modelId) return [agentId, modelId].join("-");
+
   const parts = [
     agentId,
     cleanValue(option.model)?.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    cleanValue(option.flavor)?.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
     cleanValue(option.version)?.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
   ].filter(Boolean);
   return parts.join("-");
-}
-
-function dedupeAgentOptions(
-  agentId: string,
-  options: AgentOptionSeed[],
-): AgentOptionSeed[] {
-  const seen = new Set<string>();
-  const deduped: AgentOptionSeed[] = [];
-  for (const option of options) {
-    const id = buildAgentOptionId(agentId, option);
-    if (seen.has(id)) continue;
-    seen.add(id);
-    deduped.push(option);
-  }
-  return deduped;
-}
-
-export function buildAgentImportOptions(
-  agentId: string,
-  detected: AgentOptionSeed,
-): Array<AgentOptionSeed & { id: string; label: string }> {
-  const provider = providerLabel(detected.provider, agentId);
-  const baseVersion = cleanValue(detected.version);
-  const hasDetectedModel = Boolean(cleanValue(detected.model) || cleanValue(detected.version));
-  const detectedSeed = hasDetectedModel ? [{ ...detected, provider }] : [];
-
-  const seeds: AgentOptionSeed[] =
-    provider === "Claude"
-      ? [
-          ...detectedSeed,
-          { provider, model: "opus", version: "4.5" },
-          { provider, model: "sonnet", version: "4.5" },
-          { provider, model: "haiku", version: "4.5" },
-        ]
-      : provider === "OpenAI"
-        ? [
-            ...detectedSeed,
-            { provider, model: "gpt", version: baseVersion },
-            { provider, model: "codex", version: baseVersion },
-            { provider, model: "codex-spark", version: baseVersion },
-            { provider, model: "codex-max", version: baseVersion },
-            { provider, model: "codex-mini", version: baseVersion },
-          ]
-        : provider === "Gemini"
-          ? [
-              ...detectedSeed,
-              { provider, model: "pro", version: baseVersion },
-              { provider, model: "flash", version: baseVersion },
-              { provider, model: "flash-lite", version: baseVersion },
-            ]
-          : [detected];
-
-  return dedupeAgentOptions(agentId, seeds).map((option) => ({
-    ...option,
-    id: buildAgentOptionId(agentId, option),
-    label: formatAgentOptionLabel(option),
-  }));
 }

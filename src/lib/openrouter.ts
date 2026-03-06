@@ -6,6 +6,8 @@
  * Models endpoint: GET /api/v1/models (no auth required for listing)
  */
 
+import { formatAgentOptionLabel, normalizeAgentIdentity } from "@/lib/agent-identity";
+
 const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
 export const OPENROUTER_SELECTED_AGENT_ID = "openrouter:selected";
 export const OPENROUTER_AGENT_PREFIX = "openrouter:";
@@ -29,7 +31,14 @@ export function getSelectedOpenRouterModel(
 
 /** Human-readable label for the virtual "selected OpenRouter model" agent. */
 export function formatOpenRouterSelectedAgentLabel(modelId: string): string {
-  return `OpenRouter (${modelId})`;
+  const label = formatAgentOptionLabel(
+    normalizeAgentIdentity({
+      command: "openrouter-agent",
+      kind: "openrouter",
+      model: modelId,
+    }),
+  );
+  return `${label || modelId} (orapi)`;
 }
 
 export interface OpenRouterModelPricing {
@@ -220,8 +229,14 @@ export function formatOpenRouterAgentLabel(
   label: string | undefined,
   modelId: string,
 ): string {
-  if (label?.trim()) return label.trim();
-  return `OpenRouter (${modelId || agentKey})`;
+  const normalizedLabel = formatAgentOptionLabel(
+    normalizeAgentIdentity({
+      command: "openrouter-agent",
+      kind: "openrouter",
+      model: modelId,
+    }),
+  );
+  return `${normalizedLabel || label?.trim() || modelId || agentKey} (orapi)`;
 }
 
 interface OpenRouterAgentLike {

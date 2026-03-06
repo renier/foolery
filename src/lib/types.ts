@@ -354,6 +354,7 @@ export interface RegisteredAgent {
   command: string;
   provider?: string;
   model?: string;
+  flavor?: string;
   version?: string;
   label?: string;
   /** Execution kind. Defaults to "cli" when omitted. */
@@ -374,7 +375,9 @@ export interface ScannedAgent {
   installed: boolean;
   provider?: string;
   model?: string;
+  flavor?: string;
   version?: string;
+  modelId?: string;
   options?: ScannedAgentOption[];
   selectedOptionId?: string;
 }
@@ -384,7 +387,9 @@ export interface ScannedAgentOption {
   label: string;
   provider?: string;
   model?: string;
+  flavor?: string;
   version?: string;
+  modelId?: string;
 }
 
 export interface PoolEntry {

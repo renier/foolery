@@ -574,7 +574,7 @@ describe("getActionAgent", () => {
     expect(agent.command).toBe("openrouter-agent");
     expect(agent.model).toBe("mistralai/devstral-small:free");
     expect(agent.label).toBe(
-      "OpenRouter (mistralai/devstral-small:free)",
+      "MistralAI Devstral 2 (orapi)",
     );
   });
 

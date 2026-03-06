@@ -23,7 +23,6 @@ import { abortSession, startSession, listSessions } from "@/lib/terminal-api";
 import { sessionConnections } from "@/lib/session-connection-manager";
 import {
   detectVendor,
-  formatModelDisplay,
   useAgentInfo,
   type ResolvedAgentInfo,
 } from "@/hooks/use-agent-info";
@@ -193,7 +192,7 @@ export function TerminalPanel() {
     if (!activeTerminal?.agentCommand) return null;
     return {
       name: activeTerminal.agentName || activeTerminal.agentCommand,
-      model: formatModelDisplay(activeTerminal.agentModel),
+      model: activeTerminal.agentModel,
       version: activeTerminal.agentVersion,
       command: activeTerminal.agentCommand,
       vendor: detectVendor(activeTerminal.agentCommand),

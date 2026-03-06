@@ -11,14 +11,14 @@ describe("settings sheet scroll layout", () => {
 
   it("keeps overflow scrolling on the constrained outer wrapper", () => {
     expect(source).toContain(
-      '<div className="px-4 pt-2 flex-1 min-h-0 overflow-y-auto">',
+      '<div className="px-4 flex-1 min-h-0 overflow-y-auto">',
     );
-    expect(source).toContain('<div className="space-y-3 py-4">');
+    expect(source).toContain('<div className="py-3">');
   });
 
   it("does not place overflow scrolling on the inner content stack", () => {
     expect(source).not.toContain(
-      'className="space-y-3 py-4 overflow-y-auto flex-1"',
+      'className="py-3 overflow-y-auto flex-1"',
     );
   });
 });

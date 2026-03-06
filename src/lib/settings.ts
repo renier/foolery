@@ -41,7 +41,8 @@ import { type WorkflowStep, isReviewStep, priorActionStep } from "@/lib/workflow
 import { resolvePoolAgent, getLastStepAgent, recordStepAgent } from "@/lib/agent-pool";
 import {
   agentDisplayName,
-  buildAgentImportOptions,
+  buildAgentOptionId,
+  formatAgentOptionLabel,
   normalizeAgentIdentity,
   providerLabel,
 } from "@/lib/agent-identity";
@@ -55,8 +56,17 @@ const CODEX_CONFIG_FILE = join(homedir(), ".codex", "config.toml");
 const CLAUDE_SETTINGS_FILE = join(homedir(), ".claude", "settings.json");
 const GEMINI_SETTINGS_FILE = join(homedir(), ".gemini", "settings.json");
 const GEMINI_TMP_ROOT = join(homedir(), ".gemini", "tmp");
+const AGENT_MODEL_CATALOG_FILE = join(process.cwd(), "src", "lib", "agent-model-catalog.toml");
 
 let cached: { value: FoolerySettings; loadedAt: number } | null = null;
+let catalogCache:
+  | Promise<Record<string, Array<{
+      modelId: string;
+      model?: string;
+      flavor?: string;
+      version?: string;
+    }>>>
+  | null = null;
 
 interface SettingsDefaultsComputation {
   settings: FoolerySettings;
@@ -251,6 +261,55 @@ async function resolveKeychainSecrets(
   };
 }
 
+function resolveCatalogBackedAgent(
+  agentId: string,
+  agent: RegisteredAgentConfig,
+  catalog: Record<string, AgentCatalogOption[]>,
+): RegisteredAgentConfig {
+  const normalized = normalizeAgentIdentity(agent);
+  const rawModel = agent.model?.trim().toLowerCase();
+  const normalizedModel = normalized.model?.trim().toLowerCase();
+  const normalizedFlavor = normalized.flavor?.trim().toLowerCase();
+
+  const matched = (catalog[agentId] ?? []).find((option) => {
+    const optionModelId = option.modelId.trim().toLowerCase();
+    const optionModel = option.model?.trim().toLowerCase();
+    const optionFlavor = option.flavor?.trim().toLowerCase();
+    return (
+      optionModelId === rawModel ||
+      (optionModel && optionModel === normalizedModel && optionFlavor === normalizedFlavor) ||
+      (optionFlavor && optionFlavor === rawModel) ||
+      (optionFlavor && optionFlavor === normalizedFlavor)
+    );
+  });
+
+  return {
+    ...agent,
+    ...(normalized.provider ? { provider: normalized.provider } : {}),
+    ...(normalized.flavor ?? matched?.flavor
+      ? { flavor: normalized.flavor ?? matched?.flavor }
+      : {}),
+    ...(normalized.version ?? matched?.version
+      ? { version: normalized.version ?? matched?.version }
+      : {}),
+  };
+}
+
+async function resolveCatalogBackedAgents(
+  settings: FoolerySettings,
+): Promise<FoolerySettings> {
+  const catalog = await loadAgentModelCatalog();
+  return {
+    ...settings,
+    agents: Object.fromEntries(
+      Object.entries(settings.agents).map(([agentId, agent]) => [
+        agentId,
+        resolveCatalogBackedAgent(agentId, agent, catalog),
+      ]),
+    ),
+  };
+}
+
 /**
  * Load settings from ~/.config/foolery/settings.toml.
  * Returns validated settings with defaults filled in.
@@ -262,7 +321,8 @@ export async function loadSettings(): Promise<FoolerySettings> {
     return cached.value;
   }
   const result = await computeSettingsDefaultsStatus();
-  const resolved = await resolveKeychainSecrets(result.settings);
+  const resolvedSecrets = await resolveKeychainSecrets(result.settings);
+  const resolved = await resolveCatalogBackedAgents(resolvedSecrets);
   cached = { value: resolved, loadedAt: Date.now() };
   return resolved;
 }
@@ -364,7 +424,8 @@ function toCliTarget(
   return {
     kind: "cli",
     command: agent.command,
-    ...(normalized.model ? { model: normalized.model } : {}),
+    ...(agent.model ? { model: agent.model } : {}),
+    ...(normalized.flavor ? { flavor: normalized.flavor } : {}),
     ...(normalized.version ? { version: normalized.version } : {}),
     ...((agent.label ?? agentDisplayName(agent))
       ? { label: agent.label ?? agentDisplayName(agent) }
@@ -383,6 +444,7 @@ function toOpenRouterTarget(
     authSource: "settings",
     model: agent.model ?? "",
     command: agent.command,
+    ...(agent.flavor ? { flavor: agent.flavor } : {}),
     ...(agent.version ? { version: agent.version } : {}),
     ...(agent.label ? { label: agent.label } : {}),
     ...(agentId ? { agentId } : {}),
@@ -451,7 +513,7 @@ export async function getRegisteredAgents(): Promise<
         {
           ...agent,
           ...(normalized.provider ? { provider: normalized.provider } : {}),
-          ...(normalized.model ? { model: normalized.model } : {}),
+          ...(normalized.flavor ? { flavor: normalized.flavor } : {}),
           ...(normalized.version ? { version: normalized.version } : {}),
           ...(agent.label ? { label: agent.label } : {}),
         },
@@ -508,8 +570,9 @@ export async function addRegisteredAgent(
     ...current.agents,
     [id]: {
       command: agent.command,
+      ...(agent.model ? { model: agent.model } : {}),
       ...(normalized.provider ? { provider: normalized.provider } : {}),
-      ...(normalized.model ? { model: normalized.model } : {}),
+      ...(normalized.flavor ? { flavor: normalized.flavor } : {}),
       ...(normalized.version ? { version: normalized.version } : {}),
       ...(agent.label || normalized.provider ? { label: agent.label ?? normalized.provider } : {}),
     },
@@ -534,6 +597,113 @@ export async function removeRegisteredAgent(
 interface ScannableAgent {
   id: string;
   command: string;
+}
+
+interface AgentCatalogOption {
+  modelId: string;
+  model?: string;
+  flavor?: string;
+  version?: string;
+}
+
+async function loadAgentModelCatalog(): Promise<Record<string, AgentCatalogOption[]>> {
+  if (!catalogCache) {
+    catalogCache = readFile(AGENT_MODEL_CATALOG_FILE, "utf-8")
+      .then((raw) => {
+        const parsed = parse(raw) as Record<string, unknown>;
+        const result: Record<string, AgentCatalogOption[]> = {};
+        for (const [agentId, entry] of Object.entries(parsed)) {
+          if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+          const options = "options" in entry ? (entry.options as unknown) : undefined;
+          if (!Array.isArray(options)) continue;
+          result[agentId] = options
+            .filter((option): option is Record<string, unknown> => Boolean(option) && typeof option === "object" && !Array.isArray(option))
+            .map((option) => ({
+              modelId: typeof option.model_id === "string" ? option.model_id : "",
+              ...(typeof option.model === "string" ? { model: option.model } : {}),
+              ...(typeof option.flavor === "string" ? { flavor: option.flavor } : {}),
+              ...(typeof option.version === "string" ? { version: option.version } : {}),
+            }))
+            .filter((option) => option.modelId);
+        }
+        return result;
+      })
+      .catch(() => ({}));
+  }
+  return catalogCache;
+}
+
+function dedupeScannedOptions(
+  agentId: string,
+  options: Array<{
+    provider?: string;
+    model?: string;
+    flavor?: string;
+    version?: string;
+    modelId?: string;
+  }>,
+): ScannedAgent["options"] {
+  const seen = new Set<string>();
+  const deduped: NonNullable<ScannedAgent["options"]> = [];
+  for (const option of options) {
+    const id = buildAgentOptionId(agentId, option);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    deduped.push({
+      ...option,
+      id,
+      label: formatAgentOptionLabel(option),
+    });
+  }
+  return deduped;
+}
+
+async function buildAgentImportOptions(
+  agentId: string,
+  detected: Pick<ScannedAgent, "provider" | "model" | "flavor" | "version" | "modelId">,
+): Promise<ScannedAgent["options"]> {
+  const catalog = await loadAgentModelCatalog();
+  const provider = providerLabel(detected.provider, agentId);
+  const catalogOptions = (catalog[agentId] ?? []).map((option) => ({
+    provider,
+    ...option,
+  }));
+  const detectedOption = detected.modelId
+    ? [{
+        provider,
+        ...(detected.model ? { model: detected.model } : {}),
+        ...(detected.flavor ? { flavor: detected.flavor } : {}),
+        ...(detected.version ? { version: detected.version } : {}),
+        modelId: detected.modelId,
+      }]
+    : [];
+
+  const matchedCatalogIndex = detected.modelId
+    ? catalogOptions.findIndex((option) => option.modelId === detected.modelId)
+    : -1;
+
+  if (matchedCatalogIndex >= 0) {
+    const matched = catalogOptions[matchedCatalogIndex]!;
+    const ordered = [
+      matched,
+      ...catalogOptions.filter((_, index) => index !== matchedCatalogIndex),
+    ];
+    return dedupeScannedOptions(agentId, ordered);
+  }
+
+  if (detectedOption.length > 0) {
+    return dedupeScannedOptions(agentId, [...detectedOption, ...catalogOptions]);
+  }
+
+  if (catalogOptions.length > 0) {
+    return dedupeScannedOptions(agentId, catalogOptions);
+  }
+
+  if (provider) {
+    return dedupeScannedOptions(agentId, [{ provider }]);
+  }
+
+  return [];
 }
 
 const SCANNABLE_AGENTS: readonly ScannableAgent[] = [
@@ -656,45 +826,51 @@ async function resolveInstalledAgentCommand(
 async function inspectInstalledAgentMetadata(
   agent: ScannableAgent,
   resolvedCommand: string,
-): Promise<Pick<ScannedAgent, "provider" | "model" | "version">> {
+): Promise<Pick<ScannedAgent, "provider" | "model" | "flavor" | "version" | "modelId">> {
   const provider = providerLabel(undefined, resolvedCommand);
   if (agent.id === "codex") {
-    const model = await readCodexConfiguredModel();
+    const modelId = await readCodexConfiguredModel();
     const normalized = normalizeAgentIdentity({
       command: resolvedCommand,
       provider,
-      model,
+      model: modelId,
     });
     return {
       ...(normalized.provider ? { provider: normalized.provider } : {}),
       ...(normalized.model ? { model: normalized.model } : {}),
+      ...(normalized.flavor ? { flavor: normalized.flavor } : {}),
       ...(normalized.version ? { version: normalized.version } : {}),
+      ...(modelId ? { modelId } : {}),
     };
   }
   if (agent.id === "claude") {
-    const model = await readClaudeConfiguredModel();
+    const modelId = await readClaudeConfiguredModel();
     const normalized = normalizeAgentIdentity({
       command: resolvedCommand,
       provider,
-      model,
+      model: modelId,
     });
     return {
       ...(normalized.provider ? { provider: normalized.provider } : {}),
       ...(normalized.model ? { model: normalized.model } : {}),
+      ...(normalized.flavor ? { flavor: normalized.flavor } : {}),
       ...(normalized.version ? { version: normalized.version } : {}),
+      ...(modelId ? { modelId } : {}),
     };
   }
   if (agent.id === "gemini") {
-    const model = await readGeminiConfiguredModel();
+    const modelId = await readGeminiConfiguredModel();
     const normalized = normalizeAgentIdentity({
       command: resolvedCommand,
       provider,
-      model,
+      model: modelId,
     });
     return {
       ...(normalized.provider ? { provider: normalized.provider } : {}),
       ...(normalized.model ? { model: normalized.model } : {}),
+      ...(normalized.flavor ? { flavor: normalized.flavor } : {}),
       ...(normalized.version ? { version: normalized.version } : {}),
+      ...(modelId ? { modelId } : {}),
     };
   }
   const normalized = normalizeAgentIdentity({
@@ -704,6 +880,7 @@ async function inspectInstalledAgentMetadata(
   return {
     ...(normalized.provider ? { provider: normalized.provider } : {}),
     ...(normalized.model ? { model: normalized.model } : {}),
+    ...(normalized.flavor ? { flavor: normalized.flavor } : {}),
     ...(normalized.version ? { version: normalized.version } : {}),
   };
 }
@@ -718,27 +895,26 @@ export async function scanForAgents(): Promise<ScannedAgent[]> {
           agent,
           installed.command,
         );
+        const options = await buildAgentImportOptions(agent.id, metadata);
         return {
           id: agent.id,
           command: installed.command,
           path: installed.path,
           installed: true,
           ...metadata,
-          options: buildAgentImportOptions(agent.id, metadata),
-          selectedOptionId: buildAgentImportOptions(agent.id, metadata)[0]?.id,
+          options,
+          selectedOptionId: options?.[0]?.id,
         };
       }
+      const provider = providerLabel(undefined, agent.command);
+      const options = await buildAgentImportOptions(agent.id, { provider });
       return {
         id: agent.id,
         command: agent.command,
         path: "",
         installed: false,
-        ...(providerLabel(undefined, agent.command)
-          ? { provider: providerLabel(undefined, agent.command) }
-          : {}),
-        options: buildAgentImportOptions(agent.id, {
-          provider: providerLabel(undefined, agent.command),
-        }),
+        ...(provider ? { provider } : {}),
+        options,
       };
     }),
   );

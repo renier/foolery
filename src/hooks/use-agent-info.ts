@@ -14,6 +14,7 @@ export interface ResolvedAgentInfo {
   name: string;
   /** Model identifier if configured, e.g. "sonnet" */
   model?: string;
+  flavor?: string;
   /** Agent version if configured, e.g. "4.5" */
   version?: string;
   /** CLI command path, e.g. "claude" */
@@ -46,7 +47,8 @@ export function useAgentInfo(action: ActionName): ResolvedAgentInfo | null {
         const vendor = detectVendor(command);
         setInfo({
           name: agentDisplayName(registered),
-          model: formatAgentModelDisplay(registered.model),
+          model: registered.model,
+          flavor: registered.flavor,
           version: registered.version,
           command,
           vendor,
@@ -57,7 +59,8 @@ export function useAgentInfo(action: ActionName): ResolvedAgentInfo | null {
         const vendor = detectVendor(command);
         setInfo({
           name: agentDisplayName(first ?? { command }),
-          model: formatAgentModelDisplay(first?.model),
+          model: first?.model,
+          flavor: first?.flavor,
           version: first?.version,
           command,
           vendor,

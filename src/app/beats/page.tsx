@@ -19,6 +19,11 @@ import { AlertTriangle } from "lucide-react";
 import type { Beat } from "@/lib/types";
 import type { UpdateBeatInput } from "@/lib/schemas";
 import type { AgentInfo } from "@/components/beat-columns";
+import {
+  detectAgentSource,
+  formatAgentFamily,
+  normalizeAgentIdentity,
+} from "@/lib/agent-identity";
 import { updateBeatOrThrow } from "@/lib/update-beat-mutation";
 
 const DEGRADED_ERROR_PREFIX = "Unable to interact with beats store";
@@ -37,6 +42,35 @@ function throwIfDegraded(result: { ok: boolean; error?: string }): void {
   if (!result.ok && result.error?.startsWith(DEGRADED_ERROR_PREFIX)) {
     throw new DegradedStoreError(result.error);
   }
+}
+
+function toActiveAgentInfo(input: {
+  agentCommand?: string;
+  agentName?: string;
+  model?: string;
+  version?: string;
+}): AgentInfo {
+  const normalized = normalizeAgentIdentity({
+    command: input.agentCommand ?? input.agentName,
+    model: input.model,
+    version: input.version,
+  });
+  const family = formatAgentFamily({
+    provider: normalized.provider,
+    model: normalized.model,
+    flavor: normalized.flavor,
+  });
+  const source = detectAgentSource({
+    command: input.agentCommand,
+    kind: input.agentCommand === "openrouter-agent" ? "openrouter" : "cli",
+  });
+  return {
+    agentName: input.agentName,
+    model: family || input.model,
+    version: normalized.version
+      ? `${normalized.version} (${source})`
+      : `(${source})`,
+  };
 }
 
 export default function BeatsPage() {
@@ -194,11 +228,12 @@ function BeatsPageInner() {
       const capsules = beat.metadata?.knotsHandoffCapsules;
       if (Array.isArray(capsules) && capsules.length > 0) {
         const last = capsules[capsules.length - 1] as Record<string, unknown>;
-        map[beat.id] = {
+        map[beat.id] = toActiveAgentInfo({
+          agentCommand: typeof last.agentname === "string" ? last.agentname : undefined,
           agentName: typeof last.agentname === "string" ? last.agentname : undefined,
           model: typeof last.model === "string" ? last.model : undefined,
           version: typeof last.version === "string" ? last.version : undefined,
-        };
+        });
       }
     }
 
@@ -207,8 +242,12 @@ function BeatsPageInner() {
       if (terminal.status === "running") {
         map[terminal.beatId] = {
           agentName: terminal.agentName ?? map[terminal.beatId]?.agentName,
-          model: terminal.agentModel ?? map[terminal.beatId]?.model,
-          version: terminal.agentVersion ?? map[terminal.beatId]?.version,
+          ...toActiveAgentInfo({
+            agentCommand: terminal.agentCommand,
+            agentName: terminal.agentName,
+            model: terminal.agentModel,
+            version: terminal.agentVersion,
+          }),
         };
       }
     }

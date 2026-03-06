@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { ResolvedAgentInfo } from "@/hooks/use-agent-info";
+import { formatAgentDisplayLabel } from "@/lib/agent-identity";
 
 const VENDOR_ICONS: Record<string, { icon: typeof Bot; color: string }> = {
   claude: { icon: Sparkles, color: "text-purple-500" },
@@ -32,13 +33,9 @@ export function AgentInfoLine({ agent }: AgentInfoLineProps) {
   return (
     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
       <Icon className={`size-3.5 ${cfg.color}`} />
-      <span className="font-medium">{agent.name}</span>
-      {agent.model && (
-        <>
-          <span className="text-muted-foreground/40">|</span>
-          <span>{agent.model}</span>
-        </>
-      )}
+      <span className="font-medium">
+        {formatAgentDisplayLabel(agent, { includeSource: true }) || agent.name}
+      </span>
       <span className="text-muted-foreground/40">|</span>
       <span className="font-mono text-[11px]">{agent.command}</span>
       <TooltipProvider>

@@ -3,6 +3,7 @@ export type AgentTargetKind = "cli" | "openrouter";
 export interface AgentTargetBase {
   kind: AgentTargetKind;
   model?: string;
+  flavor?: string;
   version?: string;
   label?: string;
   agentId?: string;

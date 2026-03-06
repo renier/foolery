@@ -45,7 +45,7 @@ describe("openrouter", () => {
     it("formats the selected-model agent label", () => {
       expect(
         formatOpenRouterSelectedAgentLabel("mistralai/devstral-small:free"),
-      ).toBe("OpenRouter (mistralai/devstral-small:free)");
+      ).toBe("MistralAI Devstral 2 (orapi)");
     });
   });
 

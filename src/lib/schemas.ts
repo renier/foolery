@@ -108,6 +108,7 @@ export const registeredAgentSchema = z.object({
   command: z.string().min(1),
   provider: z.string().optional(),
   model: z.string().optional(),
+  flavor: z.string().optional(),
   version: z.string().optional(),
   label: z.string().optional(),
 });

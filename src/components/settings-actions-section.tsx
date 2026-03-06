@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { saveActions } from "@/lib/settings-api";
 import type { RegisteredAgent, ActionName } from "@/lib/types";
+import { formatAgentDisplayLabel } from "@/lib/agent-identity";
 import type { ActionAgentMappings, OpenRouterSettings } from "@/lib/schemas";
 import {
   OPENROUTER_SELECTED_AGENT_ID,
@@ -138,7 +139,7 @@ export function SettingsActionsSection({
                 onValueChange={(v) => handleChange(def.name, v)}
                 disabled={disabled || optionIds.length === 0}
               >
-                <SelectTrigger className="w-[140px] shrink-0 border-primary/20 bg-background/80">
+                <SelectTrigger className="w-[240px] shrink-0 border-primary/20 bg-background/80">
                   <SelectValue placeholder={hasOptions ? "select agent" : "no agents"} />
                 </SelectTrigger>
                 <SelectContent>
@@ -164,7 +165,7 @@ export function SettingsActionsSection({
                     }
                     return (
                       <SelectItem key={id} value={id}>
-                        {agents[id]?.label ?? id}
+                        {agents[id] ? formatAgentDisplayLabel(agents[id]!, { includeSource: true }) : id}
                       </SelectItem>
                     );
                   })}

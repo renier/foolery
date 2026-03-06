@@ -329,6 +329,7 @@ export const componentSchemas = {
     properties: {
       command: { type: "string" },
       model: { type: "string" },
+      flavor: { type: "string" },
       version: { type: "string" },
       label: { type: "string" },
       agentId: { type: "string" },
@@ -343,7 +344,9 @@ export const componentSchemas = {
       label: { type: "string" },
       provider: { type: "string" },
       model: { type: "string" },
+      flavor: { type: "string" },
       version: { type: "string" },
+      modelId: { type: "string" },
     },
   },
 
@@ -357,7 +360,9 @@ export const componentSchemas = {
       installed: { type: "boolean" },
       provider: { type: "string" },
       model: { type: "string" },
+      flavor: { type: "string" },
       version: { type: "string" },
+      modelId: { type: "string" },
       options: {
         type: "array",
         items: { $ref: "#/components/schemas/ScannedAgentOption" },

@@ -637,18 +637,18 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
       {
         id: "agentModel",
         header: "Model",
-        size: 110,
-        minSize: 80,
-        maxSize: 150,
+        size: 160,
+        minSize: 120,
+        maxSize: 220,
         enableSorting: false,
         cell: ({ row }) => agentCell(row.original.id, "model"),
       },
       {
         id: "agentVersion",
         header: "Version",
-        size: 70,
-        minSize: 50,
-        maxSize: 90,
+        size: 90,
+        minSize: 80,
+        maxSize: 120,
         enableSorting: false,
         cell: ({ row }) => agentCell(row.original.id, "version"),
       },
@@ -746,4 +746,3 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
 }
 
 export const beatColumns = getBeatColumns({ showRepoColumn: false });
-

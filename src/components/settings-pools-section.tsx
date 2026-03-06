@@ -24,6 +24,7 @@ import {
   formatOpenRouterAgentLabel,
   listUniqueOpenRouterAgentKeys,
 } from "@/lib/openrouter";
+import { formatAgentDisplayLabel } from "@/lib/agent-identity";
 import type { OpenRouterModel } from "@/lib/openrouter";
 import type { RegisteredAgent } from "@/lib/types";
 import type { OpenRouterSettings, PoolEntry, PoolsSettings } from "@/lib/schemas";
@@ -81,10 +82,7 @@ function formatPoolAgentLabel(
   agentId: string,
   agent: RegisteredAgent | undefined,
 ): string {
-  const base = agent?.label?.trim() || agentId;
-  const model = agent?.model?.trim();
-  if (!model || base.includes(model)) return base;
-  return `${base} (${model})`;
+  return agent ? formatAgentDisplayLabel(agent, { includeSource: true }) : agentId;
 }
 
 function formatPoolPercent(ratio: number): string {
@@ -105,13 +103,13 @@ export function SettingsPoolsSection({
     ...agents,
   };
   if (openrouter.enabled) {
-    const fallbackCommand = Object.values(agents)[0]?.command ?? "claude";
     for (const key of listUniqueOpenRouterAgentKeys(openrouter.agents)) {
       const entry = openrouter.agents[key];
       if (!entry) continue;
       const id = openrouterAgentId(key);
       selectableAgents[id] = {
-        command: fallbackCommand,
+        command: "openrouter-agent",
+        kind: "openrouter",
         model: entry.model,
         label: formatOpenRouterAgentLabel(key, entry.label, entry.model),
       };
@@ -127,7 +125,8 @@ export function SettingsPoolsSection({
   );
   if (selectedOpenRouterModel && poolsUseLegacyOpenRouter) {
     selectableAgents[OPENROUTER_SELECTED_AGENT_ID] = {
-      command: Object.values(agents)[0]?.command ?? "claude",
+      command: "openrouter-agent",
+      kind: "openrouter",
       model: selectedOpenRouterModel,
       label: formatOpenRouterSelectedAgentLabel(selectedOpenRouterModel),
     };
@@ -512,7 +511,7 @@ function AddPoolEntryForm({
   return (
     <div className="flex items-center gap-2 pt-1">
       <Select value={selectedId} onValueChange={setSelectedId}>
-        <SelectTrigger className="h-7 w-[140px] border-primary/20 bg-background/80">
+        <SelectTrigger className="h-7 w-[240px] border-primary/20 bg-background/80">
           <SelectValue placeholder="select agent" />
         </SelectTrigger>
         <SelectContent>

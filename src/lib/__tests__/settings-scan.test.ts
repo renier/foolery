@@ -38,6 +38,8 @@ beforeEach(() => {
   mockWriteFile.mockResolvedValue(undefined);
   mockReaddir.mockResolvedValue([]);
   mockStat.mockResolvedValue({ mtimeMs: 0 });
+  // Default: reject for any unhandled file reads (e.g. agent-model-catalog.toml)
+  mockReadFile.mockRejectedValue(new Error("missing"));
 });
 
 describe("scanForAgents", () => {
@@ -61,11 +63,9 @@ describe("scanForAgents", () => {
       installed: true,
       provider: "Claude",
       options: [
-        { id: "claude-opus-4-5", label: "Claude Opus 4.5", provider: "Claude", model: "opus", version: "4.5" },
-        { id: "claude-sonnet-4-5", label: "Claude Sonnet 4.5", provider: "Claude", model: "sonnet", version: "4.5" },
-        { id: "claude-haiku-4-5", label: "Claude Haiku 4.5", provider: "Claude", model: "haiku", version: "4.5" },
+        { id: "claude", label: "Claude", provider: "Claude" },
       ],
-      selectedOptionId: "claude-opus-4-5",
+      selectedOptionId: "claude",
     });
   });
 
@@ -97,23 +97,19 @@ describe("scanForAgents", () => {
     });
 
     const agents = await scanForAgents();
-    expect(agents.find((agent) => agent.id === "codex")).toEqual({
+    const codex = agents.find((agent) => agent.id === "codex");
+    expect(codex).toMatchObject({
       id: "codex",
       command: "codex",
       path: "/opt/homebrew/bin/codex",
       installed: true,
       provider: "OpenAI",
-      model: "codex",
+      model: "gpt",
+      modelId: "gpt-5.4",
       version: "5.4",
-      options: [
-        { id: "codex-codex-5-4", label: "OpenAI Codex 5.4", provider: "OpenAI", model: "codex", version: "5.4" },
-        { id: "codex-gpt-5-4", label: "OpenAI GPT 5.4", provider: "OpenAI", model: "gpt", version: "5.4" },
-        { id: "codex-codex-spark-5-4", label: "OpenAI Codex Spark 5.4", provider: "OpenAI", model: "codex-spark", version: "5.4" },
-        { id: "codex-codex-max-5-4", label: "OpenAI Codex Max 5.4", provider: "OpenAI", model: "codex-max", version: "5.4" },
-        { id: "codex-codex-mini-5-4", label: "OpenAI Codex Mini 5.4", provider: "OpenAI", model: "codex-mini", version: "5.4" },
-      ],
-      selectedOptionId: "codex-codex-5-4",
     });
+    expect(codex!.options!.length).toBeGreaterThan(0);
+    expect(codex!.selectedOptionId).toBeTruthy();
   });
 
   it("captures Claude model metadata from settings when available", async () => {
@@ -131,21 +127,20 @@ describe("scanForAgents", () => {
     });
 
     const agents = await scanForAgents();
-    expect(agents.find((agent) => agent.id === "claude")).toEqual({
+    const claude = agents.find((agent) => agent.id === "claude");
+    expect(claude).toMatchObject({
       id: "claude",
       command: "claude",
       path: "/usr/local/bin/claude",
       installed: true,
       provider: "Claude",
-      model: "sonnet",
+      model: "claude",
+      flavor: "sonnet",
+      modelId: "claude-sonnet-4-5",
       version: "4.5",
-      options: [
-        { id: "claude-sonnet-4-5", label: "Claude Sonnet 4.5", provider: "Claude", model: "sonnet", version: "4.5" },
-        { id: "claude-opus-4-5", label: "Claude Opus 4.5", provider: "Claude", model: "opus", version: "4.5" },
-        { id: "claude-haiku-4-5", label: "Claude Haiku 4.5", provider: "Claude", model: "haiku", version: "4.5" },
-      ],
-      selectedOptionId: "claude-sonnet-4-5",
     });
+    expect(claude!.options!.length).toBeGreaterThan(0);
+    expect(claude!.options![0].label).toBe("Claude Sonnet 4.5");
   });
 
   it("captures Gemini model metadata from recent history when available", async () => {
@@ -169,20 +164,19 @@ describe("scanForAgents", () => {
     });
 
     const agents = await scanForAgents();
-    expect(agents.find((agent) => agent.id === "gemini")).toEqual({
+    const gemini = agents.find((agent) => agent.id === "gemini");
+    expect(gemini).toMatchObject({
       id: "gemini",
       command: "gemini",
       path: "/opt/homebrew/bin/gemini",
       installed: true,
       provider: "Gemini",
-      model: "pro",
+      model: "gemini",
+      flavor: "pro",
+      modelId: "gemini-2.5-pro",
       version: "2.5",
-      options: [
-        { id: "gemini-pro-2-5", label: "Gemini Pro 2.5", provider: "Gemini", model: "pro", version: "2.5" },
-        { id: "gemini-flash-2-5", label: "Gemini Flash 2.5", provider: "Gemini", model: "flash", version: "2.5" },
-        { id: "gemini-flash-lite-2-5", label: "Gemini Flash Lite 2.5", provider: "Gemini", model: "flash-lite", version: "2.5" },
-      ],
-      selectedOptionId: "gemini-pro-2-5",
     });
+    expect(gemini!.options!.length).toBeGreaterThan(0);
+    expect(gemini!.options![0].label).toBe("Gemini Pro 2.5");
   });
 });

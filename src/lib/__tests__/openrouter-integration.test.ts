@@ -106,19 +106,19 @@ describe("openrouter multi-agent helpers", () => {
   it("formatOpenRouterAgentLabel uses label when provided", () => {
     expect(
       formatOpenRouterAgentLabel("key", "Custom Label", "model/id"),
-    ).toBe("Custom Label");
+    ).toBe("model id (orapi)");
   });
 
   it("formatOpenRouterAgentLabel falls back to model ID", () => {
     expect(
       formatOpenRouterAgentLabel("key", "", "anthropic/claude-sonnet-4"),
-    ).toBe("OpenRouter (anthropic/claude-sonnet-4)");
+    ).toBe("Anthropic Claude Sonnet 4 (orapi)");
   });
 
   it("formatOpenRouterAgentLabel falls back to key when no model", () => {
     expect(
       formatOpenRouterAgentLabel("my-agent", "", ""),
-    ).toBe("OpenRouter (my-agent)");
+    ).toBe("my-agent (orapi)");
   });
 });
 
