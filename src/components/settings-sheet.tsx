@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Sheet,
@@ -17,7 +17,6 @@ import { SettingsReposSection } from "@/components/settings-repos-section";
 import { SettingsDefaultsSection } from "@/components/settings-defaults-section";
 import { SettingsDispatchSection } from "@/components/settings-dispatch-section";
 import { fetchSettings, saveSettings } from "@/lib/settings-api";
-import { cn } from "@/lib/utils";
 import type { RegisteredAgent } from "@/lib/types";
 import type {
   ActionAgentMappings,
@@ -44,26 +43,6 @@ interface SettingsData {
   openrouter: OpenRouterSettings;
   pools: PoolsSettings;
   dispatchMode: DispatchMode;
-}
-
-function SettingsSectionCard({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background/85 to-accent/10 p-4 shadow-sm backdrop-blur-sm",
-        className,
-      )}
-    >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
-      <div className="relative">{children}</div>
-    </div>
-  );
 }
 
 const DEFAULTS: SettingsData = {
@@ -152,7 +131,7 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-xl border-primary/30 bg-gradient-to-br from-primary/8 via-background to-accent/8">
+      <SheetContent className="sm:max-w-xl">
         <SheetHeader>
           <SheetTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Settings</SheetTitle>
           <SheetDescription>
@@ -163,81 +142,68 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
         <div className="px-4 pt-2 flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-3 py-4">
             {/* Section: Repositories (independent data, always rendered) */}
-            <SettingsSectionCard
-              className="border-accent/35 from-accent/12 via-background/85 to-primary/10"
-            >
-              <div ref={reposSectionRef}>
-                <SettingsReposSection />
-              </div>
-            </SettingsSectionCard>
+            <div ref={reposSectionRef}>
+              <SettingsReposSection />
+            </div>
+
+            <Separator />
             {loading ? (
               <p className="text-sm text-muted-foreground">Loading settings...</p>
             ) : (
               <>
                 {/* Section 1: Agent Management */}
-                <SettingsSectionCard
-                  className="border-primary/35 from-primary/14 via-background/85 to-accent/10"
-                >
-                  <SettingsAgentsSection
-                    agents={settings.agents}
-                    onAgentsChange={(agents) =>
-                      setSettings((prev) => ({ ...prev, agents }))
-                    }
-                    openrouter={settings.openrouter}
-                    onOpenRouterChange={(openrouter) =>
-                      setSettings((prev) => ({ ...prev, openrouter }))
-                    }
-                  />
-                </SettingsSectionCard>
+                <SettingsAgentsSection
+                  agents={settings.agents}
+                  onAgentsChange={(agents) =>
+                    setSettings((prev) => ({ ...prev, agents }))
+                  }
+                  openrouter={settings.openrouter}
+                  onOpenRouterChange={(openrouter) =>
+                    setSettings((prev) => ({ ...prev, openrouter }))
+                  }
+                />
+
+                <Separator />
 
                 {/* Section 2: Agent Dispatch (Actions + Pools with mode toggle) */}
-                <SettingsSectionCard
-                  className="border-primary/30 from-primary/12 via-background/85 to-accent/12"
-                >
-                  <SettingsDispatchSection
-                    dispatchMode={settings.dispatchMode}
-                    actions={settings.actions}
-                    pools={settings.pools}
-                    agents={settings.agents}
-                    openrouter={settings.openrouter}
-                    onDispatchModeChange={(dispatchMode) =>
-                      setSettings((prev) => ({ ...prev, dispatchMode }))
-                    }
-                    onActionsChange={(actions) =>
-                      setSettings((prev) => ({ ...prev, actions }))
-                    }
-                    onPoolsChange={(pools) =>
-                      setSettings((prev) => ({ ...prev, pools }))
-                    }
-                  />
-                </SettingsSectionCard>
+                <SettingsDispatchSection
+                  dispatchMode={settings.dispatchMode}
+                  actions={settings.actions}
+                  pools={settings.pools}
+                  agents={settings.agents}
+                  openrouter={settings.openrouter}
+                  onDispatchModeChange={(dispatchMode) =>
+                    setSettings((prev) => ({ ...prev, dispatchMode }))
+                  }
+                  onActionsChange={(actions) =>
+                    setSettings((prev) => ({ ...prev, actions }))
+                  }
+                  onPoolsChange={(pools) =>
+                    setSettings((prev) => ({ ...prev, pools }))
+                  }
+                />
+
+                <Separator />
 
                 {/* Section 4: Defaults */}
-                <SettingsSectionCard
-                  className="border-accent/30 from-accent/12 via-background/85 to-primary/10"
-                >
-                  <SettingsDefaultsSection
-                    defaults={settings.defaults}
-                    onDefaultsChange={(defaults) =>
-                      setSettings((prev) => ({ ...prev, defaults }))
-                    }
-                  />
-                </SettingsSectionCard>
+                <SettingsDefaultsSection
+                  defaults={settings.defaults}
+                  onDefaultsChange={(defaults) =>
+                    setSettings((prev) => ({ ...prev, defaults }))
+                  }
+                />
+
+
               </>
             )}
           </div>
         </div>
 
-        <Separator className="bg-gradient-to-r from-transparent via-primary/45 to-transparent" />
-        <SheetFooter className="px-4 py-3 bg-gradient-to-r from-primary/6 via-background/85 to-accent/6">
+        <SheetFooter className="px-4">
           <Button variant="outline" onClick={handleReset} disabled={saving}>
             Reset to Defaults
           </Button>
-          <Button
-            className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-md hover:opacity-95"
-            onClick={handleSave}
-            disabled={saving || loading}
-          >
+          <Button onClick={handleSave} disabled={saving || loading}>
             {saving ? "Saving..." : "Save"}
           </Button>
         </SheetFooter>

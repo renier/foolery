@@ -183,15 +183,11 @@ export function SettingsPoolsSection({
       <div className={disabled ? "space-y-4 opacity-50 pointer-events-none" : "space-y-4"}>
         <div className="flex items-center gap-2">
           <Users className="size-4 text-accent" />
-          <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">
-            Agent Pools
-          </h3>
+          <h3 className="text-sm font-medium">Agent Pools</h3>
         </div>
-        <div className="rounded-lg border border-primary/35 bg-gradient-to-br from-primary/10 via-background/80 to-accent/12 p-3">
-          <p className="text-xs text-muted-foreground">
-            Register agents first, then configure pools here.
-          </p>
-        </div>
+        <p className="text-xs text-muted-foreground">
+          Register agents first, then configure pools here.
+        </p>
       </div>
     );
   }
@@ -200,9 +196,7 @@ export function SettingsPoolsSection({
     <div className={disabled ? "space-y-4 opacity-50 pointer-events-none" : "space-y-4"}>
       <div className="flex items-center gap-2">
         <Users className="size-4 text-accent" />
-        <h3 className="bg-gradient-to-r from-primary to-accent bg-clip-text text-sm font-medium text-transparent">
-          Agent Pools
-        </h3>
+        <h3 className="text-sm font-medium">Agent Pools</h3>
       </div>
       <p className="text-xs text-muted-foreground">
         Configure weighted agent distribution for each workflow step.
@@ -252,7 +246,7 @@ function StepPoolEditor({
   const totalWeight = entries.reduce((sum, e) => sum + e.weight, 0);
 
   return (
-    <div className="rounded-lg border border-primary/25 bg-gradient-to-r from-primary/8 via-background/85 to-accent/10 p-3 space-y-2">
+    <div className="rounded-md border p-3 space-y-2">
       <div className="flex items-center justify-between">
         <div>
           <Label className="text-sm font-medium">{meta.label}</Label>
@@ -264,7 +258,6 @@ function StepPoolEditor({
           <Button
             variant="outline"
             size="sm"
-            className="border-accent/35 bg-accent/8 hover:bg-accent/18"
             onClick={() => setAddingAgent(true)}
           >
             <Plus className="size-3.5 mr-1" />
@@ -281,7 +274,7 @@ function StepPoolEditor({
         <div className="space-y-2">
           {/* Stacked horizontal bar */}
           {entries.length > 0 && totalWeight > 0 && (
-            <div className="flex h-3 w-full rounded-full overflow-hidden bg-accent/15">
+            <div className="flex h-3 w-full rounded-full overflow-hidden bg-muted">
               {entries.map((entry, idx) => {
                 const ratio = entry.weight / totalWeight;
                 const color = POOL_COLORS[idx % POOL_COLORS.length];
@@ -408,7 +401,7 @@ function AddPoolEntryForm({
   return (
     <div className="flex items-center gap-2 pt-1">
       <Select value={selectedId} onValueChange={setSelectedId}>
-        <SelectTrigger className="h-7 w-[140px] border-primary/35 bg-background/85">
+        <SelectTrigger className="w-[140px] h-7">
           <SelectValue placeholder="select agent" />
         </SelectTrigger>
         <SelectContent>
