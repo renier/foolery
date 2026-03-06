@@ -19,6 +19,7 @@ const backend = {
   list: vi.fn(),
   listWorkflows: vi.fn(),
   buildTakePrompt: vi.fn(),
+  update: vi.fn(),
 };
 
 const interactionLog = {
@@ -48,6 +49,9 @@ vi.mock("node:child_process", () => ({
     child.pid = 4321;
     spawnedChildren.push(child);
     return child;
+  }),
+  exec: vi.fn((_cmd: string, _opts: unknown, cb?: (err: Error | null, result: { stdout: string; stderr: string }) => void) => {
+    if (cb) cb(null, { stdout: "", stderr: "" });
   }),
 }));
 
@@ -109,6 +113,7 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     backend.list.mockReset();
     backend.listWorkflows.mockReset();
     backend.buildTakePrompt.mockReset();
+    backend.update.mockReset();
     interactionLog.logPrompt.mockReset();
     interactionLog.logStdout.mockReset();
     interactionLog.logStderr.mockReset();
@@ -125,7 +130,7 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     sessions?.clear();
   });
 
-  it("uses expected-state when healing active knots and tolerates stale mismatches", async () => {
+  it("rolls back active knot to queue state instead of advancing forward", async () => {
     backend.get
       .mockResolvedValueOnce({
         ok: true,
@@ -136,36 +141,31 @@ describe("terminal-manager nextKnot expected-state guard", () => {
           isAgentClaimable: false,
         },
       })
+      // After rollback, the beat is back in queue state
       .mockResolvedValueOnce({
         ok: true,
         data: {
           id: "foolery-e6d4",
           title: "Fix double kno-next",
-          state: "ready_for_implementation_review",
+          state: "ready_for_implementation",
           isAgentClaimable: true,
         },
       });
 
     backend.listWorkflows.mockResolvedValue({ ok: true, data: [] });
     backend.list.mockResolvedValue({ ok: true, data: [] });
-
-    nextKnotMock.mockResolvedValue({
-      ok: false,
-      error: "expected state 'implementation' but knot is currently 'ready_for_implementation_review'",
-    });
 
     await createSession("foolery-e6d4", "/tmp/repo", "custom prompt");
 
-    expect(nextKnotMock).toHaveBeenCalledTimes(1);
-    expect(nextKnotMock).toHaveBeenCalledWith("foolery-e6d4", "/tmp/repo", {
-      actorKind: "agent",
-      expectedState: "implementation",
-    });
+    // Should NOT advance forward via nextKnot — rollback uses kno update instead
+    expect(nextKnotMock).not.toHaveBeenCalled();
+    // Backend.get called twice: initial fetch + post-rollback refresh
     expect(backend.get).toHaveBeenCalledTimes(2);
   });
 
-  it("dispatches healing to nextBeat for beads-managed repos", async () => {
+  it("rolls back active beads-managed beat to queue state instead of advancing forward", async () => {
     resolveMemoryManagerTypeMock.mockReturnValue("beads");
+    backend.update.mockResolvedValue({ ok: true });
     backend.get
       .mockResolvedValueOnce({
         ok: true,
@@ -176,33 +176,30 @@ describe("terminal-manager nextKnot expected-state guard", () => {
           isAgentClaimable: false,
         },
       })
+      // After rollback, the beat is back in queue state
       .mockResolvedValueOnce({
         ok: true,
         data: {
           id: "foolery-e6d5",
           title: "Fix double bd-next",
-          state: "ready_for_implementation_review",
+          state: "ready_for_implementation",
           isAgentClaimable: true,
         },
       });
     backend.listWorkflows.mockResolvedValue({ ok: true, data: [] });
     backend.list.mockResolvedValue({ ok: true, data: [] });
-    nextBeatMock.mockResolvedValue({
-      beat: {
-        id: "foolery-e6d5",
-        title: "Fix double bd-next",
-        state: "implementation",
-        labels: [],
-      },
-      nextState: "ready_for_implementation_review",
-    });
 
     await createSession("foolery-e6d5", "/tmp/repo", "custom prompt");
 
-    expect(nextBeatMock).toHaveBeenCalledTimes(1);
-    expect(nextBeatMock).toHaveBeenCalledWith("foolery-e6d5", "implementation", "/tmp/repo");
+    // Should NOT advance forward via nextBeat
+    expect(nextBeatMock).not.toHaveBeenCalled();
     expect(nextKnotMock).not.toHaveBeenCalled();
-    expect(backend.get).toHaveBeenCalledTimes(2);
+    // Should rollback via backend.update
+    expect(backend.update).toHaveBeenCalledWith(
+      "foolery-e6d5",
+      { state: "ready_for_implementation" },
+      "/tmp/repo",
+    );
   });
 
   it("logs initial prompt for one-shot agents", async () => {

@@ -9,7 +9,7 @@ import {
   noopInteractionLog,
   type InteractionLog,
 } from "@/lib/interaction-logger";
-import { nextKnot } from "@/lib/knots";
+
 import { regroomAncestors } from "@/lib/regroom";
 import { getActionAgent, getStepAgent, loadSettings } from "@/lib/settings";
 import {
@@ -18,7 +18,7 @@ import {
   createLineNormalizer,
 } from "@/lib/agent-adapter";
 import { OpenRouterSessionRuntime } from "@/lib/openrouter-session-runtime";
-import { nextBeat } from "@/lib/beads-state-machine";
+
 import type { MemoryManagerType } from "@/lib/memory-managers";
 import {
   buildWorkflowStateCommand,
@@ -299,64 +299,7 @@ function isAgentOwnedActionState(
   return ownerKind === "agent";
 }
 
-function isExpectedStateMismatchError(errorMessage: string): boolean {
-  const normalized = errorMessage.toLowerCase();
-  return normalized.includes("expected state") && normalized.includes("currently");
-}
-
-type GuardedAdvanceResult =
-  | { ok: true }
-  | { ok: false; error: string; expectedStateMismatch: boolean };
-
-async function nextKnotGuarded(
-  knotId: string,
-  expectedState: string,
-  repoPath: string | undefined,
-): Promise<GuardedAdvanceResult> {
-  const result = await nextKnot(knotId, repoPath, {
-    actorKind: "agent",
-    expectedState,
-  });
-  if (result.ok) return { ok: true };
-  const error = typeof result.error === "string" ? result.error : "unknown";
-  return {
-    ok: false,
-    error,
-    expectedStateMismatch: isExpectedStateMismatchError(error),
-  };
-}
-
-async function nextBeatGuarded(
-  beatId: string,
-  expectedState: string,
-  repoPath: string | undefined,
-): Promise<GuardedAdvanceResult> {
-  try {
-    await nextBeat(beatId, expectedState, repoPath);
-    return { ok: true };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return {
-      ok: false,
-      error: message,
-      expectedStateMismatch: isExpectedStateMismatchError(message),
-    };
-  }
-}
-
-async function advanceGuarded(
-  beatId: string,
-  expectedState: string,
-  repoPath: string | undefined,
-  memoryManagerType: MemoryManagerType,
-): Promise<GuardedAdvanceResult> {
-  if (memoryManagerType === "knots") {
-    return nextKnotGuarded(beatId, expectedState, repoPath);
-  }
-  return nextBeatGuarded(beatId, expectedState, repoPath);
-}
-
-async function advanceAgentOwnedActionStateToQueue(
+async function rollbackAgentOwnedActionStateToQueue(
   beat: Beat,
   repoPath: string | undefined,
   memoryManagerType: MemoryManagerType,
@@ -367,28 +310,39 @@ async function advanceAgentOwnedActionStateToQueue(
   const workflow = resolveWorkflowForBeat(beat, workflowsById, fallbackWorkflow);
   if (!isAgentOwnedActionState(beat, workflow)) return beat;
 
-  const tag = `[terminal-manager] [${contextLabel}] [action-heal]`;
-  console.log(`${tag} advancing ${beat.id} from action state=${beat.state}`);
+  const resolved = resolveStep(beat.state);
+  if (!resolved) return beat;
 
-  const nextResult = await advanceGuarded(beat.id, beat.state, repoPath, memoryManagerType);
-  if (!nextResult.ok && !nextResult.expectedStateMismatch) {
-    console.warn(`${tag} failed to advance ${beat.id}: ${nextResult.error}`);
+  const rollbackState = queueStateForStep(resolved.step);
+  const tag = `[terminal-manager] [${contextLabel}] [step-failure]`;
+  console.warn(
+    `${tag} agent left ${beat.id} in active state="${beat.state}"` +
+    ` — rolling back to "${rollbackState}"`,
+  );
+
+  try {
+    if (memoryManagerType === "knots") {
+      const cmd = `kno update ${beat.id} --state ${rollbackState}`;
+      const { exec: execCb } = await import("node:child_process");
+      const { promisify } = await import("node:util");
+      const execAsync = promisify(execCb);
+      await execAsync(cmd, { cwd: repoPath });
+    } else {
+      await getBackend().update(beat.id, { state: rollbackState }, repoPath);
+    }
+  } catch (err) {
+    console.error(`${tag} rollback failed for ${beat.id}:`, err);
     return beat;
-  }
-  if (!nextResult.ok) {
-    console.log(
-      `${tag} skipped stale advance for ${beat.id}: ${nextResult.error}`,
-    );
   }
 
   const refreshed = await getBackend().get(beat.id, repoPath);
   if (!refreshed.ok || !refreshed.data) {
-    console.warn(`${tag} failed to reload ${beat.id} after advance`);
+    console.warn(`${tag} failed to reload ${beat.id} after rollback`);
     return beat;
   }
 
   console.log(
-    `${tag} advanced ${beat.id}: ${beat.state} -> ${refreshed.data.state} claimable=${refreshed.data.isAgentClaimable}`,
+    `${tag} rolled back ${beat.id}: ${beat.state} -> ${refreshed.data.state} claimable=${refreshed.data.isAgentClaimable}`,
   );
   return refreshed.data;
 }
@@ -622,7 +576,7 @@ export async function createSession(
   const targets = isParent ? waveBeats : [beat];
   const healedTargets = await Promise.all(
     targets.map((target) =>
-      advanceAgentOwnedActionStateToQueue(
+      rollbackAgentOwnedActionStateToQueue(
         target,
         repoPath,
         memoryManagerType,
@@ -912,32 +866,46 @@ export async function createSession(
 
     let resolved = resolveStep(current.state);
     let stepOwner = resolved ? workflow.owners?.[resolved.step] ?? "agent" : "none";
+    let stepFailureRollback = false;
     if (resolved?.phase === StepPhase.Active && stepOwner === "agent") {
-      console.log(`${tag} auto-advancing ${beatId} from active state=${current.state}`);
-      const nextResult = await advanceGuarded(beatId, current.state, repoPath, memoryManagerType);
-      if (!nextResult.ok && !nextResult.expectedStateMismatch) {
-        console.log(`${tag} STOP: auto-advance failed for ${beatId}: ${nextResult.error}`);
+      // Agent left the beat in an active state — this is a step failure.
+      // Roll back to the queue state for this step instead of advancing forward.
+      const rollbackState = queueStateForStep(resolved.step);
+      const failedAgent = agentDisplayName(agent);
+      console.warn(
+        `${tag} [STEP_FAILURE] agent "${failedAgent}" left ${beatId} in active state="${current.state}"` +
+        ` — rolling back to "${rollbackState}"`,
+      );
+      pushEvent({
+        type: "stdout",
+        data: `\x1b[33m--- Step failure: agent "${failedAgent}" left ${beatId} in active state "${current.state}", rolling back to "${rollbackState}" ---\x1b[0m\n`,
+        timestamp: Date.now(),
+      });
+
+      try {
+        if (memoryManagerType === "knots") {
+          const cmd = `kno update ${beatId} --state ${rollbackState}`;
+          const { exec: execCb } = await import("node:child_process");
+          const { promisify } = await import("node:util");
+          const execAsync = promisify(execCb);
+          await execAsync(cmd, { cwd: repoPath });
+        } else {
+          await getBackend().update(beatId, { state: rollbackState }, repoPath);
+        }
+      } catch (err) {
+        console.error(`${tag} rollback failed for ${beatId}:`, err);
         pushEvent({
           type: "stderr",
-          data: `Take loop: failed to advance ${beatId} from ${current.state}: ${nextResult.error}\n`,
+          data: `Step failure rollback failed for ${beatId}: ${err}\n`,
           timestamp: Date.now(),
         });
         return null;
       }
-      if (!nextResult.ok) {
-        console.log(
-          `${tag} auto-advance skipped for ${beatId} due stale expected state: ${nextResult.error}`,
-        );
-      }
 
+      // Refresh after rollback
       const refreshedResult = await getBackend().get(beatId, repoPath);
       if (!refreshedResult.ok || !refreshedResult.data) {
-        console.log(`${tag} STOP: failed to reload ${beatId} after auto-advance`);
-        pushEvent({
-          type: "stderr",
-          data: `Take loop: failed to reload ${beatId} after auto-advance\n`,
-          timestamp: Date.now(),
-        });
+        console.log(`${tag} STOP: failed to reload ${beatId} after step failure rollback`);
         return null;
       }
 
@@ -945,8 +913,9 @@ export async function createSession(
       workflow = resolveWorkflowForBeat(current, workflowsById, fallbackWorkflow);
       resolved = resolveStep(current.state);
       stepOwner = resolved ? workflow.owners?.[resolved.step] ?? "agent" : "none";
+      stepFailureRollback = true;
       console.log(
-        `${tag} auto-advance result: beat=${beatId} state=${current.state}` +
+        `${tag} step failure rollback result: beat=${beatId} state=${current.state}` +
         ` isAgentClaimable=${current.isAgentClaimable}`,
       );
     }
@@ -964,39 +933,52 @@ export async function createSession(
       return null;
     }
 
-    // Cross-agent review: select a different agent from the pool for review
-    // steps instead of reusing the action agent. Falls back to the session
-    // agent when no alternative is available (or pools not configured).
+    // Select a different agent from the pool when applicable:
+    // - Cross-agent review: exclude the action agent so a different agent reviews.
+    // - Step failure retry: exclude the agent that failed so a different agent retries.
+    // Falls back to the session agent when no alternative is available (or pools
+    // not configured).
     let reviewAgentOverride: CliAgentTarget | undefined;
-    if (isReviewStep(resolved.step)) {
-      try {
-        const settings = await loadSettings();
-        if (settings.dispatchMode === "pools") {
-          const actionStep = priorActionStep(resolved.step);
-          const excludeId = agent.agentId
-            ?? (actionStep ? getLastStepAgent(beatId, actionStep) : undefined);
+    {
+      // Determine which agent to exclude: after a step failure rollback,
+      // exclude the agent that just failed; for review steps, exclude the
+      // action-step agent.
+      const failedAgentId = stepFailureRollback ? agent.agentId : undefined;
+      const shouldSelectFromPool = isReviewStep(resolved.step) || stepFailureRollback;
 
-          const poolAgent = resolvePoolAgent(
-            resolved.step,
-            settings.pools,
-            settings.agents,
-            excludeId,
-          );
+      if (shouldSelectFromPool) {
+        try {
+          const settings = await loadSettings();
+          if (settings.dispatchMode === "pools") {
+            const actionStep = priorActionStep(resolved.step);
+            const excludeId = failedAgentId
+              ?? agent.agentId
+              ?? (actionStep ? getLastStepAgent(beatId, actionStep) : undefined);
 
-          if (poolAgent?.kind === "cli") {
-            reviewAgentOverride = poolAgent;
-            if (poolAgent.agentId) {
-              recordStepAgent(beatId, resolved.step, poolAgent.agentId);
-            }
-            console.log(
-              `${tag} cross-agent review: step="${resolved.step}" ` +
-              `selected="${poolAgent.agentId ?? poolAgent.command}" ` +
-              `(excluded: ${excludeId ?? "none"})`,
+            const poolAgent = resolvePoolAgent(
+              resolved.step,
+              settings.pools,
+              settings.agents,
+              excludeId,
+              beatId,
             );
+
+            if (poolAgent?.kind === "cli") {
+              reviewAgentOverride = poolAgent;
+              if (poolAgent.agentId) {
+                recordStepAgent(beatId, resolved.step, poolAgent.agentId);
+              }
+              const reason = stepFailureRollback ? "step failure retry" : "cross-agent review";
+              console.log(
+                `${tag} ${reason}: step="${resolved.step}" ` +
+                `selected="${poolAgent.agentId ?? poolAgent.command}" ` +
+                `(excluded: ${excludeId ?? "none"})`,
+              );
+            }
           }
+        } catch {
+          // Settings load failure should not block the take loop
         }
-      } catch {
-        // Settings load failure should not block the take loop
       }
     }
 
