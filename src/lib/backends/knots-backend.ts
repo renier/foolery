@@ -39,6 +39,7 @@ import {
   inferWorkflowMode,
   mapStatusToDefaultWorkflowState,
   normalizeStateForWorkflow,
+  profileDisplayName,
   resolveStep,
   StepPhase,
 } from "@/lib/workflows";
@@ -303,7 +304,7 @@ function toDescriptor(profile: KnotProfileDefinition): MemoryWorkflowDescriptor 
     id: profile.id,
     profileId: profile.id,
     backingWorkflowId: profile.id,
-    label: `Knots (${profile.id})`,
+    label: profileDisplayName(profile.id),
     mode,
     initialState: profile.initial_state.trim().toLowerCase(),
     states,

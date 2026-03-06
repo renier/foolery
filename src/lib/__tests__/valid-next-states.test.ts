@@ -7,7 +7,7 @@ function autopilotWorkflow(): MemoryWorkflowDescriptor {
   return {
     id: "autopilot",
     backingWorkflowId: "autopilot",
-    label: "Knots (autopilot)",
+    label: "Autopilot",
     mode: "granular_autonomous",
     initialState: "ready_for_planning",
     states: [

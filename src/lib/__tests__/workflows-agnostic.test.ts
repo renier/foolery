@@ -147,10 +147,12 @@ describe("backend-agnostic workflow exports", () => {
       }
     });
 
-    it("builtin descriptors use 'Workflow' label prefix", () => {
+    it("builtin descriptors use human-friendly display names", () => {
       const descriptors = builtinWorkflowDescriptors();
       for (const d of descriptors) {
-        expect(d.label).toMatch(/^Workflow \(/);
+        expect(d.label).not.toContain("Knots");
+        expect(d.label).not.toContain("Workflow (");
+        expect(d.label.length).toBeGreaterThan(0);
       }
     });
   });

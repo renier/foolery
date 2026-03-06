@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Info } from "lucide-react";
 import { createBeatSchema, updateBeatSchema } from "@/lib/schemas";
 import type { CreateBeatInput, UpdateBeatInput } from "@/lib/schemas";
 import type { MemoryWorkflowDescriptor } from "@/lib/types";
+import { profileDisplayName, PROFILE_DESCRIPTIONS } from "@/lib/workflows";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { RelationshipPicker } from "@/components/relationship-picker";
 
 const PRIORITIES = [0, 1, 2, 3, 4] as const;
@@ -51,6 +60,7 @@ export function BeatForm(props: BeatFormProps) {
   const schema = mode === "create" ? createBeatSchema : updateBeatSchema;
   const [blocks, setBlocks] = useState<string[]>([]);
   const [blockedBy, setBlockedBy] = useState<string[]>([]);
+  const [profileInfoOpen, setProfileInfoOpen] = useState(false);
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -113,6 +123,7 @@ export function BeatForm(props: BeatFormProps) {
         <FormField
           label="Profile"
           error={workflowError}
+          infoAction={() => setProfileInfoOpen(true)}
         >
           <Select
             value={form.watch("profileId") ?? form.watch("workflowId")}
@@ -127,7 +138,7 @@ export function BeatForm(props: BeatFormProps) {
             <SelectContent>
               {workflows.map((workflow) => (
                 <SelectItem key={workflow.id} value={workflow.id}>
-                  {workflow.label}
+                  {profileDisplayName(workflow.profileId ?? workflow.id)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -223,6 +234,8 @@ export function BeatForm(props: BeatFormProps) {
           </Button>
         )}
       </div>
+
+      <ProfileInfoDialog open={profileInfoOpen} onOpenChange={setProfileInfoOpen} />
     </form>
   );
 }
@@ -237,17 +250,62 @@ function formErrorMap(
 function FormField({
   label,
   error,
+  infoAction,
   children,
 }: {
   label: string;
   error?: string;
+  infoAction?: () => void;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
+      <div className="flex items-center gap-1.5">
+        <Label>{label}</Label>
+        {infoAction && (
+          <button
+            type="button"
+            onClick={infoAction}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={`Learn about ${label.toLowerCase()}`}
+          >
+            <Info className="size-3.5" />
+          </button>
+        )}
+      </div>
       {children}
       {error && <p className="text-destructive text-xs">{error}</p>}
     </div>
+  );
+}
+
+function ProfileInfoDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const entries = Object.entries(PROFILE_DESCRIPTIONS);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Workflow Profiles</DialogTitle>
+          <DialogDescription>
+            Profiles control how work flows through planning, implementation,
+            and shipment stages.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 pt-2">
+          {entries.map(([id, description]) => (
+            <div key={id} className="space-y-0.5">
+              <p className="text-sm font-medium">{profileDisplayName(id)}</p>
+              <p className="text-xs text-muted-foreground">{description}</p>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

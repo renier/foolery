@@ -76,7 +76,9 @@ export function CreateBeatDialog({
       : undefined) ??
     workflows.find((workflow) => workflow.id === "autopilot")?.id ??
     workflows[0]?.id;
-  const isKnotsBackend = workflows.some((w) => w.label?.startsWith("Knots"));
+  const isKnotsBackend = workflows.some(
+    (w) => w.id === "autopilot" || w.id === "semiauto",
+  );
 
   function withSelectedProfile(input: CreateBeatInput): CreateBeatInput {
     const selected = input.profileId ?? input.workflowId ?? defaultProfileId;
@@ -186,7 +188,7 @@ export function CreateBeatDialog({
           </DialogDescription>
         </DialogHeader>
         <BeatForm
-          key={formKey}
+          key={`${formKey}-${defaultProfileId ?? ""}`}
           mode="create"
           workflows={workflows}
           hideTypeSelector={isKnotsBackend}

@@ -114,11 +114,37 @@ export function priorActionStep(step: WorkflowStep): WorkflowStep | null {
 
 interface BuiltinProfileConfig {
   id: string;
+  displayName: string;
   description: string;
   planningMode: "required" | "skipped";
   implementationReviewMode: "required" | "skipped";
   output: "remote_main" | "pr";
   owners: MemoryWorkflowOwners;
+}
+
+/** Human-friendly display names for built-in profile IDs. */
+const PROFILE_DISPLAY_NAMES: Readonly<Record<string, string>> = {
+  autopilot: "Autopilot",
+  autopilot_with_pr: "Autopilot (PR)",
+  semiauto: "Semiauto",
+  autopilot_no_planning: "Autopilot (no planning)",
+  autopilot_with_pr_no_planning: "Autopilot (PR, no planning)",
+  semiauto_no_planning: "Semiauto (no planning)",
+};
+
+/** Human-friendly short descriptions for built-in profile IDs. */
+export const PROFILE_DESCRIPTIONS: Readonly<Record<string, string>> = {
+  autopilot: "Fully autonomous agent flow: planning, implementation, and shipment are all agent-owned. Output goes to remote main.",
+  autopilot_with_pr: "Fully autonomous agent flow with pull request output instead of direct push to main.",
+  semiauto: "Agent does the work, but a human reviews the plan and implementation before it proceeds.",
+  autopilot_no_planning: "Autonomous agent flow that skips planning and jumps straight to implementation.",
+  autopilot_with_pr_no_planning: "Autonomous agent flow with PR output and no planning phase.",
+  semiauto_no_planning: "Human-gated implementation review with no planning phase.",
+};
+
+/** Returns a human-friendly display name for a profile ID. */
+export function profileDisplayName(profileId: string): string {
+  return PROFILE_DISPLAY_NAMES[profileId] ?? profileId;
 }
 
 const AGENT_OWNERS: MemoryWorkflowOwners = {
@@ -142,6 +168,7 @@ const SEMIAUTO_OWNERS: MemoryWorkflowOwners = {
 const BUILTIN_PROFILE_CATALOG: ReadonlyArray<BuiltinProfileConfig> = [
   {
     id: "autopilot",
+    displayName: "Autopilot",
     description: "Agent-owned full flow with remote main output",
     planningMode: "required",
     implementationReviewMode: "required",
@@ -150,6 +177,7 @@ const BUILTIN_PROFILE_CATALOG: ReadonlyArray<BuiltinProfileConfig> = [
   },
   {
     id: "autopilot_with_pr",
+    displayName: "Autopilot (PR)",
     description: "Agent-owned full flow with PR output",
     planningMode: "required",
     implementationReviewMode: "required",
@@ -158,6 +186,7 @@ const BUILTIN_PROFILE_CATALOG: ReadonlyArray<BuiltinProfileConfig> = [
   },
   {
     id: "semiauto",
+    displayName: "Semiauto",
     description: "Human-gated plan and implementation reviews",
     planningMode: "required",
     implementationReviewMode: "required",
@@ -166,6 +195,7 @@ const BUILTIN_PROFILE_CATALOG: ReadonlyArray<BuiltinProfileConfig> = [
   },
   {
     id: "autopilot_no_planning",
+    displayName: "Autopilot (no planning)",
     description: "Agent-owned flow starting at implementation",
     planningMode: "skipped",
     implementationReviewMode: "required",
@@ -174,6 +204,7 @@ const BUILTIN_PROFILE_CATALOG: ReadonlyArray<BuiltinProfileConfig> = [
   },
   {
     id: "autopilot_with_pr_no_planning",
+    displayName: "Autopilot (PR, no planning)",
     description: "Agent-owned flow with PR output and no planning",
     planningMode: "skipped",
     implementationReviewMode: "required",
@@ -182,6 +213,7 @@ const BUILTIN_PROFILE_CATALOG: ReadonlyArray<BuiltinProfileConfig> = [
   },
   {
     id: "semiauto_no_planning",
+    displayName: "Semiauto (no planning)",
     description: "Human-gated implementation review with skipped planning",
     planningMode: "skipped",
     implementationReviewMode: "required",
@@ -321,13 +353,13 @@ function descriptorFromProfileConfig(
   const initialState = config.planningMode === "skipped"
     ? "ready_for_implementation"
     : "ready_for_planning";
-  const labelPrefix = options?.labelPrefix ?? "Workflow";
-
   return {
     id: config.id,
     profileId: config.id,
     backingWorkflowId: config.id,
-    label: `${labelPrefix} (${config.id})`,
+    label: options?.labelPrefix
+      ? `${options.labelPrefix} (${config.id})`
+      : config.displayName,
     mode,
     initialState,
     states,
