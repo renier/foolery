@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc428-8384-7981-a50b-a19b22337e50",
+  "occurred_at": "2026-03-06T17:18:35.396129Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Implementation review approved: dispatch pool settings now use a single global swap control (bottom of Pools section), per-step swap UI is removed, global replacement updates all matching steps in one save, and swapPoolAgent correctly merges weights when target already exists. Verification: targeted eslint on touched files passed; bun run test passed; bunx tsc --noEmit passed after regenerating .next types; NODE_ENV=production bun run build passed. Note: plain bun run lint currently fails due linting generated/auxiliary files under .claude worktrees/.knots/.next in this checkout.",
+    "datetime": "2026-03-06T17:18:35Z",
+    "entry_id": "019cc428-8384-7981-a50b-a18b7d05d39c",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "2026-03-06"
+  }
+}

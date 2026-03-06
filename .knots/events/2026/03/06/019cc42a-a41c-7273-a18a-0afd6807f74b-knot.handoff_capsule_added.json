@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc42a-a41c-7273-a18a-0afd6807f74b",
+  "occurred_at": "2026-03-06T17:20:54.812014Z",
+  "knot_id": "foolery-68d7",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Improved agent model picker readability and searchability for large OpenCode lists: added buildModelLabelDisplayMap helper to strip shared prefixes with collision fallback, reused it in both searchable combobox and plain select paths, and expanded combobox matching keywords across raw/stripped/provider/model fields. Added regression tests for unique stripped labels and collision fallback in src/lib/__tests__/model-labels.test.ts. Quality gates: bun run lint (warnings only), bunx tsc --noEmit, bun run test (119 files, 1862 passed), NODE_ENV=production bun run build. Integrated on main and pushed to origin/main at 0a7d8ef5.",
+    "datetime": "2026-03-06T17:20:42Z",
+    "entry_id": "019cc42a-a41c-7273-a18a-0ae69953bee8",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "2026-03-06"
+  }
+}

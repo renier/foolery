@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc42e-02e7-7651-9db7-5f396ed3cb84",
+  "occurred_at": "2026-03-06T17:24:35.687625Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Implemented global swap hardening for dispatch pools: swapPoolAgent now replaces all occurrences of the source agent within each step and merges total weight into replacement when present. Added regression tests for duplicate-source scenarios with/without existing replacement. Validation: bun run lint (warnings only), bunx tsc --noEmit, bun run test, NODE_ENV=production bun run build.",
+    "datetime": "2026-03-06T17:24:28Z",
+    "entry_id": "019cc42e-02e7-7651-9db7-5f2efd5cdcc0",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "gpt-5"
+  }
+}

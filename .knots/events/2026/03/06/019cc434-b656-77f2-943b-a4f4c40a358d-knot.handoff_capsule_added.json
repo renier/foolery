@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc434-b656-77f2-943b-a4f4c40a358d",
+  "occurred_at": "2026-03-06T17:31:54.838236Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Globalized dispatch Swap Agent behavior through a shared swapPoolsAgent utility, wired SettingsPoolsSection to apply one swap across all workflow steps in a single save, and added regression tests for all-step/global no-op behavior.",
+    "datetime": "2026-03-06T17:31:54Z",
+    "entry_id": "019cc434-b656-77f2-943b-a4ea9e1e4df2",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "1"
+  }
+}

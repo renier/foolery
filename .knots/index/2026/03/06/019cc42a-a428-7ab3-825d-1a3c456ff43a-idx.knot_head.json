@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc42a-a428-7ab3-825d-1a3c456ff43a",
+  "occurred_at": "2026-03-06T17:20:54.812014Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-68d7",
+    "profile_id": "autopilot",
+    "state": "implementation_review",
+    "terminal": false,
+    "title": "Settings: Agents: OpenCode agents needs to be searchable",
+    "updated_at": "2026-03-06T17:20:54.812014Z"
+  }
+}

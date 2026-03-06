@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc431-22c1-76b2-8e93-eee9c1db20c3",
+  "occurred_at": "2026-03-06T17:28:00.438956Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-0bbe",
+    "profile_id": "autopilot",
+    "state": "ready_for_implementation",
+    "terminal": false,
+    "title": "Settings: Dispatch: \"Swap Agent\" functionality should be global, not per step",
+    "updated_at": "2026-03-06T17:28:00.438956Z"
+  }
+}

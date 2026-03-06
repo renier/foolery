@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc42d-d4ea-7bf3-bbc7-bd2a1a546427",
+  "occurred_at": "2026-03-06T17:24:23.91473Z",
+  "knot_id": "foolery-68d7",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Approved shipment review: searchable OpenCode model picker and hardened prefix stripping are present on main (commit 0a7d8ef5ce7d). Required implementation commits are tagged with commit: short hashes (4f82dfa3d3b7, 64bb470ed772, 0a7d8ef5ce7d). GitHub Actions workflows (CI, Coverage Badge, Changesets) completed successfully for shipped commits; no invariant violations or regression indicators found.",
+    "datetime": "2026-03-06T17:24:23Z",
+    "entry_id": "019cc42d-d4ea-7bf3-bbc7-bd1001575968",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-06"
+  }
+}

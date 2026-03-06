@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc42c-167a-7120-a23a-efc9c2ce4e6e",
+  "occurred_at": "2026-03-06T17:22:29.626315Z",
+  "knot_id": "foolery-68d7",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment verified: code already merged to main and pushed to origin/main (0a7d8ef5). Tests pass (119 files, 1862 tests), remote is in sync. Searchable model picker with prefix stripping is live.",
+    "datetime": "2026-03-06T18:23:00Z",
+    "entry_id": "019cc42c-167a-7120-a23a-efb543010b4b",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "claude-opus-4-6"
+  }
+}

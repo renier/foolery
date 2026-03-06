@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc429-bca1-75d2-b3b0-5663efd86543",
+  "occurred_at": "2026-03-06T17:19:55.553781Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment verified: global swap agent implementation is on main and pushed to origin. Commits b8a42850 (refactor: move swap UI from per-step to global) and a6f77fc2 (fix: replace all pool occurrences) are both on main with no local/remote divergence. StepPoolEditor confirmed free of swap UI. GlobalSwapAgent component at bottom of SettingsPoolsSection handles all-step replacement in one action.",
+    "datetime": "2026-03-06T12:00:00Z",
+    "entry_id": "019cc429-bca1-75d2-b3b0-565022b06734",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

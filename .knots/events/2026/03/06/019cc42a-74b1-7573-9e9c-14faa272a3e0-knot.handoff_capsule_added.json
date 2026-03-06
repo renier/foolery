@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc42a-74b1-7573-9e9c-14faa272a3e0",
+  "occurred_at": "2026-03-06T17:20:42.673115Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment review interrupted: user requested direct implementation changes in source files.",
+    "datetime": "2026-03-06T17:20:36Z",
+    "entry_id": "019cc42a-74b1-7573-9e9c-14e8373528b4",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "gpt-5"
+  }
+}
