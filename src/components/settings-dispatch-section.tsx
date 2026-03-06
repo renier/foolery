@@ -53,8 +53,6 @@ export function SettingsDispatchSection({
   onActionsChange,
   onPoolsChange,
 }: DispatchSectionProps) {
-  const hasMultipleAgents = Object.keys(agents).length > 1;
-
   async function handleModeChange(mode: DispatchMode) {
     onDispatchModeChange(mode);
     try {
@@ -131,15 +129,13 @@ export function SettingsDispatchSection({
           onPoolsChange={onPoolsChange}
         />
       )}
-      {hasMultipleAgents && (
-        <SettingsDispatchGlobalSwap
-          actions={actions}
-          pools={pools}
-          agents={agents}
-          onActionsChange={onActionsChange}
-          onPoolsChange={onPoolsChange}
-        />
-      )}
+      <SettingsDispatchGlobalSwap
+        actions={actions}
+        pools={pools}
+        agents={agents}
+        onActionsChange={onActionsChange}
+        onPoolsChange={onPoolsChange}
+      />
     </div>
   );
 }

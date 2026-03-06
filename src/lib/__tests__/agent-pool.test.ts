@@ -5,6 +5,7 @@ import {
   recordStepAgent,
   getLastStepAgent,
   _resetStepAgentMap,
+  getSwappableSourceAgentIds,
   swapActionsAgent,
   swapPoolAgent,
   swapPoolsAgent,
@@ -353,6 +354,28 @@ describe("swapPoolAgent", () => {
       { agentId: "sonnet", weight: 1 },
       { agentId: "codex", weight: 9 },
     ]);
+  });
+});
+
+describe("getSwappableSourceAgentIds", () => {
+  it("returns no options when there are no available agents", () => {
+    expect(getSwappableSourceAgentIds(["claude"], [])).toEqual([]);
+  });
+
+  it("returns no options when all used agents equal the only available agent", () => {
+    expect(getSwappableSourceAgentIds(["claude"], ["claude"])).toEqual([]);
+  });
+
+  it("keeps stale source ids when a single replacement agent exists", () => {
+    expect(getSwappableSourceAgentIds(["legacy"], ["claude"])).toEqual([
+      "legacy",
+    ]);
+  });
+
+  it("keeps each source that has at least one different replacement", () => {
+    expect(
+      getSwappableSourceAgentIds(["claude", "codex"], ["claude", "codex"]),
+    ).toEqual(["claude", "codex"]);
   });
 });
 

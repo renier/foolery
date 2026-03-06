@@ -12,7 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatAgentDisplayLabel } from "@/lib/agent-identity";
-import { swapActionsAgent, swapPoolsAgent } from "@/lib/agent-pool";
+import {
+  getSwappableSourceAgentIds,
+  swapActionsAgent,
+  swapPoolsAgent,
+} from "@/lib/agent-pool";
 import { patchSettings } from "@/lib/settings-api";
 import type { RegisteredAgent } from "@/lib/types";
 import type { ActionAgentMappings, PoolsSettings } from "@/lib/schemas";
@@ -53,10 +57,14 @@ export function SettingsDispatchGlobalSwap({
       ),
     ]),
   ];
+  const swappableFromAgentIds = getSwappableSourceAgentIds(
+    usedAgentIds,
+    allAgentIds,
+  );
 
-  const swapFromAgentId = usedAgentIds.includes(swapFromSelection)
+  const swapFromAgentId = swappableFromAgentIds.includes(swapFromSelection)
     ? swapFromSelection
-    : (usedAgentIds[0] ?? "");
+    : (swappableFromAgentIds[0] ?? "");
   const swapToAgentId =
     allAgentIds.includes(swapToSelection) && swapToSelection !== swapFromAgentId
       ? swapToSelection
@@ -64,7 +72,7 @@ export function SettingsDispatchGlobalSwap({
 
   const canSwap =
     !disabled &&
-    usedAgentIds.length > 0 &&
+    swappableFromAgentIds.length > 0 &&
     swapFromAgentId.length > 0 &&
     swapToAgentId.length > 0 &&
     swapFromAgentId !== swapToAgentId;
@@ -114,7 +122,7 @@ export function SettingsDispatchGlobalSwap({
     setSwapFromSelection(swapToAgentId);
   }
 
-  if (allAgentIds.length < 2 || usedAgentIds.length === 0) return null;
+  if (swappableFromAgentIds.length === 0) return null;
 
   return (
     <div
@@ -136,7 +144,7 @@ export function SettingsDispatchGlobalSwap({
             <SelectValue placeholder="current agent" />
           </SelectTrigger>
           <SelectContent>
-            {usedAgentIds.map((id) => (
+            {swappableFromAgentIds.map((id) => (
               <SelectItem key={id} value={id}>
                 {formatAgentLabel(id, agents[id])}
               </SelectItem>

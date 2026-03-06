@@ -177,6 +177,20 @@ export interface SwapPoolsAgentResult {
 }
 
 /**
+ * Return source agent IDs that can be swapped globally.
+ * A source is swappable when at least one different replacement agent exists.
+ */
+export function getSwappableSourceAgentIds(
+  usedAgentIds: string[],
+  availableAgentIds: string[],
+): string[] {
+  if (usedAgentIds.length === 0 || availableAgentIds.length === 0) return [];
+  return usedAgentIds.filter((fromAgentId) =>
+    availableAgentIds.some((toAgentId) => toAgentId !== fromAgentId),
+  );
+}
+
+/**
  * Globally replace a pooled agent across workflow steps.
  * Returns per-step updates, affected step count, and the merged pools object.
  */
