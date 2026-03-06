@@ -32,6 +32,7 @@ import {
   extractWaveSlug,
   isLegacyNumericWaveSlug,
 } from "@/lib/wave-slugs";
+import { agentDisplayName } from "@/lib/agent-identity";
 
 interface OrchestrationSessionEntry {
   session: OrchestrationSession;
@@ -660,8 +661,9 @@ export async function createOrchestrationSession(
     interactionType: "direct",
     repoPath,
     beatIds: beats.map((b) => b.id),
-    agentName: agent.label || agent.command,
+    agentName: agentDisplayName(agent),
     agentModel: agent.model,
+    agentVersion: agent.version,
   }).catch((err) => {
     console.error(`[orchestration-manager] Failed to start interaction log:`, err);
     return noopInteractionLog();
@@ -821,7 +823,7 @@ export async function createOrchestrationSession(
 
   child.on("error", (err) => {
     releaseChildStreams();
-    const agentLabel = agent.label || agent.command;
+    const agentLabel = agentDisplayName(agent);
     finalizeSession(entry, "error", `Failed to start ${agentLabel}: ${err.message}`);
   });
 
@@ -843,7 +845,7 @@ export async function createOrchestrationSession(
       }
     }
 
-    const agentName = agent.label || agent.command;
+    const agentName = agentDisplayName(agent);
     const isSuccess = code === 0 && signal == null;
     const message = isSuccess
       ? `${agentName} orchestration complete`
@@ -854,7 +856,7 @@ export async function createOrchestrationSession(
   pushEvent(
     entry,
     "status",
-    `Waiting on ${agent.label || agent.command}...`
+    `Waiting on ${agentDisplayName(agent)}...`
   );
 
   return session;

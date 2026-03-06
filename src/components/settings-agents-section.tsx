@@ -14,6 +14,10 @@ import {
   formatOpenRouterAgentLabel,
 } from "@/lib/openrouter";
 import {
+  formatModelDisplay,
+  providerLabel,
+} from "@/lib/agent-identity";
+import {
   addAgent,
   removeAgent,
   scanAgents,
@@ -22,18 +26,10 @@ import {
   fetchOpenRouterModels as fetchModelsApi,
   validateOpenRouterKey,
 } from "@/lib/settings-api";
-import { formatModelDisplay } from "@/hooks/use-agent-info";
 import type { ActionAgentMappings, OpenRouterSettings } from "@/lib/schemas";
 
-const KNOWN_AGENT_LABELS: Record<string, string> = {
-  claude: "Claude Code",
-  codex: "OpenAI Codex",
-  gemini: "Google Gemini",
-  openrouter: "OpenRouter",
-};
-
 function defaultAgentLabel(id: string): string {
-  return KNOWN_AGENT_LABELS[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+  return providerLabel(undefined, id) ?? id.charAt(0).toUpperCase() + id.slice(1);
 }
 
 function normalizeModelId(model: string): string {
@@ -95,7 +91,10 @@ export function SettingsAgentsSection({
   async function handleAddScanned(scanned: ScannedAgent) {
     const res = await addAgent(scanned.id, {
       command: scanned.path,
-      label: defaultAgentLabel(scanned.id),
+      provider: scanned.provider,
+      model: scanned.model,
+      version: scanned.version,
+      label: scanned.provider ?? defaultAgentLabel(scanned.id),
     });
     if (res.ok && res.data) {
       onAgentsChange(res.data);
@@ -117,7 +116,10 @@ export function SettingsAgentsSection({
     for (const agent of sorted) {
       const res = await addAgent(agent.id, {
         command: agent.path,
-        label: defaultAgentLabel(agent.id),
+        provider: agent.provider,
+        model: agent.model,
+        version: agent.version,
+        label: agent.provider ?? defaultAgentLabel(agent.id),
       });
       if (res.ok && res.data) {
         latestAgents = res.data;
@@ -336,6 +338,17 @@ function ScannedAgentRow({
     <div className="flex items-center justify-between text-sm">
       <div className="flex items-center gap-2 min-w-0">
         <span className="shrink-0">{agent.id}</span>
+        {agent.provider ? (
+          <Badge variant="outline" className="text-[10px]">
+            {agent.provider}
+          </Badge>
+        ) : null}
+        {agent.model ? (
+          <Badge variant="outline" className="text-[10px]">
+            {formatModelDisplay(agent.model)}
+            {agent.version ? ` ${agent.version}` : ""}
+          </Badge>
+        ) : null}
         {agent.installed ? (
           <Badge
             variant="secondary"

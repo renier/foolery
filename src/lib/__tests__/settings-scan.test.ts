@@ -1,25 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock node:fs/promises
 const mockReadFile = vi.fn();
 const mockWriteFile = vi.fn();
 const mockMkdir = vi.fn();
-const mockReaddir = vi.fn();
-const mockAccess = vi.fn();
 
 vi.mock("node:fs/promises", () => ({
   readFile: (...args: unknown[]) => mockReadFile(...args),
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
-  readdir: (...args: unknown[]) => mockReaddir(...args),
-  access: (...args: unknown[]) => mockAccess(...args),
+  chmod: vi.fn(),
 }));
 
-// Mock child_process.exec — promisify(exec) turns cb-based exec into promise-based.
-// We mock exec as a cb-based function that delegates to mockExecCb for test control.
 const mockExecCb = vi.fn();
 vi.mock("node:child_process", () => ({
-  exec: (cmd: string, cb: (err: Error | null, result?: { stdout: string; stderr: string }) => void) => {
+  exec: (
+    cmd: string,
+    cb: (err: Error | null, result?: { stdout: string; stderr: string }) => void,
+  ) => {
     const p = mockExecCb(cmd);
     p.then(
       (r: { stdout: string; stderr: string }) => cb(null, r),
@@ -35,141 +32,92 @@ beforeEach(() => {
   _resetCache();
   mockMkdir.mockResolvedValue(undefined);
   mockWriteFile.mockResolvedValue(undefined);
-  mockReaddir.mockResolvedValue([]);
-  mockAccess.mockRejectedValue(new Error("not executable"));
 });
 
 describe("scanForAgents", () => {
-  it("returns installed status when agent is found on PATH", async () => {
-    mockExecCb.mockResolvedValue({ stdout: "/usr/local/bin/claude\n", stderr: "" });
-
-    const agents = await scanForAgents();
-    expect(agents).toHaveLength(5); // claude, codex, chatgpt, gemini, openrouter
-    const claude = agents.find((a) => a.id === "claude");
-    expect(claude?.installed).toBe(true);
-    expect(claude?.path).toBe("/usr/local/bin/claude");
-    expect(claude?.command).toBe("claude");
-  });
-
-  it("returns not-installed status when which fails", async () => {
-    mockExecCb.mockRejectedValue(new Error("not found"));
-
-    const agents = await scanForAgents();
-    expect(agents).toHaveLength(5);
-    for (const agent of agents) {
-      expect(agent.installed).toBe(false);
-      expect(agent.path).toBe("");
-    }
-  });
-
-  it("handles mixed results (some installed, some not)", async () => {
+  it("returns installed status when an agent is found on PATH", async () => {
     mockExecCb.mockImplementation(async (cmd: string) => {
-      if (cmd === "which claude") {
-        return { stdout: "/usr/bin/claude\n", stderr: "" };
+      if (cmd === "command -v claude") {
+        return { stdout: "/usr/local/bin/claude\n", stderr: "" };
       }
       throw new Error("not found");
     });
 
     const agents = await scanForAgents();
-    const claude = agents.find((a) => a.id === "claude");
-    const codex = agents.find((a) => a.id === "codex");
-    const chatgpt = agents.find((a) => a.id === "chatgpt");
-    const gemini = agents.find((a) => a.id === "gemini");
-    const openrouterAgent = agents.find((a) => a.id === "openrouter-agent");
+    expect(agents).toHaveLength(3);
+    expect(agents.map((agent) => agent.id)).toEqual(["claude", "codex", "gemini"]);
 
-    expect(claude?.installed).toBe(true);
-    expect(codex?.installed).toBe(false);
-    expect(chatgpt?.installed).toBe(false);
-    expect(gemini?.installed).toBe(false);
-    expect(openrouterAgent?.installed).toBe(false);
+    const claude = agents.find((agent) => agent.id === "claude");
+    expect(claude).toEqual({
+      id: "claude",
+      command: "claude",
+      path: "/usr/local/bin/claude",
+      installed: true,
+      provider: "Claude",
+    });
   });
 
-  it("scans for exactly claude, codex, chatgpt, gemini, and openrouter", async () => {
+  it("marks agents missing when command lookup fails", async () => {
     mockExecCb.mockRejectedValue(new Error("not found"));
 
     const agents = await scanForAgents();
-    const ids = agents.map((a) => a.id);
-    expect(ids).toEqual(["claude", "codex", "chatgpt", "gemini", "openrouter-agent"]);
-  });
-
-  it("falls back to latest versioned chatgpt binary when bare command is missing", async () => {
-    mockExecCb.mockRejectedValue(new Error("not found"));
-    mockReaddir.mockImplementation(async (directory: string) => {
-      if (directory === "/mock/bin") {
-        return ["chatgpt-4", "chatgpt5", "chatgpt-5.1", "chatgpt-beta"];
-      }
-      return [];
-    });
-    mockAccess.mockResolvedValue(undefined);
-
-    const originalPath = process.env.PATH;
-    process.env.PATH = "/mock/bin";
-    try {
-      const agents = await scanForAgents();
-      const chatgpt = agents.find((a) => a.id === "chatgpt");
-      expect(chatgpt).toEqual({
-        id: "chatgpt",
-        command: "chatgpt-5.1",
-        path: "/mock/bin/chatgpt-5.1",
-        installed: true,
-      });
-    } finally {
-      if (originalPath === undefined) delete process.env.PATH;
-      else process.env.PATH = originalPath;
+    expect(agents).toHaveLength(3);
+    for (const agent of agents) {
+      expect(agent.installed).toBe(false);
+      expect(agent.path).toBe("");
+      expect(agent.provider).toBeTruthy();
     }
   });
 
-  it("supports prerelease versioned chatgpt binaries", async () => {
-    mockExecCb.mockRejectedValue(new Error("not found"));
-    mockReaddir.mockImplementation(async (directory: string) => {
-      if (directory === "/mock/bin") {
-        return ["chatgpt-5.1", "chatgpt-6-preview", "chatgpt-beta"];
+  it("captures Codex model metadata from local config", async () => {
+    mockExecCb.mockImplementation(async (cmd: string) => {
+      if (cmd === "command -v codex") {
+        return { stdout: "/opt/homebrew/bin/codex\n", stderr: "" };
       }
-      return [];
+      throw new Error("not found");
     });
-    mockAccess.mockResolvedValue(undefined);
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (path.endsWith(".codex/config.toml")) {
+        return 'model = "gpt-5.4"\n';
+      }
+      throw new Error("missing");
+    });
 
-    const originalPath = process.env.PATH;
-    process.env.PATH = "/mock/bin";
-    try {
-      const agents = await scanForAgents();
-      const chatgpt = agents.find((a) => a.id === "chatgpt");
-      expect(chatgpt).toEqual({
-        id: "chatgpt",
-        command: "chatgpt-6-preview",
-        path: "/mock/bin/chatgpt-6-preview",
-        installed: true,
-      });
-    } finally {
-      if (originalPath === undefined) delete process.env.PATH;
-      else process.env.PATH = originalPath;
-    }
+    const agents = await scanForAgents();
+    expect(agents.find((agent) => agent.id === "codex")).toEqual({
+      id: "codex",
+      command: "codex",
+      path: "/opt/homebrew/bin/codex",
+      installed: true,
+      provider: "OpenAI",
+      model: "codex",
+      version: "5.4",
+    });
   });
 
-  it("prefers stable release over prerelease for matching version", async () => {
-    mockExecCb.mockRejectedValue(new Error("not found"));
-    mockReaddir.mockImplementation(async (directory: string) => {
-      if (directory === "/mock/bin") {
-        return ["chatgpt-6-rc1", "chatgpt-6"];
+  it("captures Claude model metadata from settings when available", async () => {
+    mockExecCb.mockImplementation(async (cmd: string) => {
+      if (cmd === "command -v claude") {
+        return { stdout: "/usr/local/bin/claude\n", stderr: "" };
       }
-      return [];
+      throw new Error("not found");
     });
-    mockAccess.mockResolvedValue(undefined);
+    mockReadFile.mockImplementation(async (path: string) => {
+      if (path.endsWith(".claude/settings.json")) {
+        return JSON.stringify({ defaultModel: "claude-sonnet-4-5" });
+      }
+      throw new Error("missing");
+    });
 
-    const originalPath = process.env.PATH;
-    process.env.PATH = "/mock/bin";
-    try {
-      const agents = await scanForAgents();
-      const chatgpt = agents.find((a) => a.id === "chatgpt");
-      expect(chatgpt).toEqual({
-        id: "chatgpt",
-        command: "chatgpt-6",
-        path: "/mock/bin/chatgpt-6",
-        installed: true,
-      });
-    } finally {
-      if (originalPath === undefined) delete process.env.PATH;
-      else process.env.PATH = originalPath;
-    }
+    const agents = await scanForAgents();
+    expect(agents.find((agent) => agent.id === "claude")).toEqual({
+      id: "claude",
+      command: "claude",
+      path: "/usr/local/bin/claude",
+      installed: true,
+      provider: "Claude",
+      model: "sonnet",
+      version: "4.5",
+    });
   });
 });

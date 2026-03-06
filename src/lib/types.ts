@@ -352,6 +352,7 @@ export interface ApplyBreakdownResult {
 
 export interface RegisteredAgent {
   command: string;
+  provider?: string;
   model?: string;
   version?: string;
   label?: string;
@@ -371,6 +372,9 @@ export interface ScannedAgent {
   command: string;
   path: string;
   installed: boolean;
+  provider?: string;
+  model?: string;
+  version?: string;
 }
 
 export interface PoolEntry {

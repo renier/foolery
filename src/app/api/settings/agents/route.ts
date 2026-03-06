@@ -19,7 +19,9 @@ const addAgentBody = z.object({
     message: '"default" is a reserved agent id',
   }),
   command: z.string().min(1),
+  provider: z.string().optional(),
   model: z.string().optional(),
+  version: z.string().optional(),
   label: z.string().optional(),
 });
 
@@ -28,7 +30,9 @@ export async function POST(request: NextRequest) {
     const body = addAgentBody.parse(await request.json());
     const agent = registeredAgentSchema.parse({
       command: body.command,
+      provider: body.provider,
       model: body.model,
+      version: body.version,
       label: body.label,
     });
     const updated = await addRegisteredAgent(body.id, agent);

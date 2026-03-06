@@ -26,6 +26,7 @@ export interface AgentHistorySession {
   entries: AgentHistoryEntry[];
   agentName?: string;
   agentModel?: string;
+  agentVersion?: string;
   workflowStates?: string[];
 }
 

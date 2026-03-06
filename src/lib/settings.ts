@@ -4,15 +4,12 @@ import {
   writeFile,
   mkdir,
   chmod,
-  access,
-  readdir,
 } from "node:fs/promises";
-import { constants as fsConstants } from "node:fs";
 import { exec } from "node:child_process";
 import { isDeepStrictEqual, promisify } from "node:util";
 
 const execAsync = promisify(exec);
-import { delimiter as pathDelimiter, join } from "node:path";
+import { join } from "node:path";
 import { homedir } from "node:os";
 import {
   foolerySettingsSchema,
@@ -40,12 +37,19 @@ import type {
 import type { AgentTarget, CliAgentTarget, OpenRouterAgentTarget } from "@/lib/types-agent-target";
 import { type WorkflowStep, isReviewStep, priorActionStep } from "@/lib/workflows";
 import { resolvePoolAgent, getLastStepAgent, recordStepAgent } from "@/lib/agent-pool";
+import {
+  agentDisplayName,
+  normalizeAgentIdentity,
+  providerLabel,
+} from "@/lib/agent-identity";
 
 const CONFIG_DIR = join(homedir(), ".config", "foolery");
 const SETTINGS_FILE = join(CONFIG_DIR, "settings.toml");
 const CACHE_TTL_MS = 30_000;
 const KEYCHAIN_SENTINEL = "**keychain**";
 const DEFAULT_SETTINGS: FoolerySettings = foolerySettingsSchema.parse({});
+const CODEX_CONFIG_FILE = join(homedir(), ".codex", "config.toml");
+const CLAUDE_SETTINGS_FILE = join(homedir(), ".claude", "settings.json");
 
 let cached: { value: FoolerySettings; loadedAt: number } | null = null;
 
@@ -351,12 +355,15 @@ function toCliTarget(
   agent: RegisteredAgentConfig | RegisteredAgent,
   agentId?: string,
 ): CliAgentTarget {
+  const normalized = normalizeAgentIdentity(agent);
   return {
     kind: "cli",
     command: agent.command,
-    ...(agent.model ? { model: agent.model } : {}),
-    ...(agent.version ? { version: agent.version } : {}),
-    ...(agent.label ? { label: agent.label } : {}),
+    ...(normalized.model ? { model: normalized.model } : {}),
+    ...(normalized.version ? { version: normalized.version } : {}),
+    ...((agent.label ?? agentDisplayName(agent))
+      ? { label: agent.label ?? agentDisplayName(agent) }
+      : {}),
     ...(agentId ? { agentId } : {}),
   };
 }
@@ -431,7 +438,21 @@ export async function getRegisteredAgents(): Promise<
   Record<string, RegisteredAgentConfig>
 > {
   const settings = await loadSettings();
-  return settings.agents;
+  return Object.fromEntries(
+    Object.entries(settings.agents).map(([id, agent]) => {
+      const normalized = normalizeAgentIdentity(agent);
+      return [
+        id,
+        {
+          ...agent,
+          ...(normalized.provider ? { provider: normalized.provider } : {}),
+          ...(normalized.model ? { model: normalized.model } : {}),
+          ...(normalized.version ? { version: normalized.version } : {}),
+          ...(agent.label ? { label: agent.label } : {}),
+        },
+      ];
+    }),
+  );
 }
 
 /** Resolves an action name to its agent config. Falls back to dispatch default. */
@@ -477,13 +498,15 @@ export async function addRegisteredAgent(
   agent: RegisteredAgent,
 ): Promise<FoolerySettings> {
   const current = await loadSettings();
+  const normalized = normalizeAgentIdentity(agent);
   const agents = {
     ...current.agents,
     [id]: {
       command: agent.command,
-      ...(agent.model ? { model: agent.model } : {}),
-      ...(agent.version ? { version: agent.version } : {}),
-      ...(agent.label ? { label: agent.label } : {}),
+      ...(normalized.provider ? { provider: normalized.provider } : {}),
+      ...(normalized.model ? { model: normalized.model } : {}),
+      ...(normalized.version ? { version: normalized.version } : {}),
+      ...(agent.label || normalized.provider ? { label: agent.label ?? normalized.provider } : {}),
     },
   };
   return updateSettings({ agents });
@@ -506,121 +529,122 @@ export async function removeRegisteredAgent(
 interface ScannableAgent {
   id: string;
   command: string;
-  allowVersionedCommands?: boolean;
 }
 
 const SCANNABLE_AGENTS: readonly ScannableAgent[] = [
   { id: "claude", command: "claude" },
   { id: "codex", command: "codex" },
-  // ChatGPT CLI has version-suffixed variants (for example "chatgpt-5.1").
-  { id: "chatgpt", command: "chatgpt", allowVersionedCommands: true },
   { id: "gemini", command: "gemini" },
-  { id: "openrouter-agent", command: "openrouter-agent" },
 ] as const;
 
-function isVersionedCommandName(command: string, baseCommand: string): boolean {
-  return parseVersionedCommand(command, baseCommand) !== null;
+async function readCodexConfiguredModel(): Promise<string | undefined> {
+  try {
+    const raw = await readFile(CODEX_CONFIG_FILE, "utf-8");
+    const parsed = parse(raw);
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      "model" in parsed &&
+      typeof parsed.model === "string"
+    ) {
+      return parsed.model;
+    }
+  } catch {
+    // ignore missing config
+  }
+  return undefined;
 }
 
-function parseVersionedCommand(
-  command: string,
-  baseCommand: string,
-): { segments: number[]; prerelease?: string } | null {
-  if (!command.startsWith(baseCommand) || command === baseCommand) {
-    return null;
+function findStringField(
+  value: unknown,
+  keys: ReadonlySet<string>,
+): string | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const found = findStringField(entry, keys);
+      if (found) return found;
+    }
+    return undefined;
   }
-  const suffix = command.slice(baseCommand.length);
-  const match = suffix.match(/^-?(\d+(?:\.\d+)*)(?:-([0-9a-z][0-9a-z.-]*))?$/i);
-  if (!match) return null;
-  return {
-    segments: match[1].split(".").map((segment) => Number(segment)),
-    ...(match[2] ? { prerelease: match[2] } : {}),
-  };
+  for (const [key, entry] of Object.entries(value)) {
+    if (keys.has(key) && typeof entry === "string" && entry.trim()) {
+      return entry.trim();
+    }
+    const nested = findStringField(entry, keys);
+    if (nested) return nested;
+  }
+  return undefined;
 }
 
-function compareVersionSegmentsDesc(left: number[], right: number[]): number {
-  const maxLength = Math.max(left.length, right.length);
-  for (let index = 0; index < maxLength; index += 1) {
-    const leftSegment = left[index] ?? 0;
-    const rightSegment = right[index] ?? 0;
-    if (leftSegment !== rightSegment) {
-      return rightSegment - leftSegment;
-    }
+async function readClaudeConfiguredModel(): Promise<string | undefined> {
+  try {
+    const raw = await readFile(CLAUDE_SETTINGS_FILE, "utf-8");
+    const parsed = JSON.parse(raw) as unknown;
+    return findStringField(
+      parsed,
+      new Set(["model", "defaultModel", "primaryModel"]),
+    );
+  } catch {
+    return undefined;
   }
-  return 0;
-}
-
-async function findVersionedExecutable(
-  baseCommand: string,
-): Promise<{ command: string; path: string } | null> {
-  const currentPath = process.env.PATH;
-  if (!currentPath) return null;
-
-  const candidates: { command: string; path: string }[] = [];
-  const directories = currentPath.split(pathDelimiter).filter(Boolean);
-  for (const directory of directories) {
-    let entries: string[];
-    try {
-      entries = await readdir(directory);
-    } catch {
-      continue;
-    }
-
-    for (const entry of entries) {
-      if (!isVersionedCommandName(entry, baseCommand)) continue;
-      const fullPath = join(directory, entry);
-      try {
-        await access(fullPath, fsConstants.X_OK);
-      } catch {
-        continue;
-      }
-      candidates.push({ command: entry, path: fullPath });
-    }
-  }
-
-  if (candidates.length === 0) return null;
-
-  candidates.sort((left, right) => {
-    const leftVersion = parseVersionedCommand(left.command, baseCommand);
-    const rightVersion = parseVersionedCommand(right.command, baseCommand);
-    if (leftVersion && rightVersion) {
-      const compared = compareVersionSegmentsDesc(
-        leftVersion.segments,
-        rightVersion.segments,
-      );
-      if (compared !== 0) return compared;
-      if (leftVersion.prerelease && !rightVersion.prerelease) return 1;
-      if (!leftVersion.prerelease && rightVersion.prerelease) return -1;
-      if (leftVersion.prerelease && rightVersion.prerelease) {
-        const prereleaseCompared = rightVersion.prerelease.localeCompare(
-          leftVersion.prerelease,
-          undefined,
-          { numeric: true, sensitivity: "base" },
-        );
-        if (prereleaseCompared !== 0) return prereleaseCompared;
-      }
-    }
-    return right.command.localeCompare(left.command);
-  });
-
-  return candidates[0];
 }
 
 async function resolveInstalledAgentCommand(
   agent: ScannableAgent,
 ): Promise<{ command: string; path: string } | null> {
   try {
-    const { stdout } = await execAsync(`which ${agent.command}`);
+    const { stdout } = await execAsync(`command -v ${agent.command}`);
     const installedPath = stdout.trim();
     if (installedPath) {
       return { command: agent.command, path: installedPath };
     }
   } catch {
-    // fall through to versioned scan
+    return null;
   }
+  return null;
+}
 
-  if (!agent.allowVersionedCommands) return null;
-  return findVersionedExecutable(agent.command);
+async function inspectInstalledAgentMetadata(
+  agent: ScannableAgent,
+  resolvedCommand: string,
+): Promise<Pick<ScannedAgent, "provider" | "model" | "version">> {
+  const provider = providerLabel(undefined, resolvedCommand);
+  if (agent.id === "codex") {
+    const model = await readCodexConfiguredModel();
+    const normalized = normalizeAgentIdentity({
+      command: resolvedCommand,
+      provider,
+      model,
+    });
+    return {
+      ...(normalized.provider ? { provider: normalized.provider } : {}),
+      ...(normalized.model ? { model: normalized.model } : {}),
+      ...(normalized.version ? { version: normalized.version } : {}),
+    };
+  }
+  if (agent.id === "claude") {
+    const model = await readClaudeConfiguredModel();
+    const normalized = normalizeAgentIdentity({
+      command: resolvedCommand,
+      provider,
+      model,
+    });
+    return {
+      ...(normalized.provider ? { provider: normalized.provider } : {}),
+      ...(normalized.model ? { model: normalized.model } : {}),
+      ...(normalized.version ? { version: normalized.version } : {}),
+    };
+  }
+  const normalized = normalizeAgentIdentity({
+    command: resolvedCommand,
+    provider,
+  });
+  return {
+    ...(normalized.provider ? { provider: normalized.provider } : {}),
+    ...(normalized.model ? { model: normalized.model } : {}),
+    ...(normalized.version ? { version: normalized.version } : {}),
+  };
 }
 
 /** Scans PATH for known agent CLIs and returns what was found. */
@@ -629,11 +653,16 @@ export async function scanForAgents(): Promise<ScannedAgent[]> {
     SCANNABLE_AGENTS.map(async (agent): Promise<ScannedAgent> => {
       const installed = await resolveInstalledAgentCommand(agent);
       if (installed) {
+        const metadata = await inspectInstalledAgentMetadata(
+          agent,
+          installed.command,
+        );
         return {
           id: agent.id,
           command: installed.command,
           path: installed.path,
           installed: true,
+          ...metadata,
         };
       }
       return {
@@ -641,6 +670,9 @@ export async function scanForAgents(): Promise<ScannedAgent[]> {
         command: agent.command,
         path: "",
         installed: false,
+        ...(providerLabel(undefined, agent.command)
+          ? { provider: providerLabel(undefined, agent.command) }
+          : {}),
       };
     }),
   );

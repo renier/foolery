@@ -368,7 +368,13 @@ function buildAgentLabel(session: AgentHistorySession): string | undefined {
   const parts: string[] = [];
   if (session.agentName) parts.push(session.agentName);
   const modelDisplay = formatModelDisplay(session.agentModel);
-  if (modelDisplay) parts.push(modelDisplay);
+  if (modelDisplay) {
+    parts.push(
+      session.agentVersion ? `${modelDisplay} ${session.agentVersion}` : modelDisplay,
+    );
+  } else if (session.agentVersion) {
+    parts.push(session.agentVersion);
+  }
   return parts.length > 0 ? parts.join(" · ") : undefined;
 }
 

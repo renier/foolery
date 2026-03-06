@@ -32,6 +32,7 @@ import {
   extractWaveSlug,
   isLegacyNumericWaveSlug,
 } from "@/lib/wave-slugs";
+import { agentDisplayName } from "@/lib/agent-identity";
 
 interface BreakdownSessionEntry {
   session: BreakdownSession;
@@ -385,8 +386,9 @@ export async function createBreakdownSession(
     interactionType: "breakdown",
     repoPath,
     beatIds: [parentBeatId],
-    agentName: agent.label || agent.command,
+    agentName: agentDisplayName(agent),
     agentModel: agent.model,
+    agentVersion: agent.version,
   }).catch((err) => {
     console.error(`[breakdown-manager] Failed to start interaction log:`, err);
     return noopInteractionLog();
@@ -518,7 +520,7 @@ export async function createBreakdownSession(
     child.stderr?.removeAllListeners();
   };
 
-  const agentLabel = agent.label || agent.command;
+  const agentLabel = agentDisplayName(agent);
 
   child.on("error", (err) => {
     releaseChildStreams();

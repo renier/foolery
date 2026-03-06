@@ -3,56 +3,26 @@
 import { useEffect, useState } from "react";
 import { fetchSettings } from "@/lib/settings-api";
 import type { ActionName } from "@/lib/types";
+import {
+  agentDisplayName,
+  detectAgentProviderId,
+  formatModelDisplay as formatAgentModelDisplay,
+} from "@/lib/agent-identity";
 
 export interface ResolvedAgentInfo {
-  /** Display name, e.g. "claude", "codex", "gemini" */
+  /** Display name, e.g. "Claude", "OpenAI", "Gemini" */
   name: string;
-  /** Model identifier if configured, e.g. "opus-4" */
+  /** Model identifier if configured, e.g. "sonnet" */
   model?: string;
-  /** Agent version if configured, e.g. "1.2.3" */
+  /** Agent version if configured, e.g. "4.5" */
   version?: string;
   /** CLI command path, e.g. "claude" */
   command: string;
   /** Vendor key used for icon selection */
   vendor: string;
 }
-
-/**
- * Detect vendor from command string.
- * Matches "claude", "codex", or "gemini" anywhere in the command.
- */
-export function detectVendor(command: string): string {
-  const lower = command.toLowerCase();
-  if (lower.includes("claude")) return "claude";
-  if (lower.includes("codex")) return "codex";
-  if (lower.includes("gemini")) return "gemini";
-  if (lower.includes("openrouter")) return "openrouter";
-  return "unknown";
-}
-
-/**
- * Map known model identifiers to human-readable display strings with version numbers.
- * Handles full model IDs (e.g. "claude-opus-4-6") and short names (e.g. "opus").
- */
-const MODEL_DISPLAY_MAP: Record<string, string> = {
-  "claude-opus-4-6": "Opus 4.6",
-  "claude-sonnet-4-5-20250929": "Sonnet 4.5",
-  "claude-haiku-4-5-20251001": "Haiku 4.5",
-  "claude-sonnet-4-5": "Sonnet 4.5",
-  "claude-haiku-4-5": "Haiku 4.5",
-  "opus-4-6": "Opus 4.6",
-  "sonnet-4-5": "Sonnet 4.5",
-  "haiku-4-5": "Haiku 4.5",
-  "opus": "Opus 4.6",
-  "sonnet": "Sonnet 4.5",
-  "haiku": "Haiku 4.5",
-};
-
-export function formatModelDisplay(model: string | undefined): string | undefined {
-  if (!model) return undefined;
-  const key = model.toLowerCase().trim();
-  return MODEL_DISPLAY_MAP[key] ?? model;
-}
+export const detectVendor = detectAgentProviderId;
+export const formatModelDisplay = formatAgentModelDisplay;
 
 /**
  * Hook that fetches settings and resolves agent info for a given action.
@@ -75,8 +45,8 @@ export function useAgentInfo(action: ActionName): ResolvedAgentInfo | null {
         const command = registered.command;
         const vendor = detectVendor(command);
         setInfo({
-          name: registered.label || agentId,
-          model: formatModelDisplay(registered.model),
+          name: agentDisplayName(registered),
+          model: formatAgentModelDisplay(registered.model),
           version: registered.version,
           command,
           vendor,
@@ -86,8 +56,8 @@ export function useAgentInfo(action: ActionName): ResolvedAgentInfo | null {
         const command = first?.command ?? "claude";
         const vendor = detectVendor(command);
         setInfo({
-          name: command,
-          model: formatModelDisplay(first?.model),
+          name: agentDisplayName(first ?? { command }),
+          model: formatAgentModelDisplay(first?.model),
           version: first?.version,
           command,
           vendor,

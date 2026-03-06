@@ -32,6 +32,7 @@ interface SessionMeta {
   beatIds: string[];
   agentName?: string;
   agentModel?: string;
+  agentVersion?: string;
 }
 
 export interface PromptLogMetadata {
@@ -194,6 +195,7 @@ export async function startInteractionLog(
     beatIds: meta.beatIds,
     ...(meta.agentName ? { agentName: meta.agentName } : {}),
     ...(meta.agentModel ? { agentModel: meta.agentModel } : {}),
+    ...(meta.agentVersion ? { agentVersion: meta.agentVersion } : {}),
   };
 
   // Write session_start synchronously so the file exists before cleanup

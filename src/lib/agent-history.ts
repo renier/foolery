@@ -38,6 +38,7 @@ interface SessionStartLine {
   ts: string;
   agentName?: string;
   agentModel?: string;
+  agentVersion?: string;
 }
 
 interface SessionParseResult {
@@ -407,6 +408,7 @@ function parseSession(
         ts: ts || new Date(0).toISOString(),
         agentName: typeof parsed.agentName === "string" ? parsed.agentName : undefined,
         agentModel: typeof parsed.agentModel === "string" ? parsed.agentModel : undefined,
+        agentVersion: typeof parsed.agentVersion === "string" ? parsed.agentVersion : undefined,
       };
 
       updatedAt = newerTimestamp(updatedAt, start.ts);
@@ -656,6 +658,7 @@ export async function readAgentHistory(
         entries: sortEntries(entries),
         agentName: start.agentName,
         agentModel: start.agentModel,
+        agentVersion: start.agentVersion,
         workflowStates,
       });
     }

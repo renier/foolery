@@ -108,16 +108,15 @@ describe("scanForAgents (line 345-357)", () => {
     });
 
     const results = await scanForAgents();
-    expect(results).toHaveLength(5);
+    expect(results).toHaveLength(3);
 
     const claude = results.find((r) => r.id === "claude");
     expect(claude?.installed).toBe(true);
     expect(claude?.path).toBe("/usr/local/bin/claude");
+    expect(claude?.provider).toBe("Claude");
 
     const codex = results.find((r) => r.id === "codex");
     expect(codex?.installed).toBe(false);
-
-    const openrouterAgent = results.find((r) => r.id === "openrouter-agent");
-    expect(openrouterAgent?.installed).toBe(false);
+    expect(codex?.provider).toBe("OpenAI");
   });
 });

@@ -30,6 +30,7 @@ import { ORCHESTRATION_WAVE_LABEL } from "@/lib/wave-slugs";
 import { updateMessageTypeIndexFromSession } from "@/lib/agent-message-type-index";
 import type { Beat, MemoryWorkflowDescriptor } from "@/lib/types";
 import type { AgentTarget, CliAgentTarget } from "@/lib/types-agent-target";
+import { agentDisplayName } from "@/lib/agent-identity";
 import {
   StepPhase,
   defaultWorkflowDescriptor,
@@ -84,12 +85,6 @@ function buildQueueTerminalInvariantInstruction(memoryManagerType: MemoryManager
     `Never leave work in an action state (planning, plan_review, implementation, implementation_review, shipment, shipment_review).`,
     `If the ${item} is currently in an action state, run "${advanceCommand}" to advance it to the next queue state before stopping.`,
   ].join("\n");
-}
-
-function agentDisplayName(agent: AgentTarget): string {
-  if (agent.label?.trim()) return agent.label.trim();
-  if (agent.kind === "cli") return agent.command;
-  return "OpenRouter";
 }
 
 type JsonObject = Record<string, unknown>;
@@ -744,6 +739,7 @@ export async function createSession(
     beatIds: isParent ? waveBeatIds : [beatId],
     agentName: agentDisplayName(agent),
     agentModel: agent.model,
+    agentVersion: agent.version,
   }).catch((err) => {
     console.error(`[terminal-manager] Failed to start interaction log:`, err);
     return noopInteractionLog();
@@ -1737,7 +1733,7 @@ export async function createSession(
       interactionLog.logEnd(1, "error");
       child.kill("SIGTERM");
       sessions.delete(id);
-      const agentDesc = `${agent.label || agent.command}${agent.model ? ` (model: ${agent.model})` : ""}`;
+      const agentDesc = `${agentDisplayName(agent)}${agent.model ? ` (model: ${agent.model})` : ""}`;
       throw new Error(`Failed to send initial prompt to agent: ${agentDesc}`);
     }
   } else {

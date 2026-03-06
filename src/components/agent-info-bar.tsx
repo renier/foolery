@@ -14,7 +14,7 @@ const VENDOR_CONFIG: Record<
     color: "text-purple-300",
     bg: "bg-purple-500/10",
   },
-  codex: {
+  openai: {
     icon: Code2,
     color: "text-green-300",
     bg: "bg-green-500/10",
