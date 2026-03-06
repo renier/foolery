@@ -86,7 +86,7 @@ function SettingsSectionCard({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-primary/15 bg-[linear-gradient(135deg,rgba(168,85,247,0.08),rgba(255,255,255,0.92)_45%,rgba(74,222,128,0.08))] p-4 shadow-[0_18px_45px_-32px_rgba(88,28,135,0.55)] backdrop-blur-sm dark:bg-[linear-gradient(135deg,rgba(168,85,247,0.16),rgba(24,24,27,0.92)_48%,rgba(74,222,128,0.12))]",
+        "rounded-2xl border border-primary/15 bg-card/92 p-4 shadow-[0_18px_45px_-32px_rgba(88,28,135,0.55)] backdrop-blur-sm dark:bg-card/90",
         className,
       )}
     >
@@ -151,7 +151,7 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="overflow-hidden border-primary/20 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.14),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(74,222,128,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(250,247,255,0.98))] sm:max-w-xl dark:bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.24),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(74,222,128,0.16),transparent_24%),linear-gradient(180deg,rgba(31,23,39,0.98),rgba(24,24,27,0.98))]">
+      <SheetContent className="overflow-hidden border-primary/20 bg-background sm:max-w-xl">
         <SheetHeader>
           <SheetTitle className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
             Settings
