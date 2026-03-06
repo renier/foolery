@@ -38,6 +38,11 @@ export function SettingsDefaultsSection({
   });
   const workflows =
     workflowResult?.ok && workflowResult.data ? workflowResult.data : [];
+  const selectedProfileId =
+    defaults.profileId ||
+    workflows.find((wf) => (wf.profileId ?? wf.id) === "autopilot")?.id ||
+    workflows[0]?.id ||
+    "autopilot";
 
   return (
     <div className="space-y-3">
@@ -56,11 +61,11 @@ export function SettingsDefaultsSection({
           </button>
         </div>
         <Select
-          value={defaults.profileId || "auto"}
+          value={selectedProfileId}
           onValueChange={(value) =>
             onDefaultsChange({
               ...defaults,
-              profileId: value === "auto" ? "" : value,
+              profileId: value,
             })
           }
         >
@@ -68,7 +73,6 @@ export function SettingsDefaultsSection({
             <SelectValue placeholder="Select profile..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="auto">Autopilot</SelectItem>
             {workflows.map((wf) => (
               <SelectItem key={wf.id} value={wf.profileId ?? wf.id}>
                 {profileDisplayName(wf.profileId ?? wf.id)}
