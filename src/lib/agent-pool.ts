@@ -84,6 +84,7 @@ export function resolvePoolAgent(
 
 /**
  * Replace one agentId in a pool with another while preserving total weight.
+ * Swaps all occurrences of source agentId in a step.
  * If the replacement agent already exists, merge weights and remove source.
  * Returns the original entries when the swap cannot be applied.
  */
@@ -93,24 +94,34 @@ export function swapPoolAgent(
   toAgentId: string,
 ): PoolEntry[] {
   if (fromAgentId === toAgentId) return entries;
-  const fromIndex = entries.findIndex((entry) => entry.agentId === fromAgentId);
-  if (fromIndex < 0) return entries;
+  const fromIndexes: number[] = [];
+  let fromWeight = 0;
+  for (const [idx, entry] of entries.entries()) {
+    if (entry.agentId === fromAgentId) {
+      fromIndexes.push(idx);
+      fromWeight += entry.weight;
+    }
+  }
+  if (fromIndexes.length === 0) return entries;
 
-  const toIndex = entries.findIndex(
-    (entry, idx) => idx !== fromIndex && entry.agentId === toAgentId,
-  );
+  const removeIndexes = new Set(fromIndexes);
+  const firstFromIndex = fromIndexes[0]!;
+  const toIndex = entries.findIndex((entry) => entry.agentId === toAgentId);
   if (toIndex >= 0) {
-    const fromWeight = entries[fromIndex]!.weight;
     return entries
       .map((entry, idx) =>
         idx === toIndex ? { ...entry, weight: entry.weight + fromWeight } : entry,
       )
-      .filter((_, idx) => idx !== fromIndex);
+      .filter((_, idx) => !removeIndexes.has(idx));
   }
 
-  const next = [...entries];
-  next[fromIndex] = { ...next[fromIndex]!, agentId: toAgentId };
-  return next;
+  return entries
+    .map((entry, idx) =>
+      idx === firstFromIndex
+        ? { ...entry, agentId: toAgentId, weight: fromWeight }
+        : entry,
+    )
+    .filter((_, idx) => idx === firstFromIndex || !removeIndexes.has(idx));
 }
 
 function toAgentTarget(

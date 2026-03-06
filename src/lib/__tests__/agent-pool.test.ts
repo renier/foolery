@@ -321,4 +321,31 @@ describe("swapPoolAgent", () => {
       { agentId: "claude", weight: 2 },
     ]);
   });
+
+  it("replaces all source occurrences when replacement is missing", () => {
+    const pool: PoolEntry[] = [
+      { agentId: "claude", weight: 2 },
+      { agentId: "sonnet", weight: 1 },
+      { agentId: "claude", weight: 3 },
+    ];
+    const swapped = swapPoolAgent(pool, "claude", "codex");
+    expect(swapped).toEqual([
+      { agentId: "codex", weight: 5 },
+      { agentId: "sonnet", weight: 1 },
+    ]);
+  });
+
+  it("replaces all source occurrences and merges into existing replacement", () => {
+    const pool: PoolEntry[] = [
+      { agentId: "sonnet", weight: 1 },
+      { agentId: "claude", weight: 2 },
+      { agentId: "codex", weight: 3 },
+      { agentId: "claude", weight: 4 },
+    ];
+    const swapped = swapPoolAgent(pool, "claude", "codex");
+    expect(swapped).toEqual([
+      { agentId: "sonnet", weight: 1 },
+      { agentId: "codex", weight: 9 },
+    ]);
+  });
 });
