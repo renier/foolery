@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc1cc-cccf-7500-9ff0-f87aec7944a1",
+  "occurred_at": "2026-03-06T06:19:10.415422Z",
+  "knot_id": "foolery-0df2",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Removed only the outer parent border around the Simple/Advanced dispatch mode button group, leaving the buttons themselves unchanged. Verified with bun run lint (warnings only, 0 errors), bunx tsc --noEmit, bun run test, and NODE_ENV=production bun run build. Pushed directly to origin/main as 85cc85e.",
+    "datetime": "2026-03-06T06:19:10.415422Z",
+    "entry_id": "019cc1cc-cccf-7500-9ff0-f86d90c947a7",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
