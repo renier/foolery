@@ -221,7 +221,7 @@ export function SettingsSheet({ open, onOpenChange, initialSection }: SettingsSh
             Reset to Defaults
           </Button>
           <Button
-            className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-[0_12px_30px_-18px_rgba(88,28,135,0.75)] hover:opacity-95"
+            className="bg-primary text-primary-foreground shadow-[0_12px_30px_-18px_rgba(88,28,135,0.55)] hover:bg-primary/90"
             onClick={handleSave}
             disabled={saving || loading}
           >

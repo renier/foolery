@@ -71,7 +71,7 @@ export function SettingsReposSection() {
   }
 
   return (
-    <div className="space-y-4 rounded-xl border border-primary/18 bg-background/60 p-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FolderKanban className="size-4 text-accent" />
