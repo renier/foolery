@@ -73,10 +73,7 @@ export function SettingsReposSection() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FolderOpen className="size-4 text-accent" />
-          <h3 className="text-sm font-medium">Repositories</h3>
-        </div>
+        <h3 className="text-sm font-medium">Repositories</h3>
         <Button size="sm" variant="outline" onClick={() => setBrowseOpen(true)}>
           <Plus className="mr-1 h-3.5 w-3.5" />
           Add
@@ -106,8 +103,8 @@ function EmptyReposState({ onBrowse }: { onBrowse: () => void }) {
     .join(", ");
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-primary/30 py-8 text-center">
-      <Database className="size-8 text-primary/60 mb-3" />
+    <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-8 text-center">
+      <Database className="size-8 text-muted-foreground mb-3" />
       <p className="text-sm font-medium mb-1">No repositories registered</p>
       <p className="text-xs text-muted-foreground mb-3 max-w-[260px]">
         Add a repository with a supported memory manager ({supported}) to get

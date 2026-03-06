@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Settings2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -31,10 +30,7 @@ export function SettingsDefaultsSection({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Settings2 className="size-4 text-primary" />
-        <h3 className="text-sm font-medium">Defaults</h3>
-      </div>
+      <h3 className="text-sm font-medium">Defaults</h3>
 
       <div className="space-y-2">
         <Label htmlFor="default-profile" className="text-sm">
