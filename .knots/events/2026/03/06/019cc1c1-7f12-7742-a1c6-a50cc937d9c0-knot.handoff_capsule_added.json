@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc1c1-7f12-7742-a1c6-a50cc937d9c0",
+  "occurred_at": "2026-03-06T06:06:49.618829Z",
+  "knot_id": "foolery-0df2",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Removed the settings sheet header/title block, restored the top content stack to start immediately with Repositories, and changed the Repositories/Agents headings from gradient-clipped text to solid text to eliminate the remaining washout. Verified with bun run lint (warnings only, 0 errors), bunx tsc --noEmit, bun run test, and NODE_ENV=production bun run build. Pushed directly to origin/main as 537505c.",
+    "datetime": "2026-03-06T06:06:49.618829Z",
+    "entry_id": "019cc1c1-7f12-7742-a1c6-a4f0e8c72985",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
