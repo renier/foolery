@@ -10,41 +10,41 @@
 <table align="center">
   <tr>
     <td align="center">
-      <a href="docs/screenshots/beats.png">
-        <img src="docs/screenshots/beats.png" width="160" alt="Beats View" />
+      <a href="docs/screenshots/queues.png">
+        <img src="docs/screenshots/queues.png" width="160" alt="Queues View" />
       </a>
       <br />
-      <sub><b>Beats</b></sub>
+      <sub><b>Queues</b></sub>
     </td>
     <td align="center">
-      <a href="docs/screenshots/new-beat.png">
-        <img src="docs/screenshots/new-beat.png" width="160" alt="New Beat" />
+      <a href="docs/screenshots/active.png">
+        <img src="docs/screenshots/active.png" width="160" alt="Active View" />
       </a>
       <br />
-      <sub><b>New Beat</b></sub>
+      <sub><b>Active</b></sub>
     </td>
     <td align="center">
-      <a href="docs/screenshots/take.png">
-        <img src="docs/screenshots/take.png" width="160" alt="Take Terminal" />
+      <a href="docs/screenshots/human-action.png">
+        <img src="docs/screenshots/human-action.png" width="160" alt="Human Action" />
       </a>
       <br />
-      <sub><b>Take!</b></sub>
-    </td>
-    <td align="center">
-      <a href="docs/screenshots/scenes.png">
-        <img src="docs/screenshots/scenes.png" width="160" alt="Scenes" />
-      </a>
-      <br />
-      <sub><b>Scenes</b></sub>
+      <sub><b>Human Action</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <a href="docs/screenshots/final-cut.png">
-        <img src="docs/screenshots/final-cut.png" width="160" alt="Final Cut" />
+      <a href="docs/screenshots/retakes.png">
+        <img src="docs/screenshots/retakes.png" width="160" alt="ReTakes" />
       </a>
       <br />
-      <sub><b>Final Cut</b></sub>
+      <sub><b>ReTakes</b></sub>
+    </td>
+    <td align="center">
+      <a href="docs/screenshots/history.png">
+        <img src="docs/screenshots/history.png" width="160" alt="History" />
+      </a>
+      <br />
+      <sub><b>History</b></sub>
     </td>
     <td align="center">
       <a href="docs/screenshots/hot-keys.png">
@@ -52,20 +52,6 @@
       </a>
       <br />
       <sub><b>Hot Keys</b></sub>
-    </td>
-    <td align="center">
-      <a href="docs/screenshots/agent-history.png">
-        <img src="docs/screenshots/agent-history.png" width="160" alt="Agent History" />
-      </a>
-      <br />
-      <sub><b>Agent History</b></sub>
-    </td>
-    <td align="center">
-      <a href="docs/screenshots/retake.png">
-        <img src="docs/screenshots/retake.png" width="160" alt="ReTake" />
-      </a>
-      <br />
-      <sub><b>ReTake</b></sub>
     </td>
   </tr>
 </table>
@@ -97,62 +83,79 @@ foolery setup
 foolery start
 ```
 
+## Supported Agent CLIs
+
+Foolery launches and monitors agent sessions through their CLIs. It auto-detects installed agents and adapts its command invocation, output parsing, and terminal display per dialect.
+
+| Agent | CLI Command | Notes |
+|-------|-------------|-------|
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | `claude` | Default dialect. Streams JSONL via `--output-format stream-json`. |
+| [Codex](https://github.com/openai/codex) | `codex` | Uses `exec` subcommand with `--json` output. ChatGPT CLI variants also supported. |
+| [OpenCode](https://github.com/opencode-ai/opencode) | `opencode` | Uses `run` subcommand with `--format json` output. |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | `gemini` | Auto-detected and displayed in agent identity. |
+
+Foolery scans your `$PATH` for these CLIs during setup and in **Settings > Agents**. You can register additional agent commands or override defaults there.
+
+## Dispatch Modes
+
+Foolery supports two dispatch modes for assigning agents to work, configurable under **Settings > Dispatch**.
+
+### Simple (One agent per action)
+
+Map a single registered agent to each action type: **Take!** (execute a single beat), **Scene!** (multi-beat orchestration), and **Breakdown** (decompose into sub-beats). The Swap Agent control lets you globally replace one agent with another across all mappings.
+
+![Simple dispatch](docs/screenshots/dispatch-simple.png)
+
+### Advanced (Weighted pools per step)
+
+Assign multiple agents with weights to each workflow step: Planning, Plan Review, Implementation, Impl Review, Shipment, and Ship Review. Foolery selects an agent probabilistically based on relative weights, enabling A/B testing across agents or distributing work across different models.
+
+![Advanced dispatch](docs/screenshots/dispatch-advanced.png)
+
 ## Flow & Features
 
-### Beats
+### Queues
 
-The main table. See every beat at a glance — filter by status, type, priority, or free-text search. Select rows with spacebar, bulk-update fields, drill into inline summaries, and trigger agent sessions on any beat.
+The default view. All beats queued and ready for action — filter by type, priority, or free-text search. Select rows with spacebar, bulk-update fields, drill into inline summaries, and trigger agent sessions on any beat. Create new beats with Shift+N.
 
-![Beats view](docs/screenshots/beats.png)
+![Queues view](docs/screenshots/queues.png)
 
-### Enter a Beat
-Rapid, basic task creation - Shift-N, tab, tab, enter, done.
+### Active
 
-![Enter a Beat](docs/screenshots/new-beat.png)
+Beats currently in progress. See which agents are working, their model, version, and state at a glance. The Active view adds Agent, Model, and Version columns so you can monitor running work.
 
-### Scenes
+![Active view](docs/screenshots/active.png)
 
-Browse and manage your orchestration trees. Navigate dependency hierarchies with keyboard arrows, zoom in/out on wave depth, rename slugs, and trigger execution on any wave with a single shortcut.
+### Human Action
 
-![Scenes view](docs/screenshots/scenes.png)
+The human action queue. Beats requiring a human-owned next step land here based on profile ownership and state. Review outcomes, capture notes, and keep your done list honest.
 
-### Take! Terminal
+![Human Action view](docs/screenshots/human-action.png)
 
-One-click or bulk select - Launch an agent run from the table and monitor it live in the built-in terminal drawer without leaving the app context.
+### ReTakes
 
-![Take terminal panel](docs/screenshots/take.png)
+The review lane for shipped beats. Browse handoff capsules from agent sessions, inspect implementation history, and trigger follow-up passes when needed.
 
-### Final Cut
+![ReTakes view](docs/screenshots/retakes.png)
 
-The human action queue. Beats requiring human review land here. Review outcomes, capture notes, and keep your done list honest.
+### History
 
-![Final Cut view](docs/screenshots/final-cut.png)
+A focused history feed for agent sessions. Browse recent beat activity, inspect beat metadata, and review app-to-agent and agent-to-app conversation logs in one timeline.
 
-### Agent History
-
-A focused history feed for agent implementation sessions. Browse recent beat activity, inspect beat metadata, and review app-to-agent and agent-to-app messages in one timeline.
-
-![Agent History view](docs/screenshots/agent-history.png)
-
-### ReTake
-
-The redo lane for follow-up agent passes. Re-run work with tighter prompts, keep retries visible, and iterate without losing the original beat context.
-
-![ReTake view](docs/screenshots/retake.png)
+![History view](docs/screenshots/history.png)
 
 ### Hot Keys
 
-Need to stay in flow? Open the keyboard shortcut overlay for a quick map of navigation, actions, editing, and panel controls across views.
+Need to stay in flow? Open the keyboard shortcut overlay (Shift+H) for a quick map of navigation, actions, editing, and panel controls across views.
 
 ![Keyboard shortcuts overlay](docs/screenshots/hot-keys.png)
 
 ## Why Foolery?
 
 - **Rapid scratch pad for small bugs and big ideas alike.** Create a beat, fire off an agent, review the result — all without leaving the keyboard.
-- **Leverage agents to organize groups of work and optimize them for parallel execution.** Ask Claude to decompose a set of tasks into dependency-aware waves, then launch them scene by scene.
+- **Leverage agents to organize groups of work and optimize them for parallel execution.** Ask Claude to decompose a set of tasks into dependency-aware waves, then launch them in sequence.
 - **Track "completed" work units in a first-class way.** Every finished beat flows into a human action queue where you review outcomes and annotate before it's truly done.
 - **Keyboard-first workflow.** Navigate, select, bulk-update, and trigger agent sessions entirely from the keyboard.
-- **Dependency-aware wave planning.** Visualize what's runnable, what's blocked, and what's next — across your whole project.
 - **Multi-repo support.** Switch between repositories or view beats across all of them in one place.
 
 ## How to Contribute
@@ -193,6 +196,7 @@ Shift+H to view at any time!
 | `Shift+R` / `⌘+Shift+R` | Next / previous repository |
 | `Shift+S` | Take! (start agent session) |
 | `Shift+C` | Close focused beat |
+| `Shift+<` / `Shift+>` | Fold / unfold parent |
 | `Shift+O` | Open notes dialog |
 | `Shift+L` | Add label to focused beat |
 | `Shift+N` | Create new beat |
