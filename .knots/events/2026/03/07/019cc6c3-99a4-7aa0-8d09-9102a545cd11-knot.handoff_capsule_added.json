@@ -1,0 +1,15 @@
+{
+  "event_id": "019cc6c3-99a4-7aa0-8d09-9102a545cd11",
+  "occurred_at": "2026-03-07T05:27:13.572045Z",
+  "knot_id": "foolery-a55e",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Fixed the Beads CLI filter path so UI phase aliases work for list fetches: state=queued now returns queued workflow states and state=in_action returns active workflow states. Added regression coverage in bd-coverage, and verified 1brutus now returns 26 queued beats and 18 active beats through the real bd path. Validation: bun run lint; bunx tsc --noEmit; bun run test; bun run build.",
+    "datetime": "2026-03-07T05:27:13.572045Z",
+    "entry_id": "019cc6c3-99a4-7aa0-8d09-90fdcd5c0a78",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
