@@ -15,6 +15,7 @@ import {
   isWorkflowStateLabel,
   mapStatusToDefaultWorkflowState,
   normalizeStateForWorkflow,
+  resolveStep,
   withWorkflowProfileLabel,
   withWorkflowStateLabel,
 } from "./workflows";
@@ -470,7 +471,15 @@ function applyWorkflowFilters(
   if (!filters) return beats;
   return beats.filter((beat) => {
     if (filters.workflowId && beat.workflowId !== filters.workflowId) return false;
-    if (filters.state && beat.state !== filters.state) return false;
+    if (filters.state) {
+      if (filters.state === "queued") {
+        if (resolveStep(beat.state)?.phase !== "queued") return false;
+      } else if (filters.state === "in_action") {
+        if (resolveStep(beat.state)?.phase !== "active") return false;
+      } else if (beat.state !== filters.state) {
+        return false;
+      }
+    }
     if (filters.profileId && beat.profileId !== filters.profileId) return false;
     if (filters.requiresHumanAction !== undefined) {
       const wantsHuman = filters.requiresHumanAction === "true";

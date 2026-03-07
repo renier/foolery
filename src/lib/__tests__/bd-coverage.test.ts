@@ -341,4 +341,30 @@ describe("bd.ts additional coverage", () => {
     expect(result.ok).toBe(false);
     expect(result.error).toContain("Failed to parse");
   });
+
+  it("listBeats filters queued as a workflow phase alias", async () => {
+    queueExec({
+      stdout: JSON.stringify([
+        { ...BEAT_JSON, id: "queued-1", status: "open", labels: [] },
+        { ...BEAT_JSON, id: "active-1", status: "in_progress", labels: [] },
+      ]),
+    });
+    const { listBeats } = await import("@/lib/bd");
+    const result = await listBeats({ state: "queued" });
+    expect(result.ok).toBe(true);
+    expect(result.data?.map((beat) => beat.id)).toEqual(["queued-1"]);
+  });
+
+  it("listBeats filters in_action as a workflow phase alias", async () => {
+    queueExec({
+      stdout: JSON.stringify([
+        { ...BEAT_JSON, id: "queued-1", status: "open", labels: [] },
+        { ...BEAT_JSON, id: "active-1", status: "in_progress", labels: [] },
+      ]),
+    });
+    const { listBeats } = await import("@/lib/bd");
+    const result = await listBeats({ state: "in_action" });
+    expect(result.ok).toBe(true);
+    expect(result.data?.map((beat) => beat.id)).toEqual(["active-1"]);
+  });
 });
