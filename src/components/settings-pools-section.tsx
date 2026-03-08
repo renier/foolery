@@ -120,8 +120,9 @@ export function SettingsPoolsSection({
         Configure weighted agent distribution per workflow step.
       </p>
       <p className="text-[10px] text-muted-foreground">
-        For a full replacement across Dispatch, use the single global Swap
-        Agent control below these step editors.
+        These editors only change one step at a time. Use the dispatch-wide
+        Swap Agent tool at the bottom of Settings &gt; Dispatch for a global
+        replacement.
       </p>
       <div className="space-y-4">
         {ALL_STEPS.map((step) => (

@@ -150,10 +150,10 @@ export function SettingsDispatchGlobalSwap({
       }
     >
       <div>
-        <Label className="text-xs font-medium">Global Swap Agent</Label>
+        <Label className="text-xs font-medium">Swap Agent</Label>
         <p className="text-[10px] text-muted-foreground">
-          Single dispatch-wide replacement. One swap updates every matching
-          action mapping and pool entry across all workflow steps.
+          Dispatch-wide replacement. One swap updates every matching action
+          mapping and pool entry across all workflow steps.
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -189,12 +189,12 @@ export function SettingsDispatchGlobalSwap({
           disabled={!canSwap}
           onClick={handleGlobalSwap}
         >
-          Swap Globally
+          Swap Across Dispatch
         </Button>
       </div>
       {scopeParts.length > 0 && (
         <p className="text-[10px] text-muted-foreground">
-          Global scope: {scopeParts.join(" and ")}.
+          Dispatch-wide scope: {scopeParts.join(" and ")}.
         </p>
       )}
     </div>
