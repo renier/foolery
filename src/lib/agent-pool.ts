@@ -171,6 +171,7 @@ export function swapActionsAgent(
 const DEFAULT_POOL_STEPS = Object.values(WorkflowStep) as WorkflowStep[];
 
 export interface SwapPoolsAgentResult {
+  affectedEntries: number;
   affectedSteps: number;
   updates: Partial<PoolsSettings>;
   updatedPools: PoolsSettings;
@@ -200,25 +201,43 @@ export function swapPoolsAgent(
   toAgentId: string,
 ): SwapPoolsAgentResult {
   if (!fromAgentId || !toAgentId || fromAgentId === toAgentId) {
-    return { affectedSteps: 0, updates: {}, updatedPools: pools };
+    return {
+      affectedEntries: 0,
+      affectedSteps: 0,
+      updates: {},
+      updatedPools: pools,
+    };
   }
 
   const updates: Partial<PoolsSettings> = {};
+  let affectedEntries = 0;
   let affectedSteps = 0;
   for (const step of DEFAULT_POOL_STEPS) {
     const stepEntries = pools[step];
+    const entryMatches = stepEntries.filter(
+      (entry) => entry.agentId === fromAgentId,
+    ).length;
+    if (entryMatches === 0) continue;
+
     const swappedEntries = swapPoolAgent(stepEntries, fromAgentId, toAgentId);
     if (swappedEntries !== stepEntries) {
       updates[step] = swappedEntries;
+      affectedEntries += entryMatches;
       affectedSteps += 1;
     }
   }
 
   if (affectedSteps === 0) {
-    return { affectedSteps: 0, updates: {}, updatedPools: pools };
+    return {
+      affectedEntries: 0,
+      affectedSteps: 0,
+      updates: {},
+      updatedPools: pools,
+    };
   }
 
   return {
+    affectedEntries,
     affectedSteps,
     updates,
     updatedPools: { ...pools, ...updates },

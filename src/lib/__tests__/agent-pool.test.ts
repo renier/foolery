@@ -430,6 +430,7 @@ describe("swapPoolsAgent", () => {
 
   it("swaps the source agent across all workflow steps that contain it", () => {
     const result = swapPoolsAgent(basePools, "claude", "codex");
+    expect(result.affectedEntries).toBe(3);
     expect(result.affectedSteps).toBe(3);
     expect(result.updates).toEqual({
       planning: [{ agentId: "codex", weight: 1 }],
@@ -454,6 +455,7 @@ describe("swapPoolsAgent", () => {
 
   it("returns original pools when no steps contain the source agent", () => {
     const result = swapPoolsAgent(basePools, "nonexistent", "codex");
+    expect(result.affectedEntries).toBe(0);
     expect(result.affectedSteps).toBe(0);
     expect(result.updates).toEqual({});
     expect(result.updatedPools).toBe(basePools);
@@ -461,8 +463,42 @@ describe("swapPoolsAgent", () => {
 
   it("returns original pools for no-op swaps", () => {
     const result = swapPoolsAgent(basePools, "claude", "claude");
+    expect(result.affectedEntries).toBe(0);
     expect(result.affectedSteps).toBe(0);
     expect(result.updates).toEqual({});
     expect(result.updatedPools).toBe(basePools);
+  });
+
+  it("counts every matching pool entry across steps, not just affected steps", () => {
+    const pools: PoolsSettings = {
+      planning: [
+        { agentId: "claude", weight: 1 },
+        { agentId: "claude", weight: 2 },
+      ],
+      plan_review: [],
+      implementation: [
+        { agentId: "sonnet", weight: 2 },
+        { agentId: "claude", weight: 3 },
+      ],
+      implementation_review: [],
+      shipment: [{ agentId: "codex", weight: 1 }],
+      shipment_review: [{ agentId: "claude", weight: 4 }],
+    };
+
+    const result = swapPoolsAgent(pools, "claude", "codex");
+
+    expect(result.affectedEntries).toBe(4);
+    expect(result.affectedSteps).toBe(3);
+    expect(result.updatedPools).toEqual({
+      planning: [{ agentId: "codex", weight: 3 }],
+      plan_review: [],
+      implementation: [
+        { agentId: "sonnet", weight: 2 },
+        { agentId: "codex", weight: 3 },
+      ],
+      implementation_review: [],
+      shipment: [{ agentId: "codex", weight: 1 }],
+      shipment_review: [{ agentId: "codex", weight: 4 }],
+    });
   });
 });

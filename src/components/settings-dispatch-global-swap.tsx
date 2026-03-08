@@ -115,7 +115,7 @@ export function SettingsDispatchGlobalSwap({
     }
     if (poolSwap.affectedSteps > 0) {
       affectedParts.push(
-        `${poolSwap.affectedSteps} pool step${poolSwap.affectedSteps > 1 ? "s" : ""}`,
+        `${poolSwap.affectedEntries} pool entr${poolSwap.affectedEntries === 1 ? "y" : "ies"} across ${poolSwap.affectedSteps} step${poolSwap.affectedSteps > 1 ? "s" : ""}`,
       );
     }
     toast.success(`Swapped agent across ${affectedParts.join(" and ")}`);
@@ -135,7 +135,7 @@ export function SettingsDispatchGlobalSwap({
       <div>
         <Label className="text-xs font-medium">Swap Agent (Global)</Label>
         <p className="text-[10px] text-muted-foreground">
-          Replace an agent across all dispatch mappings and pool steps.
+          Replace an agent across all dispatch mappings and every matching pool entry.
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">

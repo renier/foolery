@@ -108,7 +108,7 @@ Map a single registered agent to each action type: **Take!** (execute a single b
 
 ### Advanced (Weighted pools per step)
 
-Assign multiple agents with weights to each workflow step: Planning, Plan Review, Implementation, Impl Review, Shipment, and Ship Review. Foolery selects an agent probabilistically based on relative weights, enabling A/B testing across agents or distributing work across different models.
+Assign multiple agents with weights to each workflow step: Planning, Plan Review, Implementation, Impl Review, Shipment, and Ship Review. Foolery selects an agent probabilistically based on relative weights, enabling A/B testing across agents or distributing work across different models. The single Swap Agent control at the bottom of Dispatch replaces every matching occurrence globally instead of requiring step-by-step edits.
 
 ![Advanced dispatch](docs/screenshots/dispatch-advanced.png)
 
