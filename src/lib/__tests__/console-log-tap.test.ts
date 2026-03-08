@@ -33,9 +33,13 @@ describe("console-log-tap", () => {
     rmSync(TEST_LOG_ROOT, { recursive: true, force: true });
   });
 
+  function logFilePathForDate(date: string): string {
+    return join(TEST_LOG_ROOT, "_server", date, "console.log");
+  }
+
   function logFilePath(): string {
     const date = new Date().toISOString().slice(0, 10);
-    return join(TEST_LOG_ROOT, "_server", date, "console.log");
+    return logFilePathForDate(date);
   }
 
   it("creates the log file and tees console.log output", async () => {
@@ -104,5 +108,108 @@ describe("console-log-tap", () => {
     const contents = readFileSync(logFilePath(), "utf-8");
     expect(contents).toContain('"key":"value"');
     expect(contents).toContain("boom");
+  });
+
+  it("rolls over to a new file when the date changes", async () => {
+    const { installConsoleTap, _setDateNow } =
+      await import("@/lib/console-log-tap");
+
+    vi.spyOn(process.stdout, "write").mockReturnValue(true);
+
+    // Start on day 1.
+    _setDateNow(() => new Date("2026-01-01T12:00:00Z"));
+    installConsoleTap();
+
+    console.log("day-one message");
+    await new Promise((r) => setTimeout(r, 50));
+
+    const day1Path = logFilePathForDate("2026-01-01");
+    expect(existsSync(day1Path)).toBe(true);
+    expect(readFileSync(day1Path, "utf-8")).toContain("day-one message");
+
+    // Advance to day 2.
+    _setDateNow(() => new Date("2026-01-02T03:00:00Z"));
+
+    console.log("day-two message");
+    await new Promise((r) => setTimeout(r, 50));
+
+    const day2Path = logFilePathForDate("2026-01-02");
+    expect(existsSync(day2Path)).toBe(true);
+    expect(readFileSync(day2Path, "utf-8")).toContain("day-two message");
+
+    // Day 1 file should NOT contain day-two content.
+    expect(readFileSync(day1Path, "utf-8")).not.toContain("day-two message");
+  });
+
+  it("captures uncaughtException to the log file", async () => {
+    const { installConsoleTap } = await import("@/lib/console-log-tap");
+
+    vi.spyOn(process.stdout, "write").mockReturnValue(true);
+    vi.spyOn(process.stderr, "write").mockReturnValue(true);
+
+    installConsoleTap();
+
+    // Emit a synthetic uncaughtException event.
+    const fakeError = new Error("synthetic crash");
+    process.emit("uncaughtException", fakeError);
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const contents = readFileSync(logFilePath(), "utf-8");
+    expect(contents).toContain("[FATAL]");
+    expect(contents).toContain("Uncaught exception: synthetic crash");
+  });
+
+  it("captures unhandledRejection to the log file", async () => {
+    const { installConsoleTap } = await import("@/lib/console-log-tap");
+
+    vi.spyOn(process.stdout, "write").mockReturnValue(true);
+    vi.spyOn(process.stderr, "write").mockReturnValue(true);
+
+    installConsoleTap();
+
+    // Emit a synthetic unhandledRejection event.
+    const fakeReason = new Error("unhandled promise");
+    process.emit("unhandledRejection", fakeReason, Promise.resolve());
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    const contents = readFileSync(logFilePath(), "utf-8");
+    expect(contents).toContain("[FATAL]");
+    expect(contents).toContain("Unhandled rejection: unhandled promise");
+  });
+
+  it("attaches an error handler to the write stream (no crash on error)", async () => {
+    const { EventEmitter } = await import("node:events");
+
+    // Create a fake stream that we can emit errors on.
+    const fakeStream = Object.assign(new EventEmitter(), {
+      write: vi.fn(() => true),
+      end: vi.fn(),
+    });
+
+    // Use vi.doMock to intercept createWriteStream for this test only.
+    vi.doMock("node:fs", async (importOriginal) => {
+      const actual =
+        await importOriginal<typeof import("node:fs")>();
+      return { ...actual, createWriteStream: () => fakeStream };
+    });
+
+    const { installConsoleTap } = await import("@/lib/console-log-tap");
+
+    vi.spyOn(process.stdout, "write").mockReturnValue(true);
+
+    installConsoleTap();
+
+    // Trigger a log line so ensureStream() is called and the stream is created.
+    console.log("trigger stream creation");
+
+    // Verify an error handler is registered (listenerCount > 0).
+    expect(fakeStream.listenerCount("error")).toBeGreaterThan(0);
+
+    // Emitting an error should not throw.
+    expect(() => {
+      fakeStream.emit("error", new Error("ENOSPC"));
+    }).not.toThrow();
   });
 });

@@ -1,4 +1,4 @@
-import { createWriteStream, mkdirSync } from "node:fs";
+import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { join } from "node:path";
 import { resolveInteractionLogRoot } from "@/lib/interaction-logger";
 
@@ -14,21 +14,39 @@ import { resolveInteractionLogRoot } from "@/lib/interaction-logger";
 
 let installed = false;
 
+// Exported for testing — allows injecting a custom date function.
+export let _dateNow: () => Date = () => new Date();
+export function _setDateNow(fn: () => Date): void {
+  _dateNow = fn;
+}
+
 export function installConsoleTap(): void {
   if (installed) return;
   installed = true;
 
-  const date = new Date().toISOString().slice(0, 10);
-  const dir = join(resolveInteractionLogRoot(), "_server", date);
-  try {
-    mkdirSync(dir, { recursive: true });
-  } catch {
-    // If we can't create the dir, bail silently — don't break the app.
-    return;
-  }
+  let currentDate = "";
+  let stream: WriteStream | null = null;
 
-  const filePath = join(dir, "console.log");
-  const stream = createWriteStream(filePath, { flags: "a" });
+  function ensureStream(): WriteStream | null {
+    const date = _dateNow().toISOString().slice(0, 10);
+    if (date !== currentDate || !stream) {
+      if (stream) {
+        stream.end();
+      }
+      const dir = join(resolveInteractionLogRoot(), "_server", date);
+      try {
+        mkdirSync(dir, { recursive: true });
+      } catch {
+        return null;
+      }
+      currentDate = date;
+      stream = createWriteStream(join(dir, "console.log"), { flags: "a" });
+      stream.on("error", () => {
+        // Swallow write errors — never crash the server due to logging.
+      });
+    }
+    return stream;
+  }
 
   const origLog = console.log.bind(console);
   const origWarn = console.warn.bind(console);
@@ -49,9 +67,11 @@ export function installConsoleTap(): void {
   }
 
   function writeLine(level: string, args: unknown[]): void {
-    const ts = new Date().toISOString();
+    const s = ensureStream();
+    if (!s) return;
+    const ts = _dateNow().toISOString();
     const msg = formatArgs(args);
-    stream.write(`${ts} [${level}] ${msg}\n`);
+    s.write(`${ts} [${level}] ${msg}\n`);
   }
 
   console.log = (...args: unknown[]) => {
@@ -69,10 +89,8 @@ export function installConsoleTap(): void {
     writeLine("ERROR", args);
   };
 
-  // Catch unhandled rejections and uncaught exceptions too
   process.on("uncaughtException", (err) => {
     writeLine("FATAL", [`Uncaught exception: ${err.message}`, err.stack ?? ""]);
-    stream.write("", () => { /* flush */ });
   });
 
   process.on("unhandledRejection", (reason) => {
@@ -81,5 +99,5 @@ export function installConsoleTap(): void {
     writeLine("FATAL", [`Unhandled rejection: ${msg}`, stack ?? ""]);
   });
 
-  origLog(`[console-tap] Logging all console output to ${filePath}`);
+  origLog("[console-tap] Console output tee active");
 }
