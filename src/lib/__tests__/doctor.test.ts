@@ -19,12 +19,14 @@ vi.mock("@/lib/backend-instance", () => ({
 const mockGetRegisteredAgents = vi.fn();
 const mockScanForAgents = vi.fn();
 const mockLoadSettings = vi.fn();
+const mockUpdateSettings = vi.fn();
 const mockInspectSettingsDefaults = vi.fn();
 const mockBackfillMissingSettingsDefaults = vi.fn();
 vi.mock("@/lib/settings", () => ({
   getRegisteredAgents: () => mockGetRegisteredAgents(),
   scanForAgents: () => mockScanForAgents(),
   loadSettings: () => mockLoadSettings(),
+  updateSettings: (...args: unknown[]) => mockUpdateSettings(...args),
   inspectSettingsDefaults: () => mockInspectSettingsDefaults(),
   backfillMissingSettingsDefaults: () => mockBackfillMissingSettingsDefaults(),
 }));
@@ -66,6 +68,7 @@ import {
   checkAgents,
   checkUpdates,
   checkSettingsDefaults,
+  checkBackendTypeMigration,
   checkRepoMemoryManagerTypes,
   checkStaleParents,
   checkPromptGuidance,
@@ -169,6 +172,45 @@ describe("checkSettingsDefaults", () => {
     expect(diags[0].fixOptions).toEqual([
       { key: "backfill", label: "Backfill missing settings defaults" },
     ]);
+  });
+});
+
+// ── checkBackendTypeMigration ──────────────────────────────────
+
+describe("checkBackendTypeMigration", () => {
+  it("warns when backend.type is cli", async () => {
+    mockLoadSettings.mockResolvedValue({ backend: { type: "cli" } });
+    const diags = await checkBackendTypeMigration();
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("warning");
+    expect(diags[0].check).toBe("backend-type-migration");
+    expect(diags[0].fixable).toBe(true);
+    expect(diags[0].message).toContain("cli");
+    expect(diags[0].message).toContain("auto");
+  });
+
+  it("passes when backend.type is auto", async () => {
+    mockLoadSettings.mockResolvedValue({ backend: { type: "auto" } });
+    const diags = await checkBackendTypeMigration();
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("info");
+    expect(diags[0].fixable).toBe(false);
+  });
+
+  it("passes for other backend types", async () => {
+    mockLoadSettings.mockResolvedValue({ backend: { type: "knots" } });
+    const diags = await checkBackendTypeMigration();
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("info");
+    expect(diags[0].message).toContain("knots");
+  });
+
+  it("handles loadSettings failure gracefully", async () => {
+    mockLoadSettings.mockRejectedValue(new Error("read error"));
+    const diags = await checkBackendTypeMigration();
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("warning");
+    expect(diags[0].fixable).toBe(false);
   });
 });
 
@@ -531,6 +573,19 @@ describe("runDoctorFix", () => {
     expect(fixReport.summary.attempted).toBe(0);
   });
 
+  it("fixes backend-type-migration by updating settings to auto", async () => {
+    mockLoadSettings.mockResolvedValue({ backend: { type: "cli" } });
+    mockListRepos.mockResolvedValue([]);
+    mockGetRegisteredAgents.mockResolvedValue({});
+    mockUpdateSettings.mockResolvedValue({ backend: { type: "auto" } });
+
+    const fixReport = await runDoctorFix({ "backend-type-migration": "migrate" });
+    const btFix = fixReport.fixes.find((f) => f.check === "backend-type-migration");
+    expect(btFix?.success).toBe(true);
+    expect(btFix?.message).toContain("Migrated");
+    expect(mockUpdateSettings).toHaveBeenCalledWith({ backend: { type: "auto" } });
+  });
+
   it("uses default first option when no strategies provided (backwards compat)", async () => {
     setupStaleParent();
 
@@ -552,7 +607,7 @@ describe("streamDoctor", () => {
     return events;
   }
 
-  it("emits 9 check events plus 1 summary event", async () => {
+  it("emits 10 check events plus 1 summary event", async () => {
     mockGetRegisteredAgents.mockResolvedValue({
       claude: { command: "claude", label: "Claude" },
     });
@@ -565,10 +620,10 @@ describe("streamDoctor", () => {
     });
 
     const events = await collectStream();
-    expect(events).toHaveLength(10);
+    expect(events).toHaveLength(11);
 
-    // First 9 are check results
-    for (let i = 0; i < 9; i++) {
+    // First 10 are check results
+    for (let i = 0; i < 10; i++) {
       const ev = events[i] as DoctorCheckResult;
       expect(ev.done).toBeUndefined();
       expect(ev.category).toBeTruthy();
@@ -579,7 +634,7 @@ describe("streamDoctor", () => {
     }
 
     // Last is summary
-    const summary = events[9] as DoctorStreamSummary;
+    const summary = events[10] as DoctorStreamSummary;
     expect(summary.done).toBe(true);
     expect(typeof summary.passed).toBe("number");
     expect(typeof summary.failed).toBe("number");
@@ -600,6 +655,7 @@ describe("streamDoctor", () => {
       "agents",
       "updates",
       "settings-defaults",
+      "backend-type-migration",
       "repo-memory-managers",
       "memory-implementation",
       "stale-parents",

@@ -5,6 +5,8 @@ import { join } from "node:path";
 import { getBackend } from "./backend-instance";
 import {
   getRegisteredAgents,
+  loadSettings,
+  updateSettings,
   inspectSettingsDefaults,
   backfillMissingSettingsDefaults,
 } from "./settings";
@@ -233,6 +235,10 @@ const SETTINGS_DEFAULTS_FIX_OPTIONS: FixOption[] = [
   { key: "backfill", label: "Backfill missing settings defaults" },
 ];
 
+const BACKEND_TYPE_MIGRATION_FIX_OPTIONS: FixOption[] = [
+  { key: "migrate", label: "Migrate backend.type from cli to auto" },
+];
+
 const REPO_MEMORY_MANAGERS_FIX_OPTIONS: FixOption[] = [
   { key: "backfill", label: "Backfill missing repository memory manager metadata" },
 ];
@@ -288,6 +294,47 @@ export async function checkSettingsDefaults(): Promise<Diagnostic[]> {
     message: "Settings defaults are present in ~/.config/foolery/settings.toml.",
     fixable: false,
   });
+  return diagnostics;
+}
+
+// ── Backend type migration check ────────────────────────────────────
+
+/**
+ * Detect legacy backend.type = "cli" from v0.3.0 and offer migration to "auto".
+ * The "auto" backend enables per-repo detection (knots vs beads).
+ */
+export async function checkBackendTypeMigration(): Promise<Diagnostic[]> {
+  const diagnostics: Diagnostic[] = [];
+
+  try {
+    const settings = await loadSettings();
+    if (settings.backend.type === "cli") {
+      diagnostics.push({
+        check: "backend-type-migration",
+        severity: "warning",
+        message:
+          'backend.type is set to "cli" (v0.3.0 default). Migrate to "auto" to enable per-repo backend detection.',
+        fixable: true,
+        fixOptions: BACKEND_TYPE_MIGRATION_FIX_OPTIONS,
+        context: { currentType: "cli" },
+      });
+    } else {
+      diagnostics.push({
+        check: "backend-type-migration",
+        severity: "info",
+        message: `backend.type is "${settings.backend.type}".`,
+        fixable: false,
+      });
+    }
+  } catch (e) {
+    diagnostics.push({
+      check: "backend-type-migration",
+      severity: "warning",
+      message: `Could not check backend.type: ${e instanceof Error ? e.message : String(e)}`,
+      fixable: false,
+    });
+  }
+
   return diagnostics;
 }
 
@@ -653,6 +700,7 @@ export async function runDoctor(): Promise<DoctorReport> {
     agentDiags,
     updateDiags,
     settingsDiags,
+    backendTypeDiags,
     repoMemoryManagerDiags,
     memoryCompatibilityDiags,
     staleDiags,
@@ -663,6 +711,7 @@ export async function runDoctor(): Promise<DoctorReport> {
     checkAgents(),
     checkUpdates(),
     checkSettingsDefaults(),
+    checkBackendTypeMigration(),
     checkRepoMemoryManagerTypes(),
     checkMemoryImplementationCompatibility(repos),
     checkStaleParents(repos),
@@ -675,6 +724,7 @@ export async function runDoctor(): Promise<DoctorReport> {
     ...agentDiags,
     ...updateDiags,
     ...settingsDiags,
+    ...backendTypeDiags,
     ...repoMemoryManagerDiags,
     ...memoryCompatibilityDiags,
     ...staleDiags,
@@ -738,6 +788,7 @@ export async function* streamDoctor(): AsyncGenerator<DoctorStreamEvent> {
     { category: "agents", label: "Agent connectivity", run: () => checkAgents() },
     { category: "updates", label: "Version", run: () => checkUpdates() },
     { category: "settings-defaults", label: "Settings defaults", run: () => checkSettingsDefaults() },
+    { category: "backend-type-migration", label: "Backend type", run: () => checkBackendTypeMigration() },
     { category: "repo-memory-managers", label: "Repo memory managers", run: () => checkRepoMemoryManagerTypes() },
     { category: "memory-implementation", label: "Memory implementation", run: () => checkMemoryImplementationCompatibility(repos) },
     { category: "stale-parents", label: "Stale parents", run: () => checkStaleParents(repos) },
@@ -972,6 +1023,28 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
           check: diag.check,
           success: true,
           message: `Appended Foolery guidance to ${file} in "${ctx.repoName}".`,
+          context: ctx,
+        };
+      } catch (e) {
+        return { check: diag.check, success: false, message: String(e), context: ctx };
+      }
+    }
+
+    case "backend-type-migration": {
+      if (strategy && strategy !== "migrate" && strategy !== "default") {
+        return {
+          check: diag.check,
+          success: false,
+          message: `Unknown strategy "${strategy}" for backend type migration.`,
+          context: ctx,
+        };
+      }
+      try {
+        await updateSettings({ backend: { type: "auto" } });
+        return {
+          check: diag.check,
+          success: true,
+          message: 'Migrated backend.type from "cli" to "auto" in ~/.config/foolery/settings.toml.',
           context: ctx,
         };
       } catch (e) {
