@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccde1-5850-7853-9fbb-4c69368862f4",
+  "occurred_at": "2026-03-08T14:37:03.440069Z",
+  "knot_id": "foolery-ba29",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Commit c6d3627d5ff0 verified on origin/main. All 1901 tests pass (120 files). Changes correctly scoped to setup.sh, agent-wizard.sh, and regression test. No invariants to verify. No regressions detected.",
+    "datetime": "2026-03-08T14:37:00Z",
+    "entry_id": "019ccde1-5850-7853-9fbb-4c5a5b66e07e",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4-6"
+  }
+}

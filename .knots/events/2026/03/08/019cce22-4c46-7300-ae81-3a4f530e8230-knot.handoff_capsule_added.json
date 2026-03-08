@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce22-4c46-7300-ae81-3a4f530e8230",
+  "occurred_at": "2026-03-08T15:48:00.198805Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Pushed dispatch swap framing cleanup in a39fc565: Dispatch now owns the single global Swap Agent presentation via a Dispatch Tools area, the step pool editors no longer advertise swap behavior, and the layout regression test now locks the swap UI to that one dispatch-level control. Validation: bun install --frozen-lockfile; bun run lint (warnings only, pre-existing); bunx tsc --noEmit; bun run test; bun run build.",
+    "datetime": "2026-03-08T15:48:00.198805Z",
+    "entry_id": "019cce22-4c46-7300-ae81-3a3a33226868",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

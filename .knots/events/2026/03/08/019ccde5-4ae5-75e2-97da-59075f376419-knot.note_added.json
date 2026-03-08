@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccde5-4ae5-75e2-97da-59075f376419",
+  "occurred_at": "2026-03-08T14:41:22.149603Z",
+  "knot_id": "foolery-1f67",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review: code quality is good, tests pass (127/127), typecheck clean. However the feature branch (worktree-agent-a4bb9b38) has merge conflicts with main due to commits 1f87cecc and f22ad2fe (config permissions) landing on main after the branch diverged. Needs rebase onto main and conflict resolution in doctor-applyfix.test.ts, doctor.test.ts, registry.test.ts, doctor.ts, and registry.ts before it can be merged.",
+    "datetime": "2026-03-08T14:41:22.149603Z",
+    "entry_id": "019ccde5-4ae5-75e2-97da-58f3a8a7ecb9",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

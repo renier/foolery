@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdea-86e6-73a3-8200-a989424099ba",
+  "occurred_at": "2026-03-08T14:47:05.190931Z",
+  "knot_id": "foolery-ad30",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implemented registry-consistency fixable diagnostic: added updateRegisteredRepoMemoryManagerType to registry.ts, marked mismatch diagnostic fixable:true with sync fix option, added registry-consistency case in applyFix with isKnownMemoryManagerType validation, added comprehensive tests in doctor-applyfix.test.ts and doctor.test.ts. All 120 test files pass (1908 tests), typecheck clean, build succeeds.",
+    "datetime": "2026-03-08T14:47:05.190931Z",
+    "entry_id": "019ccdea-86e6-73a3-8200-a971b4cbcb7a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccde5-61df-7e41-bbdf-97a7d2450dee",
+  "occurred_at": "2026-03-08T14:41:28.020018Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-1f67",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "Doctor: remove stale settings keys (agent, verification, actions.direct)",
+    "updated_at": "2026-03-08T14:41:28.020018Z"
+  }
+}

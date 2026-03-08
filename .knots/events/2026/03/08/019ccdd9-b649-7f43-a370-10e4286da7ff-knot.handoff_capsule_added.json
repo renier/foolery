@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdd9-b649-7f43-a370-10e4286da7ff",
+  "occurred_at": "2026-03-08T14:28:43.209258Z",
+  "knot_id": "foolery-cd8b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Reviewed b359e0f813ca on main/origin/main: scripts/setup.sh now uses KNOWN_AGENTS=(claude codex gemini opencode) and maps opencode to OpenCode, matching src/lib/settings.ts SCANNABLE_AGENTS. Verified with ripgrep, bash -n scripts/setup.sh, and bunx tsc --noEmit; no issues found in review.",
+    "datetime": "2026-03-08T14:28:35Z",
+    "entry_id": "019ccdd9-b649-7f43-a370-10d579a18634",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

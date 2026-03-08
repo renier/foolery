@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdfc-664c-71c2-82ec-b4a73b6d534a",
+  "occurred_at": "2026-03-08T15:06:36.492485Z",
+  "knot_id": "foolery-1f67",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review approved. All quality gates pass: 1920 tests green, typecheck clean, lint 0 errors. Stale settings feature is correctly implemented with detection (inspectStaleSettingsKeys), cleanup (cleanStaleSettingsKeys), doctor integration (checkStaleSettingsKeys), and applyFix handler. Test coverage is comprehensive across settings.test.ts, doctor.test.ts, and doctor-applyfix.test.ts.",
+    "datetime": "2026-03-08T16:00:00Z",
+    "entry_id": "019ccdfc-664c-71c2-82ec-b49f7100a12b",
+    "model": "claude-opus-4-6",
+    "username": "unknown",
+    "version": "4.6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccddb-b5e4-7503-abf0-b246920cdd45",
+  "occurred_at": "2026-03-08T14:30:54.180449Z",
+  "knot_id": "foolery-4331",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Reviewed commit 4221f588dd03: doctor now warns when legacy backend.type=cli is persisted, offers migrate->auto, wires the check into runDoctor/streamDoctor, and covers detection plus fix behavior in unit tests. Validation: bun install --frozen-lockfile, bun run lint (warnings only), bunx tsc --noEmit, bun run test passed (1891 tests). bun run build fails when inherited NODE_ENV=development, but succeeds with NODE_ENV=production, so the feature itself is approved with that environment caveat noted.",
+    "datetime": "2026-03-08T14:30:40Z",
+    "entry_id": "019ccddb-b5e4-7503-abf0-b23e9e66a4fc",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

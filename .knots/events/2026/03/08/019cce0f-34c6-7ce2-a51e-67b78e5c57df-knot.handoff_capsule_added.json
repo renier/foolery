@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce0f-34c6-7ce2-a51e-67b78e5c57df",
+  "occurred_at": "2026-03-08T15:27:08.998588Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Implementation review could not proceed because the task requires source edits; returned knot to ready_for_implementation for direct code changes.",
+    "datetime": "2026-03-08T15:27:08Z",
+    "entry_id": "019cce0f-34c6-7ce2-a51e-67a79307a528",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "5"
+  }
+}

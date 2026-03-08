@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdd9-8d2c-7b12-964b-a8dd00c4ab0c",
+  "occurred_at": "2026-03-08T14:28:32.684089Z",
+  "knot_id": "foolery-4331",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implemented checkBackendTypeMigration doctor check that detects legacy backend.type=cli from v0.3.0 and offers migration to auto. Added fix handler that calls updateSettings. 4 unit tests for the check + 1 fix test. All quality gates pass (lint, typecheck, 1889 tests).",
+    "datetime": "2026-03-08T00:00:00Z",
+    "entry_id": "019ccdd9-8d2c-7b12-964b-a8cbeb75ba7d",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

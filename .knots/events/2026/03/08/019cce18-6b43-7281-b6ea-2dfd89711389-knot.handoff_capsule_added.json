@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce18-6b43-7281-b6ea-2dfd89711389",
+  "occurred_at": "2026-03-08T15:37:12.771967Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Returned from implementation_review to ready_for_implementation because this task requires direct code changes in source files.",
+    "datetime": "2026-03-08T15:37:12.771967Z",
+    "entry_id": "019cce18-6b43-7281-b6ea-2def6247b78d",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce1b-27d1-7802-80eb-5ca2d79fca7b",
+  "occurred_at": "2026-03-08T15:40:12.113204Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review required code edits: harden console-log-tap stream cleanup/recovery after stream errors and add recovery test coverage.",
+    "datetime": "2026-03-08T15:40:12.113204Z",
+    "entry_id": "019cce1b-27d1-7802-80eb-5c9553cbefc9",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

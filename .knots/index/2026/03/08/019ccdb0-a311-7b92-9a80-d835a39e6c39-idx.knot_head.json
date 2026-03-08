@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdb0-a311-7b92-9a80-d835a39e6c39",
+  "occurred_at": "2026-03-08T13:43:51.313801Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-3d03",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "terminal": false,
+    "title": "reload does not remember active project",
+    "updated_at": "2026-03-08T13:43:51.313801Z"
+  }
+}

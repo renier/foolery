@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce23-4b16-7f30-ac65-148ecedfc34d",
+  "occurred_at": "2026-03-08T15:49:05.4305Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Integrated and pushed on main as 25214b19. Dispatch now presents Swap Agent as a single dispatch-level tool, removes swap messaging from per-step pool editors, and keeps regression coverage around the one global control. Validation: bun install --frozen-lockfile; bun run lint (warnings only, pre-existing); bunx tsc --noEmit; bun run test; bun run build.",
+    "datetime": "2026-03-08T15:49:05.4305Z",
+    "entry_id": "019cce23-4b16-7f30-ac65-147ac69d5ced",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

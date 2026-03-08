@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce22-970b-7891-9f0d-4e8b723a8500",
+  "occurred_at": "2026-03-08T15:48:19.33973Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Hardened the console output tap against synchronous createWriteStream failures: ensureStream() now resets cleanly when opening console.log throws, then retries successfully on the next write. Added recovery coverage in console-log-tap tests and reran bun run lint, bunx tsc --noEmit, bun run test, and bun run build before merging to main and pushing origin/main at 7e7a0a66ed6c.",
+    "datetime": "2026-03-08T16:47:16+01:00",
+    "entry_id": "019cce22-970b-7891-9f0d-4e765345853f",
+    "model": "GPT-5",
+    "username": "codex",
+    "version": "codex"
+  }
+}

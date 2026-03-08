@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce13-41e8-73b0-9595-8f4884aa5549",
+  "occurred_at": "2026-03-08T15:31:34.504445Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Fixed all three review issues: (1) daily rollover - ensureStream() now computes date on each write and opens new WriteStream when date changes, (2) stream error handling - added stream.on('error') handler to swallow IO errors, (3) added 4 new tests covering daily rollover, uncaughtException capture, unhandledRejection capture, and stream error resilience. All 8 tests pass. Exported _dateNow/_setDateNow for test date injection.",
+    "datetime": "2026-03-08T16:32:00Z",
+    "entry_id": "019cce13-41e8-73b0-9595-8f3c56e444fe",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

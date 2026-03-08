@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccde0-4618-7be0-ae20-8a3800119166",
+  "occurred_at": "2026-03-08T14:35:53.240401Z",
+  "knot_id": "foolery-ba29",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Confirmed setup writers on origin/main still emit complete settings.toml defaults including dispatchMode, backend, defaults, and pools; targeted setup-settings-writer regression passes on current origin/main b06ac8d9. Full lint, typecheck, and unit test suite passed on ancestor 4221f588; build failed there with a pre-existing Next.js prerender error on /_global-error and /beats.",
+    "datetime": "2026-03-08T14:35:13Z",
+    "entry_id": "019ccde0-4618-7be0-ae20-8a27470cbbab",
+    "model": "GPT-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

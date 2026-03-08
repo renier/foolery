@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce0d-43ec-7022-b5a7-4a0407a5950c",
+  "occurred_at": "2026-03-08T15:25:01.804977Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Clarified dispatch-global Swap Agent semantics by tracking affected pool entries across all steps, surfacing that count in the UI, and adding regression coverage for duplicate source occurrences; verified with lint (warnings only), tsc, test, and production build.",
+    "datetime": "2026-03-08T15:25:01.804977Z",
+    "entry_id": "019cce0d-43ec-7022-b5a7-49f1d7f100ab",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

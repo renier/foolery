@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce09-04d4-7f82-875e-55de2b08a07a",
+  "occurred_at": "2026-03-08T15:20:23.500385Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-28b0",
+    "profile_id": "autopilot_no_planning",
+    "state": "abandoned",
+    "terminal": true,
+    "title": "Wire pool swap config mutation",
+    "updated_at": "2026-03-08T15:20:23.500385Z"
+  }
+}

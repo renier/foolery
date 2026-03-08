@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccddc-4139-7b23-ab41-3c5b3a044be0",
+  "occurred_at": "2026-03-08T14:31:29.84978Z",
+  "knot_id": "foolery-ad30",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Implemented doctor registry-consistency auto-fix by marking mismatches fixable, adding targeted registry sync support, and covering the new diagnostic/fix path with tests. Validation: bun run lint (warnings only), bunx tsc --noEmit, bun run test, and NODE_ENV=production bun run build; plain bun run build fails in this shell because NODE_ENV is set to development.",
+    "datetime": "2026-03-08T14:30:52Z",
+    "entry_id": "019ccddc-4139-7b23-ab41-3c421d06958e",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "5"
+  }
+}

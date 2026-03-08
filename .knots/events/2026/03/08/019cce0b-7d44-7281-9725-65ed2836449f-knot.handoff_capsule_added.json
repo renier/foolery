@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce0b-7d44-7281-9725-65ed2836449f",
+  "occurred_at": "2026-03-08T15:23:05.412695Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Revision needed: source edits requested, so shipment review was rolled back to ready_for_implementation for implementation work.",
+    "datetime": "2026-03-08T00:00:00Z",
+    "entry_id": "019cce0b-7d44-7281-9725-65d5ccbeb767",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "unknown"
+  }
+}

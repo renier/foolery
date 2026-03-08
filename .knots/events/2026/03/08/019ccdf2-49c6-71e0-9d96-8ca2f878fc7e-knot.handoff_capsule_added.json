@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdf2-49c6-71e0-9d96-8ca2f878fc7e",
+  "occurred_at": "2026-03-08T14:55:33.830936Z",
+  "knot_id": "foolery-4f1f",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Verified: (1) All commits on main (3cd12ec4, 49b9caec, f22ad2fe, 1f87cecc, ad091b00ea57). (2) 1920 tests pass, 0 failures. (3) Config-permissions doctor check covers both settings.toml and registry.json with inspect/ensure/fix paths. (4) Registry save and backfill enforce chmod 0600. (5) No invariant violations. (6) All commit tags use commit: prefix.",
+    "datetime": "2026-03-08T15:56:00Z",
+    "entry_id": "019ccdf2-49c6-71e0-9d96-8c9cc2cc00ba",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "claude-opus-4-6"
+  }
+}

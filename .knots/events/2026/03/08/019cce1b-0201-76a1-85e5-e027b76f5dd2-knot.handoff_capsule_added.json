@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce1b-0201-76a1-85e5-e027b76f5dd2",
+  "occurred_at": "2026-03-08T15:40:02.433624Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Pushed cf24e048 to origin/main. Clarified the single dispatch-level Swap Agent control as a global replacement tool, added pools-section guidance that replacements happen via that one shared control, and added a regression test that locks the swap UI to Dispatch instead of per-step pool editors. Validation: bun install --frozen-lockfile, bun run lint (warnings only, pre-existing), bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-08T15:40:02.433624Z",
+    "entry_id": "019cce1b-0201-76a1-85e5-e017590b3aef",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

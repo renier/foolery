@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce17-7677-78b0-8b38-f0508ac78396",
+  "occurred_at": "2026-03-08T15:36:10.10338Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Refined the dispatch-level Swap Agent presentation so the only swap control now sits in a dedicated dispatch-wide tools area at the bottom of Settings > Dispatch, with copy that explicitly frames it as a single global replacement rather than a per-step edit. Integrated on main and pushed as 4d3344dcd20b. Validation: bun install --frozen-lockfile in the dedicated worktree, bun run lint (warnings only, pre-existing), bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-08T15:36:10Z",
+    "entry_id": "019cce17-7677-78b0-8b38-f049f1aa3237",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "gpt-5"
+  }
+}

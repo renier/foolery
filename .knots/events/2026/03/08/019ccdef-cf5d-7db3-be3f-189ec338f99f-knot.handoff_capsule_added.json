@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdef-cf5d-7db3-be3f-189ec338f99f",
+  "occurred_at": "2026-03-08T14:52:51.421948Z",
+  "knot_id": "foolery-4f1f",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review approved. The config-permissions doctor check correctly inspects and fixes 0600 permissions on both settings.toml and registry.json. saveRegistry and backfillMissingRepoMemoryManagerTypes both enforce chmod 0600. Tests cover all paths. Lint, typecheck, and all 1918 tests pass. Build error is pre-existing and unrelated.",
+    "datetime": "2026-03-08T16:00:00+01:00",
+    "entry_id": "019ccdef-cf5d-7db3-be3f-188d63394090",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

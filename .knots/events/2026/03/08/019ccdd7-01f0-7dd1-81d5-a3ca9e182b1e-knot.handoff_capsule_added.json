@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdd7-01f0-7dd1-81d5-a3ca9e182b1e",
+  "occurred_at": "2026-03-08T14:25:45.968876Z",
+  "knot_id": "foolery-cd8b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Replaced openrouter with opencode in KNOWN_AGENTS array and _agent_label function in scripts/setup.sh. Lint/typecheck pass. Pushed to main as b359e0f813ca.",
+    "datetime": "2026-03-08T14:25:45Z",
+    "entry_id": "019ccdd7-01f0-7dd1-81d5-a3b9c554ca78",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

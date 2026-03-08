@@ -1,0 +1,12 @@
+{
+  "event_id": "019ccdb6-9970-7892-ae95-1c3b53a03e9d",
+  "occurred_at": "2026-03-08T13:50:22.064464Z",
+  "knot_id": "foolery-4f1f",
+  "type": "knot.created",
+  "data": {
+    "body": "settings.toml correctly gets chmod 0600 permissions, but registry.json does not. Doctor should check and fix permissions on both config files for consistency. The backfill and save functions should also set 0600 on registry.json.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Doctor: add permissions check for registry.json"
+  }
+}

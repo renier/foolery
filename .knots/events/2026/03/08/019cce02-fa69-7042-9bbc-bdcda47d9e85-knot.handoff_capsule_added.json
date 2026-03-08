@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce02-fa69-7042-9bbc-bdcda47d9e85",
+  "occurred_at": "2026-03-08T15:13:47.625462Z",
+  "knot_id": "foolery-1f67",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Verified stale settings cleanup is present on main at 640dc4551e8d and origin/main. Local checks: bun install --frozen-lockfile ok, bunx tsc --noEmit ok, bun run test ok (1920 passed), bun run build ok. Remote GitHub Actions for commit 640dc4551e8d are green. Local bun run lint did not return within 60s in this environment, so shipment proceeded based on green remote CI and the other local gates.",
+    "datetime": "2026-03-08T15:12:10Z",
+    "entry_id": "019cce02-fa69-7042-9bbc-bdb7e1a84228",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex"
+  }
+}

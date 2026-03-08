@@ -1,0 +1,18 @@
+{
+  "event_id": "019ccdf9-5bc6-78a3-8716-2c5ca296358b",
+  "occurred_at": "2026-03-08T15:03:17.190074Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-a55e",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation_review",
+    "terminal": false,
+    "title": "Beads CLI filters: support queued and in_action phase aliases",
+    "updated_at": "2026-03-08T15:03:17.190074Z"
+  },
+  "precondition": {
+    "profile_etag": "019ccdf8-1285-7b60-a1e5-51c49856f944"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce1f-e16c-7312-8e7e-e212d80d1ef2",
+  "occurred_at": "2026-03-08T15:45:21.77255Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Code changes are required for the requested implementation; moving out of shipment_review to resume implementation work.",
+    "datetime": "2026-03-08T15:45:21.77255Z",
+    "entry_id": "019cce1f-e16c-7312-8e7e-e2002f5b8ae7",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

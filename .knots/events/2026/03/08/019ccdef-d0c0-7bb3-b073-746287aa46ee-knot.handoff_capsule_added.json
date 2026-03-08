@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdef-d0c0-7bb3-b073-746287aa46ee",
+  "occurred_at": "2026-03-08T14:52:51.776422Z",
+  "knot_id": "foolery-3d03",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Approved and shipped reload repo persistence hardening. UrlStateSync now rewrites the URL from persisted localStorage repo even if the store already matches, and a regression test locks that behavior. Validation: bun run lint (warnings only), bunx tsc --noEmit, bun run test all passed. bun run build fails on baseline main and this branch with an existing prerender error in src/components/providers.tsx during /beats and /_not-found, so this change does not introduce the build failure.",
+    "datetime": "2026-03-08T14:52:01Z",
+    "entry_id": "019ccdef-d0c0-7bb3-b073-745596852376",
+    "model": "gpt-5-codex",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

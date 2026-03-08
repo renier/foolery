@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdfa-15fc-7892-9def-c8269e869aff",
+  "occurred_at": "2026-03-08T15:04:04.860588Z",
+  "knot_id": "foolery-ad30",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Pushed registry-consistency sync hardening to origin/main. Added failure-path coverage for missing repo entries, added direct tests for updateRegisteredRepoMemoryManagerType including chmod behavior, and kept doctor fix messaging aligned with the new failure mode. Validation: bun run lint (existing warnings only), bunx tsc --noEmit, bun run test, bun run build, and remote CI run 22823610834 passed.",
+    "datetime": "2026-03-08T15:03:52Z",
+    "entry_id": "019ccdfa-15fc-7892-9def-c81be9931b17",
+    "model": "gpt-5.4",
+    "username": "cartine",
+    "version": "gpt-5.4"
+  }
+}

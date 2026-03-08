@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce0a-f867-7491-9539-7d7750d29fe8",
+  "occurred_at": "2026-03-08T15:22:31.399699Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment verified: global swap agent implementation confirmed on main, in sync with origin. All 1924 tests pass, tsc clean. SettingsDispatchGlobalSwap component provides single dispatch-level swap control replacing agents across all action mappings and pool steps. Per-step swap UI is absent.",
+    "datetime": "2026-03-08T16:25:00Z",
+    "entry_id": "019cce0a-f867-7491-9539-7d62637f561a",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

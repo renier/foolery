@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccddc-52cd-7451-8bcf-60f75a31b68f",
+  "occurred_at": "2026-03-08T14:31:34.349866Z",
+  "knot_id": "foolery-4331",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment complete: commit 4221f588dd03 already on main and pushed to origin/main. Implementation adds checkBackendTypeMigration doctor check for legacy backend.type=cli migration to auto.",
+    "datetime": "2026-03-08T14:35:00Z",
+    "entry_id": "019ccddc-52cd-7451-8bcf-60e78effee2c",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

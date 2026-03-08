@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce19-b908-7a43-8af5-d6e85c10e455",
+  "occurred_at": "2026-03-08T15:38:38.216062Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Preserved console tap crash semantics while keeping persistent daily teeing: the tap now reuses the shared _server log-dir helper, observes uncaught exceptions via uncaughtExceptionMonitor, logs unhandled rejections without silently changing default crash behavior, reopens after stream errors, and adds cleanup/test coverage for the process-level hooks. Quality gates passed: bun run lint, bunx tsc --noEmit, bun run test, bun run build. Pushed to origin/main as 563c171e.",
+    "datetime": "2026-03-08T16:38:30Z",
+    "entry_id": "019cce19-b908-7a43-8af5-d6dd6366a6db",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdea-e93d-7ec1-9630-54c81b13e6c6",
+  "occurred_at": "2026-03-08T14:47:30.365668Z",
+  "knot_id": "foolery-3d03",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Fixed reload not remembering active project. Root cause: UrlStateSync was setting activeRepo to null when URL had no ?repo= param, ignoring localStorage. Fix: on initial load with no URL repo param, restore from localStorage and update URL via router.replace. All 1908 tests pass, typecheck clean.",
+    "datetime": "2026-03-08T15:48:00Z",
+    "entry_id": "019ccdea-e93d-7ec1-9630-54bc31f8ece7",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

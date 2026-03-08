@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdf1-0b86-7902-a2b9-1c68ee1f98e4",
+  "occurred_at": "2026-03-08T14:54:12.358877Z",
+  "knot_id": "foolery-3d03",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment complete. Both commits (5a8366c84e6c, c55f558e) already merged on main and pushed to origin/main. CI green on all 3 workflows (CI, Changesets, Coverage Badge). No merge needed - work was done directly on main.",
+    "datetime": "2026-03-08T16:00:00Z",
+    "entry_id": "019ccdf1-0b86-7902-a2b9-1c5e2bb95315",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

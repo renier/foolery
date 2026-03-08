@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdfb-c805-7640-8ab0-c518e755f0c7",
+  "occurred_at": "2026-03-08T15:05:55.973058Z",
+  "knot_id": "foolery-ad30",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Verified on main: (1) checkRegistryConsistency marks mismatches fixable:true with sync fix option, (2) updateRegisteredRepoMemoryManagerType in registry.ts correctly updates registry entries, (3) applyFix handles registry-consistency case with type validation and error handling, (4) all relevant commits tagged. Dirty working tree has unrelated cosmetic changes from subsequent work - does not affect shipped feature.",
+    "datetime": "2026-03-08T12:00:00Z",
+    "entry_id": "019ccdfb-c805-7640-8ab0-c501a5d04792",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

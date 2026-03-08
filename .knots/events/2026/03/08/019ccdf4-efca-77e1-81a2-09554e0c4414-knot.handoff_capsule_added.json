@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdf4-efca-77e1-81a2-09554e0c4414",
+  "occurred_at": "2026-03-08T14:58:27.402284Z",
+  "knot_id": "foolery-1f67",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review complete. Stale settings keys feature (agent, verification, actions.direct detection and cleanup) integrated on main with all conflicts resolved. 137 tests pass, typecheck clean. Commits: b06ac8d9, 7d806ae3, b802cca6 (original), 49b9caec, 3cd12ec4 (integration). Features: inspectStaleSettingsKeys, cleanStaleSettingsKeys in settings.ts; checkStaleSettingsKeys + applyFix case in doctor.ts; updateRegisteredRepoMemoryManagerType in registry.ts; comprehensive test coverage.",
+    "datetime": "2026-03-08T14:58:27.402284Z",
+    "entry_id": "019ccdf4-efca-77e1-81a2-09440c01d392",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

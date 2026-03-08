@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdd8-54ba-77c1-ac2f-40f13e58ab55",
+  "occurred_at": "2026-03-08T14:27:12.698386Z",
+  "knot_id": "foolery-ba29",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Setup writers now emit complete settings.toml defaults including dispatchMode, backend, defaults, and pools; added a regression test that sources setup.sh and agent-wizard.sh and parses the written TOML. Verification: bun run lint (warnings only), bunx tsc --noEmit, bun run test, targeted setup-settings-writer test after rebase. Note: bun run build fails on pristine origin/main as a pre-existing Next.js prerender error, so build remains baseline-red rather than introduced by this patch.",
+    "datetime": "2026-03-08T14:23:34Z",
+    "entry_id": "019ccdd8-54ba-77c1-ac2f-40edd7bdebce",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce03-1494-7020-b6cb-9b948a7ea070",
+  "occurred_at": "2026-03-08T15:13:54.324393Z",
+  "knot_id": "foolery-a55e",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Verified shipment on main: queued/in_action alias filtering is present in src/lib/bd.ts and src/lib/backends/beads-backend.ts, regression tests are present, and quality gates passed in an isolated worktree (bun run lint, bunx tsc --noEmit, bun run test, bun run build). main already matched origin/main; git push returned Everything up-to-date.",
+    "datetime": "2026-03-08T15:13:33Z",
+    "entry_id": "019cce03-1494-7020-b6cb-9b88575ca0eb",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

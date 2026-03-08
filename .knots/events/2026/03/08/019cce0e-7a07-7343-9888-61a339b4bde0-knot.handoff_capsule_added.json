@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce0e-7a07-7343-9888-61a339b4bde0",
+  "occurred_at": "2026-03-08T15:26:21.19197Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Implemented and pushed dispatch global-swap reporting refinement on main (958f5981): global swap now reports every matching pool entry across steps, UI copy explicitly describes global replacement semantics, and regression tests cover duplicate-source occurrences. Validation: bun run lint (warnings only), bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-08T15:24:49Z",
+    "entry_id": "019cce0e-7a07-7343-9888-619c68d800d5",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "unknown"
+  }
+}

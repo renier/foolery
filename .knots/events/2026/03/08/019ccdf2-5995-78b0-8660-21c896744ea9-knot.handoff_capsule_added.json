@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdf2-5995-78b0-8660-21c896744ea9",
+  "occurred_at": "2026-03-08T14:55:37.877599Z",
+  "knot_id": "foolery-3d03",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment review approved on main. Verified commits 5a8366c84e6c and c55f558e910f are present on origin/main; UrlStateSync restores persisted repo state and rewrites the URL when ?repo is absent; GitHub Actions CI, Changesets, and Coverage Badge all succeeded for both commits; focused regression test bun run test src/lib/__tests__/url-state-sync-reload.test.ts passed locally.",
+    "datetime": "2026-03-08T14:55:25Z",
+    "entry_id": "019ccdf2-5995-78b0-8660-21bb94d309fe",
+    "model": "gpt-5-codex",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

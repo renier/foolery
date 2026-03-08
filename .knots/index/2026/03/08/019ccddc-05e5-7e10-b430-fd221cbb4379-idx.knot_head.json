@@ -1,0 +1,18 @@
+{
+  "event_id": "019ccddc-05e5-7e10-b430-fd221cbb4379",
+  "occurred_at": "2026-03-08T14:31:14.661395Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-4331",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment",
+    "terminal": false,
+    "title": "Doctor: migrate backend.type from cli to auto",
+    "updated_at": "2026-03-08T14:31:14.661395Z"
+  },
+  "precondition": {
+    "profile_etag": "019ccddb-b5e8-75c3-b734-26aad0de8707"
+  }
+}

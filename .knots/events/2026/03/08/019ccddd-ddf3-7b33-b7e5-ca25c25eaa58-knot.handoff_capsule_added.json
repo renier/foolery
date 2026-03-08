@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccddd-ddf3-7b33-b7e5-ca25c25eaa58",
+  "occurred_at": "2026-03-08T14:33:15.507676Z",
+  "knot_id": "foolery-4331",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment review approved on main at 4221f588dd03. Verified legacy backend.type=cli migration check is present, commit tag commit:4221f588dd03 exists on the knot, origin/main matches local main, and local quality gates passed in a clean worktree: bun run lint (warnings only), bunx tsc --noEmit, bun run test (1891 passed), NODE_ENV=production bun run build. No knot invariants were defined.",
+    "datetime": "2026-03-08T14:32:14Z",
+    "entry_id": "019ccddd-ddf3-7b33-b7e5-ca1f3af15725",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce22-e72a-7903-8dd6-019ff0b3a329",
+  "occurred_at": "2026-03-08T15:48:39.850192Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Rebased the dispatch swap framing cleanup onto the latest main as 25214b19 and revalidated the touched dispatch files after the rebase: targeted eslint passed clean and the dispatch global swap layout test still passed.",
+    "datetime": "2026-03-08T15:48:39.850192Z",
+    "entry_id": "019cce22-e72a-7903-8dd6-018aac5f8728",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

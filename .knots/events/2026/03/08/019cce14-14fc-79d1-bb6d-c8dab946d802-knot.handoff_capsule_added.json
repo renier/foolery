@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce14-14fc-79d1-bb6d-c8dab946d802",
+  "occurred_at": "2026-03-08T15:32:28.540591Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Moved back to implementation so the console tap rollover/error-handling fix can be applied and validated.",
+    "datetime": "2026-03-08T15:32:22Z",
+    "entry_id": "019cce14-14fc-79d1-bb6d-c8c89265e508",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

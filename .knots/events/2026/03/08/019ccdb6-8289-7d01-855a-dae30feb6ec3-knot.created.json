@@ -1,0 +1,12 @@
+{
+  "event_id": "019ccdb6-8289-7d01-855a-dae30feb6ec3",
+  "occurred_at": "2026-03-08T13:50:16.201568Z",
+  "knot_id": "foolery-cd8b",
+  "type": "knot.created",
+  "data": {
+    "body": "scripts/setup.sh has KNOWN_AGENTS=(claude codex gemini openrouter) but openrouter was replaced by opencode in the codebase (src/lib/settings.ts SCANNABLE_AGENTS). The setup wizard will scan for the wrong binary. Should be KNOWN_AGENTS=(claude codex gemini opencode).",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Setup: replace openrouter with opencode in KNOWN_AGENTS"
+  }
+}

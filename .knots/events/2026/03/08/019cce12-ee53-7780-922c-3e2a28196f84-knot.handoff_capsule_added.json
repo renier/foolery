@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce12-ee53-7780-922c-3e2a28196f84",
+  "occurred_at": "2026-03-08T15:31:13.107042Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Pushed a8903419 to origin/main. Dispatch still uses one global Swap Agent control, and the UI now previews its full global scope by counting matching action mappings and pool entries across all workflow steps so the replacement is clearly global rather than per-step. Added regression coverage for the occurrence counting helper. Validation: bun run lint (warnings only, pre-existing), bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-08T15:31:13Z",
+    "entry_id": "019cce12-ee53-7780-922c-3e16539d8616",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "5"
+  }
+}

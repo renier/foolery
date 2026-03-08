@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce01-1c30-7702-af3a-7bf63d26c2a9",
+  "occurred_at": "2026-03-08T15:11:45.200951Z",
+  "knot_id": "foolery-a55e",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review approved: queued/in_action phase alias filtering is correctly implemented in applyWorkflowFilters (bd.ts:474-481) using resolveStep to map states to phases. Tests cover both aliases. All quality gates pass: tests (1920 passed), tsc (clean), lint (no new issues), build (success).",
+    "datetime": "2026-03-08T16:10:00Z",
+    "entry_id": "019cce01-1c30-7702-af3a-7bed86dba061",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccde1-bfb4-7232-80ab-d68296f5ae44",
+  "occurred_at": "2026-03-08T14:37:29.908066Z",
+  "knot_id": "foolery-ad30",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Previous implementation did not actually make registry-consistency fixable. The diff only contains syntax fixes and test count updates. Need to: 1) Add syncRepoMemoryManagerType to registry.ts, 2) Mark mismatch diagnostic fixable:true with fix options, 3) Add registry-consistency case in applyFix, 4) Add tests.",
+    "datetime": "2026-03-08T14:37:29.908066Z",
+    "entry_id": "019ccde1-bfb4-7232-80ab-d675defc97cc",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

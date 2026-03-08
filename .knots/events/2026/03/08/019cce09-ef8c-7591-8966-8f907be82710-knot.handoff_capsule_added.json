@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce09-ef8c-7591-8966-8f907be82710",
+  "occurred_at": "2026-03-08T15:21:23.596265Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review approved: global swap agent is correctly implemented. Single SettingsDispatchGlobalSwap component at bottom of dispatch section handles all-step replacement. Per-step swap UI absent from StepPoolEditor. swapPoolAgent merges weights correctly. swapActionsAgent covers all action mappings. 37 tests pass, tsc clean.",
+    "datetime": "2026-03-08T16:21:00Z",
+    "entry_id": "019cce09-ef8c-7591-8966-8f844f95ce3b",
+    "model": "claude-opus-4-6",
+    "username": "claude-code",
+    "version": "claude-opus-4-6"
+  }
+}

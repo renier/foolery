@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce14-5124-78c0-b0c9-5d66d99b7cf5",
+  "occurred_at": "2026-03-08T15:32:43.940126Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Returned from implementation_review to ready_for_implementation because the task requires direct source edits in dispatch settings.",
+    "datetime": "2026-03-08T15:32:33Z",
+    "entry_id": "019cce14-5124-78c0-b0c9-5d5a20c27ac4",
+    "model": "gpt-5",
+    "username": "codex",
+    "version": "gpt-5"
+  }
+}

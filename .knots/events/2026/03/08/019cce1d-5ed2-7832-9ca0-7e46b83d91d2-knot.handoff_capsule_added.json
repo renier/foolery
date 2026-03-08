@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce1d-5ed2-7832-9ca0-7e46b83d91d2",
+  "occurred_at": "2026-03-08T15:42:37.266972Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Hardened console-log-tap stream cleanup and recovery: detach/destroy errored streams before reopening, added recovery coverage for stream errors, ran bun run lint, bunx tsc --noEmit, bun run test, bun run build, merged to main, and pushed origin/main at 4d8e2d80.",
+    "datetime": "2026-03-08T15:39:37Z",
+    "entry_id": "019cce1d-5ed2-7832-9ca0-7e30d4cf9965",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex"
+  }
+}

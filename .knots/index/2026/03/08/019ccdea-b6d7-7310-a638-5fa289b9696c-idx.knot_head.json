@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdea-b6d7-7310-a638-5fa289b9696c",
+  "occurred_at": "2026-03-08T14:47:17.463038Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-ad30",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation_review",
+    "terminal": false,
+    "title": "Doctor: make registry-consistency mismatch fixable",
+    "updated_at": "2026-03-08T14:47:17.463038Z"
+  }
+}

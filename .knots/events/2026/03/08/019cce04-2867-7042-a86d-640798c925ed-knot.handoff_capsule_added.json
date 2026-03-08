@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce04-2867-7042-a86d-640798c925ed",
+  "occurred_at": "2026-03-08T15:15:04.935416Z",
+  "knot_id": "foolery-1f67",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Verified on main branch: inspectStaleSettingsKeys, cleanStaleSettingsKeys, checkStaleSettingsKeys all present in settings.ts and doctor.ts with comprehensive test coverage. 1920/1920 tests pass, typecheck clean. Commits tagged with 12-char short hashes. No regressions detected.",
+    "datetime": "2026-03-08T16:15:00Z",
+    "entry_id": "019cce04-2867-7042-a86d-63f892226dd8",
+    "model": "claude-opus-4-6",
+    "username": "claude-code",
+    "version": "4.6"
+  }
+}

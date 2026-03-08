@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccddb-87b9-77b3-a360-f1ba2c641362",
+  "occurred_at": "2026-03-08T14:30:42.36171Z",
+  "knot_id": "foolery-cd8b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Approved shipment review on main/origin/main at 4221f588dd03. Verified commit:b359e0f813ca is tagged on the knot, scripts/setup.sh uses KNOWN_AGENTS=(claude codex gemini opencode) and labels opencode as OpenCode, matching src/lib/settings.ts SCANNABLE_AGENTS. GitHub Actions runs for CI, Changesets, and Coverage Badge completed successfully on 4221f588dd03. Local bash -n scripts/setup.sh passed; bunx tsc --noEmit in a clean review worktree surfaced unrelated existing main-branch module-resolution/type errors outside this change, but no regression attributable to b359e0f813ca was found.",
+    "datetime": "2026-03-08T14:29:54Z",
+    "entry_id": "019ccddb-87b9-77b3-a360-f1ad0b7d0394",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

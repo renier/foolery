@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce16-56bb-7553-94ce-30a038888581",
+  "occurred_at": "2026-03-08T15:34:56.443229Z",
+  "knot_id": "foolery-4c75",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment review approved. Commit 6946d801ef42 is tagged on the knot, present on origin/main, and the mapped Beads behavior is present on main in bd and JSONL normalization paths with regression coverage. Remote GitHub Actions runs for CI, Changesets, and Coverage Badge all completed successfully for this commit, and targeted local verification passed: 227 tests across bd, beads-jsonl-dto, workflows-agnostic, and workflows-coverage.",
+    "datetime": "2026-03-08T15:34:37Z",
+    "entry_id": "019cce16-56bb-7553-94ce-309a0d824d9a",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

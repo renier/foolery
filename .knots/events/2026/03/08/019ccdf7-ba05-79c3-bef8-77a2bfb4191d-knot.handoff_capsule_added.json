@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdf7-ba05-79c3-bef8-77a2bfb4191d",
+  "occurred_at": "2026-03-08T15:01:30.245944Z",
+  "knot_id": "foolery-a55e",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Forced the Next.js build script to run with NODE_ENV=production so queued/in_action alias work can clear the build gate even when the shell exports NODE_ENV=development. Validation in the dedicated worktree: bun run lint, bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-08T15:00:18Z",
+    "entry_id": "019ccdf7-ba05-79c3-bef8-77988ecb4df3",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-08"
+  }
+}

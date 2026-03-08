@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce0f-2e61-7470-a35f-4bfe52b6ec30",
+  "occurred_at": "2026-03-08T15:27:07.361291Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Review feedback: console-log-tap pins the output path/date at startup, so a long-lived dev or prod process continues writing after midnight to the previous day's file instead of {logRoot}/_server/{YYYY-MM-DD}/console.log for the current day. It also creates a WriteStream without an error handler, so ENOSPC/EACCES/IO failures can emit an unhandled 'error' event and crash the server. Tests only cover basic log/warn/error teeing and formatting; they do not cover uncaughtException/unhandledRejection capture, daily rollover, or stream error handling.",
+    "datetime": "2026-03-08T15:27:07.361291Z",
+    "entry_id": "019cce0f-2e61-7470-a35f-4be3d6312388",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

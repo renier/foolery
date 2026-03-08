@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce0b-7d5e-7ba2-a4a6-c4fb7441ce97",
+  "occurred_at": "2026-03-08T15:23:05.438858Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implemented console-log-tap: wired installConsoleTap() into instrumentation.ts register() to intercept console.log/warn/error at startup, teeing output to {logRoot}/_server/YYYY-MM-DD/console.log. Also captures uncaughtException and unhandledRejection. Added 4 unit tests for the tap module and updated instrumentation test with mock. All quality gates pass (lint, typecheck, tests). Pushed to main as 3bb5eac688b2.",
+    "datetime": "2026-03-08T16:22:00Z",
+    "entry_id": "019cce0b-7d5e-7ba2-a4a6-c4ea1a069fb4",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

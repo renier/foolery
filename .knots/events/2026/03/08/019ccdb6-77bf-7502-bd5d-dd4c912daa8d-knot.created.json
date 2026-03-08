@@ -1,0 +1,12 @@
+{
+  "event_id": "019ccdb6-77bf-7502-bd5d-dd4c912daa8d",
+  "occurred_at": "2026-03-08T13:50:13.43916Z",
+  "knot_id": "foolery-ba29",
+  "type": "knot.created",
+  "data": {
+    "body": "setup.sh _write_settings_toml() only writes [agents.*] and [actions]. It omits [backend], [defaults], [pools], and dispatchMode. Fresh installs should produce a complete file. Without these, foolery setup followed by immediate use may have incomplete config until doctor backfill runs.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Setup: write complete settings.toml with backend, defaults, pools, dispatchMode"
+  }
+}

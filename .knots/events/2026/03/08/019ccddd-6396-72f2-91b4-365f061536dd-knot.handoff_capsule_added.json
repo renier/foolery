@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccddd-6396-72f2-91b4-365f061536dd",
+  "occurred_at": "2026-03-08T14:32:44.182687Z",
+  "knot_id": "foolery-ba29",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review approved. Changes in c6d3627d correctly add dispatchMode, backend, defaults, and pools sections to both setup.sh and agent-wizard.sh _write_settings_toml() functions. Test coverage is solid (2 tests, both passing). No security issues. Merge conflicts in doctor.ts are from a separate commit (4221f588), not introduced by this change.",
+    "datetime": "2026-03-08T15:30:00+01:00",
+    "entry_id": "019ccddd-6396-72f2-91b4-36481e796c99",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4-6"
+  }
+}

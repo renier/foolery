@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccddc-7256-7ea1-b5fe-e449467f9c46",
+  "occurred_at": "2026-03-08T14:31:42.422256Z",
+  "knot_id": "foolery-4f1f",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Added 0600 enforcement for registry.json on save/backfill and a doctor config-permissions audit/fix covering settings.toml and registry.json; validated with lint, typecheck, tests, and production build.",
+    "datetime": "2026-03-08T14:31:08Z",
+    "entry_id": "019ccddc-7256-7ea1-b5fe-e4352a84dcbc",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-08"
+  }
+}

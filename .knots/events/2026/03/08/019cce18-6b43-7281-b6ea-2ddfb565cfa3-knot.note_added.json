@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce18-6b43-7281-b6ea-2ddfb565cfa3",
+  "occurred_at": "2026-03-08T15:37:12.771967Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "User requested direct source edits for dispatch global Swap Agent behavior; returning from implementation_review to implementation queue.",
+    "datetime": "2026-03-08T15:37:12.771967Z",
+    "entry_id": "019cce18-6b43-7281-b6ea-2dca8b0fc42c",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

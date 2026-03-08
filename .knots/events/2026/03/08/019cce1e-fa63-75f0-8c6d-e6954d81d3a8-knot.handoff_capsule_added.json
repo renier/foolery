@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce1e-fa63-75f0-8c6d-e6954d81d3a8",
+  "occurred_at": "2026-03-08T15:44:22.627063Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Pushed c3e0b315 to origin/main. Refined the single dispatch-level Swap Agent presentation so it reads as a dispatch-wide replacement tool instead of a per-step affordance, updated pools guidance/README copy to point back to that one shared control, and refreshed the layout regression test. Validation: bun install --frozen-lockfile; bun run lint (warnings only, pre-existing); bunx tsc --noEmit; bun run test; bun run build.",
+    "datetime": "2026-03-08T15:44:22.627063Z",
+    "entry_id": "019cce1e-fa63-75f0-8c6d-e68c218fc60d",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

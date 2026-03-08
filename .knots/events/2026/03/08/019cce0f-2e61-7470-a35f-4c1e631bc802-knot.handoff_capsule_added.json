@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce0f-2e61-7470-a35f-4c1e631bc802",
+  "occurred_at": "2026-03-08T15:27:07.361291Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Rejected in review. The startup wiring is present, but the console tap does not satisfy the daily-file requirement across date rollover and can crash the process on stream write errors because the WriteStream has no error handler. Existing tests miss those cases and do not exercise uncaughtException/unhandledRejection capture.",
+    "datetime": "2026-03-08T15:25:48Z",
+    "entry_id": "019cce0f-2e61-7470-a35f-4c0f3a972cdd",
+    "model": "GPT-5",
+    "username": "codex",
+    "version": "GPT-5"
+  }
+}

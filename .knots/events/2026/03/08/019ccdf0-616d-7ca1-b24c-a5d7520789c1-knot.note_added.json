@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdf0-616d-7ca1-b24c-a5d7520789c1",
+  "occurred_at": "2026-03-08T14:53:28.812964Z",
+  "knot_id": "foolery-a55e",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review blocked: alias handling looks correct in src/lib/backends/beads-backend.ts and src/lib/bd.ts, and regression tests cover queued/in_action aliases, but required gate bun run build fails in the current checkout during prerender of /_global-error and /beats with React key warnings and TypeError: Cannot read properties of null (reading 'useContext'). Validation run: bunx tsc --noEmit passed; bun run test passed; bun run build failed.",
+    "datetime": "2026-03-08T14:53:28.812964Z",
+    "entry_id": "019ccdf0-616d-7ca1-b24c-a5c5a2f3c01b",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

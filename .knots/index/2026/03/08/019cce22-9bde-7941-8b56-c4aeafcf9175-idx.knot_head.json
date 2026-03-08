@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce22-9bde-7941-8b56-c4aeafcf9175",
+  "occurred_at": "2026-03-08T15:48:20.57475Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-3985",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "Console log tap: tee all console output to daily log file",
+    "updated_at": "2026-03-08T15:48:20.57475Z"
+  }
+}

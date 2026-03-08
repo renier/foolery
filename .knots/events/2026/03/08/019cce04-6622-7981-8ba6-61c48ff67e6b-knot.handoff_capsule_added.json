@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce04-6622-7981-8ba6-61c48ff67e6b",
+  "occurred_at": "2026-03-08T15:15:20.73858Z",
+  "knot_id": "foolery-a55e",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved: both commits (a0ca2567, fa97988f) verified on main, implementation present in bd.ts and beads-backend.ts, all quality gates pass (1920 tests passed, tsc clean, build success). No invariants to check. No regressions detected.",
+    "datetime": "2026-03-08T16:17:00Z",
+    "entry_id": "019cce04-6622-7981-8ba6-61b49a907698",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

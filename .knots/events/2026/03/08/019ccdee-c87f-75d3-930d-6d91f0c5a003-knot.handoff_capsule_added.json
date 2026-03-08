@@ -1,0 +1,15 @@
+{
+  "event_id": "019ccdee-c87f-75d3-930d-6d91f0c5a003",
+  "occurred_at": "2026-03-08T14:51:44.127532Z",
+  "knot_id": "foolery-ad30",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review passed. All quality gates green: 120 test files (1918 tests), typecheck clean. Registry-consistency mismatch is now fixable:true with sync strategy. updateRegisteredRepoMemoryManagerType correctly updates registry, applyFix handles registry-consistency case with proper type validation and error handling. Tests cover happy path, no-op, repo-not-found, and permission error cases.",
+    "datetime": "2026-03-08T15:52:00Z",
+    "entry_id": "019ccdee-c87f-75d3-930d-6d82fc435e76",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

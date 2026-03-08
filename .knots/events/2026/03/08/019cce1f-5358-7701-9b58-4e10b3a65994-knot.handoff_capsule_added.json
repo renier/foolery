@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce1f-5358-7701-9b58-4e10b3a65994",
+  "occurred_at": "2026-03-08T15:44:45.400384Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment verified: console-log-tap implementation is complete on main and pushed to origin/main. All 1934 tests pass across 123 test files. Key commits: 563c171e (preserve crash semantics), 4d8e2d80 (stream cleanup/recovery). Features: daily rollover, stream error handling, uncaughtException/unhandledRejection capture, full test coverage.",
+    "datetime": "2026-03-08T16:45:00Z",
+    "entry_id": "019cce1f-5358-7701-9b58-4e09f1d673da",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}
