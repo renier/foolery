@@ -177,6 +177,12 @@ export interface SwapPoolsAgentResult {
   updatedPools: PoolsSettings;
 }
 
+export interface DispatchAgentOccurrences {
+  affectedActions: number;
+  affectedEntries: number;
+  affectedSteps: number;
+}
+
 /**
  * Return source agent IDs that can be swapped globally.
  * A source is swappable when at least one different replacement agent exists.
@@ -241,6 +247,45 @@ export function swapPoolsAgent(
     affectedSteps,
     updates,
     updatedPools: { ...pools, ...updates },
+  };
+}
+
+/**
+ * Count every dispatch occurrence of an agent across action mappings and pools.
+ * Used by the global swap UI to preview the scope of a replacement.
+ */
+export function countDispatchAgentOccurrences(
+  actions: ActionAgentMappings,
+  pools: PoolsSettings,
+  agentId: string,
+): DispatchAgentOccurrences {
+  if (!agentId) {
+    return {
+      affectedActions: 0,
+      affectedEntries: 0,
+      affectedSteps: 0,
+    };
+  }
+
+  const affectedActions = ACTION_NAMES.reduce(
+    (count, action) => count + (actions[action] === agentId ? 1 : 0),
+    0,
+  );
+
+  let affectedEntries = 0;
+  let affectedSteps = 0;
+  for (const step of DEFAULT_POOL_STEPS) {
+    const stepEntries = pools[step];
+    const stepMatches = stepEntries.filter((entry) => entry.agentId === agentId).length;
+    if (stepMatches === 0) continue;
+    affectedEntries += stepMatches;
+    affectedSteps += 1;
+  }
+
+  return {
+    affectedActions,
+    affectedEntries,
+    affectedSteps,
   };
 }
 

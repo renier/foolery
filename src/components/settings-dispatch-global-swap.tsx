@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { formatAgentDisplayLabel } from "@/lib/agent-identity";
 import {
+  countDispatchAgentOccurrences,
   getSwappableSourceAgentIds,
   swapActionsAgent,
   swapPoolsAgent,
@@ -76,6 +77,22 @@ export function SettingsDispatchGlobalSwap({
     swapFromAgentId.length > 0 &&
     swapToAgentId.length > 0 &&
     swapFromAgentId !== swapToAgentId;
+  const occurrenceSummary = countDispatchAgentOccurrences(
+    actions,
+    pools,
+    swapFromAgentId,
+  );
+  const scopeParts: string[] = [];
+  if (occurrenceSummary.affectedActions > 0) {
+    scopeParts.push(
+      `${occurrenceSummary.affectedActions} action mapping${occurrenceSummary.affectedActions > 1 ? "s" : ""}`,
+    );
+  }
+  if (occurrenceSummary.affectedEntries > 0) {
+    scopeParts.push(
+      `${occurrenceSummary.affectedEntries} pool entr${occurrenceSummary.affectedEntries === 1 ? "y" : "ies"} across ${occurrenceSummary.affectedSteps} step${occurrenceSummary.affectedSteps > 1 ? "s" : ""}`,
+    );
+  }
 
   async function handleGlobalSwap() {
     if (!swapFromAgentId || !swapToAgentId) return;
@@ -135,7 +152,7 @@ export function SettingsDispatchGlobalSwap({
       <div>
         <Label className="text-xs font-medium">Swap Agent (Global)</Label>
         <p className="text-[10px] text-muted-foreground">
-          Replace an agent across all dispatch mappings and every matching pool entry.
+          Replace an agent everywhere in dispatch, including action mappings and matching pool entries.
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -171,9 +188,14 @@ export function SettingsDispatchGlobalSwap({
           disabled={!canSwap}
           onClick={handleGlobalSwap}
         >
-          Swap
+          Swap Everywhere
         </Button>
       </div>
+      {scopeParts.length > 0 && (
+        <p className="text-[10px] text-muted-foreground">
+          Current global scope: {scopeParts.join(" and ")}.
+        </p>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
+  countDispatchAgentOccurrences,
   selectFromPool,
   resolvePoolAgent,
   recordStepAgent,
@@ -412,6 +413,43 @@ describe("swapActionsAgent", () => {
     expect(result.affectedActions).toBe(0);
     expect(result.updates).toEqual({});
     expect(result.updatedActions).toBe(baseActions);
+  });
+});
+
+describe("countDispatchAgentOccurrences", () => {
+  const actions: ActionAgentMappings = {
+    take: "claude",
+    scene: "sonnet",
+    breakdown: "claude",
+  };
+
+  const pools: PoolsSettings = {
+    planning: [{ agentId: "claude", weight: 1 }],
+    plan_review: [],
+    implementation: [
+      { agentId: "sonnet", weight: 2 },
+      { agentId: "claude", weight: 3 },
+      { agentId: "claude", weight: 4 },
+    ],
+    implementation_review: [{ agentId: "codex", weight: 1 }],
+    shipment: [],
+    shipment_review: [{ agentId: "claude", weight: 2 }],
+  };
+
+  it("counts global action and pool occurrences for a source agent", () => {
+    expect(countDispatchAgentOccurrences(actions, pools, "claude")).toEqual({
+      affectedActions: 2,
+      affectedEntries: 4,
+      affectedSteps: 3,
+    });
+  });
+
+  it("returns zero counts when the source agent is absent", () => {
+    expect(countDispatchAgentOccurrences(actions, pools, "legacy")).toEqual({
+      affectedActions: 0,
+      affectedEntries: 0,
+      affectedSteps: 0,
+    });
   });
 });
 
