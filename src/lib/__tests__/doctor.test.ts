@@ -626,6 +626,49 @@ describe("runDoctorFix", () => {
     expect(mockUpdateSettings).toHaveBeenCalledWith({ backend: { type: "auto" } });
   });
 
+  it("fixes registry-consistency by syncing memory manager type", async () => {
+    const repos = [
+      { path: "/repo", name: "test-repo", addedAt: "2026-01-01", memoryManagerType: "beads" as const },
+    ];
+    mockListRepos.mockResolvedValue(repos);
+    mockGetRegisteredAgents.mockResolvedValue({});
+    mockDetectMemoryManagerType.mockReturnValue("knots");
+    mockUpdateRegisteredRepoMemoryManagerType.mockResolvedValue({
+      changed: true,
+      fileMissing: false,
+      repoFound: true,
+      previousMemoryManagerType: "beads",
+      memoryManagerType: "knots",
+    });
+
+    const fixReport = await runDoctorFix({ "registry-consistency": "sync" });
+    const rcFix = fixReport.fixes.find((f) => f.check === "registry-consistency");
+    expect(rcFix).toBeDefined();
+    expect(rcFix?.success).toBe(true);
+    expect(rcFix?.message).toContain("knots");
+    expect(mockUpdateRegisteredRepoMemoryManagerType).toHaveBeenCalledWith("/repo", "knots");
+  });
+
+  it("reports failure when registry-consistency sync finds no repo", async () => {
+    const repos = [
+      { path: "/repo", name: "test-repo", addedAt: "2026-01-01", memoryManagerType: "beads" as const },
+    ];
+    mockListRepos.mockResolvedValue(repos);
+    mockGetRegisteredAgents.mockResolvedValue({});
+    mockDetectMemoryManagerType.mockReturnValue("knots");
+    mockUpdateRegisteredRepoMemoryManagerType.mockResolvedValue({
+      changed: false,
+      fileMissing: false,
+      repoFound: false,
+    });
+
+    const fixReport = await runDoctorFix({ "registry-consistency": "sync" });
+    const rcFix = fixReport.fixes.find((f) => f.check === "registry-consistency");
+    expect(rcFix).toBeDefined();
+    expect(rcFix?.success).toBe(false);
+    expect(rcFix?.message).toContain("no longer registered");
+  });
+
   it("uses default first option when no strategies provided (backwards compat)", async () => {
     setupStaleParent();
 
@@ -850,7 +893,7 @@ describe("checkRegistryConsistency", () => {
     expect(diags[0].check).toBe("registry-consistency");
     expect(diags[0].fixable).toBe(true);
     expect(diags[0].fixOptions).toEqual([
-      { key: "sync", label: "Update registry entry to detected type" },
+      { key: "sync", label: "Update registry to match detected type" },
     ]);
     expect(diags[0].message).toContain("beads");
     expect(diags[0].message).toContain("knots");

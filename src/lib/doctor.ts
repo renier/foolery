@@ -252,7 +252,7 @@ const REPO_MEMORY_MANAGERS_FIX_OPTIONS: FixOption[] = [
 ];
 
 const REGISTRY_CONSISTENCY_FIX_OPTIONS: FixOption[] = [
-  { key: "sync", label: "Update registry entry to detected type" },
+  { key: "sync", label: "Update registry to match detected type" },
 ];
 
 function summarizeMissingSettings(paths: string[]): string {
