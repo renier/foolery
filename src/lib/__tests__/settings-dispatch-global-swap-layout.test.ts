@@ -15,20 +15,19 @@ describe("dispatch global swap layout", () => {
 
   it("keeps a single dispatch-level swap control outside the per-step pool editor", () => {
     expect(dispatchSectionSource).toContain("<SettingsDispatchGlobalSwap");
-    expect(dispatchSectionSource).toContain("Global Swap Agent");
+    expect(dispatchSectionSource).toContain("Swap Agent");
     expect(dispatchSectionSource).toContain(
-      "Use this one control to replace an agent everywhere in Dispatch.",
+      "Use this one Dispatch-level control to replace an agent everywhere.",
     );
     expect(poolsSectionSource).not.toContain("SettingsDispatchGlobalSwap");
-    expect(poolsSectionSource).not.toContain("Swap Agent tool");
+    expect(poolsSectionSource).not.toContain("Global Swap Agent");
+    expect(poolsSectionSource).not.toContain("dispatch-wide replacement");
   });
 
-  it("keeps the per-step pool editor focused on step-local edits", () => {
+  it("keeps the per-step pool editor focused on pool editing", () => {
     expect(poolsSectionSource).toContain(
-      "These editors only change one step at a time.",
+      "Configure weighted agent distribution per workflow step.",
     );
-    expect(poolsSectionSource).toContain(
-      "For a dispatch-wide replacement, use the Global Swap Agent control at",
-    );
+    expect(poolsSectionSource).not.toContain("Swap Agent");
   });
 });

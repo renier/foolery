@@ -181,7 +181,7 @@ export function SettingsDispatchGlobalSwap({
           disabled={!canSwap}
           onClick={handleGlobalSwap}
         >
-          Swap Agent Globally
+          Swap Agent
         </Button>
       </div>
       {scopeParts.length > 0 && (
