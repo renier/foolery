@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { savePools } from "@/lib/settings-api";
 import { formatAgentDisplayLabel } from "@/lib/agent-identity";
+import { AgentDisplayLabel } from "@/components/agent-display-label";
 import type { RegisteredAgent } from "@/lib/types";
 import type { PoolEntry, PoolsSettings } from "@/lib/schemas";
 import { WorkflowStep } from "@/lib/workflows";
@@ -220,10 +221,10 @@ function StepPoolEditor({
                 >
                   <div className="w-[140px] sm:w-[220px] min-w-0 shrink-0 flex items-start gap-2">
                     <span className={`mt-1 size-2.5 rounded-full shrink-0 ${color}`} />
-                    <div className="min-w-0">
-                      <span className="text-xs block truncate" title={label}>
-                        {label}
-                      </span>
+                    <div className="min-w-0 text-xs">
+                      {agent ? <AgentDisplayLabel agent={agent} /> : (
+                        <span className="block truncate" title={label}>{label}</span>
+                      )}
                     </div>
                   </div>
                   <Input
@@ -310,7 +311,7 @@ function AddPoolEntryForm({
             const agent = agents[id];
             return (
               <SelectItem key={id} value={id}>
-                {formatPoolAgentLabel(id, agent)}
+                {agent ? <AgentDisplayLabel agent={agent} /> : id}
               </SelectItem>
             );
           })}

@@ -32,6 +32,7 @@ import {
   formatAgentDisplayLabel,
   formatAgentOptionLabel,
 } from "@/lib/agent-identity";
+import { AgentDisplayLabel } from "@/components/agent-display-label";
 import {
   addAgent,
   removeAgent,
@@ -603,10 +604,8 @@ function AgentRow({
 
   return (
     <div className="flex items-center justify-between rounded-xl border border-primary/15 bg-background/60 px-3 py-2">
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="text-xs font-medium truncate">
-          {formatAgentDisplayLabel(agent) || agent.label || id}
-        </span>
+      <div className="flex items-center gap-2 min-w-0 text-xs font-medium">
+        <AgentDisplayLabel agent={agent} />
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <Button variant="ghost" size="sm" className="hover:bg-primary/10" onClick={onEdit}>

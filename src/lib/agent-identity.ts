@@ -253,6 +253,75 @@ export function formatAgentDisplayLabel(
   }) || cleanValue(agent.label) || cleanValue(agent.command) || "Unknown";
 }
 
+/* ── Structured display parts (label + pills) ────────────── */
+
+export interface AgentDisplayParts {
+  label: string;
+  pills: string[];
+}
+
+function capitalizeToken(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function formatModelToken(token: string): string {
+  return token
+    .split("-")
+    .map((p) => (MODEL_LABELS[p.toLowerCase()] ?? capitalizeToken(p)))
+    .join(" ");
+}
+
+function parseOpenCodeModelPath(rawModel: string): {
+  label: string;
+  routerPill?: string;
+} {
+  const tokens = rawModel.split("/").filter(Boolean);
+  if (tokens.length >= 3) {
+    const router = tokens[0]!;
+    const vendor = capitalizeToken(tokens[tokens.length - 2]!);
+    const modelVersion = formatModelToken(tokens[tokens.length - 1]!);
+    return { label: `${vendor} ${modelVersion}`, routerPill: router };
+  }
+  if (tokens.length === 2) {
+    const vendor = capitalizeToken(tokens[0]!);
+    const model = formatModelToken(tokens[1]!);
+    return { label: `${vendor} ${model}`, routerPill: undefined };
+  }
+  if (tokens.length === 1) {
+    return { label: formatModelToken(tokens[0]!), routerPill: undefined };
+  }
+  return { label: rawModel, routerPill: undefined };
+}
+
+export function parseAgentDisplayParts(
+  agent: AgentIdentityLike,
+): AgentDisplayParts {
+  const providerId = detectAgentProviderId(agent.command);
+  const pills: string[] = [];
+
+  if (providerId === "opencode") {
+    const rawModel = cleanValue(agent.model);
+    if (rawModel && rawModel.includes("/")) {
+      const parsed = parseOpenCodeModelPath(rawModel);
+      if (parsed.routerPill) pills.push(parsed.routerPill);
+      pills.push("cli");
+      return { label: parsed.label, pills };
+    }
+    // Non-path model: use existing display, add opencode + cli pills
+    if (rawModel) {
+      pills.push("opencode");
+      pills.push("cli");
+      return { label: formatModelToken(rawModel), pills };
+    }
+    pills.push("cli");
+    return { label: "OpenCode", pills };
+  }
+
+  // Claude, Codex (OpenAI), Gemini — use existing label, add cli pill
+  pills.push("cli");
+  return { label: formatAgentDisplayLabel(agent), pills };
+}
+
 export function buildAgentOptionId(
   agentId: string,
   option: AgentOptionSeed,

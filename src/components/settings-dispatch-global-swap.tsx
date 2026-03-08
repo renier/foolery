@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatAgentDisplayLabel } from "@/lib/agent-identity";
+import { AgentDisplayLabel } from "@/components/agent-display-label";
 import {
   countDispatchAgentOccurrences,
   getSwappableSourceAgentIds,
@@ -156,7 +157,7 @@ export function SettingsDispatchGlobalSwap({
           <SelectContent>
             {swappableFromAgentIds.map((id) => (
               <SelectItem key={id} value={id}>
-                {formatAgentLabel(id, agents[id])}
+                {agents[id] ? <AgentDisplayLabel agent={agents[id]!} /> : id}
               </SelectItem>
             ))}
           </SelectContent>
@@ -169,7 +170,7 @@ export function SettingsDispatchGlobalSwap({
           <SelectContent>
             {allAgentIds.map((id) => (
               <SelectItem key={id} value={id} disabled={id === swapFromAgentId}>
-                {formatAgentLabel(id, agents[id])}
+                {agents[id] ? <AgentDisplayLabel agent={agents[id]!} /> : id}
               </SelectItem>
             ))}
           </SelectContent>

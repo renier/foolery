@@ -17,6 +17,7 @@ import {
 import { saveActions } from "@/lib/settings-api";
 import type { RegisteredAgent, ActionName } from "@/lib/types";
 import { formatAgentDisplayLabel } from "@/lib/agent-identity";
+import { AgentDisplayLabel } from "@/components/agent-display-label";
 import type { ActionAgentMappings } from "@/lib/schemas";
 import type { LucideIcon } from "lucide-react";
 
@@ -111,7 +112,7 @@ export function SettingsActionsSection({
                 <SelectContent>
                   {agentIds.map((id) => (
                     <SelectItem key={id} value={id}>
-                      {agents[id] ? formatAgentDisplayLabel(agents[id]!) : id}
+                      {agents[id] ? <AgentDisplayLabel agent={agents[id]!} /> : id}
                     </SelectItem>
                   ))}
                 </SelectContent>
