@@ -29,15 +29,6 @@ export interface RepoMemoryManagerBackfillResult {
   error?: string;
 }
 
-export interface RepoMemoryManagerSyncResult {
-  changed: boolean;
-  fileMissing: boolean;
-  repoFound: boolean;
-  previousMemoryManagerType?: MemoryManagerType;
-  memoryManagerType?: MemoryManagerType;
-  error?: string;
-}
-
 export interface RegistryPermissionsAudit {
   fileMissing: boolean;
   needsFix: boolean;
@@ -47,6 +38,15 @@ export interface RegistryPermissionsAudit {
 
 export interface RegistryPermissionsFixResult extends RegistryPermissionsAudit {
   changed: boolean;
+}
+
+export interface RepoMemoryManagerSyncResult {
+  changed: boolean;
+  fileMissing: boolean;
+  repoFound: boolean;
+  previousMemoryManagerType?: MemoryManagerType;
+  memoryManagerType?: MemoryManagerType;
+  error?: string;
 }
 const CONFIG_DIR = `${homedir()}/.config/foolery`;
 const REGISTRY_FILE = `${CONFIG_DIR}/registry.json`;
@@ -274,6 +274,49 @@ export async function backfillMissingRepoMemoryManagerTypes(): Promise<RepoMemor
   };
 }
 
+export async function inspectRegistryPermissions(): Promise<RegistryPermissionsAudit> {
+  try {
+    const info = await stat(REGISTRY_FILE);
+    const actualMode = normalizeMode(info.mode);
+    return {
+      fileMissing: false,
+      needsFix: actualMode !== 0o600,
+      actualMode,
+    };
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") {
+      return {
+        fileMissing: true,
+        needsFix: false,
+      };
+    }
+    return {
+      fileMissing: false,
+      needsFix: false,
+      error: formatError(error),
+    };
+  }
+}
+
+export async function ensureRegistryPermissions(): Promise<RegistryPermissionsFixResult> {
+  const result = await inspectRegistryPermissions();
+  if (result.error || result.fileMissing || !result.needsFix) {
+    return {
+      ...result,
+      changed: false,
+    };
+  }
+
+  await chmod(REGISTRY_FILE, 0o600);
+  return {
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+    changed: true,
+  };
+}
+
 export async function updateRegisteredRepoMemoryManagerType(
   repoPath: string,
   memoryManagerType: MemoryManagerType,
@@ -356,7 +399,6 @@ export async function updateRegisteredRepoMemoryManagerType(
     JSON.stringify({ ...record, repos }, null, 2),
     "utf-8",
   );
-  await chmod(REGISTRY_FILE, 0o600);
 
   return {
     changed: true,
@@ -364,48 +406,5 @@ export async function updateRegisteredRepoMemoryManagerType(
     repoFound: true,
     previousMemoryManagerType,
     memoryManagerType,
-  };
-}
-
-export async function inspectRegistryPermissions(): Promise<RegistryPermissionsAudit> {
-  try {
-    const info = await stat(REGISTRY_FILE);
-    const actualMode = normalizeMode(info.mode);
-    return {
-      fileMissing: false,
-      needsFix: actualMode !== 0o600,
-      actualMode,
-    };
-  } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
-    if (code === "ENOENT") {
-      return {
-        fileMissing: true,
-        needsFix: false,
-      };
-    }
-    return {
-      fileMissing: false,
-      needsFix: false,
-      error: formatError(error),
-    };
-  }
-}
-
-export async function ensureRegistryPermissions(): Promise<RegistryPermissionsFixResult> {
-  const result = await inspectRegistryPermissions();
-  if (result.error || result.fileMissing || !result.needsFix) {
-    return {
-      ...result,
-      changed: false,
-    };
-  }
-
-  await chmod(REGISTRY_FILE, 0o600);
-  return {
-    fileMissing: false,
-    needsFix: false,
-    actualMode: 0o600,
-    changed: true,
   };
 }

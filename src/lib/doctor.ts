@@ -1215,6 +1215,32 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
       }
     }
 
+    case "stale-parent": {
+      // Fix: move parent to in_progress (don't close — per project rules)
+      const { beatId, repoPath } = ctx;
+      if (!beatId || !repoPath) {
+        return { check: diag.check, success: false, message: "Missing context for fix.", context: ctx };
+      }
+      try {
+        const result = await getBackend().update(
+          beatId,
+          { state: "in_progress" },
+          repoPath,
+        );
+        if (!result.ok) {
+          return { check: diag.check, success: false, message: result.error?.message ?? "bd update failed", context: ctx };
+        }
+        return {
+          check: diag.check,
+          success: true,
+          message: `Moved ${beatId} to state=in_progress.`,
+          context: ctx,
+        };
+      } catch (e) {
+        return { check: diag.check, success: false, message: String(e), context: ctx };
+      }
+    }
+
     case "registry-consistency": {
       if (strategy && strategy !== "sync" && strategy !== "default") {
         return {
@@ -1244,7 +1270,15 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
           return {
             check: diag.check,
             success: false,
-            message: `Failed to update registry memory manager metadata: ${result.error}`,
+            message: `Failed to update repository memory manager metadata: ${result.error}`,
+            context: ctx,
+          };
+        }
+        if (result.fileMissing) {
+          return {
+            check: diag.check,
+            success: false,
+            message: "Repository registry ~/.config/foolery/registry.json does not exist.",
             context: ctx,
           };
         }
@@ -1252,7 +1286,7 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
           return {
             check: diag.check,
             success: false,
-            message: `Could not find registered repo entry for ${repoPath}.`,
+            message: `Repository ${repoPath} is no longer registered.`,
             context: ctx,
           };
         }
@@ -1260,40 +1294,14 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
           return {
             check: diag.check,
             success: true,
-            message: "Registry memory manager metadata already matches detected type; no changes needed.",
+            message: `Repository memory manager metadata already matches detected type "${detected}".`,
             context: ctx,
           };
         }
         return {
           check: diag.check,
           success: true,
-          message: `Updated registry memory manager metadata for "${ctx.repoName ?? repoPath}" to "${detected}".`,
-          context: ctx,
-        };
-      } catch (e) {
-        return { check: diag.check, success: false, message: String(e), context: ctx };
-      }
-    }
-
-    case "stale-parent": {
-      // Fix: move parent to in_progress (don't close — per project rules)
-      const { beatId, repoPath } = ctx;
-      if (!beatId || !repoPath) {
-        return { check: diag.check, success: false, message: "Missing context for fix.", context: ctx };
-      }
-      try {
-        const result = await getBackend().update(
-          beatId,
-          { state: "in_progress" },
-          repoPath,
-        );
-        if (!result.ok) {
-          return { check: diag.check, success: false, message: result.error?.message ?? "bd update failed", context: ctx };
-        }
-        return {
-          check: diag.check,
-          success: true,
-          message: `Moved ${beatId} to state=in_progress.`,
+          message: `Updated registry memory manager metadata for ${repoPath} to "${detected}".`,
           context: ctx,
         };
       } catch (e) {
