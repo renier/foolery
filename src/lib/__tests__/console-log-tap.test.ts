@@ -338,4 +338,35 @@ describe("console-log-tap", () => {
 
     _resetConsoleTapForTests();
   });
+
+  it("closes the active stream on beforeExit", async () => {
+    const { EventEmitter } = await import("node:events");
+
+    const fakeStream = Object.assign(new EventEmitter(), {
+      write: vi.fn(() => true),
+      end: vi.fn(),
+      destroy: vi.fn(),
+    });
+
+    vi.doMock("node:fs", async (importOriginal) => {
+      const actual =
+        await importOriginal<typeof import("node:fs")>();
+      return { ...actual, createWriteStream: () => fakeStream };
+    });
+
+    const { installConsoleTap, _resetConsoleTapForTests } = await import(
+      "@/lib/console-log-tap"
+    );
+
+    vi.spyOn(process.stdout, "write").mockReturnValue(true);
+
+    installConsoleTap();
+    console.log("flush me on shutdown");
+
+    process.emit("beforeExit", 0);
+
+    expect(fakeStream.end).toHaveBeenCalledTimes(1);
+
+    _resetConsoleTapForTests();
+  });
 });

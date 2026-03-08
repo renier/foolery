@@ -17,6 +17,7 @@ let currentDate = "";
 let stream: WriteStream | null = null;
 let streamErrorHandler: (() => void) | null = null;
 let restoreConsole: (() => void) | null = null;
+let beforeExitHandler: (() => void) | null = null;
 let uncaughtExceptionMonitorHandler:
   | ((error: Error | unknown) => void)
   | null = null;
@@ -211,6 +212,11 @@ export function installConsoleTap(): void {
   };
   process.on("unhandledRejection", unhandledRejectionHandler);
 
+  beforeExitHandler = () => {
+    closeStream();
+  };
+  process.on("beforeExit", beforeExitHandler);
+
   console.log("[console-tap] Console output tee active");
 }
 
@@ -229,6 +235,10 @@ export function _resetConsoleTapForTests(): void {
   if (unhandledRejectionHandler) {
     process.removeListener("unhandledRejection", unhandledRejectionHandler);
     unhandledRejectionHandler = null;
+  }
+  if (beforeExitHandler) {
+    process.removeListener("beforeExit", beforeExitHandler);
+    beforeExitHandler = null;
   }
   closeStream();
   installed = false;
