@@ -21,21 +21,29 @@ const mockScanForAgents = vi.fn();
 const mockLoadSettings = vi.fn();
 const mockInspectSettingsDefaults = vi.fn();
 const mockBackfillMissingSettingsDefaults = vi.fn();
+const mockInspectSettingsPermissions = vi.fn();
+const mockEnsureSettingsPermissions = vi.fn();
 vi.mock("@/lib/settings", () => ({
   getRegisteredAgents: () => mockGetRegisteredAgents(),
   scanForAgents: () => mockScanForAgents(),
   loadSettings: () => mockLoadSettings(),
   inspectSettingsDefaults: () => mockInspectSettingsDefaults(),
   backfillMissingSettingsDefaults: () => mockBackfillMissingSettingsDefaults(),
+  inspectSettingsPermissions: () => mockInspectSettingsPermissions(),
+  ensureSettingsPermissions: () => mockEnsureSettingsPermissions(),
 }));
 
 const mockListRepos = vi.fn();
 const mockInspectMissingRepoMemoryManagerTypes = vi.fn();
 const mockBackfillMissingRepoMemoryManagerTypes = vi.fn();
+const mockInspectRegistryPermissions = vi.fn();
+const mockEnsureRegistryPermissions = vi.fn();
 vi.mock("@/lib/registry", () => ({
   listRepos: () => mockListRepos(),
   inspectMissingRepoMemoryManagerTypes: () => mockInspectMissingRepoMemoryManagerTypes(),
   backfillMissingRepoMemoryManagerTypes: () => mockBackfillMissingRepoMemoryManagerTypes(),
+  inspectRegistryPermissions: () => mockInspectRegistryPermissions(),
+  ensureRegistryPermissions: () => mockEnsureRegistryPermissions(),
 }));
 
 const mockGetReleaseVersionStatus = vi.fn();
@@ -102,6 +110,17 @@ beforeEach(() => {
     fileMissing: false,
     changed: false,
   });
+  mockInspectSettingsPermissions.mockResolvedValue({
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+  });
+  mockEnsureSettingsPermissions.mockResolvedValue({
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+    changed: false,
+  });
   mockInspectMissingRepoMemoryManagerTypes.mockResolvedValue({
     missingRepoPaths: [],
     fileMissing: false,
@@ -111,10 +130,62 @@ beforeEach(() => {
     migratedRepoPaths: [],
     fileMissing: false,
   });
+  mockInspectRegistryPermissions.mockResolvedValue({
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+  });
+  mockEnsureRegistryPermissions.mockResolvedValue({
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+    changed: false,
+  });
   mockGetReleaseVersionStatus.mockResolvedValue({
     installedVersion: "1.0.0",
     latestVersion: "1.0.0",
     updateAvailable: false,
+  });
+});
+
+describe("applyFix: config-permissions", () => {
+  it("restricts config permissions when strategy is selected", async () => {
+    mockInspectRegistryPermissions.mockResolvedValue({
+      fileMissing: false,
+      needsFix: true,
+      actualMode: 0o644,
+    });
+    mockEnsureRegistryPermissions.mockResolvedValue({
+      fileMissing: false,
+      needsFix: false,
+      actualMode: 0o600,
+      changed: true,
+    });
+
+    const fixReport = await runDoctorFix({ "config-permissions": "restrict" });
+    const fix = fixReport.fixes.find((f) => f.check === "config-permissions");
+    expect(fix?.success).toBe(true);
+    expect(fix?.message).toContain("Restricted config file permissions");
+    expect(mockEnsureRegistryPermissions).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns failure when permission fix reports an error", async () => {
+    mockInspectSettingsPermissions.mockResolvedValue({
+      fileMissing: false,
+      needsFix: true,
+      actualMode: 0o644,
+    });
+    mockEnsureSettingsPermissions.mockResolvedValue({
+      fileMissing: false,
+      needsFix: false,
+      changed: false,
+      error: "permission denied",
+    });
+
+    const fixReport = await runDoctorFix({ "config-permissions": "restrict" });
+    const fix = fixReport.fixes.find((f) => f.check === "config-permissions");
+    expect(fix?.success).toBe(false);
+    expect(fix?.message).toContain("permission denied");
   });
 });
 

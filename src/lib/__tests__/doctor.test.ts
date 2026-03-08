@@ -21,21 +21,29 @@ const mockScanForAgents = vi.fn();
 const mockLoadSettings = vi.fn();
 const mockInspectSettingsDefaults = vi.fn();
 const mockBackfillMissingSettingsDefaults = vi.fn();
+const mockInspectSettingsPermissions = vi.fn();
+const mockEnsureSettingsPermissions = vi.fn();
 vi.mock("@/lib/settings", () => ({
   getRegisteredAgents: () => mockGetRegisteredAgents(),
   scanForAgents: () => mockScanForAgents(),
   loadSettings: () => mockLoadSettings(),
   inspectSettingsDefaults: () => mockInspectSettingsDefaults(),
   backfillMissingSettingsDefaults: () => mockBackfillMissingSettingsDefaults(),
+  inspectSettingsPermissions: () => mockInspectSettingsPermissions(),
+  ensureSettingsPermissions: () => mockEnsureSettingsPermissions(),
 }));
 
 const mockListRepos = vi.fn();
 const mockInspectMissingRepoMemoryManagerTypes = vi.fn();
 const mockBackfillMissingRepoMemoryManagerTypes = vi.fn();
+const mockInspectRegistryPermissions = vi.fn();
+const mockEnsureRegistryPermissions = vi.fn();
 vi.mock("@/lib/registry", () => ({
   listRepos: () => mockListRepos(),
   inspectMissingRepoMemoryManagerTypes: () => mockInspectMissingRepoMemoryManagerTypes(),
   backfillMissingRepoMemoryManagerTypes: () => mockBackfillMissingRepoMemoryManagerTypes(),
+  inspectRegistryPermissions: () => mockInspectRegistryPermissions(),
+  ensureRegistryPermissions: () => mockEnsureRegistryPermissions(),
 }));
 
 const mockGetReleaseVersionStatus = vi.fn();
@@ -65,6 +73,7 @@ vi.mock("@/lib/memory-manager-detection", () => ({
 import {
   checkAgents,
   checkUpdates,
+  checkConfigPermissions,
   checkSettingsDefaults,
   checkRepoMemoryManagerTypes,
   checkStaleParents,
@@ -122,6 +131,17 @@ beforeEach(() => {
     fileMissing: false,
     changed: false,
   });
+  mockInspectSettingsPermissions.mockResolvedValue({
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+  });
+  mockEnsureSettingsPermissions.mockResolvedValue({
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+    changed: false,
+  });
   mockInspectMissingRepoMemoryManagerTypes.mockResolvedValue({
     missingRepoPaths: [],
     fileMissing: false,
@@ -131,12 +151,52 @@ beforeEach(() => {
     migratedRepoPaths: [],
     fileMissing: false,
   });
+  mockInspectRegistryPermissions.mockResolvedValue({
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+  });
+  mockEnsureRegistryPermissions.mockResolvedValue({
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+    changed: false,
+  });
   mockGetReleaseVersionStatus.mockResolvedValue({
     installedVersion: "1.0.0",
     latestVersion: "1.0.0",
     updateAvailable: false,
   });
   mockDetectMemoryManagerType.mockReturnValue(undefined);
+});
+
+describe("checkConfigPermissions", () => {
+  it("reports info when config permissions are already restricted", async () => {
+    const diags = await checkConfigPermissions();
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("info");
+    expect(diags[0].check).toBe("config-permissions");
+    expect(diags[0].fixable).toBe(false);
+  });
+
+  it("reports warning and fix option when a config file is too permissive", async () => {
+    mockInspectRegistryPermissions.mockResolvedValue({
+      fileMissing: false,
+      needsFix: true,
+      actualMode: 0o644,
+    });
+
+    const diags = await checkConfigPermissions();
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("warning");
+    expect(diags[0].check).toBe("config-permissions");
+    expect(diags[0].fixable).toBe(true);
+    expect(diags[0].fixOptions).toEqual([
+      { key: "restrict", label: "Restrict config file permissions to 0600" },
+    ]);
+    expect(diags[0].message).toContain("registry.json");
+    expect(diags[0].message).toContain("0644");
+  });
 });
 
 // ── checkSettingsDefaults ─────────────────────────────────
@@ -552,7 +612,7 @@ describe("streamDoctor", () => {
     return events;
   }
 
-  it("emits 9 check events plus 1 summary event", async () => {
+  it("emits 10 check events plus 1 summary event", async () => {
     mockGetRegisteredAgents.mockResolvedValue({
       claude: { command: "claude", label: "Claude" },
     });
@@ -565,10 +625,10 @@ describe("streamDoctor", () => {
     });
 
     const events = await collectStream();
-    expect(events).toHaveLength(10);
+    expect(events).toHaveLength(11);
 
-    // First 9 are check results
-    for (let i = 0; i < 9; i++) {
+    // First 10 are check results
+    for (let i = 0; i < 10; i++) {
       const ev = events[i] as DoctorCheckResult;
       expect(ev.done).toBeUndefined();
       expect(ev.category).toBeTruthy();
@@ -579,7 +639,7 @@ describe("streamDoctor", () => {
     }
 
     // Last is summary
-    const summary = events[9] as DoctorStreamSummary;
+    const summary = events[10] as DoctorStreamSummary;
     expect(summary.done).toBe(true);
     expect(typeof summary.passed).toBe("number");
     expect(typeof summary.failed).toBe("number");
@@ -599,6 +659,7 @@ describe("streamDoctor", () => {
     expect(categories).toEqual([
       "agents",
       "updates",
+      "config-permissions",
       "settings-defaults",
       "repo-memory-managers",
       "memory-implementation",

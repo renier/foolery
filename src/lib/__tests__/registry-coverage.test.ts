@@ -3,11 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockReadFile = vi.fn();
 const mockWriteFile = vi.fn();
 const mockMkdir = vi.fn();
+const mockChmod = vi.fn();
+const mockStat = vi.fn();
 
 vi.mock("node:fs/promises", () => ({
   readFile: (...args: unknown[]) => mockReadFile(...args),
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
+  chmod: (...args: unknown[]) => mockChmod(...args),
+  stat: (...args: unknown[]) => mockStat(...args),
 }));
 
 const mockDetectMemoryManagerType = vi.fn();
@@ -28,6 +32,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockMkdir.mockResolvedValue(undefined);
   mockWriteFile.mockResolvedValue(undefined);
+  mockChmod.mockResolvedValue(undefined);
+  mockStat.mockResolvedValue({ mode: 0o600 });
   mockDetectMemoryManagerType.mockReturnValue(undefined);
 });
 
@@ -214,5 +220,9 @@ describe("saveRegistry", () => {
     await saveRegistry({ repos: [] });
     expect(mockMkdir).toHaveBeenCalled();
     expect(mockWriteFile).toHaveBeenCalledTimes(1);
+    expect(mockChmod).toHaveBeenCalledWith(
+      expect.stringContaining("registry.json"),
+      0o600,
+    );
   });
 });
