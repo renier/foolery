@@ -23,8 +23,10 @@ export function UrlStateSync() {
       // No repo in URL on initial load — try to restore from localStorage
       restoredRef.current = true;
       const persisted = getPersistedRepo();
-      if (persisted && persisted !== store.activeRepo) {
-        store.setActiveRepo(persisted);
+      if (persisted) {
+        if (persisted !== store.activeRepo) {
+          store.setActiveRepo(persisted);
+        }
         // Update URL to include the restored repo
         const params = new URLSearchParams(searchParams.toString());
         params.set("repo", persisted);
