@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -149,13 +148,6 @@ export function SettingsDispatchGlobalSwap({
           : "rounded-xl border border-primary/18 bg-background/60 p-3 space-y-2"
       }
     >
-      <div>
-        <Label className="text-xs font-medium">Swap Agent</Label>
-        <p className="text-[10px] text-muted-foreground">
-          Dispatch-wide replacement. One swap updates every matching action
-          mapping and pool entry across all workflow steps.
-        </p>
-      </div>
       <div className="flex flex-wrap items-center gap-2">
         <Select value={swapFromAgentId} onValueChange={setSwapFromSelection}>
           <SelectTrigger className="h-7 w-[170px] border-primary/20 bg-background/80">

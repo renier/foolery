@@ -15,14 +15,15 @@ describe("dispatch global swap layout", () => {
 
   it("keeps a single dispatch-level swap control outside the per-step pool editor", () => {
     expect(dispatchSectionSource).toContain("<SettingsDispatchGlobalSwap");
-    expect(dispatchSectionSource).toContain("Dispatch-wide replacement tool");
+    expect(dispatchSectionSource).toContain("Dispatch Tools");
+    expect(dispatchSectionSource).toContain("Swap Agent is global here.");
     expect(poolsSectionSource).not.toContain("SettingsDispatchGlobalSwap");
-    expect(poolsSectionSource).not.toContain("Dispatch-wide replacement.");
+    expect(poolsSectionSource).not.toContain("Swap Agent tool");
   });
 
-  it("guides pool editing toward the global swap control instead of embedding one per step", () => {
+  it("keeps the per-step pool editor focused on step-local edits", () => {
     expect(poolsSectionSource).toContain(
-      "These editors only change one step at a time. Use the dispatch-wide",
+      "These editors only change one step at a time.",
     );
   });
 });
