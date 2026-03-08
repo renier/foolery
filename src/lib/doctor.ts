@@ -11,18 +11,20 @@ import {
   inspectStaleSettingsKeys,
   backfillMissingSettingsDefaults,
   cleanStaleSettingsKeys,
+  inspectSettingsPermissions,
+  ensureSettingsPermissions,
 } from "./settings";
 import {
   listRepos,
   inspectMissingRepoMemoryManagerTypes,
   backfillMissingRepoMemoryManagerTypes,
-  updateRegisteredRepoMemoryManagerType,
+  inspectRegistryPermissions,
+  ensureRegistryPermissions,
   type RegisteredRepo,
 } from "./registry";
 import { getReleaseVersionStatus, type ReleaseVersionStatus } from "./release-version";
 import type { Beat, MemoryWorkflowDescriptor } from "./types";
 import { detectMemoryManagerType } from "./memory-manager-detection";
-import { isKnownMemoryManagerType } from "./memory-managers";
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -247,12 +249,16 @@ const BACKEND_TYPE_MIGRATION_FIX_OPTIONS: FixOption[] = [
   { key: "migrate", label: "Migrate backend.type from cli to auto" },
 ];
 
-const REPO_MEMORY_MANAGERS_FIX_OPTIONS: FixOption[] = [
-  { key: "backfill", label: "Backfill missing repository memory manager metadata" },
+const CONFIG_PERMISSIONS_FIX_OPTIONS: FixOption[] = [
+  { key: "restrict", label: "Restrict config file permissions to 0600" },
 ];
 
 const REGISTRY_CONSISTENCY_FIX_OPTIONS: FixOption[] = [
   { key: "sync", label: "Update registry to match detected type" },
+];
+
+const REPO_MEMORY_MANAGERS_FIX_OPTIONS: FixOption[] = [
+  { key: "backfill", label: "Backfill missing repository memory manager metadata" },
 ];
 
 function summarizeMissingSettings(paths: string[]): string {
@@ -265,6 +271,22 @@ function summarizePaths(paths: string[]): string {
   const preview = paths.slice(0, 3).join(", ");
   if (paths.length <= 3) return preview;
   return `${preview} (+${paths.length - 3} more)`;
+}
+
+function formatMode(mode: number): string {
+  return `0${mode.toString(8).padStart(3, "0")}`;
+}
+
+function summarizeConfigPermissionIssues(
+  issues: Array<{ path: string; actualMode?: number }>,
+): string {
+  return issues
+    .map((issue) =>
+      issue.actualMode === undefined
+        ? issue.path
+        : `${issue.path} (${formatMode(issue.actualMode)})`,
+    )
+    .join(", ");
 }
 
 export async function checkSettingsDefaults(): Promise<Diagnostic[]> {
@@ -385,6 +407,68 @@ export async function checkBackendTypeMigration(): Promise<Diagnostic[]> {
     });
   }
 
+  return diagnostics;
+}
+
+export async function checkConfigPermissions(): Promise<Diagnostic[]> {
+  const diagnostics: Diagnostic[] = [];
+  const [settingsResult, registryResult] = await Promise.all([
+    inspectSettingsPermissions(),
+    inspectRegistryPermissions(),
+  ]);
+
+  const errors = [
+    settingsResult.error
+      ? `Could not inspect ~/.config/foolery/settings.toml permissions: ${settingsResult.error}`
+      : null,
+    registryResult.error
+      ? `Could not inspect ~/.config/foolery/registry.json permissions: ${registryResult.error}`
+      : null,
+  ].filter((message): message is string => message !== null);
+
+  if (errors.length > 0) {
+    return errors.map((message) => ({
+      check: "config-permissions",
+      severity: "warning",
+      message,
+      fixable: false,
+    }));
+  }
+
+  const issues: Array<{ path: string; actualMode?: number }> = [];
+  if (!settingsResult.fileMissing && settingsResult.needsFix) {
+    issues.push({
+      path: "~/.config/foolery/settings.toml",
+      actualMode: settingsResult.actualMode,
+    });
+  }
+  if (!registryResult.fileMissing && registryResult.needsFix) {
+    issues.push({
+      path: "~/.config/foolery/registry.json",
+      actualMode: registryResult.actualMode,
+    });
+  }
+
+  if (issues.length > 0) {
+    diagnostics.push({
+      check: "config-permissions",
+      severity: "warning",
+      message: `Config files should be owner-only (0600): ${summarizeConfigPermissionIssues(issues)}.`,
+      fixable: true,
+      fixOptions: CONFIG_PERMISSIONS_FIX_OPTIONS,
+      context: {
+        files: issues.map((issue) => issue.path).join(","),
+      },
+    });
+    return diagnostics;
+  }
+
+  diagnostics.push({
+    check: "config-permissions",
+    severity: "info",
+    message: "Config file permissions are restricted to 0600 for existing config files.",
+    fixable: false,
+  });
   return diagnostics;
 }
 
@@ -718,8 +802,7 @@ export async function checkRegistryConsistency(
       diagnostics.push({
         check: "registry-consistency",
         severity: "warning",
-        fixable: true,
-        fixOptions: REGISTRY_CONSISTENCY_FIX_OPTIONS,
+        fixable: false,
         message: `Repo "${repo.name}" is registered as "${registered ?? "unset"}" but detected as "${detected}".`,
         context: {
           repoPath: repo.path,
@@ -750,6 +833,7 @@ export async function runDoctor(): Promise<DoctorReport> {
   const [
     agentDiags,
     updateDiags,
+    configPermissionDiags,
     settingsDiags,
     staleSettingsDiags,
     backendTypeDiags,
@@ -762,6 +846,7 @@ export async function runDoctor(): Promise<DoctorReport> {
   ] = await Promise.all([
     checkAgents(),
     checkUpdates(),
+    checkConfigPermissions(),
     checkSettingsDefaults(),
     checkStaleSettingsKeys(),
     checkBackendTypeMigration(),
@@ -776,6 +861,7 @@ export async function runDoctor(): Promise<DoctorReport> {
   const diagnostics = [
     ...agentDiags,
     ...updateDiags,
+    ...configPermissionDiags,
     ...settingsDiags,
     ...staleSettingsDiags,
     ...backendTypeDiags,
@@ -841,6 +927,7 @@ export async function* streamDoctor(): AsyncGenerator<DoctorStreamEvent> {
   }> = [
     { category: "agents", label: "Agent connectivity", run: () => checkAgents() },
     { category: "updates", label: "Version", run: () => checkUpdates() },
+    { category: "config-permissions", label: "Config permissions", run: () => checkConfigPermissions() },
     { category: "settings-defaults", label: "Settings defaults", run: () => checkSettingsDefaults() },
     { category: "settings-stale-keys", label: "Settings stale keys", run: () => checkStaleSettingsKeys() },
     { category: "backend-type-migration", label: "Backend type", run: () => checkBackendTypeMigration() },
@@ -1027,6 +1114,62 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
       }
     }
 
+    case "config-permissions": {
+      if (strategy && strategy !== "restrict" && strategy !== "default") {
+        return {
+          check: diag.check,
+          success: false,
+          message: `Unknown strategy "${strategy}" for config permissions.`,
+          context: ctx,
+        };
+      }
+      try {
+        const [settingsResult, registryResult] = await Promise.all([
+          ensureSettingsPermissions(),
+          ensureRegistryPermissions(),
+        ]);
+        const errors = [
+          settingsResult.error
+            ? `settings.toml: ${settingsResult.error}`
+            : null,
+          registryResult.error
+            ? `registry.json: ${registryResult.error}`
+            : null,
+        ].filter((message): message is string => message !== null);
+        if (errors.length > 0) {
+          return {
+            check: diag.check,
+            success: false,
+            message: `Failed to restrict config file permissions: ${errors.join("; ")}`,
+            context: ctx,
+          };
+        }
+        const changedFiles = [
+          settingsResult.changed ? "~/.config/foolery/settings.toml" : null,
+          registryResult.changed ? "~/.config/foolery/registry.json" : null,
+        ].filter((path): path is string => path !== null);
+        if (changedFiles.length === 0) {
+          return {
+            check: diag.check,
+            success: true,
+            message: "Config file permissions already restricted; no changes needed.",
+            context: ctx,
+          };
+        }
+        return {
+          check: diag.check,
+          success: true,
+          message: `Restricted config file permissions to 0600: ${changedFiles.join(", ")}.`,
+          context: {
+            ...ctx,
+            files: changedFiles.join(","),
+          },
+        };
+      } catch (e) {
+        return { check: diag.check, success: false, message: String(e), context: ctx };
+      }
+    }
+
     case "repo-memory-managers": {
       if (strategy && strategy !== "backfill" && strategy !== "default") {
         return {
@@ -1088,74 +1231,6 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
           check: diag.check,
           success: true,
           message: `Moved ${beatId} to state=in_progress.`,
-          context: ctx,
-        };
-      } catch (e) {
-        return { check: diag.check, success: false, message: String(e), context: ctx };
-      }
-    }
-
-    case "registry-consistency": {
-      if (strategy && strategy !== "sync" && strategy !== "default") {
-        return {
-          check: diag.check,
-          success: false,
-          message: `Unknown strategy "${strategy}" for registry consistency.`,
-          context: ctx,
-        };
-      }
-
-      const { repoPath, detected } = ctx;
-      if (!repoPath || !detected) {
-        return { check: diag.check, success: false, message: "Missing context for fix.", context: ctx };
-      }
-      if (!isKnownMemoryManagerType(detected)) {
-        return {
-          check: diag.check,
-          success: false,
-          message: `Detected memory manager type "${detected}" is not supported.`,
-          context: ctx,
-        };
-      }
-
-      try {
-        const result = await updateRegisteredRepoMemoryManagerType(repoPath, detected);
-        if (result.error) {
-          return {
-            check: diag.check,
-            success: false,
-            message: `Failed to update repository memory manager metadata: ${result.error}`,
-            context: ctx,
-          };
-        }
-        if (result.fileMissing) {
-          return {
-            check: diag.check,
-            success: false,
-            message: "Repository registry ~/.config/foolery/registry.json does not exist.",
-            context: ctx,
-          };
-        }
-        if (!result.repoFound) {
-          return {
-            check: diag.check,
-            success: false,
-            message: `Repository ${repoPath} is no longer registered.`,
-            context: ctx,
-          };
-        }
-        if (!result.changed) {
-          return {
-            check: diag.check,
-            success: true,
-            message: `Repository memory manager metadata already matches detected type "${detected}".`,
-            context: ctx,
-          };
-        }
-        return {
-          check: diag.check,
-          success: true,
-          message: `Updated registry memory manager metadata for ${repoPath} to "${detected}".`,
           context: ctx,
         };
       } catch (e) {

@@ -3,11 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockReadFile = vi.fn();
 const mockWriteFile = vi.fn();
 const mockMkdir = vi.fn();
+const mockChmod = vi.fn();
+const mockStat = vi.fn();
 
 vi.mock("node:fs/promises", () => ({
   readFile: (...args: unknown[]) => mockReadFile(...args),
   writeFile: (...args: unknown[]) => mockWriteFile(...args),
   mkdir: (...args: unknown[]) => mockMkdir(...args),
+  chmod: (...args: unknown[]) => mockChmod(...args),
+  stat: (...args: unknown[]) => mockStat(...args),
 }));
 
 const mockDetectMemoryManagerType = vi.fn();
@@ -19,13 +23,16 @@ import {
   listRepos,
   inspectMissingRepoMemoryManagerTypes,
   backfillMissingRepoMemoryManagerTypes,
-  updateRegisteredRepoMemoryManagerType,
+  inspectRegistryPermissions,
+  ensureRegistryPermissions,
 } from "@/lib/registry";
 
 beforeEach(() => {
   vi.clearAllMocks();
   mockMkdir.mockResolvedValue(undefined);
   mockWriteFile.mockResolvedValue(undefined);
+  mockChmod.mockResolvedValue(undefined);
+  mockStat.mockResolvedValue({ mode: 0o600 });
   mockDetectMemoryManagerType.mockReturnValue(undefined);
 });
 
@@ -121,6 +128,10 @@ describe("backfillMissingRepoMemoryManagerTypes", () => {
       { path: "/repo-a", name: "repo-a", addedAt: "2026-01-01T00:00:00.000Z", memoryManagerType: "beads" },
       { path: "/repo-b", name: "repo-b", addedAt: "2026-01-01T00:00:00.000Z", memoryManagerType: "beads" },
     ]);
+    expect(mockChmod).toHaveBeenCalledWith(
+      expect.stringContaining("registry.json"),
+      0o600,
+    );
   });
 
   it("does not write when memory manager metadata already exists", async () => {
@@ -155,55 +166,24 @@ describe("backfillMissingRepoMemoryManagerTypes", () => {
   });
 });
 
-describe("updateRegisteredRepoMemoryManagerType", () => {
-  it("updates an existing repo entry to the detected memory manager type", async () => {
-    mockReadFile.mockResolvedValue(
-      JSON.stringify({
-        repos: [
-          {
-            path: "/repo-a",
-            name: "repo-a",
-            addedAt: "2026-01-01T00:00:00.000Z",
-            memoryManagerType: "beads",
-          },
-        ],
-      }),
-    );
+describe("registry permissions", () => {
+  it("reports when registry.json permissions need tightening", async () => {
+    mockStat.mockResolvedValue({ mode: 0o644 });
 
-    const result = await updateRegisteredRepoMemoryManagerType("/repo-a", "knots");
-    expect(result.changed).toBe(true);
-    expect(result.repoFound).toBe(true);
-    expect(result.previousMemoryManagerType).toBe("beads");
-    expect(result.memoryManagerType).toBe("knots");
-    expect(mockWriteFile).toHaveBeenCalledTimes(1);
-
-    const written = mockWriteFile.mock.calls[0][1] as string;
-    const parsed = JSON.parse(written) as {
-      repos: Array<{ path: string; memoryManagerType?: string }>;
-    };
-    expect(parsed.repos[0]).toMatchObject({
-      path: "/repo-a",
-      memoryManagerType: "knots",
-    });
+    const result = await inspectRegistryPermissions();
+    expect(result.fileMissing).toBe(false);
+    expect(result.needsFix).toBe(true);
+    expect(result.actualMode).toBe(0o644);
   });
 
-  it("does not write when the repo is already registered with the detected type", async () => {
-    mockReadFile.mockResolvedValue(
-      JSON.stringify({
-        repos: [
-          {
-            path: "/repo-a",
-            name: "repo-a",
-            addedAt: "2026-01-01T00:00:00.000Z",
-            memoryManagerType: "knots",
-          },
-        ],
-      }),
-    );
+  it("chmods registry.json to 0600 when needed", async () => {
+    mockStat.mockResolvedValue({ mode: 0o644 });
 
-    const result = await updateRegisteredRepoMemoryManagerType("/repo-a", "knots");
-    expect(result.changed).toBe(false);
-    expect(result.repoFound).toBe(true);
-    expect(mockWriteFile).not.toHaveBeenCalled();
+    const result = await ensureRegistryPermissions();
+    expect(result.changed).toBe(true);
+    expect(mockChmod).toHaveBeenCalledWith(
+      expect.stringContaining("registry.json"),
+      0o600,
+    );
   });
 });

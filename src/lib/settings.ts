@@ -93,6 +93,16 @@ interface StaleSettingsComputation extends StaleSettingsAudit {
 const STALE_TOP_LEVEL_SETTINGS_KEYS = ["agent", "verification"] as const;
 const STALE_ACTION_SETTINGS_KEYS = ["direct"] as const;
 
+export interface SettingsPermissionsAudit {
+  fileMissing: boolean;
+  needsFix: boolean;
+  actualMode?: number;
+  error?: string;
+}
+
+export interface SettingsPermissionsFixResult extends SettingsPermissionsAudit {
+  changed: boolean;
+}
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -148,6 +158,10 @@ function mergeMissingDefaults(
 function formatError(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);
+}
+
+function normalizeMode(mode: number): number {
+  return mode & 0o777;
 }
 
 async function readRawSettings(): Promise<{
@@ -328,6 +342,49 @@ export async function cleanStaleSettingsKeys(): Promise<StaleSettingsCleanupResu
     fileMissing: result.fileMissing,
     error: result.error,
     changed,
+  };
+}
+
+export async function inspectSettingsPermissions(): Promise<SettingsPermissionsAudit> {
+  try {
+    const info = await stat(SETTINGS_FILE);
+    const actualMode = normalizeMode(info.mode);
+    return {
+      fileMissing: false,
+      needsFix: actualMode !== 0o600,
+      actualMode,
+    };
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") {
+      return {
+        fileMissing: true,
+        needsFix: false,
+      };
+    }
+    return {
+      fileMissing: false,
+      needsFix: false,
+      error: formatError(error),
+    };
+  }
+}
+
+export async function ensureSettingsPermissions(): Promise<SettingsPermissionsFixResult> {
+  const result = await inspectSettingsPermissions();
+  if (result.error || result.fileMissing || !result.needsFix) {
+    return {
+      ...result,
+      changed: false,
+    };
+  }
+
+  await chmod(SETTINGS_FILE, 0o600);
+  return {
+    fileMissing: false,
+    needsFix: false,
+    actualMode: 0o600,
+    changed: true,
   };
 }
 
