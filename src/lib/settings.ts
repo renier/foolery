@@ -76,6 +76,17 @@ export interface SettingsDefaultsBackfillResult extends SettingsDefaultsAudit {
   changed: boolean;
 }
 
+export interface SettingsPermissionsAudit {
+  fileMissing: boolean;
+  needsFix: boolean;
+  actualMode?: number;
+  error?: string;
+}
+
+export interface SettingsPermissionsFixResult extends SettingsPermissionsAudit {
+  changed: boolean;
+}
+
 export interface StaleSettingsAudit {
   stalePaths: string[];
   fileMissing: boolean;
@@ -93,16 +104,6 @@ interface StaleSettingsComputation extends StaleSettingsAudit {
 const STALE_TOP_LEVEL_SETTINGS_KEYS = ["agent", "verification"] as const;
 const STALE_ACTION_SETTINGS_KEYS = ["direct"] as const;
 
-export interface SettingsPermissionsAudit {
-  fileMissing: boolean;
-  needsFix: boolean;
-  actualMode?: number;
-  error?: string;
-}
-
-export interface SettingsPermissionsFixResult extends SettingsPermissionsAudit {
-  changed: boolean;
-}
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -324,27 +325,6 @@ export async function backfillMissingSettingsDefaults(): Promise<SettingsDefault
   };
 }
 
-/** Remove obsolete settings keys that are no longer used by the app. */
-export async function cleanStaleSettingsKeys(): Promise<StaleSettingsCleanupResult> {
-  const result = await computeStaleSettingsStatus();
-  let changed = false;
-
-  if (!result.error && result.stalePaths.length > 0) {
-    await mkdir(CONFIG_DIR, { recursive: true });
-    await writeFile(SETTINGS_FILE, stringify(result.cleaned), "utf-8");
-    await chmod(SETTINGS_FILE, 0o600);
-    changed = true;
-  }
-
-  cached = null;
-  return {
-    stalePaths: result.stalePaths,
-    fileMissing: result.fileMissing,
-    error: result.error,
-    changed,
-  };
-}
-
 export async function inspectSettingsPermissions(): Promise<SettingsPermissionsAudit> {
   try {
     const info = await stat(SETTINGS_FILE);
@@ -385,6 +365,27 @@ export async function ensureSettingsPermissions(): Promise<SettingsPermissionsFi
     needsFix: false,
     actualMode: 0o600,
     changed: true,
+  };
+}
+
+/** Remove obsolete settings keys that are no longer used by the app. */
+export async function cleanStaleSettingsKeys(): Promise<StaleSettingsCleanupResult> {
+  const result = await computeStaleSettingsStatus();
+  let changed = false;
+
+  if (!result.error && result.stalePaths.length > 0) {
+    await mkdir(CONFIG_DIR, { recursive: true });
+    await writeFile(SETTINGS_FILE, stringify(result.cleaned), "utf-8");
+    await chmod(SETTINGS_FILE, 0o600);
+    changed = true;
+  }
+
+  cached = null;
+  return {
+    stalePaths: result.stalePaths,
+    fileMissing: result.fileMissing,
+    error: result.error,
+    changed,
   };
 }
 

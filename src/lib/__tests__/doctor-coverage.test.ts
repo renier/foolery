@@ -29,17 +29,17 @@ const mockGetRegisteredAgents = vi.fn();
 const mockInspectSettingsDefaults = vi.fn();
 const mockInspectStaleSettingsKeys = vi.fn();
 const mockBackfillMissingSettingsDefaults = vi.fn();
-const mockCleanStaleSettingsKeys = vi.fn();
 const mockInspectSettingsPermissions = vi.fn();
 const mockEnsureSettingsPermissions = vi.fn();
+const mockCleanStaleSettingsKeys = vi.fn();
 vi.mock("@/lib/settings", () => ({
   getRegisteredAgents: () => mockGetRegisteredAgents(),
   inspectSettingsDefaults: () => mockInspectSettingsDefaults(),
   inspectStaleSettingsKeys: () => mockInspectStaleSettingsKeys(),
   backfillMissingSettingsDefaults: () => mockBackfillMissingSettingsDefaults(),
-  cleanStaleSettingsKeys: () => mockCleanStaleSettingsKeys(),
   inspectSettingsPermissions: () => mockInspectSettingsPermissions(),
   ensureSettingsPermissions: () => mockEnsureSettingsPermissions(),
+  cleanStaleSettingsKeys: () => mockCleanStaleSettingsKeys(),
 }));
 
 const mockListRepos = vi.fn();
@@ -113,11 +113,6 @@ beforeEach(() => {
     missingPaths: [],
     changed: false,
   });
-  mockCleanStaleSettingsKeys.mockResolvedValue({
-    stalePaths: [],
-    fileMissing: false,
-    changed: false,
-  });
   mockInspectSettingsPermissions.mockResolvedValue({
     fileMissing: false,
     needsFix: false,
@@ -127,6 +122,10 @@ beforeEach(() => {
     fileMissing: false,
     needsFix: false,
     actualMode: 0o600,
+    changed: false,
+  });
+  mockCleanStaleSettingsKeys.mockResolvedValue({
+    stalePaths: [],
     changed: false,
   });
   mockInspectMissingRepoMemoryManagerTypes.mockResolvedValue({
@@ -397,19 +396,6 @@ describe("applyFix: unknown strategy", () => {
     expect(fix?.message).toContain('Unknown strategy');
   });
 
-  it("returns failure for unknown settings-stale-keys strategy", async () => {
-    mockInspectStaleSettingsKeys.mockResolvedValue({
-      stalePaths: ["agent"],
-      fileMissing: false,
-    });
-    const report = await runDoctorFix({
-      "settings-stale-keys": "unknown-strategy",
-    });
-    const fix = report.fixes.find((f) => f.check === "settings-stale-keys");
-    expect(fix?.success).toBe(false);
-    expect(fix?.message).toContain("Unknown strategy");
-  });
-
   it("returns failure for unknown config-permissions strategy", async () => {
     mockInspectRegistryPermissions.mockResolvedValue({
       fileMissing: false,
@@ -459,6 +445,19 @@ describe("applyFix: config-permissions no-change", () => {
     const fix = report.fixes.find((f) => f.check === "config-permissions");
     expect(fix?.success).toBe(false);
     expect(fix?.message).toContain("io error");
+  });
+
+  it("returns failure for unknown settings-stale-keys strategy", async () => {
+    mockInspectStaleSettingsKeys.mockResolvedValue({
+      stalePaths: ["agent"],
+      fileMissing: false,
+    });
+    const report = await runDoctorFix({
+      "settings-stale-keys": "unknown-strategy",
+    });
+    const fix = report.fixes.find((f) => f.check === "settings-stale-keys");
+    expect(fix?.success).toBe(false);
+    expect(fix?.message).toContain("Unknown strategy");
   });
 });
 

@@ -23,9 +23,9 @@ const mockUpdateSettings = vi.fn();
 const mockInspectSettingsDefaults = vi.fn();
 const mockInspectStaleSettingsKeys = vi.fn();
 const mockBackfillMissingSettingsDefaults = vi.fn();
-const mockCleanStaleSettingsKeys = vi.fn();
 const mockInspectSettingsPermissions = vi.fn();
 const mockEnsureSettingsPermissions = vi.fn();
+const mockCleanStaleSettingsKeys = vi.fn();
 vi.mock("@/lib/settings", () => ({
   getRegisteredAgents: () => mockGetRegisteredAgents(),
   scanForAgents: () => mockScanForAgents(),
@@ -34,9 +34,9 @@ vi.mock("@/lib/settings", () => ({
   inspectSettingsDefaults: () => mockInspectSettingsDefaults(),
   inspectStaleSettingsKeys: () => mockInspectStaleSettingsKeys(),
   backfillMissingSettingsDefaults: () => mockBackfillMissingSettingsDefaults(),
-  cleanStaleSettingsKeys: () => mockCleanStaleSettingsKeys(),
   inspectSettingsPermissions: () => mockInspectSettingsPermissions(),
   ensureSettingsPermissions: () => mockEnsureSettingsPermissions(),
+  cleanStaleSettingsKeys: () => mockCleanStaleSettingsKeys(),
 }));
 
 const mockListRepos = vi.fn();
@@ -44,12 +44,15 @@ const mockInspectMissingRepoMemoryManagerTypes = vi.fn();
 const mockBackfillMissingRepoMemoryManagerTypes = vi.fn();
 const mockInspectRegistryPermissions = vi.fn();
 const mockEnsureRegistryPermissions = vi.fn();
+const mockUpdateRegisteredRepoMemoryManagerType = vi.fn();
 vi.mock("@/lib/registry", () => ({
   listRepos: () => mockListRepos(),
   inspectMissingRepoMemoryManagerTypes: () => mockInspectMissingRepoMemoryManagerTypes(),
   backfillMissingRepoMemoryManagerTypes: () => mockBackfillMissingRepoMemoryManagerTypes(),
   inspectRegistryPermissions: () => mockInspectRegistryPermissions(),
   ensureRegistryPermissions: () => mockEnsureRegistryPermissions(),
+  updateRegisteredRepoMemoryManagerType: (...args: unknown[]) =>
+    mockUpdateRegisteredRepoMemoryManagerType(...args),
 }));
 
 const mockGetReleaseVersionStatus = vi.fn();
@@ -143,11 +146,6 @@ beforeEach(() => {
     fileMissing: false,
     changed: false,
   });
-  mockCleanStaleSettingsKeys.mockResolvedValue({
-    stalePaths: [],
-    fileMissing: false,
-    changed: false,
-  });
   mockInspectSettingsPermissions.mockResolvedValue({
     fileMissing: false,
     needsFix: false,
@@ -157,6 +155,11 @@ beforeEach(() => {
     fileMissing: false,
     needsFix: false,
     actualMode: 0o600,
+    changed: false,
+  });
+  mockCleanStaleSettingsKeys.mockResolvedValue({
+    stalePaths: [],
+    fileMissing: false,
     changed: false,
   });
   mockInspectMissingRepoMemoryManagerTypes.mockResolvedValue({
@@ -178,6 +181,11 @@ beforeEach(() => {
     needsFix: false,
     actualMode: 0o600,
     changed: false,
+  });
+  mockUpdateRegisteredRepoMemoryManagerType.mockResolvedValue({
+    changed: false,
+    fileMissing: false,
+    repoFound: true,
   });
   mockGetReleaseVersionStatus.mockResolvedValue({
     installedVersion: "1.0.0",
@@ -678,6 +686,49 @@ describe("runDoctorFix", () => {
     expect(mockUpdateSettings).toHaveBeenCalledWith({ backend: { type: "auto" } });
   });
 
+  it("fixes registry-consistency by syncing memory manager type", async () => {
+    const repos = [
+      { path: "/repo", name: "test-repo", addedAt: "2026-01-01", memoryManagerType: "beads" as const },
+    ];
+    mockListRepos.mockResolvedValue(repos);
+    mockGetRegisteredAgents.mockResolvedValue({});
+    mockDetectMemoryManagerType.mockReturnValue("knots");
+    mockUpdateRegisteredRepoMemoryManagerType.mockResolvedValue({
+      changed: true,
+      fileMissing: false,
+      repoFound: true,
+      previousMemoryManagerType: "beads",
+      memoryManagerType: "knots",
+    });
+
+    const fixReport = await runDoctorFix({ "registry-consistency": "sync" });
+    const rcFix = fixReport.fixes.find((f) => f.check === "registry-consistency");
+    expect(rcFix).toBeDefined();
+    expect(rcFix?.success).toBe(true);
+    expect(rcFix?.message).toContain("knots");
+    expect(mockUpdateRegisteredRepoMemoryManagerType).toHaveBeenCalledWith("/repo", "knots");
+  });
+
+  it("reports failure when registry-consistency sync finds no repo", async () => {
+    const repos = [
+      { path: "/repo", name: "test-repo", addedAt: "2026-01-01", memoryManagerType: "beads" as const },
+    ];
+    mockListRepos.mockResolvedValue(repos);
+    mockGetRegisteredAgents.mockResolvedValue({});
+    mockDetectMemoryManagerType.mockReturnValue("knots");
+    mockUpdateRegisteredRepoMemoryManagerType.mockResolvedValue({
+      changed: false,
+      fileMissing: false,
+      repoFound: false,
+    });
+
+    const fixReport = await runDoctorFix({ "registry-consistency": "sync" });
+    const rcFix = fixReport.fixes.find((f) => f.check === "registry-consistency");
+    expect(rcFix).toBeDefined();
+    expect(rcFix?.success).toBe(false);
+    expect(rcFix?.message).toContain("no longer registered");
+  });
+
   it("uses default first option when no strategies provided (backwards compat)", async () => {
     setupStaleParent();
 
@@ -699,7 +750,7 @@ describe("streamDoctor", () => {
     return events;
   }
 
-  it("emits 11 check events plus 1 summary event", async () => {
+  it("emits 12 check events plus 1 summary event", async () => {
     mockGetRegisteredAgents.mockResolvedValue({
       claude: { command: "claude", label: "Claude" },
     });
@@ -901,7 +952,10 @@ describe("checkRegistryConsistency", () => {
     expect(diags).toHaveLength(1);
     expect(diags[0].severity).toBe("warning");
     expect(diags[0].check).toBe("registry-consistency");
-    expect(diags[0].fixable).toBe(false);
+    expect(diags[0].fixable).toBe(true);
+    expect(diags[0].fixOptions).toEqual([
+      { key: "sync", label: "Update registry to match detected type" },
+    ]);
     expect(diags[0].message).toContain("beads");
     expect(diags[0].message).toContain("knots");
   });

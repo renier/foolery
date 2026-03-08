@@ -25,6 +25,7 @@ import {
   backfillMissingRepoMemoryManagerTypes,
   inspectRegistryPermissions,
   ensureRegistryPermissions,
+  updateRegisteredRepoMemoryManagerType,
 } from "@/lib/registry";
 
 beforeEach(() => {
@@ -185,5 +186,58 @@ describe("registry permissions", () => {
       expect.stringContaining("registry.json"),
       0o600,
     );
+  });
+});
+
+describe("updateRegisteredRepoMemoryManagerType", () => {
+  it("updates an existing repo entry to the detected memory manager type", async () => {
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        repos: [
+          {
+            path: "/repo-a",
+            name: "repo-a",
+            addedAt: "2026-01-01T00:00:00.000Z",
+            memoryManagerType: "beads",
+          },
+        ],
+      }),
+    );
+
+    const result = await updateRegisteredRepoMemoryManagerType("/repo-a", "knots");
+    expect(result.changed).toBe(true);
+    expect(result.repoFound).toBe(true);
+    expect(result.previousMemoryManagerType).toBe("beads");
+    expect(result.memoryManagerType).toBe("knots");
+    expect(mockWriteFile).toHaveBeenCalledTimes(1);
+
+    const written = mockWriteFile.mock.calls[0][1] as string;
+    const parsed = JSON.parse(written) as {
+      repos: Array<{ path: string; memoryManagerType?: string }>;
+    };
+    expect(parsed.repos[0]).toMatchObject({
+      path: "/repo-a",
+      memoryManagerType: "knots",
+    });
+  });
+
+  it("does not write when the repo is already registered with the detected type", async () => {
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        repos: [
+          {
+            path: "/repo-a",
+            name: "repo-a",
+            addedAt: "2026-01-01T00:00:00.000Z",
+            memoryManagerType: "knots",
+          },
+        ],
+      }),
+    );
+
+    const result = await updateRegisteredRepoMemoryManagerType("/repo-a", "knots");
+    expect(result.changed).toBe(false);
+    expect(result.repoFound).toBe(true);
+    expect(mockWriteFile).not.toHaveBeenCalled();
   });
 });
