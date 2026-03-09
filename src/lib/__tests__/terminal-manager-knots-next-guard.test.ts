@@ -400,9 +400,9 @@ describe("terminal-manager nextKnot expected-state guard", () => {
       );
 
       // Take-loop prompt should contain review preamble, NOT implementation preamble
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const take2Calls = interactionLog.logPrompt.mock.calls.filter(
-        (args: any[]) => args[1]?.source === "take_2",
+        (args: unknown[]) =>
+          (args[1] as Record<string, unknown>)?.source === "take_2",
       );
       expect(take2Calls).toHaveLength(1);
       const take2Prompt = take2Calls[0][0] as string;
