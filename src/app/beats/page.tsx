@@ -43,7 +43,7 @@ function throwIfDegraded(result: { ok: boolean; error?: string }): void {
   }
 }
 
-export function toActiveAgentInfo(input: {
+function toActiveAgentInfo(input: {
   agentCommand?: string;
   agentName?: string;
   model?: string;
@@ -59,12 +59,9 @@ export function toActiveAgentInfo(input: {
     model: normalized.model,
     flavor: normalized.flavor,
   });
-  const modelDisplay = family && input.agentName && family.startsWith(`${input.agentName} `)
-    ? family.slice(input.agentName.length + 1)
-    : family;
   return {
     agentName: input.agentName,
-    model: modelDisplay || input.model,
+    model: family || input.model,
     version: normalized.version,
   };
 }
