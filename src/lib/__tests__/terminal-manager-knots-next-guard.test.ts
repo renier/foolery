@@ -353,4 +353,63 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     });
   });
 
+
+  it("uses review preamble when take-loop iteration reaches a review state", async () => {
+    const reviewBeat = {
+      id: "foolery-3000",
+      title: "Review preamble regression",
+      state: "ready_for_implementation_review",
+      isAgentClaimable: true,
+    };
+    // 1) Initial fetch in createSession
+    backend.get.mockResolvedValueOnce({
+      ok: true,
+      data: {
+        id: "foolery-3000",
+        title: "Review preamble regression",
+        state: "ready_for_implementation",
+        isAgentClaimable: true,
+      },
+    });
+    // 2) enforceQueueTerminalInvariant after first child closes
+    backend.get.mockResolvedValueOnce({ ok: true, data: reviewBeat });
+    // 3) buildNextTakePrompt fetches current state
+    backend.get.mockResolvedValueOnce({ ok: true, data: reviewBeat });
+    // 4) enforceQueueTerminalInvariant after second child closes
+    backend.get.mockResolvedValueOnce({ ok: true, data: { ...reviewBeat, state: "shipped" } });
+
+    backend.listWorkflows.mockResolvedValue({ ok: true, data: [] });
+    backend.list.mockResolvedValue({ ok: true, data: [] });
+    backend.buildTakePrompt
+      .mockResolvedValueOnce({ ok: true, data: { prompt: "initial impl prompt" } })
+      .mockResolvedValueOnce({ ok: true, data: { prompt: "review iteration prompt" } });
+
+    await createSession("foolery-3000", "/tmp/repo");
+
+    // First agent finishes — triggers take-loop
+    expect(spawnedChildren).toHaveLength(1);
+    spawnedChildren[0].emit("close", 0, null);
+
+    await vi.waitFor(() => {
+      expect(spawnedChildren.length).toBe(2);
+
+      // Initial prompt should contain implementation preamble
+      expect(interactionLog.logPrompt).toHaveBeenCalledWith(
+        expect.stringContaining("Implement the following task"),
+        { source: "initial" },
+      );
+
+      // Take-loop prompt should contain review preamble, NOT implementation preamble
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const take2Calls = interactionLog.logPrompt.mock.calls.filter(
+        (args: any[]) => args[1]?.source === "take_2",
+      );
+      expect(take2Calls).toHaveLength(1);
+      const take2Prompt = take2Calls[0][0] as string;
+      expect(take2Prompt).toContain("Review the following work");
+      expect(take2Prompt).toContain("Do NOT make code changes unless you find issues");
+      expect(take2Prompt).not.toContain("Implement the following task");
+      expect(take2Prompt).not.toContain("You MUST edit the actual source files");
+    });
+  });
 });
