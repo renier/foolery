@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1d5-eefa-7473-a0e0-3e36be9ab4bc",
+  "occurred_at": "2026-03-09T09:03:04.442859Z",
+  "knot_id": "foolery-7714",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Verified: (1) commit 01fc79d7 live on origin/main, (2) commit tag present on knot, (3) no remaining outdated references (beads viewer, Agent Memory Engagement, web UI for Beads), (4) all 5 file changes correctly reflect Foolery as agentic orchestration interface with Knots primary / Beads alternative. No invariants to check. No regressions.",
+    "datetime": "2026-03-09T00:00:00Z",
+    "entry_id": "019cd1d5-eefa-7473-a0e0-3e2e940fff33",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "4.6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd219-d52e-7880-9111-d1bcc27c34b0",
+  "occurred_at": "2026-03-09T10:17:14.286015Z",
+  "knot_id": "foolery-bf71",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review APPROVED. Commit 85303d574886 verified on origin/main. All 6 TAKE N/ terminal log messages correctly prepend ISO timestamp and knot state. Format matches spec. No invariants to check. No regressions reported.",
+    "datetime": "2026-03-09T14:30:00+01:00",
+    "entry_id": "019cd219-d52e-7880-9111-d1af3973217b",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c2-7618-7f02-8a00-a95c25bb7443",
+  "occurred_at": "2026-03-09T08:41:48.307115Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-8ddf",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment_review",
+    "terminal": false,
+    "title": "Support arm64/Linux runtime builds",
+    "updated_at": "2026-03-09T08:41:48.307115Z"
+  }
+}

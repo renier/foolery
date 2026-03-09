@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1da-df90-72c1-a313-0ecf230f0270",
+  "occurred_at": "2026-03-09T09:08:28.176614Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Claude Code",
+    "content": "Shipment complete. Fixed CI lint error (explicit any → unknown in test file), committed cbf67985, pushed to origin/main. CI green. All implementation commits on main: 04b24ceb (dispatch preamble), b16371e1 (preamble tests), b8a3a32b (take-loop regression test), cbf67985 (lint fix).",
+    "datetime": "2026-03-09T09:08:00Z",
+    "entry_id": "019cd1da-df90-72c1-a313-0eb7a26244f1",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

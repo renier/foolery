@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1d4-5648-79e0-85df-ed9cf1a8d394",
+  "occurred_at": "2026-03-09T09:01:19.816126Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review approved. All three requirements satisfied: (1) dispatchPreamble() correctly varies wrapper text by workflow step — review steps get review-oriented language, action steps get implementation-oriented language, threaded through initial dispatch, parent dispatch, and take-loop paths; (2) kno claim non-zero exit code guard added to all three prompt paths in knots-backend.ts (parent, parent-child, single-beat); (3) regression test in terminal-manager-knots-next-guard.test.ts exercises take-loop review preamble path — 8/8 tests pass, tsc clean, lint clean.",
+    "datetime": "2026-03-09T10:00:00Z",
+    "entry_id": "019cd1d4-5648-79e0-85df-ed8b8505c9c0",
+    "model": "claude-opus-4-6",
+    "username": "claude-code",
+    "version": "opus-4-6"
+  }
+}

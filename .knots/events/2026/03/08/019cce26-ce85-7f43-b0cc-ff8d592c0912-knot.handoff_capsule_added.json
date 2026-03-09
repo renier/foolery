@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce26-ce85-7f43-b0cc-ff8d592c0912",
+  "occurred_at": "2026-03-08T15:52:55.685375Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Added explicit beforeExit cleanup for the console tap so clean shutdowns close the active console.log stream and flush buffered output. Added regression coverage for shutdown cleanup, reran bun run lint, bunx tsc --noEmit, bun run test, and bun run build, then merged to main and pushed origin/main at 96162b7aeacf.",
+    "datetime": "2026-03-08T15:52:46Z",
+    "entry_id": "019cce26-ce85-7f43-b0cc-ff7e3618a20c",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

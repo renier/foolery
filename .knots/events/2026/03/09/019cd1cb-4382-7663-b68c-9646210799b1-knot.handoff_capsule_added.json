@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1cb-4382-7663-b68c-9646210799b1",
+  "occurred_at": "2026-03-09T08:51:25.186621Z",
+  "knot_id": "foolery-9c47",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment complete. Commit 6fdb4e86 (screenshot-only change replacing docs/screenshots/history.png) is on main and pushed to origin/main. No source code changes. Implementation review approved the screenshot showing beat b71a selected with conversation log visible.",
+    "datetime": "2026-03-09T12:00:00Z",
+    "entry_id": "019cd1cb-4382-7663-b68c-963793b16a03",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

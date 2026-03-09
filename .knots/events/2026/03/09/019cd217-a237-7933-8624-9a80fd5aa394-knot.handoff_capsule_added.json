@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd217-a237-7933-8624-9a80fd5aa394",
+  "occurred_at": "2026-03-09T10:14:50.167451Z",
+  "knot_id": "foolery-bf71",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added ISO timestamp and beat state to all 7 terminal TAKE N/ log messages in terminal-manager.ts. Format changed from '--- Take N/M ---' to '--- 2026-03-09T... state_name TAKE N/M ---'. Also updated claimed, stop (terminal state, not agent-owned, max iterations) messages. All tests pass (1948/1948). Commit 85303d57 pushed to main.",
+    "datetime": "2026-03-09T10:14:50.167451Z",
+    "entry_id": "019cd217-a237-7933-8624-9a794119b2c6",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

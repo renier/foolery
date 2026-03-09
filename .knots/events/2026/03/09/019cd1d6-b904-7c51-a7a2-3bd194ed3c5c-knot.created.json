@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd1d6-b904-7c51-a7a2-3bd194ed3c5c",
+  "occurred_at": "2026-03-09T09:03:56.16483Z",
+  "knot_id": "foolery-dc26",
+  "type": "knot.created",
+  "data": {
+    "body": "looks like we need custom parsing between Claude and Codex - Claude now works correctly thanks to a recent commit.\n\nNow Codex shows \"codex-cli\" instead of the version \"5.4\"\n\nlet's make sure that both\n\nClaude | Opus | 4.6 \n\nand\n\nCodex | GPT | 5.4\n\nare parsed and rendered properly",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Active View: codex gpt 5.4 needs better parsing"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "019cce56-70d9-7e13-91b1-dc5f1b38612d",
+  "occurred_at": "2026-03-08T16:44:57.433809Z",
+  "knot_id": "foolery-b13d",
+  "type": "knot.created",
+  "data": {
+    "body": "the claude and codex agents should have a little pill that says \"cli\"\nthe opencode ones should parse the model - the leading token should become a pill (typically openrouter, sometimes opencode)\nthe last token is the model and version\nthe penultimate token is the model vendor\n\nso the opencode for /openrouter/mistral/devstral251225 should be\n\nMistral Devstral 251125 with pills for openrouter and cli ",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Settings: Agents and Dispatch agent titles should be more consistent"
+  }
+}

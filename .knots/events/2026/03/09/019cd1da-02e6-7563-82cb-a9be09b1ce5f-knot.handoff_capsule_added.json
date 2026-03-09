@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1da-02e6-7563-82cb-a9be09b1ce5f",
+  "occurred_at": "2026-03-09T09:07:31.686818Z",
+  "knot_id": "foolery-9407",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Verified all 3 implementation commits (e57fa8d2, c25b0bac, b8a3a32b) are on main. Confirmed: (1) rollbackAgentOwnedActionStateToQueue returns RollbackResult, adds kno notes, uses --status flag, and callers log rollbacks to UI terminal + interaction log; (2) buildTakePrompt instructs agents to exit on non-zero kno claim for both single-beat and parent/scene modes; (3) All 1952 tests pass. Note: tag commit:9c664af37ff6 appears to be from an unrelated commit — minor metadata issue.",
+    "datetime": "2026-03-09T10:10:00Z",
+    "entry_id": "019cd1da-02e6-7563-82cb-a9a7500e21c3",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

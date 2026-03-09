@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1f5-8b82-78b1-a578-f100a5b13219",
+  "occurred_at": "2026-03-09T09:37:36.130418Z",
+  "knot_id": "foolery-4c2f",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implemented: 3 new functions in memory-manager-commands.ts (rollbackBeatState, assertClaimable, supportsAutoFollowUp) replace all 5 memoryManagerType conditionals in terminal-manager.ts. All quality gates pass. Commit e00e56b6 pushed to origin/main.",
+    "datetime": "2026-03-09T00:00:00Z",
+    "entry_id": "019cd1f5-8b82-78b1-a578-f0f92d2fe0e4",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

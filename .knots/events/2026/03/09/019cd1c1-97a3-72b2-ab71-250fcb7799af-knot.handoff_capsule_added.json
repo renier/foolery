@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c1-97a3-72b2-ab71-250fcb7799af",
+  "occurred_at": "2026-03-09T08:40:51.363525Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Fixed step-aware dispatch preamble in terminal-manager take-loop: wrapSingleBeatPrompt now accepts isReview param, buildNextTakePrompt passes isReviewStep(resolved.step). Extracted dispatchPreamble() helper used by all 3 wrapper paths (parent, single-beat initial, take-loop). Added unit tests. Commit b16371e1fa77 pushed to origin/main.",
+    "datetime": "2026-03-09T09:40:00Z",
+    "entry_id": "019cd1c1-97a3-72b2-ab71-24fed9c8f83a",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

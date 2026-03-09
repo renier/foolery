@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1e7-2ab9-7e70-8467-30c8d37491cd",
+  "occurred_at": "2026-03-09T09:21:53.849706Z",
+  "knot_id": "foolery-97a9",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment complete. Commit d184a7e196ac already on main and pushed to origin/main. Changes: scrollbar-hide CSS utility in globals.css + applied to terminal-panel.tsx tab strip container. Navigation arrows with hotkey tooltips preserved.",
+    "datetime": "2026-03-09T10:30:00Z",
+    "entry_id": "019cd1e7-2ab9-7e70-8467-30bcadef30b9",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "4.6"
+  }
+}

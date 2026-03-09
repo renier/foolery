@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1cc-b593-76e0-9e4e-e5033e4d4cad",
+  "occurred_at": "2026-03-09T08:52:59.905579Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-b71a",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "Active View: Agent/Model  for Claude Opus 4.6 is not correct",
+    "updated_at": "2026-03-09T08:52:59.905579Z"
+  }
+}

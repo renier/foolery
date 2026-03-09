@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c5-95e7-7d63-982c-b11ab861d8a6",
+  "occurred_at": "2026-03-09T08:45:13.06338Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Needs changes: the take-loop implementation in src/lib/terminal-manager.ts now computes review-aware wrapping, but test coverage does not verify the regression path called out by the knot. Add a terminal-manager test that drives a single-beat take-loop into a review queue state (for example ready_for_implementation_review) and asserts the follow-up prompt/logged prompt contains the review preamble and excludes the implementation-biased preamble. Sanity gates in review worktree: targeted tests passed; full tsc/test/build passed; lint exited successfully with existing warnings only.",
+    "datetime": "2026-03-09T08:45:04Z",
+    "entry_id": "019cd1c5-95e7-7d63-982c-b10817deba82",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

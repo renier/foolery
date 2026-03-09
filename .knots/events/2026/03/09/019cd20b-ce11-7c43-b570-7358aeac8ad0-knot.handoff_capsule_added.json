@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd20b-ce11-7c43-b570-7358aeac8ad0",
+  "occurred_at": "2026-03-09T10:01:54.961446Z",
+  "knot_id": "foolery-b71a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "1. The knot only asks to trim the duplicated Claude provider prefix in the active-view model column, but this work also changes settings UI layout/label rendering in src/components/agent-display-label.tsx, src/components/settings-pools-section.tsx, and src/components/settings-sheet.tsx. 2. It also changes runtime agent-pool behavior in src/lib/agent-pool.ts by adding new console logging and global selection histogram state unrelated to the active-view bug. 3. The targeted fix/test in src/app/beats/page.tsx and src/app/beats/__tests__/page-active-agent-info.test.ts look correct, and bunx tsc --noEmit, bun run test, and bun run build passed; bun run lint was still running after several minutes, so I could not fully re-verify that gate.",
+    "datetime": "2026-03-09T10:01:45Z",
+    "entry_id": "019cd20b-ce11-7c43-b570-7348b4393434",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "GPT-5"
+  }
+}

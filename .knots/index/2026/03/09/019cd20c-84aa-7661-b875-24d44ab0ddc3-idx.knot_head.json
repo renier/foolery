@@ -1,0 +1,18 @@
+{
+  "event_id": "019cd20c-84aa-7661-b875-24d44ab0ddc3",
+  "occurred_at": "2026-03-09T10:02:41.706832Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-bf71",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "Improve UI Terminal logging of -- TAKE N/",
+    "updated_at": "2026-03-09T10:02:41.706832Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd20a-7620-7df3-9e53-f48ce32223fc"
+  }
+}

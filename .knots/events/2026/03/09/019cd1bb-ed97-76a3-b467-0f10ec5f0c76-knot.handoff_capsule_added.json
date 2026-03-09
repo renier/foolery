@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1bb-ed97-76a3-b467-0f10ec5f0c76",
+  "occurred_at": "2026-03-09T08:34:40.151847Z",
+  "knot_id": "foolery-8ddf",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Added an explicit release-runtime matrix with linux-arm64 on ubuntu-24.04-arm, preserved linux-x64 and darwin-arm64, added a unit test that guards the workflow target, and ran bun run lint, bunx tsc --noEmit, bun run test, and bun run build successfully. Final integrated commit is 556a08d51d5e on origin/main.",
+    "datetime": "2026-03-09T08:34:28Z",
+    "entry_id": "019cd1bb-ed97-76a3-b467-0f0f57c8469f",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex-cli"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1e6-6555-78e0-98a9-cb276904bc6a",
+  "occurred_at": "2026-03-09T09:21:03.317797Z",
+  "knot_id": "foolery-97a9",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review approved. Scrollbar hidden via scrollbar-hide CSS utility (globals.css) applied to tab strip container (terminal-panel.tsx:686). Left/right nav arrows with hotkey tooltips (Alt+Shift+Left/Right) preserved. All 1952 tests pass. No regressions or security issues.",
+    "datetime": "2026-03-09T10:15:00Z",
+    "entry_id": "019cd1e6-6555-78e0-98a9-cb11534f3dd3",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "claude-opus-4-6"
+  }
+}

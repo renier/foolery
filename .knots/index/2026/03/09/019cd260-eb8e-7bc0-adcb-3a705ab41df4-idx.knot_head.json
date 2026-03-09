@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd260-eb8e-7bc0-adcb-3a705ab41df4",
+  "occurred_at": "2026-03-09T11:34:53.059869Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-dc26",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "Active View: codex gpt 5.4 needs better parsing",
+    "updated_at": "2026-03-09T11:34:53.059869Z"
+  }
+}

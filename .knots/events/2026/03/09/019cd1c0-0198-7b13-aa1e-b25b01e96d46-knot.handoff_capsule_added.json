@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c0-0198-7b13-aa1e-b25b01e96d46",
+  "occurred_at": "2026-03-09T08:39:07.416626Z",
+  "knot_id": "foolery-9407",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implemented rollback logging for knots in action state before dispatch. Changes: (1) rollbackAgentOwnedActionStateToQueue now returns RollbackResult with metadata, adds kno notes documenting rollbacks, and callers replay rollback events to UI terminal and interaction logs after session setup. (2) buildTakePrompt now instructs agents to exit immediately on kno claim failure. (3) Take-loop rollback also adds kno notes. Files: terminal-manager.ts, knots-backend.ts, interaction-logger.ts. Commit e57fa8d2 pushed to origin/main.",
+    "datetime": "2026-03-09T08:39:07Z",
+    "entry_id": "019cd1c0-0198-7b13-aa1e-b24252e15874",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

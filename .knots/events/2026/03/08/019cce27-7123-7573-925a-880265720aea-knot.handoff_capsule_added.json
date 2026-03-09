@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce27-7123-7573-925a-880265720aea",
+  "occurred_at": "2026-03-08T15:53:37.315581Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Integrated and pushed on main as 5c5e4b1b8a4c. Dispatch now presents Swap Agent as one explicit global replacement control, the per-step pool editors point users back to that shared Dispatch control for all-step changes, and the layout regression test locks that framing in place. Validation: bun install --frozen-lockfile; bun run lint (warnings only, pre-existing); bunx tsc --noEmit; bun run test; bun run build.",
+    "datetime": "2026-03-08T15:52:19Z",
+    "entry_id": "019cce27-7123-7573-925a-87fa5211459a",
+    "model": "GPT-5",
+    "username": "codex",
+    "version": "5"
+  }
+}

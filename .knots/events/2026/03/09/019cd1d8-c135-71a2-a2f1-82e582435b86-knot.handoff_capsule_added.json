@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1d8-c135-71a2-a2f1-82e582435b86",
+  "occurred_at": "2026-03-09T09:06:09.33319Z",
+  "knot_id": "foolery-9407",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Merged fix/foolery-9407 to main and pushed to origin. Changes: (1) Fixed kno rollback commands to use --status instead of invalid --state in 3 locations in terminal-manager.ts, (2) Changed parent/scene claim failure instruction from skip-and-continue to stop-immediately in knots-backend.ts, (3) Added test coverage for exact rollback command and parent prompt contract. All 83 tests pass, typecheck clean.",
+    "datetime": "2026-03-09T10:10:00Z",
+    "entry_id": "019cd1d8-c135-71a2-a2f1-82dfa1af3260",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

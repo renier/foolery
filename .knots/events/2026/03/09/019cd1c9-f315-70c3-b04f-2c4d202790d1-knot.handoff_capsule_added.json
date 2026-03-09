@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c9-f315-70c3-b04f-2c4d202790d1",
+  "occurred_at": "2026-03-09T08:49:59.061523Z",
+  "knot_id": "foolery-9c47",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Screenshot-only change: replaced docs/screenshots/history.png with a version showing beat b71a selected in the History view, with the conversation log panel visible displaying session details, agent info, and prompt content. No source code changes. Commit 6fdb4e86ee45 pushed to origin/main.",
+    "datetime": "2026-03-09T09:49:00+01:00",
+    "entry_id": "019cd1c9-f315-70c3-b04f-2c3ddd6a0bf5",
+    "model": "claude-opus-4-6",
+    "username": "agent",
+    "version": "claude-opus-4-6"
+  }
+}

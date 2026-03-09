@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c2-7613-7882-8bdf-734576cb1272",
+  "occurred_at": "2026-03-09T08:41:48.307115Z",
+  "knot_id": "foolery-8ddf",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Verified: (1) commit 556a08d51d5e is on main with linux-arm64 build matrix entry in release-runtime-artifact.yml using ubuntu-24.04-arm runner, (2) both commit tags (commit:556a08d51d5e, commit:97ad91fe826e) present on knot, (3) all CI workflows (CI, Changesets, Coverage Badge) passed green for 556a08d5, (4) test file release-runtime-artifact-workflow.test.ts exists, (5) no invariants to verify, (6) no regressions in subsequent main commits.",
+    "datetime": "2026-03-09T08:45:00Z",
+    "entry_id": "019cd1c2-7613-7882-8bdf-7333d18417e9",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "2026-03-09"
+  }
+}

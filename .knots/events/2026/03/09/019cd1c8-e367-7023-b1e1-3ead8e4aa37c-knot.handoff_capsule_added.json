@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c8-e367-7023-b1e1-3ead8e4aa37c",
+  "occurred_at": "2026-03-09T08:48:49.511186Z",
+  "knot_id": "foolery-b71a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "1. The branch fails bunx tsc --noEmit in src/lib/__tests__/terminal-manager-knots-next-guard.test.ts. 2. That file still contains unresolved merge conflict markers at lines 356-415, so the review state is not valid for approval. 3. The targeted fix in src/app/beats/page.tsx appears to produce Agent: Claude and Model: Opus for claude-opus-4-6, and src/app/beats/__tests__/page-active-agent-info.test.ts covers that regression, but approval is blocked until the unrelated breakage is cleaned up and gates pass.",
+    "datetime": "2026-03-09T08:48:25Z",
+    "entry_id": "019cd1c8-e367-7023-b1e1-3e947000a306",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-09"
+  }
+}

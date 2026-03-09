@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd216-3133-7421-98a9-1dd6917c69bc",
+  "occurred_at": "2026-03-09T10:13:15.699856Z",
+  "knot_id": "foolery-1d12",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Added HandoffCapsules component to beat detail lightbox sidebar. Shows capsules from beat.metadata.knotsHandoffCapsules in reverse chronological order. Each capsule is individually collapsible showing datetime, agent info, and content. The entire section is collapsible with a count badge. Uses max-h-[50vh] with overflow-y-auto for scroll on overrun. Commit: 2cd9bd06",
+    "datetime": "2026-03-09T11:15:00Z",
+    "entry_id": "019cd216-3133-7421-98a9-1dccecdd8e4d",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd1c2-a370-7772-93da-b5b9036f013c",
+  "occurred_at": "2026-03-09T08:41:59.92059Z",
+  "knot_id": "foolery-9c47",
+  "type": "knot.created",
+  "data": {
+    "body": "the conversation log is cool, let's replace history.png's screenshot with a version where a conversation is actually selected and the log is revealed",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "history.png -> screenshot should select a beat so that the conversation log shows"
+  }
+}

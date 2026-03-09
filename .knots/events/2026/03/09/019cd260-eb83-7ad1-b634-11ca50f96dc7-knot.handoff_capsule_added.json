@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd260-eb83-7ad1-b634-11ca50f96dc7",
+  "occurred_at": "2026-03-09T11:34:53.059869Z",
+  "knot_id": "foolery-dc26",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Added displayCommandLabel() in agent-identity.ts to normalize CLI command names (codex-cli→Codex, claude→Claude, etc). Updated toActiveAgentInfo in beats/page.tsx to use it for the agentName column. Added tests for codex-cli with model gpt-5.4 and gpt-5.4-codex. All 1950 tests pass, typecheck clean, pushed to main as 366e8c12.",
+    "datetime": "2026-03-09T11:34:53.059869Z",
+    "entry_id": "019cd260-eb83-7ad1-b634-11b4435ca23e",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

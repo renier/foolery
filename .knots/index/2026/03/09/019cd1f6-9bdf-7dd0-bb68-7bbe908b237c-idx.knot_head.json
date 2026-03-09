@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1f6-9bdf-7dd0-bb68-7bbe908b237c",
+  "occurred_at": "2026-03-09T09:38:45.84996Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-4c2f",
+    "profile_id": "autopilot",
+    "state": "shipment",
+    "terminal": false,
+    "title": "Eliminate memory-manager type switches in terminal-manager",
+    "updated_at": "2026-03-09T09:38:45.84996Z"
+  }
+}

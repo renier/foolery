@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1da-1825-7a62-9e85-69428c1a995e",
+  "occurred_at": "2026-03-09T09:07:37.115963Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-97a9",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "UI Terminal:  Horizontal scroll bar must be removed",
+    "updated_at": "2026-03-09T09:07:37.115963Z"
+  }
+}

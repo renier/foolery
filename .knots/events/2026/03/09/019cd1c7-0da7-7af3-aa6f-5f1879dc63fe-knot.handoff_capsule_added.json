@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c7-0da7-7af3-aa6f-5f1879dc63fe",
+  "occurred_at": "2026-03-09T08:46:49.255398Z",
+  "knot_id": "foolery-9407",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Closed the remaining gaps in the stale-claim rollback fix: knots rollback commands now use `kno update --status` instead of invalid `--state`, and parent/scene claim guidance now tells agents to stop immediately on claim failure rather than skipping ahead. Added regression coverage for the exact rollback command and the parent prompt contract. Validated with bun run lint, bunx tsc --noEmit, bun run test, and bun run build.",
+    "datetime": "2026-03-09T08:46:42Z",
+    "entry_id": "019cd1c7-0da7-7af3-aa6f-5f0d2aec54f1",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

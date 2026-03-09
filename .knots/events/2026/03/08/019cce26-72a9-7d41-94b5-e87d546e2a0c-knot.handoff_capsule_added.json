@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce26-72a9-7d41-94b5-e87d546e2a0c",
+  "occurred_at": "2026-03-08T15:52:32.169263Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Clarified Dispatch so the only Swap Agent control is framed as a single global replacement tool, updated the per-step pools copy to redirect all-step replacements back to that shared Dispatch control, and refreshed the layout regression test. Validation: bun install --frozen-lockfile; bun run lint (warnings only, pre-existing); bunx tsc --noEmit; bun run test; bun run build.",
+    "datetime": "2026-03-08T15:52:32.169263Z",
+    "entry_id": "019cce26-72a9-7d41-94b5-e868c4414221",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

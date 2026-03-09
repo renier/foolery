@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce24-8db9-7491-bb4f-bdc1641bfbbd",
+  "occurred_at": "2026-03-08T15:50:28.025671Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Source edits are required for dispatch settings, so shipment review cannot proceed; returning the knot to the implementation queue.",
+    "datetime": "2026-03-08T15:50:28.025671Z",
+    "entry_id": "019cce24-8db9-7491-bb4f-bdba5400265a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

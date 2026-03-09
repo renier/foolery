@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd20d-da4f-7750-8786-6409ef58b8da",
+  "occurred_at": "2026-03-09T10:04:09.167508Z",
+  "knot_id": "foolery-1d12",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan: Add a HandoffCapsules component to the right sidebar in beat-detail-lightbox.tsx. The component will: (1) extract capsules from beat.metadata.knotsHandoffCapsules, (2) display them in reverse order (latest first), (3) each capsule is individually collapsible showing content/agent/model/datetime, (4) the entire section is collapsible, (5) uses overflow-y-auto for scrolling. Implementation in beat-detail-lightbox.tsx sidebar section, with a new HandoffCapsules component.",
+    "datetime": "2026-03-09T10:04:09.167508Z",
+    "entry_id": "019cd20d-da4f-7750-8786-63f06b6d731c",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

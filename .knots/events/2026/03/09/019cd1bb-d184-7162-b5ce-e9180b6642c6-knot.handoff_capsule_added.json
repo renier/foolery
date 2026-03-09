@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1bb-d184-7162-b5ce-e9180b6642c6",
+  "occurred_at": "2026-03-09T08:34:32.964678Z",
+  "knot_id": "foolery-b607",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Updated all 8 README screenshots (queues, active, human-action, retakes, history, hot-keys, dispatch-simple, dispatch-advanced) using Playwright MCP against localhost:3210/beats?repo=%2FUsers%2Fcartine%2Ffoolery. Committed and pushed as 7b231389.",
+    "datetime": "2026-03-09T08:34:32.964678Z",
+    "entry_id": "019cd1bb-d184-7162-b5ce-e906ddc2e761",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

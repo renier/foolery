@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce2a-cd9b-7d63-b57b-033132580f9e",
+  "occurred_at": "2026-03-08T15:57:17.595596Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Pushed 15b0a1b3 to origin/main. Dispatch now exposes one Swap Agent control at the Dispatch level, removes swap-specific instructional copy from per-step pool editors, and keeps regression coverage on that single global placement. Validation: bun install --frozen-lockfile; bun run lint (warnings only, pre-existing); bunx tsc --noEmit; bun run test; bun run build.",
+    "datetime": "2026-03-08T15:54:41Z",
+    "entry_id": "019cce2a-cd9b-7d63-b57b-0326f7e89e89",
+    "model": "GPT-5",
+    "username": "codex",
+    "version": "5"
+  }
+}

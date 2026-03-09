@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1e8-110d-7f73-ace0-caa6193b8ffa",
+  "occurred_at": "2026-03-09T09:22:52.813204Z",
+  "knot_id": "foolery-97a9",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Verified commit d184a7e196ac on origin/main. CSS scrollbar-hide utility correctly hides scrollbar across all browser engines while preserving scroll functionality. Navigation arrows with hotkey tooltips (Alt+Shift+Left/Right) intact. Minimal, correct change — no regressions.",
+    "datetime": "2026-03-09T11:00:00Z",
+    "entry_id": "019cd1e8-110d-7f73-ace0-ca9e64d3ac6e",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "4.6"
+  }
+}

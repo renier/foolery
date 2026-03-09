@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1bc-3188-7fd3-a896-b85e560ae8a5",
+  "occurred_at": "2026-03-09T08:34:57.543969Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Needs changes: the initial dispatch wrapper is step-aware, but the single-beat take-loop path still injects an unconditional implementation preamble at src/lib/terminal-manager.ts:798 and returns it from buildNextTakePrompt() at src/lib/terminal-manager.ts:990. That means review-step iterations can still receive contradictory write instructions. Validation: bun install --frozen-lockfile, bun run lint (passes with existing warnings), bunx tsc --noEmit, and targeted vitest suites passed.",
+    "datetime": "2026-03-09T08:34:42Z",
+    "entry_id": "019cd1bc-3188-7fd3-a896-b844020ade10",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1d5-1fe3-72a0-bbae-e1cb87ad139e",
+  "occurred_at": "2026-03-09T09:02:11.427229Z",
+  "knot_id": "foolery-7714",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment verified: commit 01fc79d7 already on origin/main. Updated 5 markdown files (README.md, docs/MANIFEST.md, docs/DEVELOPING.md, docs/audit/workflow-operations-map.md, docs/audit/beats-usage-inventory.md) to reflect Foolery as agentic orchestration interface with Knots as primary and Beads as alternative backend. CI green on remote.",
+    "datetime": "2026-03-09T00:00:00Z",
+    "entry_id": "019cd1d5-1fe3-72a0-bbae-e1b6c01dfc5f",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "4.6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1bc-3188-7fd3-a896-b83d31c1be26",
+  "occurred_at": "2026-03-09T08:34:57.543969Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Implementation review rejected: src/lib/terminal-manager.ts:796-810 still hardcodes the implementation-biased preamble inside wrapSingleBeatPrompt(). buildNextTakePrompt() reuses that wrapper at src/lib/terminal-manager.ts:990 for subsequent take-loop iterations, so review-step claims can still be wrapped with 'Implement the following task...' after a step-failure rollback or any queued review iteration. This does not fully satisfy the requirement that review steps instruct the agent to review rather than implement. Add step-aware wrapping in the take-loop path and cover it with a terminal-manager test.",
+    "datetime": "2026-03-09T08:34:42Z",
+    "entry_id": "019cd1bc-3187-7f31-ab02-38f368611d1b",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

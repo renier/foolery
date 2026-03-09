@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1ca-9ac8-7152-8b8d-945a31d7a5ba",
+  "occurred_at": "2026-03-09T08:50:41.991987Z",
+  "knot_id": "foolery-9c47",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review approved. Commit 6fdb4e86 is screenshot-only: replaces docs/screenshots/history.png with a version showing beat b71a selected and conversation log panel visible. No source code changes. Previous review concern about code changes is resolved.",
+    "datetime": "2026-03-09T12:00:00Z",
+    "entry_id": "019cd1ca-9ac7-72c1-a49c-45867850a4c9",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

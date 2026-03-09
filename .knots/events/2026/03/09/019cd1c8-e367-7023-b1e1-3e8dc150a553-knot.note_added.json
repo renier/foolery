@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c8-e367-7023-b1e1-3e8dc150a553",
+  "occurred_at": "2026-03-09T08:48:49.511186Z",
+  "knot_id": "foolery-b71a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Review rejected: the branch does not pass bunx tsc --noEmit because src/lib/__tests__/terminal-manager-knots-next-guard.test.ts contains unresolved merge conflict markers (for example lines 356-415) and a typed mock.calls filter that currently fails TS checking. The active-view change in src/app/beats/page.tsx and its regression test look directionally correct, but the implementation review cannot be approved until the conflict is resolved and repo sanity gates pass.",
+    "datetime": "2026-03-09T08:48:49.511186Z",
+    "entry_id": "019cd1c8-e367-7023-b1e1-3e75666367d6",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

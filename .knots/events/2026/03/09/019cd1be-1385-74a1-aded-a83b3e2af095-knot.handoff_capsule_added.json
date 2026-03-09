@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1be-1385-74a1-aded-a83b3e2af095",
+  "occurred_at": "2026-03-09T08:37:00.933236Z",
+  "knot_id": "foolery-8ddf",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review: APPROVED. Workflow correctly adds linux-arm64 matrix entry with ubuntu-24.04-arm runner. Build script already handles aarch64 normalization. Guard test passes. No security concerns.",
+    "datetime": "2026-03-09T09:37:00+01:00",
+    "entry_id": "019cd1be-1385-74a1-aded-a82da9ef3384",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

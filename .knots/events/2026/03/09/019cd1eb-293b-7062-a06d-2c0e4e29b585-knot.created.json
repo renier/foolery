@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd1eb-293b-7062-a06d-2c0e4e29b585",
+  "occurred_at": "2026-03-09T09:26:15.611411Z",
+  "knot_id": "foolery-4c2f",
+  "type": "knot.created",
+  "data": {
+    "body": "terminal-manager.ts has ~6 places that branch on memoryManagerType === 'knots' vs 'beads' to pick CLI commands or behavior. This is a leaky abstraction — the memory manager should expose methods for variant behavior (e.g. rollback command, claim command, state advance command) instead of terminal-manager switching on the type string. Audit all memoryManagerType conditionals in terminal-manager.ts and push variant behavior behind the memory manager interface.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Eliminate memory-manager type switches in terminal-manager"
+  }
+}

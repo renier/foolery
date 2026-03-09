@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c5-95e7-7d63-982c-b0f3f27c63b0",
+  "occurred_at": "2026-03-09T08:45:13.06338Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Review rejected: src/lib/terminal-manager.ts correctly threads review-aware dispatch through buildNextTakePrompt(), but the required regression coverage is still missing. Current tests only cover dispatchPreamble() and generic take-loop prompt logging; they do not exercise a take-loop iteration where the beat is in a review state and assert the wrapped prompt switches from implementation wording to review wording.",
+    "datetime": "2026-03-09T08:45:13.06338Z",
+    "entry_id": "019cd1c5-95e7-7d63-982c-b0e2d9a7f8e9",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

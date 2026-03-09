@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1d4-8110-7a31-adbb-a70cd0bfde42",
+  "occurred_at": "2026-03-09T09:01:30.768791Z",
+  "knot_id": "foolery-7714",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Audited all project markdown files. Updated 5 files (README.md, docs/MANIFEST.md, docs/DEVELOPING.md, docs/audit/workflow-operations-map.md, docs/audit/beats-usage-inventory.md) to replace outdated 'Beads viewer' framing with accurate description of Foolery as an agentic orchestration interface with Knots as primary and Beads as alternative backend. All quality gates passed. Commit 01fc79d7 pushed to origin/main.",
+    "datetime": "2026-03-09T09:01:30.768791Z",
+    "entry_id": "019cd1d4-8110-7a31-adbb-a6f6549c7c0e",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

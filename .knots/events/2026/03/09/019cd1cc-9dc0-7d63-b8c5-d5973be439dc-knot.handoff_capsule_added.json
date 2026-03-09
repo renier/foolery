@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1cc-9dc0-7d63-b8c5-d5973be439dc",
+  "occurred_at": "2026-03-09T08:52:53.824039Z",
+  "knot_id": "foolery-9c47",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review approved. Commit 6fdb4e86 is screenshot-only (docs/screenshots/history.png). The code regression from 156910a9 (removed export, deleted test, changed model label logic) was fixed by subsequent commit e4bde357 on main. Current main has correct toActiveAgentInfo with stripLeadingAgentName and the regression test intact. No invariant violations.",
+    "datetime": "2026-03-09T12:00:00Z",
+    "entry_id": "019cd1cc-9dc0-7d63-b8c5-d58dbc2cba75",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1b7-23d6-7e32-a4a7-e51e4dadeed1",
+  "occurred_at": "2026-03-09T08:29:26.358205Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-b607",
+    "profile_id": "autopilot",
+    "state": "ready_for_implementation",
+    "terminal": false,
+    "title": "README.md images",
+    "updated_at": "2026-03-09T08:29:26.358205Z"
+  }
+}

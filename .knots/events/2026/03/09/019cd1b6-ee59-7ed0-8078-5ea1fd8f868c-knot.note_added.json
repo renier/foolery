@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1b6-ee59-7ed0-8078-5ea1fd8f868c",
+  "occurred_at": "2026-03-09T08:29:12.665039Z",
+  "knot_id": "foolery-b607",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan: Use Playwright MCP to navigate to localhost:3210/beats?repo=%2FUsers%2Fcartine%2Ffoolery and capture screenshots for all 8 views (queues, active, human-action, retakes, history, hot-keys, dispatch-simple, dispatch-advanced). Save to docs/screenshots/ replacing existing files. The thumbnails in the README table and the larger inline screenshots both reference the same files.",
+    "datetime": "2026-03-09T08:29:12.665039Z",
+    "entry_id": "019cd1b6-ee59-7ed0-8078-5e9b0c77a0a3",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

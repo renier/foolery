@@ -1,0 +1,18 @@
+{
+  "event_id": "019cd1c3-1121-7de2-ad89-92deb354a00b",
+  "occurred_at": "2026-03-09T08:42:28.001009Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-9c47",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "history.png -> screenshot should select a beat so that the conversation log shows",
+    "updated_at": "2026-03-09T08:42:28.001009Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd1c2-a38f-7113-bded-b109ff2ab46a"
+  }
+}

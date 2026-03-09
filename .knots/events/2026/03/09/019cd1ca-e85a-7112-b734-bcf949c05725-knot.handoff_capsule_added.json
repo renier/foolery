@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1ca-e85a-7112-b734-bcf949c05725",
+  "occurred_at": "2026-03-09T08:51:01.850917Z",
+  "knot_id": "foolery-b607",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Refreshed all 8 README screenshots in docs/screenshots from http://localhost:3210/beats?repo=%2FUsers%2Fcartine%2Ffoolery using Playwright MCP/headless browser capture. Replaced queues, active, human-action, retakes, history, hot-keys, dispatch-simple, and dispatch-advanced; verified bun run lint, bunx tsc --noEmit, bun run test, and bun run build in the isolated worktree. Pushed commit 9042006fa6b1 to origin/main.",
+    "datetime": "2026-03-09T08:50:44Z",
+    "entry_id": "019cd1ca-e85a-7112-b734-bcec30f89c7b",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex-cli"
+  }
+}

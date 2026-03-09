@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd207-586d-71d0-ab65-3d96e51e7e41",
+  "occurred_at": "2026-03-09T09:57:02.701027Z",
+  "knot_id": "foolery-1d12",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says.  show them on the right side where there is a lot of space.  use a scrollbar to handle overrun content.  make the handoff_capsules foldable and show them in reverse chronological order (latest first)",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "show handoff_capsules in beat detail view"
+  }
+}

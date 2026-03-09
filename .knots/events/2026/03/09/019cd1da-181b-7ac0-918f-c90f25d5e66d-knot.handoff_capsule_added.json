@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1da-181b-7ac0-918f-c90f25d5e66d",
+  "occurred_at": "2026-03-09T09:07:37.115963Z",
+  "knot_id": "foolery-97a9",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Removed horizontal scrollbar from terminal tab strip by adding scrollbar-hide CSS utility (globals.css) and applying it to the tab strip container (terminal-panel.tsx:686). Left/right navigation arrows with hotkey tooltips preserved. All 1952 tests pass.",
+    "datetime": "2026-03-09T09:07:36Z",
+    "entry_id": "019cd1da-181b-7ac0-918f-c8f3c6ddefbf",
+    "model": "claude-opus-4-6",
+    "username": "autopilot",
+    "version": "4.6"
+  }
+}

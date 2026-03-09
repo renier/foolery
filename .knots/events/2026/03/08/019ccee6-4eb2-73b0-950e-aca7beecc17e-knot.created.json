@@ -1,0 +1,12 @@
+{
+  "event_id": "019ccee6-4eb2-73b0-950e-aca7beecc17e",
+  "occurred_at": "2026-03-08T19:22:05.874557Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.created",
+  "data": {
+    "body": "The terminal-manager dispatch wrapper at terminal-manager.ts:653-654 always says 'Implement the following task. You MUST edit the actual source files' regardless of workflow step. For review steps like implementation_review, this actively contradicts the read-only constraints in the kno skill prompt. The wrapper should vary by workflow step — review steps should instruct the agent to review, not implement. Additionally, if kno claim returns a non-zero exit code, the agent should simply exit rather than proceeding without constraints.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Terminal-manager wrapper prompt is unconditionally implementation-biased"
+  }
+}

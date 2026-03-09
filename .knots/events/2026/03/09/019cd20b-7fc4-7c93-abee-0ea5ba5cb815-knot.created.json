@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd20b-7fc4-7c93-abee-0ea5ba5cb815",
+  "occurred_at": "2026-03-09T10:01:34.916677Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.created",
+  "data": {
+    "body": "as title says.  it appeared \"hung\" for an hour, clicking terminate got it going again instead of killing it.  now it's running and there is no way to terminate it.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "b71a did not terminate after clicking terminate"
+  }
+}

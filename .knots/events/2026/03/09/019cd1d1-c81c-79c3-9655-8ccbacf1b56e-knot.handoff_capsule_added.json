@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1d1-c81c-79c3-9655-8ccbacf1b56e",
+  "occurred_at": "2026-03-09T08:58:32.348943Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Claude Code",
+    "content": "Added regression test verifying take-loop review preamble: when beat reaches ready_for_implementation_review, wrapped prompt contains review wording and excludes implementation-biased preamble. Test in terminal-manager-knots-next-guard.test.ts. All quality gates pass (tsc, test, lint).",
+    "datetime": "2026-03-09T10:00:00+01:00",
+    "entry_id": "019cd1d1-c81c-79c3-9655-8cb00e1ff2b4",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

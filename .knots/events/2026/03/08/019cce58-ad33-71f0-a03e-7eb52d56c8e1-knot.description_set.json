@@ -1,0 +1,9 @@
+{
+  "event_id": "019cce58-ad33-71f0-a03e-7eb52d56c8e1",
+  "occurred_at": "2026-03-08T16:47:23.955278Z",
+  "knot_id": "foolery-b13d",
+  "type": "knot.description_set",
+  "data": {
+    "description": "the claude and codex agents should have a little pill that says \"cli\"\nthe opencode ones should parse the model - the leading token should become a pill (typically openrouter, sometimes opencode)\nthe last token is the model-version\nthe penultimate token is the model vendor\n\nso the opencode for /openrouter/mistral/devstral-2512 should be\n\nMistral Devstral 2512 with pills for openrouter and cli"
+  }
+}

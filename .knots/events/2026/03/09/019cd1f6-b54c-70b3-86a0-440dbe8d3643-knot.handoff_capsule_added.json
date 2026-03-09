@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1f6-b54c-70b3-86a0-440dbe8d3643",
+  "occurred_at": "2026-03-09T09:38:52.364187Z",
+  "knot_id": "foolery-4c2f",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment verified: commit e00e56b6 is on main and pushed to origin/main. All 3 CI workflows (CI, Changesets, Coverage Badge) pass green. Implementation confirmed: all 5 memoryManagerType conditionals in terminal-manager.ts replaced with calls to rollbackBeatState, assertClaimable, and supportsAutoFollowUp in memory-manager-commands.ts.",
+    "datetime": "2026-03-09T12:00:00Z",
+    "entry_id": "019cd1f6-b54c-70b3-86a0-43f7f4f0f1be",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

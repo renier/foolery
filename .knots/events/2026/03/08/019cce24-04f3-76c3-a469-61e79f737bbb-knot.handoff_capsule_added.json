@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce24-04f3-76c3-a469-61e79f737bbb",
+  "occurred_at": "2026-03-08T15:49:53.011707Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Returned the knot from shipment_review to ready_for_implementation because this task requires source edits in the repo.",
+    "datetime": "2026-03-08T15:49:47Z",
+    "entry_id": "019cce24-04f3-76c3-a469-61dcf20b92b1",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

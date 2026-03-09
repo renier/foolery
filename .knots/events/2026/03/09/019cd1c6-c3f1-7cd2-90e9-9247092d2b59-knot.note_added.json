@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c6-c3f1-7cd2-90e9-9247092d2b59",
+  "occurred_at": "2026-03-09T08:46:30.385342Z",
+  "knot_id": "foolery-9c47",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Review rejected: the screenshot update is correct, but commit 156910a9 also changes src/app/beats/page.tsx to show 'Claude Opus' instead of the expected stripped model label 'Opus' and deletes the regression test that covered that behavior. Re-submit with the screenshot-only change or restore the formatter/test behavior.",
+    "datetime": "2026-03-09T08:46:30.385342Z",
+    "entry_id": "019cd1c6-c3f1-7cd2-90e9-9231003ac067",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

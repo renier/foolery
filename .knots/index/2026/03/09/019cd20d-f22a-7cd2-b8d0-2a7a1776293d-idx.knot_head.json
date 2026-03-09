@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd20d-f22a-7cd2-b8d0-2a7a1776293d",
+  "occurred_at": "2026-03-09T10:04:15.274595Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-1d12",
+    "profile_id": "autopilot",
+    "state": "ready_for_plan_review",
+    "terminal": false,
+    "title": "show handoff_capsules in beat detail view",
+    "updated_at": "2026-03-09T10:04:15.274595Z"
+  }
+}

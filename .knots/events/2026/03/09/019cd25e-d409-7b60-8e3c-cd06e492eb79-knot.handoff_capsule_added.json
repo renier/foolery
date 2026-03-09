@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd25e-d409-7b60-8e3c-cd06e492eb79",
+  "occurred_at": "2026-03-09T11:32:35.977285Z",
+  "knot_id": "foolery-1d12",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Feature fully implemented and committed. HandoffCapsules component in beat-detail-lightbox.tsx shows capsules from beat.metadata.knotsHandoffCapsules in reverse chronological order, with individually collapsible items showing datetime/agent/model/content, collapsible section header with count badge, and max-h-[50vh] overflow-y-auto for scroll. Typecheck passes.",
+    "datetime": "2026-03-09T00:00:00Z",
+    "entry_id": "019cd25e-d409-7b60-8e3c-ccf4272b7a1e",
+    "model": "claude-opus-4-6",
+    "username": "unknown",
+    "version": "4.6"
+  }
+}

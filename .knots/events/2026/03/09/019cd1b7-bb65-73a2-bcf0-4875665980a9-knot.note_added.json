@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1b7-bb65-73a2-bcf0-4875665980a9",
+  "occurred_at": "2026-03-09T08:30:05.15736Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Problem\nThe dispatch wrapper in terminal-manager.ts:653-654 unconditionally says 'Implement the following task. You MUST edit the actual source files' regardless of workflow step. For review steps (plan_review, implementation_review, shipment_review), this contradicts the read-only constraints in the kno skill prompt.\n\n### Changes\n\n**1. terminal-manager.ts (~line 635-668): Vary wrapper prompt by workflow step**\n- Import `isReviewStep` from workflows.ts\n- Use the already-resolved step (line 606) to determine if we're in a review step\n- For review steps: use a review-oriented preamble ('Review the following work...')\n- For action steps: keep the current implementation-oriented preamble\n- Apply the same logic to the parent beat path (line 638)\n\n**2. terminal-manager.ts: Add kno claim exit code instruction**\n- The KNOTS CLAIM MODE instruction (from knots-backend.ts) tells the agent to run `kno claim`. If it fails (non-zero exit), the agent currently has no instruction to stop. Add a line to the wrapper instructing the agent to exit if kno claim fails.\n\n### Step-specific preambles\n\n| Step | Preamble |\n|------|----------|\n| planning, implementation, shipment | 'Implement the following task. You MUST edit the actual source files...' |\n| plan_review, implementation_review, shipment_review | 'Review the following work. You are in a review step — evaluate quality, correctness, and completeness. Do NOT make code changes unless you find issues that must be fixed.' |\n\n### Files touched\n- src/lib/terminal-manager.ts\n\n### Risks\n- Low: wrapper preamble is purely instructional text, no logic changes\n- Test: existing terminal-manager tests should still pass; may add test for review step preamble",
+    "datetime": "2026-03-09T08:30:05.15736Z",
+    "entry_id": "019cd1b7-bb65-73a2-bcf0-48647293775f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

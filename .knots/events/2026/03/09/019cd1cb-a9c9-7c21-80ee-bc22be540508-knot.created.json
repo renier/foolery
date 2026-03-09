@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd1cb-a9c9-7c21-80ee-bc22be540508",
+  "occurred_at": "2026-03-09T08:51:51.369464Z",
+  "knot_id": "foolery-7714",
+  "type": "knot.created",
+  "data": {
+    "body": "We want to look for things like \"fooelry is a beads viewer\" and remove them.  Foolery is an agentic orchestration interface.  It's memory agent of choice is Knots.  It also supports Beads.\n\nalso scan the other markdownfiles in project root and docs to make sure the content is still erlevant and up to date.\n",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Audit the markdown files to make sure the content is up to date"
+  }
+}

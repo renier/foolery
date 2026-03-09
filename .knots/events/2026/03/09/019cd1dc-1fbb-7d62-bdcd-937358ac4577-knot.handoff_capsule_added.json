@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1dc-1fbb-7d62-bdcd-937358ac4577",
+  "occurred_at": "2026-03-09T09:09:50.1394Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Claude Code",
+    "content": "Shipment review approved. Verified: (1) dispatchPreamble() correctly varies wrapper by step — review steps get review-oriented language, implementation steps get implementation-biased language; threaded through initial dispatch, parent dispatch, and take-loop paths. (2) kno claim non-zero exit-code guard present in all 3 prompt paths in knots-backend.ts. (3) Regression test in terminal-manager-knots-next-guard.test.ts exercises take-loop review preamble switch — 12/12 tests pass. (4) All 4 commits tagged with commit: prefix. (5) CI green on main (d184a7e1). No regressions found.",
+    "datetime": "2026-03-09T10:12:00Z",
+    "entry_id": "019cd1dc-1fbb-7d62-bdcd-936ffaaa58fa",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

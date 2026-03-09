@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce62-885b-7510-98f0-00539f584dfc",
+  "occurred_at": "2026-03-08T16:58:09.883061Z",
+  "knot_id": "foolery-b13d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Reviewed commit 3f1f81f1 on main. The implementation matches the requested agent title behavior: Claude/Codex/Gemini show a cli pill, and OpenCode model paths render vendor + model version labels with router + cli pills (for example /openrouter/mistral/devstral-2512 -> Mistral Devstral 2512 with openrouter and cli pills). Verified by code inspection plus passing tsc, unit tests, and production build on 2026-03-08.",
+    "datetime": "2026-03-08T16:54:38Z",
+    "entry_id": "019cce62-885b-7510-98f0-0041dd27768d",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex"
+  }
+}

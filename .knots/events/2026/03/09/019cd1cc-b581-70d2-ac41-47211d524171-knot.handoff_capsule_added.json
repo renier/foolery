@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1cc-b581-70d2-ac41-47211d524171",
+  "occurred_at": "2026-03-09T08:52:59.905579Z",
+  "knot_id": "foolery-b71a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Trim the duplicated Claude provider prefix from the active-view model column so claude-opus-4-6 renders as Agent: Claude | Model: Opus, and add a regression test for active agent info formatting. Validated with bun run lint, bunx tsc --noEmit, bun run test, and bun run build. Work branch commit 4c46261d2abe was integrated on main as e4bde357130c and pushed to origin/main.",
+    "datetime": "2026-03-09T08:52:48Z",
+    "entry_id": "019cd1cc-b581-70d2-ac41-471b7381f437",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-09"
+  }
+}

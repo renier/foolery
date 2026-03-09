@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce24-04f3-76c3-a469-61c96811cc18",
+  "occurred_at": "2026-03-08T15:49:53.011707Z",
+  "knot_id": "foolery-3985",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Code edits are required for the requested console tap change, so shipment_review must be rolled back to implementation.",
+    "datetime": "2026-03-08T15:49:53.011707Z",
+    "entry_id": "019cce24-04f3-76c3-a469-61b2d371150f",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

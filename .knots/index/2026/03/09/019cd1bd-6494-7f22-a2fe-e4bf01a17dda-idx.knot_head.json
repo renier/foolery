@@ -1,0 +1,18 @@
+{
+  "event_id": "019cd1bd-6494-7f22-a2fe-e4bf01a17dda",
+  "occurred_at": "2026-03-09T08:36:16.148974Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-8ddf",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation_review",
+    "terminal": false,
+    "title": "Support arm64/Linux runtime builds",
+    "updated_at": "2026-03-09T08:36:16.148974Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd1bc-268b-7c51-8c2d-2d1279491480"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "019ccee6-5606-7a43-bd2f-3aeddae77892",
+  "occurred_at": "2026-03-08T19:22:07.750758Z",
+  "knot_id": "foolery-9407",
+  "type": "knot.created",
+  "data": {
+    "body": "When Foolery dispatches an agent for a knot that is already in an action state (e.g. implementation_review), the buildTakePrompt flow sends the agent in blind — the agent tries kno claim, it fails because the knot is already active, and the agent proceeds without any skill constraints. The fix has two parts: (1) Before dispatching, if the knot is in an action state, roll it back to the prior queue state. Log this rollback in the UI terminal, interaction logs, and as a note on the knot itself. This ensures the subsequent kno claim will succeed and the agent receives the correct skill prompt with write constraints. (2) If the agent runs kno claim and receives a non-zero exit code, it should simply exit — not attempt to work without a skill prompt. The orchestration loop then inspects the knot, sees the invalid state, performs the rollback, and re-dispatches cleanly.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "Roll back knots in action state before dispatch instead of dispatching into stale claims"
+  }
+}

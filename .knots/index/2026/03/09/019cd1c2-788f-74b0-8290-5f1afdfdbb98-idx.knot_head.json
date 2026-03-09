@@ -1,0 +1,18 @@
+{
+  "event_id": "019cd1c2-788f-74b0-8290-5f1afdfdbb98",
+  "occurred_at": "2026-03-09T08:41:48.9437Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-9407",
+    "profile_id": "autopilot",
+    "state": "implementation_review",
+    "terminal": false,
+    "title": "Roll back knots in action state before dispatch instead of dispatching into stale claims",
+    "updated_at": "2026-03-09T08:41:48.9437Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd1c0-11e8-72b1-a990-cd59ba948504"
+  }
+}

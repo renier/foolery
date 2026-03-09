@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1ba-7e5d-7d10-9ea4-179fcd6920b4",
+  "occurred_at": "2026-03-09T08:33:06.141103Z",
+  "knot_id": "foolery-e372",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implemented step-aware dispatch wrapper preamble in terminal-manager.ts. Review steps now get review-oriented language instead of implementation-biased text. Added kno claim exit-code guard in knots-backend.ts (both parent and single-beat paths). All quality gates passed (lint, typecheck, 1944 tests). Commit 04b24ceb pushed to origin/main.",
+    "datetime": "2026-03-09T00:00:00Z",
+    "entry_id": "019cd1ba-7e5d-7d10-9ea4-1787036a0c9c",
+    "model": "claude-opus-4-6",
+    "username": "unknown",
+    "version": "4.6"
+  }
+}

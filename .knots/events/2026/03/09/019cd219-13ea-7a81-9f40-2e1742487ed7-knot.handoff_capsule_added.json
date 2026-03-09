@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd219-13ea-7a81-9f40-2e1742487ed7",
+  "occurred_at": "2026-03-09T10:16:24.81043Z",
+  "knot_id": "foolery-bf71",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment complete. Commit 85303d57 already on main and pushed to origin. Implementation adds ISO timestamp and knot state to all 6 terminal TAKE N/ log messages. Format: '<ISO time> <state> TAKE N/M'. No merge needed — work was done directly on main.",
+    "datetime": "2026-03-09T12:00:00Z",
+    "entry_id": "019cd219-13ea-7a81-9f40-2e044ac89c98",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

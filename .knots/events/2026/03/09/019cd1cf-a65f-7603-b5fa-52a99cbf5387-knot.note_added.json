@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1cf-a65f-7603-b5fa-52a99cbf5387",
+  "occurred_at": "2026-03-09T08:56:12.639954Z",
+  "knot_id": "foolery-7714",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Plan\n\nFiles needing updates:\n\n1. **README.md** - Line 3: 'Agent Memory Engagement tool' → 'agentic orchestration interface'; Line 59: update description to reflect both Beads and Knots\n2. **docs/MANIFEST.md** - Lines 5, 9: outdated 'web UI for Beads memory manager' description; FAQ/Glossary outdated; no mention of Knots\n3. **docs/DEVELOPING.md** - Line 3: 'web UI for Beads issue tracking' → include Knots; Line 9: prerequisites should mention Knots; Lines 252-284: contribution/work tracking sections need Knots mentions\n4. **docs/audit/workflow-operations-map.md** - Lines 248, 474: registry operations only mention .beads, should mention .knots\n5. **docs/audit/beats-usage-inventory.md** - Add note that Knots backend now exists alongside Beads\n\nFiles that are fine:\n- PROMPT.md, PROMPT_BEATS.md, PROMPT_KNOTS.md - templates, correct per backend\n- AGENTS.md, CLAUDE.md - already Knots-focused\n- docs/FOOLERY_AGENT_MEMORY_CONTRACT.md - already mentions both\n- docs/backend-extension-guide.md - already mentions both\n- docs/adr-knots-compatibility.md - ADR, historical\n- docs/API.md - already mentions both\n- docs/SETTINGS.md - already mentions both\n- SECURITY.md, RELEASE_CHEATSHEET.md, CHANGELOG.md - fine\n- docs/BEATS_DOLT_HOOKS.md - Beads-specific, intentional",
+    "datetime": "2026-03-09T08:56:12.639954Z",
+    "entry_id": "019cd1cf-a65f-7603-b5fa-52903f395e6b",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce63-1a5b-7593-ad14-68a4e10cde97",
+  "occurred_at": "2026-03-08T16:58:47.259237Z",
+  "knot_id": "foolery-b13d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment verified: commit 3f1f81f1 is on main and pushed to origin/main. Implementation adds parseAgentDisplayParts() for structured agent labels with cli/provider pills. Claude/Codex/Gemini get cli pill; OpenCode agents parse model paths into vendor+version with router+cli pills. All quality gates passed.",
+    "datetime": "2026-03-08T12:00:00Z",
+    "entry_id": "019cce63-1a5b-7593-ad14-68970828504f",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd20b-ce11-7c43-b570-7338ac76b6bf",
+  "occurred_at": "2026-03-09T10:01:54.961446Z",
+  "knot_id": "foolery-b71a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Review rejected: the active-view formatting fix in src/app/beats/page.tsx is directionally correct and covered by src/app/beats/__tests__/page-active-agent-info.test.ts, but this implementation also bundles unrelated settings UI changes (src/components/agent-display-label.tsx, src/components/settings-pools-section.tsx, src/components/settings-sheet.tsx) and agent-pool runtime diagnostics/state changes (src/lib/agent-pool.ts) that are outside the knot description. tsc, test, and build passed during review; full lint did not complete within the review window, so it was not fully re-verified.",
+    "datetime": "2026-03-09T10:01:54.961446Z",
+    "entry_id": "019cd20b-ce11-7c43-b570-732437ba2130",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

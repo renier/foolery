@@ -1,0 +1,18 @@
+{
+  "event_id": "019cd1ce-76fc-74f2-b43d-7ea5dfa46e8c",
+  "occurred_at": "2026-03-09T08:54:54.972693Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-7714",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "Audit the markdown files to make sure the content is up to date",
+    "updated_at": "2026-03-09T08:54:54.972693Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd1cb-a9e5-7a60-8371-c04391e96ed8"
+  }
+}

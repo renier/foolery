@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce64-54e2-7873-8f65-e40d15a954af",
+  "occurred_at": "2026-03-08T17:00:07.778783Z",
+  "knot_id": "foolery-b13d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment review approved on main. Verified commit 3f1f81f15b7c is present on origin/main and tagged on the knot as commit:3f1f81f15b7c. Confirmed the shipped implementation renders cli pills for Claude/Codex/Gemini and parses OpenCode model paths so /openrouter/mistral/devstral-2512 displays as Mistral Devstral 2512 with openrouter and cli pills. Re-verified with bunx tsc --noEmit, the focused unit test file, a production build, and successful GitHub Actions runs (CI, Coverage Badge, Changesets) for the same commit on 2026-03-08.",
+    "datetime": "2026-03-08T17:00:00Z",
+    "entry_id": "019cce64-54e2-7873-8f65-e3f98a826363",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex"
+  }
+}

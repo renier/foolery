@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce28-4977-7a91-9431-d652f4f89120",
+  "occurred_at": "2026-03-08T15:54:32.695632Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Direct source edits are required for dispatch settings, so implementation_review cannot proceed; returning the knot to the implementation queue.",
+    "datetime": "2026-03-08T15:54:32.695632Z",
+    "entry_id": "019cce28-4977-7a91-9431-d6482dcfab8e",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

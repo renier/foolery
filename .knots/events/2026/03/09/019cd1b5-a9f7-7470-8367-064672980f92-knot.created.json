@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd1b5-a9f7-7470-8367-064672980f92",
+  "occurred_at": "2026-03-09T08:27:49.623339Z",
+  "knot_id": "foolery-b607",
+  "type": "knot.created",
+  "data": {
+    "body": "let's update the images, both the thumbnails and the bigger screen shots.\n\nuse localhost:3210/beats?repo=%2FUsers%2Fcartine%2Ffoolery so images don't have the next button on the bottom left.\n\nuse the playwright mcp and headless chrome (if possible)",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "README.md images"
+  }
+}

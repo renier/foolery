@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c6-c3f1-7cd2-90e9-9267fefb529c",
+  "occurred_at": "2026-03-09T08:46:30.385342Z",
+  "knot_id": "foolery-9c47",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Rejected in implementation_review. Findings: (1) src/app/beats/page.tsx:46-65 removes the agent-name prefix stripping logic, so Claude rows regress from model='Opus' to model='Claude Opus', which is unrelated to the history.png screenshot beat and appears to undo the prior label fix. (2) src/app/beats/__tests__/page-active-agent-info.test.ts was deleted entirely; that file was the direct regression coverage for the formatter behavior changed in the same commit, leaving no src/app/beats unit tests. Validation: docs/screenshots/history.png itself does satisfy the beat by showing a selected beat and visible conversation log. Targeted test check: 'bun run test -- src/app/beats' now reports no test files found.",
+    "datetime": "2026-03-09T08:46:11Z",
+    "entry_id": "019cd1c6-c3f1-7cd2-90e9-925a31b9a727",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex"
+  }
+}

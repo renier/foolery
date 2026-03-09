@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce24-8db9-7491-bb4f-bdec9fb90578",
+  "occurred_at": "2026-03-08T15:50:28.025671Z",
+  "knot_id": "foolery-0bbe",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Source edits are required for dispatch settings, so shipment review cannot proceed; returning the knot to ready_for_implementation for implementation work.",
+    "datetime": "2026-03-08T15:50:24Z",
+    "entry_id": "019cce24-8db9-7491-bb4f-bdd2fd1bcb60",
+    "model": "GPT-5",
+    "username": "codex",
+    "version": "5"
+  }
+}

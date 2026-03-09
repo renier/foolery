@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd1c5-c8c6-7a52-bffd-6cc4b6d50f6a",
+  "occurred_at": "2026-03-09T08:45:26.086608Z",
+  "knot_id": "foolery-97a9",
+  "type": "knot.created",
+  "data": {
+    "body": "for the love of god please remove that horizontal scrollbar.\n\nkeep the left and right navigation arrows\nhave the navigation arrows show a mouseover with the hotkey that can also be used.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "UI Terminal:  Horizontal scroll bar must be removed"
+  }
+}

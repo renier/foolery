@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c1-9d23-7ab2-ba9f-0a1b4566fb75",
+  "occurred_at": "2026-03-09T08:40:52.771751Z",
+  "knot_id": "foolery-b607",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Refreshed all 8 README screenshots in docs/screenshots from localhost:3210/beats?repo=%2FUsers%2Fcartine%2Ffoolery using Playwright MCP. Replaced queues, active, human-action, retakes, history, hot-keys, dispatch-simple, and dispatch-advanced images; verified lint, typecheck, tests, and build in the screenshot-refresh worktree.",
+    "datetime": "2026-03-09T08:40:44Z",
+    "entry_id": "019cd1c1-9d23-7ab2-ba9f-0a06f1b20081",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-09"
+  }
+}

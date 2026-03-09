@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1b9-7fa0-7873-aa6c-86d83bed94f5",
+  "occurred_at": "2026-03-09T08:32:00.928511Z",
+  "knot_id": "foolery-9407",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Part 1: Enhanced rollback logging before dispatch\n\n**File: src/lib/terminal-manager.ts**\n\n1. Modify `rollbackAgentOwnedActionStateToQueue` to:\n   - Add a note on the knot itself via `kno update <id> --add-note '...'` documenting the rollback (action state → queue state)\n   - Return rollback metadata: `{ beat, rolledBack, fromState, toState }`\n\n2. After `pushEvent` and `interactionLog` are created (~line 710), replay buffered rollback events:\n   - Push a UI terminal event describing the rollback\n   - Log to interaction log via `interactionLog.logBeatState`\n\n3. In the take-loop rollback (~line 847), also add a note on the knot itself.\n\n### Part 2: Exit on kno claim failure\n\n**File: src/lib/backends/knots-backend.ts**\n\n4. In `buildTakePrompt` (single-beat mode), add instruction: if `kno claim` returns a non-zero exit code, the agent MUST exit immediately without attempting to work.\n\n5. In `buildTakePrompt` (parent/scene mode), add same instruction for each child claim.\n\n### Files changed:\n- src/lib/terminal-manager.ts\n- src/lib/backends/knots-backend.ts",
+    "datetime": "2026-03-09T08:32:00.928511Z",
+    "entry_id": "019cd1b9-7fa0-7873-aa6c-86c363eff61d",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

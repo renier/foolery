@@ -1,0 +1,15 @@
+{
+  "event_id": "019cce5e-3546-7da0-b229-102783746e8c",
+  "occurred_at": "2026-03-08T16:53:26.470379Z",
+  "knot_id": "foolery-b13d",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Added parseAgentDisplayParts() to agent-identity.ts that returns structured {label, pills} for agents. Created AgentDisplayLabel component rendering label text + Badge pills. Claude/Codex/Gemini agents get a 'cli' pill. OpenCode agents parse model paths like /openrouter/mistral/devstral-2512 into 'Mistral Devstral 2512' with 'openrouter' and 'cli' pills. Updated settings-agents-section, settings-actions-section, settings-pools-section, settings-dispatch-global-swap to use AgentDisplayLabel. All quality gates pass (lint, tsc, 1936 tests, build). Pushed to main as 3f1f81f1.",
+    "datetime": "2026-03-08T17:53:00Z",
+    "entry_id": "019cce5e-3546-7da0-b229-10150c3bcfa7",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

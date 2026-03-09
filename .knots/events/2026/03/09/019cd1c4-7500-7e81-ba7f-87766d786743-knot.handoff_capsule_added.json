@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1c4-7500-7e81-ba7f-87766d786743",
+  "occurred_at": "2026-03-09T08:43:59.104782Z",
+  "knot_id": "foolery-b71a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Adjusted active-view agent/model formatting so Claude Opus 4.6 displays as Agent: Claude and Model: Opus, and added a regression test for the adapter.",
+    "datetime": "2026-03-09T08:42:06Z",
+    "entry_id": "019cd1c4-7500-7e81-ba7f-8769e6450d9a",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-09"
+  }
+}

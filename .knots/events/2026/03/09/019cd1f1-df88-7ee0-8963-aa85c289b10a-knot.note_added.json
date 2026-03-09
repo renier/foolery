@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd1f1-df88-7ee0-8963-aa85c289b10a",
+  "occurred_at": "2026-03-09T09:33:35.496367Z",
+  "knot_id": "foolery-4c2f",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Problem\nterminal-manager.ts has 5 places that branch on `memoryManagerType === 'knots'` vs `'beads'`:\n1. **L319-333** — Rollback in `rollbackAgentOwnedActionStateToQueue()`: knots uses `kno update` CLI + add-note; beads uses `backend.update()`\n2. **L592-599** — Claimability check in `createSession()`: knots calls `assertKnotsClaimable()`; beads skips\n3. **L836-847** — Take-loop step failure rollback: same pattern as #1 with different note text\n4. **L1007-1015** — Invariant enforcement rollback: same pattern as #1 without note\n5. **L1321-1336** — Auto ship completion prompt: knots returns `null`; beads builds follow-up\n\n### Design\n\n**Extend `memory-manager-commands.ts`** with three new behavioral methods that encapsulate the variant behavior:\n\n1. **`rollbackBeatState(beatId, fromState, toState, repoPath, reason?)`** — Async function that updates beat state. For knots: runs `kno update` CLI + optional note. For beads: calls `backend.update()`.\n2. **`assertClaimable(beats, action)`** — For knots: validates `isAgentClaimable`; for beads: no-op.\n3. **`supportsAutoFollowUp(memoryManagerType)`** — Returns `false` for knots, `true` for beads.\n\nThis keeps the interface in the existing `memory-manager-commands.ts` file (server-side, can import node:child_process and backend) rather than expanding the runtime-agnostic `memory-managers.ts`.\n\n### Files Changed\n- `src/lib/memory-manager-commands.ts` — Add 3 new exported functions\n- `src/lib/terminal-manager.ts` — Replace 5 conditional blocks with calls to new functions\n- `src/lib/__tests__/memory-manager-commands.test.ts` or new test file — Tests for new functions\n\n### Risks\n- The rollback functions need access to `getBackend()` — need to import from backend module\n- The `kno update` CLI calls use dynamic imports of `node:child_process` — will centralize this pattern\n- Must preserve exact behavior including best-effort note addition on rollback failures",
+    "datetime": "2026-03-09T09:33:35.496367Z",
+    "entry_id": "019cd1f1-df88-7ee0-8963-aa72863dc4e1",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}
