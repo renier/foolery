@@ -53,6 +53,16 @@ class SessionConnectionManager {
           listener(event);
         }
 
+        if (event.type === "agent_switch") {
+          try {
+            const agent = JSON.parse(event.data);
+            useTerminalStore.getState().updateAgent(sessionId, agent);
+          } catch {
+            // ignore malformed agent_switch data
+          }
+          return;
+        }
+
         if (event.type === "exit") {
           // Exit is terminal; ignore duplicate exit events from reconnect/replay.
           if (conn.exitReceived) return;

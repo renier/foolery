@@ -1223,6 +1223,18 @@ export async function createSession(
             takeIteration++;
             const iterAgent = nextTake.agentOverride ?? agent;
             const iterAgentLabel = iterAgent.label ?? iterAgent.agentId ?? iterAgent.command;
+            if (nextTake.agentOverride) {
+              pushEvent({
+                type: "agent_switch",
+                data: JSON.stringify({
+                  agentName: iterAgent.label ?? iterAgent.agentId ?? iterAgent.command,
+                  agentModel: iterAgent.model,
+                  agentVersion: iterAgent.version,
+                  agentCommand: iterAgent.command,
+                }),
+                timestamp: Date.now(),
+              });
+            }
             pushEvent({
               type: "stdout",
               data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,
@@ -1568,6 +1580,18 @@ export async function createSession(
             takeIteration++;
             const iterAgent = nextTake.agentOverride ?? agent;
             const iterAgentLabel = iterAgent.label ?? iterAgent.agentId ?? iterAgent.command;
+            if (nextTake.agentOverride) {
+              pushEvent({
+                type: "agent_switch",
+                data: JSON.stringify({
+                  agentName: iterAgent.label ?? iterAgent.agentId ?? iterAgent.command,
+                  agentModel: iterAgent.model,
+                  agentVersion: iterAgent.version,
+                  agentCommand: iterAgent.command,
+                }),
+                timestamp: Date.now(),
+              });
+            }
             pushEvent({
               type: "stdout",
               data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,

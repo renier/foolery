@@ -41,6 +41,7 @@ interface TerminalState {
   removeTerminal: (sessionId: string) => void;
   setActiveSession: (sessionId: string) => void;
   updateStatus: (sessionId: string, status: TerminalSessionStatus) => void;
+  updateAgent: (sessionId: string, agent: Pick<ActiveTerminal, "agentName" | "agentModel" | "agentVersion" | "agentCommand">) => void;
   markPendingClose: (sessionId: string) => void;
   cancelPendingClose: (sessionId: string) => void;
   enqueueSceneBeats: (items: QueuedBeat[]) => void;
@@ -149,6 +150,14 @@ export const useTerminalStore = create<TerminalState>()(
       });
       return changed ? { terminals } : state;
     }),
+  updateAgent: (sessionId, agent) =>
+    set((state) => ({
+      terminals: state.terminals.map((item) =>
+        item.sessionId === sessionId
+          ? { ...item, ...agent }
+          : item,
+      ),
+    })),
   markPendingClose: (sessionId) =>
     set((state) => {
       const pendingClose = new Set(state.pendingClose);
