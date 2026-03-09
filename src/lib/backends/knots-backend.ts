@@ -1126,6 +1126,7 @@ export class KnotsBackend implements BackendPort {
         ``,
         `KNOTS CLAIM MODE (required):`,
         `Always claim a knot before implementation and follow the claim output verbatim.`,
+        `If \`kno claim\` exits with a non-zero code, stop immediately — do not proceed without claim constraints.`,
         ...childLines,
         `- Use the returned \`prompt\` field as the source of truth for each claim iteration.`,
         `- Do not stop after the first claim/completion unless the child is already terminal.`,
@@ -1148,6 +1149,7 @@ export class KnotsBackend implements BackendPort {
       ``,
       `KNOTS CLAIM MODE (required):`,
       `Run \`kno claim "${beatId}" --json\` and follow the returned \`prompt\` field verbatim.`,
+      `If \`kno claim\` exits with a non-zero code, stop immediately — do not proceed without claim constraints.`,
       `After completing the work, run the completion command from the claim output.`,
     ].filter((line): line is string => line !== null).join("\n");
 

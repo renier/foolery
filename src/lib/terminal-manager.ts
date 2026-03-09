@@ -633,9 +633,12 @@ export async function createSession(
     const taskPrompt = takePromptResult.data.prompt;
 
     // Wrap backend prompt with Foolery execution instructions
+    const isReview = resolved ? isReviewStep(resolved.step) : false;
     prompt = (isParent
       ? [
-          `You are executing a parent beat and its children. Implement the children beats and use the parent beat's notes/description for context and guidance. You MUST edit source files directly — do not just describe what to do.`,
+          isReview
+            ? `You are reviewing a parent beat and its children. Evaluate quality, correctness, and completeness. Do NOT make code changes unless you find issues that must be fixed.`
+            : `You are executing a parent beat and its children. Implement the children beats and use the parent beat's notes/description for context and guidance. You MUST edit source files directly — do not just describe what to do.`,
           ``,
           queueTerminalInvariantInstruction,
           ``,
@@ -651,7 +654,9 @@ export async function createSession(
           taskPrompt,
         ]
       : [
-          `Implement the following task. You MUST edit the actual source files to make the change — do not just describe what to do.`,
+          isReview
+            ? `Review the following work. You are in a review step — evaluate quality, correctness, and completeness. Do NOT make code changes unless you find issues that must be fixed.`
+            : `Implement the following task. You MUST edit the actual source files to make the change — do not just describe what to do.`,
           ``,
           queueTerminalInvariantInstruction,
           ``,
