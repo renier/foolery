@@ -338,7 +338,7 @@ async function rollbackAgentOwnedActionStateToQueue(
 
   try {
     if (memoryManagerType === "knots") {
-      const cmd = `kno update ${beat.id} --state ${rollbackState}`;
+      const cmd = `kno update ${beat.id} --status ${rollbackState}`;
       const { exec: execCb } = await import("node:child_process");
       const { promisify } = await import("node:util");
       const execAsync = promisify(execCb);
@@ -904,7 +904,7 @@ export async function createSession(
 
       try {
         if (memoryManagerType === "knots") {
-          const cmd = `kno update ${beatId} --state ${rollbackState}`;
+          const cmd = `kno update ${beatId} --status ${rollbackState}`;
           const { exec: execCb } = await import("node:child_process");
           const { promisify } = await import("node:util");
           const execAsync = promisify(execCb);
@@ -1075,7 +1075,7 @@ export async function createSession(
 
     try {
       if (memoryManagerType === "knots") {
-        const cmd = `kno update ${beatId} --state ${rollbackState}`;
+        const cmd = `kno update ${beatId} --status ${rollbackState}`;
         const { exec } = await import("node:child_process");
         const { promisify } = await import("node:util");
         const execAsync = promisify(exec);

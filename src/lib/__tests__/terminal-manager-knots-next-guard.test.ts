@@ -103,7 +103,7 @@ vi.mock("@/lib/agent-message-type-index", () => ({
 import { createSession } from "@/lib/terminal-manager";
 
 describe("terminal-manager nextKnot expected-state guard", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     nextKnotMock.mockReset();
     nextBeatMock.mockReset();
     resolveMemoryManagerTypeMock.mockReset();
@@ -120,6 +120,8 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     interactionLog.logResponse.mockReset();
     interactionLog.logBeatState.mockReset();
     interactionLog.logEnd.mockReset();
+    const { exec } = await import("node:child_process");
+    vi.mocked(exec).mockClear();
 
     const sessions = (globalThis as { __terminalSessions?: Map<string, unknown> }).__terminalSessions;
     sessions?.clear();
@@ -161,6 +163,12 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     expect(nextKnotMock).not.toHaveBeenCalled();
     // Backend.get called twice: initial fetch + post-rollback refresh
     expect(backend.get).toHaveBeenCalledTimes(2);
+    const { exec } = await import("node:child_process");
+    expect(vi.mocked(exec)).toHaveBeenCalledWith(
+      expect.stringContaining("kno update foolery-e6d4 --status ready_for_implementation"),
+      expect.objectContaining({ cwd: "/tmp/repo" }),
+      expect.any(Function),
+    );
   });
 
   it("rolls back active beads-managed beat to queue state instead of advancing forward", async () => {
@@ -344,4 +352,5 @@ describe("terminal-manager nextKnot expected-state guard", () => {
       expect(interactionLog.logPrompt).toHaveBeenCalledWith(expect.stringContaining("loop beads prompt"), { source: "take_2" });
     });
   });
+
 });
