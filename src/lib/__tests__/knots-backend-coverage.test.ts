@@ -568,10 +568,11 @@ describe("KnotsBackend coverage: buildTakePrompt parent/scene mode", () => {
     expect(result.data?.prompt).toContain("CHILD-B");
     expect(result.data?.prompt).toContain("KNOTS CLAIM MODE");
     expect(result.data?.prompt).toContain("Open child beat IDs:");
-    expect(result.data?.prompt).toContain("Repeat this loop until the child reaches `shipped` or `abandoned`.");
-    expect(result.data?.prompt).toContain("Do not stop after the first claim/completion unless the child is already terminal.");
-    expect(result.data?.prompt).toContain("run `kno next <id> --expected-state <currentState> --actor-kind agent` once to return it to queue");
-    expect(result.data?.prompt).toContain("If `kno claim` exits with a non-zero exit code for a child, stop immediately.");
+    expect(result.data?.prompt).toContain("treat each claim result as a single-step authorization");
+    expect(result.data?.prompt).toContain("Each child claim authorizes exactly one workflow action.");
+    expect(result.data?.prompt).toContain("Do not immediately re-claim the same child");
+    expect(result.data?.prompt).toContain("run `kno next <id> --expected-state <currentState> --actor-kind agent` once to return it to queue, then stop work on that child.");
+    expect(result.data?.prompt).toContain("If `kno claim` exits with a non-zero exit code for a child, stop work on that child immediately.");
     // Should NOT have called claimKnot
     expect(mockClaimKnot).not.toHaveBeenCalled();
   });
@@ -674,6 +675,8 @@ describe("KnotsBackend coverage: buildTakePrompt parent/scene mode", () => {
     expect(result.data?.prompt).toContain("Title: My Task");
     expect(result.data?.prompt).toContain("Description: Do the thing");
     expect(result.data?.prompt).toContain("kno claim");
+    expect(result.data?.prompt).toContain("single-step authorization");
+    expect(result.data?.prompt).toContain("Do not run `kno claim` again in this session");
   });
 
   it("uses body when description is absent for single-beat prompt", async () => {

@@ -55,11 +55,20 @@ describe("getBeatsSkillPrompt", () => {
       expect(prompt).toContain(showCmd);
       expect(prompt).toContain("bd sync");
       expect(prompt).toContain(currentState);
-      expect(prompt).not.toContain("kno");
+      expect(prompt).not.toContain("kno claim");
+      expect(prompt).toContain("## Authority Boundary");
+      expect(prompt).toContain("Complete exactly one workflow action, then stop.");
 
       for (const workflowState of entry.transitions) {
         const transitionCmd = buildWorkflowStateCommand(beatId, workflowState, "beads", { noDaemon: true });
         expect(prompt).toContain(transitionCmd);
+        expect(prompt).toContain(`\`${workflowState}\``);
+      }
+
+      if (entry.transitions.length === 1) {
+        expect(prompt).toContain("Allowed exit state for this session:");
+      } else {
+        expect(prompt).toContain("Allowed exit states for this session:");
       }
     });
   }

@@ -229,7 +229,7 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     expect(interactionLog.logPrompt).toHaveBeenCalledWith("show this prompt in history", { source: "initial" });
   });
 
-  it("logs app-generated initial prompt for one-shot scene sessions", async () => {
+  it("wraps app-generated initial prompt for one-shot scene sessions", async () => {
     backend.get.mockResolvedValue({
       ok: true,
       data: {
@@ -260,13 +260,15 @@ describe("terminal-manager nextKnot expected-state guard", () => {
 
     expect(spawnedChildren).toHaveLength(1);
     expect(interactionLog.logPrompt).toHaveBeenCalledTimes(1);
-    expect(interactionLog.logPrompt).toHaveBeenCalledWith(
-      "scene app prompt",
-      { source: "initial" },
-    );
+    const initialPrompt = interactionLog.logPrompt.mock.calls[0]?.[0];
+    expect(typeof initialPrompt).toBe("string");
+    expect(initialPrompt).toContain("FOOLERY EXECUTION BOUNDARY:");
+    expect(initialPrompt).toContain("Execute only the child beats explicitly listed below.");
+    expect(initialPrompt).toContain("scene app prompt");
+    expect(interactionLog.logPrompt).toHaveBeenCalledWith(initialPrompt, { source: "initial" });
   });
 
-  it("passes backend prompt through for beads-managed beats", async () => {
+  it("wraps backend prompt for beads-managed beats", async () => {
     resolveMemoryManagerTypeMock.mockReturnValue("beads");
     backend.get.mockResolvedValue({
       ok: true,
@@ -286,10 +288,12 @@ describe("terminal-manager nextKnot expected-state guard", () => {
 
     await createSession("foolery-3100", "/tmp/repo");
 
-    expect(interactionLog.logPrompt).toHaveBeenCalledWith(
-      "beads app prompt",
-      { source: "initial" },
-    );
+    const initialPrompt = interactionLog.logPrompt.mock.calls[0]?.[0];
+    expect(typeof initialPrompt).toBe("string");
+    expect(initialPrompt).toContain("FOOLERY EXECUTION BOUNDARY:");
+    expect(initialPrompt).toContain("Execute only the currently assigned workflow action described below.");
+    expect(initialPrompt).toContain("beads app prompt");
+    expect(interactionLog.logPrompt).toHaveBeenCalledWith(initialPrompt, { source: "initial" });
   });
 
   it("logs take-loop prompts for one-shot agents", async () => {
@@ -315,8 +319,20 @@ describe("terminal-manager nextKnot expected-state guard", () => {
 
     await vi.waitFor(() => {
       expect(spawnedChildren.length).toBe(2);
-      expect(interactionLog.logPrompt).toHaveBeenCalledWith("initial app prompt", { source: "initial" });
-      expect(interactionLog.logPrompt).toHaveBeenCalledWith("loop app prompt", { source: "take_2" });
+      const initialPrompt = interactionLog.logPrompt.mock.calls.find(
+        (args: unknown[]) => (args[1] as Record<string, unknown>)?.source === "initial",
+      )?.[0];
+      const loopPrompt = interactionLog.logPrompt.mock.calls.find(
+        (args: unknown[]) => (args[1] as Record<string, unknown>)?.source === "take_2",
+      )?.[0];
+
+      expect(typeof initialPrompt).toBe("string");
+      expect(initialPrompt).toContain("FOOLERY EXECUTION BOUNDARY:");
+      expect(initialPrompt).toContain("initial app prompt");
+
+      expect(typeof loopPrompt).toBe("string");
+      expect(loopPrompt).toContain("FOOLERY EXECUTION BOUNDARY:");
+      expect(loopPrompt).toContain("loop app prompt");
     });
   });
 
@@ -344,13 +360,25 @@ describe("terminal-manager nextKnot expected-state guard", () => {
 
     await vi.waitFor(() => {
       expect(spawnedChildren.length).toBe(2);
-      expect(interactionLog.logPrompt).toHaveBeenCalledWith("initial beads prompt", { source: "initial" });
-      expect(interactionLog.logPrompt).toHaveBeenCalledWith("loop beads prompt", { source: "take_2" });
+      const initialPrompt = interactionLog.logPrompt.mock.calls.find(
+        (args: unknown[]) => (args[1] as Record<string, unknown>)?.source === "initial",
+      )?.[0];
+      const loopPrompt = interactionLog.logPrompt.mock.calls.find(
+        (args: unknown[]) => (args[1] as Record<string, unknown>)?.source === "take_2",
+      )?.[0];
+
+      expect(typeof initialPrompt).toBe("string");
+      expect(initialPrompt).toContain("FOOLERY EXECUTION BOUNDARY:");
+      expect(initialPrompt).toContain("initial beads prompt");
+
+      expect(typeof loopPrompt).toBe("string");
+      expect(loopPrompt).toContain("FOOLERY EXECUTION BOUNDARY:");
+      expect(loopPrompt).toContain("loop beads prompt");
     });
   });
 
 
-  it("passes backend prompt through without wrapper in take-loop iterations", async () => {
+  it("wraps backend prompt during take-loop iterations", async () => {
     const reviewBeat = {
       id: "foolery-3000",
       title: "Review preamble regression",
@@ -389,19 +417,21 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     await vi.waitFor(() => {
       expect(spawnedChildren.length).toBe(2);
 
-      // Initial prompt is the backend prompt passed through directly
-      expect(interactionLog.logPrompt).toHaveBeenCalledWith(
-        "initial impl prompt",
-        { source: "initial" },
-      );
+      const initialPrompt = interactionLog.logPrompt.mock.calls.find(
+        (args: unknown[]) => (args[1] as Record<string, unknown>)?.source === "initial",
+      )?.[0];
+      expect(typeof initialPrompt).toBe("string");
+      expect(initialPrompt).toContain("FOOLERY EXECUTION BOUNDARY:");
+      expect(initialPrompt).toContain("initial impl prompt");
 
-      // Take-loop prompt is also the backend prompt passed through directly
+      // Take-loop prompt preserves the backend content but now adds the execution boundary.
       const take2Calls = interactionLog.logPrompt.mock.calls.filter(
         (args: unknown[]) =>
           (args[1] as Record<string, unknown>)?.source === "take_2",
       );
       expect(take2Calls).toHaveLength(1);
-      expect(take2Calls[0][0]).toBe("review iteration prompt");
+      expect(take2Calls[0]?.[0]).toContain("FOOLERY EXECUTION BOUNDARY:");
+      expect(take2Calls[0]?.[0]).toContain("review iteration prompt");
     });
   });
 });

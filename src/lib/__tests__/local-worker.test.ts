@@ -78,6 +78,41 @@ describe("LocalWorkerService", () => {
 
     expect(result.ok).toBe(true);
     expect(result.data?.claimedId).toBe("foolery-1");
+    expect(result.data?.lease.prompt).toContain("FOOLERY EXECUTION BOUNDARY:");
     expect(result.data?.lease.prompt).toContain("foolery-1");
+  });
+
+  it("wraps scene prompts for parent work", async () => {
+    mockGet.mockResolvedValue({
+      ok: true,
+      data: {
+        id: "foolery-parent",
+        title: "Parent",
+        state: "ready_for_implementation",
+        isAgentClaimable: true,
+        type: "task",
+        priority: 2,
+        labels: [],
+        created: "2026-03-05T00:00:00Z",
+        updated: "2026-03-05T00:00:00Z",
+      },
+    });
+    mockListWorkflows.mockResolvedValue({ ok: true, data: [] });
+    mockListDeps.mockResolvedValue({ ok: true, data: [] });
+    mockList.mockResolvedValue({ ok: true, data: [] });
+
+    const worker = new LocalWorkerService();
+    const result = await worker.prepareTake({
+      beatId: "foolery-parent",
+      repoPath: "/tmp/repo",
+      isParent: true,
+      childBeatIds: ["foolery-child-1", "foolery-child-2"],
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.data?.prompt).toContain("FOOLERY EXECUTION BOUNDARY:");
+    expect(result.data?.prompt).toContain("Execute only the child beats explicitly listed below.");
+    expect(result.data?.prompt).toContain("foolery-child-1");
+    expect(result.data?.prompt).toContain("foolery-child-2");
   });
 });

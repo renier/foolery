@@ -37,7 +37,6 @@ import * as knots from "@/lib/knots";
 import {
   deriveWorkflowRuntimeState,
   inferWorkflowMode,
-  mapStatusToDefaultWorkflowState,
   normalizeStateForWorkflow,
   profileDisplayName,
   resolveStep,
@@ -1114,7 +1113,7 @@ export class KnotsBackend implements BackendPort {
 
       const childLines = options.childBeatIds.map(
         (id) =>
-          `- Child ${id}: run \`kno claim ${JSON.stringify(id)} --json\`, follow the returned \`prompt\`, run its completion command, then check \`kno show ${JSON.stringify(id)} --json\`. Repeat this loop until the child reaches \`shipped\` or \`abandoned\`.`,
+          `- Child ${id}: run \`kno claim ${JSON.stringify(id)} --json\`, use the returned \`prompt\` only for that claimed step, run only the completion command from that claim output, then check \`kno show ${JSON.stringify(id)} --json\`.`,
       );
       const prompt = [
         `Parent beat ID: ${beatId}`,
@@ -1125,14 +1124,16 @@ export class KnotsBackend implements BackendPort {
         ...options.childBeatIds.map((id) => `- ${id}`),
         ``,
         `KNOTS CLAIM MODE (required):`,
-        `Always claim a knot before implementation and follow the claim output verbatim.`,
+        `Always claim a knot before implementation and treat each claim result as a single-step authorization.`,
         `If \`kno claim\` exits with a non-zero code, stop immediately — do not proceed without claim constraints.`,
         ...childLines,
-        `- Use the returned \`prompt\` field as the source of truth for each claim iteration.`,
-        `- Do not stop after the first claim/completion unless the child is already terminal.`,
-        `- If a child is left in an active state (e.g. implementation_review), run \`kno next <id> --expected-state <currentState> --actor-kind agent\` once to return it to queue, then continue the claim loop.`,
+        `- Each child claim authorizes exactly one workflow action. After its completion command succeeds, stop work on that child for this session.`,
+        `- Do not immediately re-claim the same child after a successful completion unless a later Foolery prompt explicitly tells you to do so.`,
+        `- Do not try to drive a child all the way to \`shipped\` unless the claim output for the current step explicitly makes that the allowed exit state.`,
+        `- If a child is left in an active state (for example \`implementation_review\`), run \`kno next <id> --expected-state <currentState> --actor-kind agent\` once to return it to queue, then stop work on that child.`,
         `- Do not guess or brute-force workflow transitions outside the claim output.`,
-        `- If \`kno claim\` exits with a non-zero exit code for a child, stop immediately. Do not attempt further work without a valid claim; the orchestration loop will handle rollback and re-dispatch.`,
+        `- If \`kno claim\` exits with a non-zero exit code for a child, stop work on that child immediately. Do not attempt further work without a valid claim.`,
+        `- Ignore generic instructions about finishing the whole knot, shipping, or pushing unless the active child claim explicitly requires them.`,
       ].filter((line): line is string => line !== null).join("\n");
 
       return ok({ prompt, claimed: false });
@@ -1149,8 +1150,11 @@ export class KnotsBackend implements BackendPort {
       knot.description ? `Description: ${knot.description}` : knot.body ? `Description: ${knot.body}` : null,
       ``,
       `KNOTS CLAIM MODE (required):`,
-      `Run \`kno claim "${beatId}" --json\` and follow the returned \`prompt\` field verbatim.`,
-      `After completing the work, run the completion command from the claim output.`,
+      `Run \`kno claim "${beatId}" --json\` and use the returned \`prompt\` only for the currently claimed step.`,
+      `Treat that claim result as a single-step authorization: run only the completion command from the claim output, then stop immediately.`,
+      `Do not run \`kno claim\` again in this session after the completion command succeeds.`,
+      `Do not inspect, review, or advance later workflow states on your own.`,
+      `Ignore generic instructions about finishing the whole knot, shipping, or pushing unless the active claim explicitly requires them.`,
       `If \`kno claim\` exits with a non-zero exit code, you MUST stop immediately — do not attempt to work without a valid claim. Simply exit.`,
     ].filter((line): line is string => line !== null).join("\n");
 

@@ -577,6 +577,8 @@ describe("KnotsBackend mapping behaviour", () => {
       expect(result.data?.prompt).toContain(id);
       expect(result.data?.prompt).toContain("KNOTS CLAIM MODE");
       expect(result.data?.prompt).toContain("kno claim");
+      expect(result.data?.prompt).toContain("single-step authorization");
+      expect(result.data?.prompt).toContain("Do not inspect, review, or advance later workflow states on your own.");
       expect(result.data?.claimed).toBe(false);
       expect(mockShowKnot).toHaveBeenCalledWith(id, "/repo");
       expect(mockClaimKnot).not.toHaveBeenCalled();

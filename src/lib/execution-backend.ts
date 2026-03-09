@@ -14,6 +14,7 @@ import { getBackend } from "@/lib/backend-instance";
 import { claimKnot, pollKnot, updateKnot } from "@/lib/knots";
 import { nextBeat } from "@/lib/beads-state-machine";
 import { nextKnot } from "@/lib/knots";
+import { wrapExecutionPrompt } from "@/lib/agent-prompt-guardrails";
 import { getBeatsSkillPrompt } from "@/lib/beats-skill-prompts";
 import { resolveMemoryManagerType } from "@/lib/memory-manager-commands";
 import { builtinProfileDescriptor, defaultWorkflowDescriptor, forwardTransitionTarget, resolveStep, StepPhase } from "@/lib/workflows";
@@ -94,13 +95,13 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
     const leaseId = generateLeaseId();
 
     if (input.mode === "scene" && input.childBeatIds?.length) {
-      const prompt = [
+      const prompt = wrapExecutionPrompt([
         `Parent beat ID: ${input.beatId}`,
         `Open child beat IDs:`,
         ...input.childBeatIds.map((id) => `- ${id}`),
         "",
         "Execute child beats in parallel when practical and use the parent beat for context.",
-      ].join("\n");
+      ].join("\n"), "scene");
       const lease: ExecutionLease = {
         leaseId,
         mode: input.mode,
@@ -145,7 +146,7 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
         beat: claimedSnapshot.data.beat,
         workflow: claimedSnapshot.data.workflow,
         step: claimedSnapshot.data.step,
-        prompt: claimResult.data.prompt,
+        prompt: wrapExecutionPrompt(claimResult.data.prompt, "take"),
         claimed: true,
         completion: { kind: "advance", expectedState: claimResult.data.state },
         rollback: { kind: "note", note: "Take iteration failed before completion." },
@@ -157,10 +158,10 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
     const beat = snapshot.beat;
     const resolved = resolveStep(beat.state);
     if (!resolved || resolved.phase !== StepPhase.Queued || !beat.isAgentClaimable) {
-      const prompt = [
+      const prompt = wrapExecutionPrompt([
         `Beat ID: ${input.beatId}`,
         `Use \`bd show "${input.beatId}"\` to inspect full details before starting.`,
-      ].join("\n");
+      ].join("\n"), "take");
       const lease: ExecutionLease = {
         leaseId,
         mode: input.mode,
@@ -210,7 +211,10 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
       beat: claimedSnapshot.data.beat,
       workflow: claimedSnapshot.data.workflow,
       step: claimedSnapshot.data.step,
-      prompt: claimedStep ? getBeatsSkillPrompt(claimedStep, beat.id, target) : `Beat ID: ${beat.id}`,
+      prompt: wrapExecutionPrompt(
+        claimedStep ? getBeatsSkillPrompt(claimedStep, beat.id, target) : `Beat ID: ${beat.id}`,
+        "take",
+      ),
       claimed: true,
       completion: { kind: "advance", expectedState: target },
       rollback: { kind: "noop" },
@@ -242,7 +246,7 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
         beat: snapshotResult.data.beat,
         workflow: snapshotResult.data.workflow,
         step: snapshotResult.data.step,
-        prompt: pollResult.data.prompt,
+        prompt: wrapExecutionPrompt(pollResult.data.prompt, "take"),
         claimed: true,
         completion: { kind: "advance", expectedState: pollResult.data.state },
         rollback: { kind: "note", note: "Poll iteration failed before completion." },

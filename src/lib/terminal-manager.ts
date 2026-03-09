@@ -33,6 +33,7 @@ import { updateMessageTypeIndexFromSession } from "@/lib/agent-message-type-inde
 import type { Beat, MemoryWorkflowDescriptor } from "@/lib/types";
 import type { CliAgentTarget } from "@/lib/types-agent-target";
 import { agentDisplayName } from "@/lib/agent-identity";
+import { buildShipFollowUpBoundaryLines, wrapExecutionPrompt } from "@/lib/agent-prompt-guardrails";
 import {
   StepPhase,
   defaultWorkflowDescriptor,
@@ -206,6 +207,7 @@ function buildSingleBeatCompletionFollowUp(
     "Ship completion follow-up:",
     `Confirm that changes for ${target.id} are merged and pushed according to your normal shipping guidelines.`,
     "Do not ask for another follow-up prompt until merge/push confirmation is done (or blocked by a hard error).",
+    ...buildShipFollowUpBoundaryLines("single"),
     ...buildSingleTargetFollowUpLines(target, memoryManagerType),
     "Then summarize merge/push confirmation and workflow command results.",
   ].join("\n");
@@ -224,6 +226,7 @@ function buildWaveCompletionFollowUp(
     `Handle this in one pass for scene ${waveId}.`,
     "For EACH beat below, confirm merge/push status before workflow transitions.",
     "Do not ask for another follow-up prompt until all listed beats are merge-confirmed (or blocked by a hard error).",
+    ...buildShipFollowUpBoundaryLines("scene"),
     ...safeTargets.flatMap((target) => buildSingleTargetFollowUpLines(
       target,
       memoryManagerType,
@@ -619,7 +622,7 @@ export async function createSession(
 
     // The backend's buildTakePrompt already provides beat context and
     // kno claim instructions.  We only add a thin execution-mode wrapper.
-    prompt = taskPrompt;
+    prompt = wrapExecutionPrompt(taskPrompt, isParent ? "scene" : "take");
   }
 
   const session: TerminalSession = {
@@ -759,8 +762,8 @@ export async function createSession(
   const isTakeLoop = !isParent && !customPrompt;
   let takeIteration = 1;
 
-  const wrapSingleBeatPrompt = (taskPrompt: string, _isReview = false): string => {
-    return taskPrompt;
+  const wrapSingleBeatPrompt = (taskPrompt: string): string => {
+    return wrapExecutionPrompt(taskPrompt, "take");
   };
 
   const buildNextTakePrompt = async (): Promise<{ prompt: string; beatState: string; agentOverride?: CliAgentTarget } | null> => {
@@ -938,8 +941,7 @@ export async function createSession(
       timestamp: Date.now(),
     });
 
-    const takeIsReview = resolved ? isReviewStep(resolved.step) : false;
-    return { prompt: wrapSingleBeatPrompt(takeResult.data.prompt, takeIsReview), beatState: current.state, agentOverride: reviewAgentOverride };
+    return { prompt: wrapSingleBeatPrompt(takeResult.data.prompt), beatState: current.state, agentOverride: reviewAgentOverride };
   };
 
   /**
