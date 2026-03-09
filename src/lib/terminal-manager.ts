@@ -934,10 +934,12 @@ export async function createSession(
       return null;
     }
 
+    const claimAgent = reviewAgentOverride ?? agent;
+    const claimAgentLabel = claimAgent.label ?? claimAgent.agentId ?? claimAgent.command;
     console.log(`${tag} CONTINUE: claimed ${beatId} → iteration ${takeIteration + 1}`);
     pushEvent({
       type: "stdout",
-      data: `\x1b[36m--- ${new Date().toISOString()} ${current.state} Claimed ${beatId} (iteration ${takeIteration + 1}) ---\x1b[0m\n`,
+      data: `\x1b[36m--- ${new Date().toISOString()} ${current.state} Claimed ${beatId} (iteration ${takeIteration + 1}) [agent: ${claimAgentLabel}] ---\x1b[0m\n`,
       timestamp: Date.now(),
     });
 
@@ -1215,12 +1217,11 @@ export async function createSession(
           const nextTake = await buildNextTakePrompt();
           if (nextTake) {
             takeIteration++;
-            const switchLabel = nextTake.agentOverride
-              ? ` [agent: ${nextTake.agentOverride.label ?? nextTake.agentOverride.agentId ?? nextTake.agentOverride.command}]`
-              : "";
+            const iterAgent = nextTake.agentOverride ?? agent;
+            const iterAgentLabel = iterAgent.label ?? iterAgent.agentId ?? iterAgent.command;
             pushEvent({
               type: "stdout",
-              data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS}${switchLabel} ---\x1b[0m\n`,
+              data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,
               timestamp: Date.now(),
             });
             spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
@@ -1561,12 +1562,11 @@ export async function createSession(
           const nextTake = await buildNextTakePrompt();
           if (nextTake) {
             takeIteration++;
-            const switchLabel = nextTake.agentOverride
-              ? ` [agent: ${nextTake.agentOverride.label ?? nextTake.agentOverride.agentId ?? nextTake.agentOverride.command}]`
-              : "";
+            const iterAgent = nextTake.agentOverride ?? agent;
+            const iterAgentLabel = iterAgent.label ?? iterAgent.agentId ?? iterAgent.command;
             pushEvent({
               type: "stdout",
-              data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS}${switchLabel} ---\x1b[0m\n`,
+              data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,
               timestamp: Date.now(),
             });
             console.log(`${tag} starting iteration ${takeIteration}/${MAX_TAKE_ITERATIONS}`);
