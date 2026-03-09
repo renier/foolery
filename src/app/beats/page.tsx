@@ -43,7 +43,17 @@ function throwIfDegraded(result: { ok: boolean; error?: string }): void {
   }
 }
 
-function toActiveAgentInfo(input: {
+function stripLeadingAgentName(model: string | undefined, agentName: string | undefined): string | undefined {
+  const trimmedModel = model?.trim();
+  const trimmedAgent = agentName?.trim();
+  if (!trimmedModel || !trimmedAgent) return trimmedModel;
+
+  const escapedAgent = trimmedAgent.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const withoutPrefix = trimmedModel.replace(new RegExp(`^${escapedAgent}\\s+`, "i"), "").trim();
+  return withoutPrefix || trimmedModel;
+}
+
+export function toActiveAgentInfo(input: {
   agentCommand?: string;
   agentName?: string;
   model?: string;
@@ -61,7 +71,7 @@ function toActiveAgentInfo(input: {
   });
   return {
     agentName: input.agentName,
-    model: family || input.model,
+    model: stripLeadingAgentName(family || input.model, input.agentName),
     version: normalized.version,
   };
 }
