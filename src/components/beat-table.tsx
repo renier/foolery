@@ -68,7 +68,7 @@ function SummaryColumn({
   }, [text]);
 
   return (
-    <div className={`min-w-0 basis-[37.5%] ${rounded} px-2 py-1 ${bg}`}>
+    <div className={`min-w-0 ${rounded} px-2 py-1 ${bg}`}>
       <div
         ref={ref}
         className={`whitespace-pre-wrap break-words ${expanded ? "" : "line-clamp-[7]"}`}
@@ -94,7 +94,7 @@ function InlineSummary({ beat }: { beat: Beat }) {
 
   return (
     <div
-      className={`mt-1.5 flex max-w-[75%] text-xs leading-relaxed ${expanded ? "relative z-10" : ""}`}
+      className={`mt-1.5 inline-grid max-w-[56.25%] grid-cols-2 text-xs leading-relaxed ${expanded ? "relative z-10" : ""}`}
       onMouseLeave={() => setExpanded(false)}
     >
       <SummaryColumn

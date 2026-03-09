@@ -53,7 +53,7 @@ describe("beats page layout", () => {
   });
 
   it("constrains selected-row description and notes summaries on laptop widths", () => {
-    expect(beatTableSource).toContain('className={`mt-1.5 flex max-w-[75%] text-xs leading-relaxed ${expanded ? "relative z-10" : ""}`}');
-    expect(beatTableSource).toContain('className={`min-w-0 basis-[37.5%] ${rounded} px-2 py-1 ${bg}`}');
+    expect(beatTableSource).toContain('className={`mt-1.5 inline-grid max-w-[56.25%] grid-cols-2 text-xs leading-relaxed ${expanded ? "relative z-10" : ""}`}');
+    expect(beatTableSource).toContain('className={`min-w-0 ${rounded} px-2 py-1 ${bg}`}');
   });
 });
