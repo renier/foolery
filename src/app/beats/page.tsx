@@ -20,6 +20,7 @@ import type { Beat } from "@/lib/types";
 import type { UpdateBeatInput } from "@/lib/schemas";
 import type { AgentInfo } from "@/components/beat-columns";
 import {
+  displayCommandLabel,
   formatAgentFamily,
   normalizeAgentIdentity,
 } from "@/lib/agent-identity";
@@ -43,25 +44,30 @@ function throwIfDegraded(result: { ok: boolean; error?: string }): void {
   }
 }
 
-function toActiveAgentInfo(input: {
+export function toActiveAgentInfo(input: {
   agentCommand?: string;
   agentName?: string;
   model?: string;
   version?: string;
 }): AgentInfo {
+  const command = input.agentCommand ?? input.agentName;
   const normalized = normalizeAgentIdentity({
-    command: input.agentCommand ?? input.agentName,
+    command,
     model: input.model,
     version: input.version,
   });
+  const agentName = displayCommandLabel(command) ?? input.agentName;
   const family = formatAgentFamily({
     provider: normalized.provider,
     model: normalized.model,
     flavor: normalized.flavor,
   });
+  const modelDisplay = family && agentName && family.startsWith(`${agentName} `)
+    ? family.slice(agentName.length + 1)
+    : family;
   return {
-    agentName: input.agentName,
-    model: family || input.model,
+    agentName,
+    model: modelDisplay || input.model,
     version: normalized.version,
   };
 }

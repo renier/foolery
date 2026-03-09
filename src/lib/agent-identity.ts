@@ -199,6 +199,24 @@ export function normalizeAgentIdentity(agent: AgentIdentityLike): {
   };
 }
 
+const COMMAND_DISPLAY_LABELS: Record<string, string> = {
+  claude: "Claude",
+  codex: "Codex",
+  "codex-cli": "Codex",
+  gemini: "Gemini",
+  opencode: "OpenCode",
+};
+
+export function displayCommandLabel(command?: string): string | undefined {
+  const lower = cleanValue(command)?.toLowerCase();
+  if (!lower) return undefined;
+  if (COMMAND_DISPLAY_LABELS[lower]) return COMMAND_DISPLAY_LABELS[lower];
+  for (const [key, label] of Object.entries(COMMAND_DISPLAY_LABELS)) {
+    if (lower.includes(key)) return label;
+  }
+  return undefined;
+}
+
 export function agentDisplayName(agent: AgentIdentityLike): string {
   return (
     providerLabel(agent.provider, agent.command) ??
