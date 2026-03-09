@@ -869,51 +869,55 @@ export async function createSession(
       return null;
     }
 
-    // Select a different agent from the pool when applicable:
-    // - Cross-agent review: exclude the action agent so a different agent reviews.
-    // - Step failure retry: exclude the agent that failed so a different agent retries.
-    // Falls back to the session agent when no alternative is available (or pools
-    // not configured).
-    let reviewAgentOverride: CliAgentTarget | undefined;
+    // Select an agent from the pool for this step:
+    // - Review steps: exclude the agent that did the prior action step so a
+    //   different agent reviews (falls back to the same agent if no other exists).
+    // - Action steps: select from pool without exclusion.
+    // - Step failure retry: exclude the agent that just failed.
+    // Falls back to the session agent when pools are not configured.
+    let stepAgentOverride: CliAgentTarget | undefined;
     {
-      // Determine which agent to exclude: after a step failure rollback,
-      // exclude the agent that just failed; for review steps, exclude the
-      // action-step agent.
       const failedAgentId = stepFailureRollback ? agent.agentId : undefined;
-      const shouldSelectFromPool = isReviewStep(resolved.step) || stepFailureRollback;
 
-      if (shouldSelectFromPool) {
-        try {
-          const settings = await loadSettings();
-          if (settings.dispatchMode === "pools") {
-            const actionStep = priorActionStep(resolved.step);
-            const excludeId = failedAgentId
-              ?? agent.agentId
-              ?? (actionStep ? getLastStepAgent(beatId, actionStep) : undefined);
+      try {
+        const settings = await loadSettings();
+        if (settings.dispatchMode === "pools") {
+          const isReview = isReviewStep(resolved.step);
+          const actionStep = isReview ? priorActionStep(resolved.step) : null;
+          // For review steps, exclude the agent that did the prior action step.
+          // For step failure retries, exclude the agent that failed.
+          // For action steps, no exclusion — select freely from the pool.
+          const excludeId = failedAgentId
+            ?? (isReview
+              ? (agent.agentId ?? (actionStep ? getLastStepAgent(beatId, actionStep) : undefined))
+              : undefined);
 
-            const poolAgent = resolvePoolAgent(
-              resolved.step,
-              settings.pools,
-              settings.agents,
-              excludeId,
-            );
+          const poolAgent = resolvePoolAgent(
+            resolved.step,
+            settings.pools,
+            settings.agents,
+            excludeId,
+          );
 
-            if (poolAgent?.kind === "cli") {
-              reviewAgentOverride = poolAgent;
-              if (poolAgent.agentId) {
-                recordStepAgent(beatId, resolved.step, poolAgent.agentId);
-              }
-              const reason = stepFailureRollback ? "step failure retry" : "cross-agent review";
-              console.log(
-                `${tag} ${reason}: step="${resolved.step}" ` +
-                `selected="${poolAgent.agentId ?? poolAgent.command}" ` +
-                `(excluded: ${excludeId ?? "none"})`,
-              );
+          if (poolAgent?.kind === "cli") {
+            stepAgentOverride = poolAgent;
+            if (poolAgent.agentId) {
+              recordStepAgent(beatId, resolved.step, poolAgent.agentId);
             }
+            const reason = stepFailureRollback
+              ? "step failure retry"
+              : isReview
+                ? "cross-agent review"
+                : "pool selection";
+            console.log(
+              `${tag} ${reason}: step="${resolved.step}" ` +
+              `selected="${poolAgent.agentId ?? poolAgent.command}" ` +
+              `(excluded: ${excludeId ?? "none"})`,
+            );
           }
-        } catch {
-          // Settings load failure should not block the take loop
         }
+      } catch {
+        // Settings load failure should not block the take loop
       }
     }
 
@@ -934,7 +938,7 @@ export async function createSession(
       return null;
     }
 
-    const claimAgent = reviewAgentOverride ?? agent;
+    const claimAgent = stepAgentOverride ?? agent;
     const claimAgentLabel = claimAgent.label ?? claimAgent.agentId ?? claimAgent.command;
     console.log(`${tag} CONTINUE: claimed ${beatId} → iteration ${takeIteration + 1}`);
     pushEvent({
@@ -943,7 +947,7 @@ export async function createSession(
       timestamp: Date.now(),
     });
 
-    return { prompt: wrapSingleBeatPrompt(takeResult.data.prompt), beatState: current.state, agentOverride: reviewAgentOverride };
+    return { prompt: wrapSingleBeatPrompt(takeResult.data.prompt), beatState: current.state, agentOverride: stepAgentOverride };
   };
 
   /**
