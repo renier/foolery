@@ -683,7 +683,7 @@ export function TerminalPanel() {
               )}
               <div
                 ref={tabStripRef}
-                className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pb-0.5"
+                className="scrollbar-hide flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pb-0.5"
                 onScroll={syncTabStripState}
                 onWheel={handleTabStripWheel}
               >
