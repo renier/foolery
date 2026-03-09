@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-**Foolery** is a modern web UI for the Beads memory manager—a git-based issue management system. The application provides an intuitive interface for viewing, creating, and managing Beads (issues) through a Next.js-based web application that leverages the `bd` CLI v0.49.6 as its backend service layer.
+**Foolery** is an agentic orchestration interface for local memory managers. It supports Knots (`kno`) as its primary backend and Beads (`bd`) as an alternative. The application provides a web-based interface for viewing, creating, and managing work items ("beats") through a Next.js-based web application with pluggable backend adapters.
 
 ### Purpose
 
-Foolery bridges the gap between command-line issue tracking and web-based project management, allowing teams to manage issues directly within a Git repository while providing a polished, responsive web interface for collaboration and task management.
+Foolery provides a keyboard-first web interface for orchestrating agent work across repositories. It bridges command-line memory managers (Knots, Beads) with a responsive web UI for capturing work, dispatching agents, and reviewing outcomes.
 
 ### Key Features
 
@@ -32,7 +32,7 @@ Next.js API Routes (Backend Gateway)
     ↓
 Bun.spawn() Process
     ↓
-bd CLI v0.49.6 (Issue Memory Manager)
+Memory Manager CLI (kno / bd)
     ↓
 Git Repository (Data Storage)
 ```
@@ -50,15 +50,15 @@ Git Repository (Data Storage)
 
 #### **API Layer (Next.js Routes)**
 - Server-side request handlers in `/src/app/api/`
-- Bridge between frontend and `bd` CLI
-- Spawns child processes using `Bun.spawn()` to execute `bd` commands
+- Bridge between frontend and memory manager CLIs (`kno`, `bd`)
+- Spawns child processes using `Bun.spawn()` to execute CLI commands
 - Handles JSON serialization/deserialization
 - Implements error handling and status code mapping
 
 #### **CLI Integration Layer**
-- `bd` CLI v0.49.6 is invoked as a subprocess
+- Memory manager CLIs (`kno`, `bd`) are invoked as subprocesses via the `BackendPort` abstraction
 - Communicates via stdin/stdout using JSON protocol
-- Commands executed: `bd list`, `bd create`, `bd update`, `bd close`, `bd deps`, `bd query`
+- Backend selection is automatic per repository based on marker detection (`.knots` or `.beads`)
 
 #### **Data Storage**
 - Git repository containing Bead definitions
@@ -529,13 +529,13 @@ foolery/
 ## Troubleshooting & FAQ
 
 ### Q: Why use `Bun.spawn()` instead of direct library integration?
-**A:** The `bd` CLI is the source of truth for Bead data. Using the CLI ensures all writes are validated by bd's business logic and persist correctly to Git.
+**A:** The memory manager CLIs (`kno`, `bd`) are the source of truth for work item data. Using the CLI ensures all writes are validated by the memory manager's business logic and persist correctly to Git.
 
 ### Q: How are errors from `bd` commands handled?
 **A:** API routes catch stderr output, parse error messages, and return appropriate HTTP status codes. UI shows toast notifications for user-facing errors.
 
-### Q: Can I use Foolery without the `bd` CLI installed?
-**A:** No. The `bd` CLI v0.49.6 must be installed and accessible in the system PATH. Foolery is a UI wrapper, not a standalone memory manager.
+### Q: Can I use Foolery without a memory manager CLI installed?
+**A:** No. At least one supported memory manager CLI (`kno` or `bd`) must be installed and accessible in the system PATH. Foolery is an orchestration interface, not a standalone memory manager.
 
 ### Q: How do I extend the data model?
 **A:** Add new fields to the `Bead` interface in `src/lib/types.ts`. Update forms, tables, and API routes to handle the new fields. The `metadata` field is available for custom data.
@@ -544,9 +544,10 @@ foolery/
 
 ## Glossary
 
-- **Bead**: A single issue, task, or work item managed by the `bd` CLI
-- **bd CLI**: Command-line memory manager that stores data in Git
-- **Foolery**: Web UI for browsing and managing Beads
+- **Beat**: A single issue, task, or work item managed by a memory manager CLI
+- **Knots**: Primary memory manager backend (`kno` CLI)
+- **Beads**: Alternative memory manager backend (`bd` CLI)
+- **Foolery**: Agentic orchestration interface for managing beats across repositories
 - **React Query**: Server state synchronization library
 - **Zustand**: Lightweight state management
 - **shadcn/ui**: Reusable component library based on Radix UI + Tailwind CSS

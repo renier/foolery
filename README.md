@@ -1,6 +1,6 @@
 # Foolery
 
-**Agent Memory Engagement tool** — one layer up from managing 8 agent terminals, one level down from massively multi-agent chaos.
+**Agentic orchestration interface** — one layer up from managing 8 agent terminals, one level down from massively multi-agent chaos.
 
 
 [![Latest Release](https://img.shields.io/github/v/release/acartine/foolery?style=for-the-badge)](https://github.com/acartine/foolery/releases)
@@ -56,7 +56,7 @@
   </tr>
 </table>
 
-Foolery is a local web UI that sits on top of local memory managers ([Beads](https://github.com/steveyegge/beads) and Knots) and turns them into an agent memory engagement layer: capture work, orchestrate execution, and review outcomes across repositories.
+Foolery is an agentic orchestration interface that sits on top of local memory managers ([Knots](https://github.com/acartine/knots) and [Beads](https://github.com/steveyegge/beads)) to capture work, orchestrate execution, and review outcomes across repositories. Its memory agent of choice is Knots; it also supports Beads.
 
 [Check out the substack on why I built this.](https://open.substack.com/pub/thecartine/p/foolery-the-app?r=1rb8nt&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true) It won't make you dumber.
 

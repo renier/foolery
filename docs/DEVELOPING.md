@@ -1,12 +1,14 @@
 # Developing Foolery
 
-A guide for contributors working on [Foolery](https://github.com/acartine/foolery), the web UI for [Beads](https://github.com/steveyegge/beads) issue tracking.
+A guide for contributors working on [Foolery](https://github.com/acartine/foolery), an agentic orchestration interface for [Knots](https://github.com/acartine/knots) and [Beads](https://github.com/steveyegge/beads) memory managers.
 
 ## Prerequisites
 
 - **[Bun](https://bun.sh)** (runtime and package manager)
 - **[Node.js](https://nodejs.org)** 20+ (Next.js runtime, used by the launcher)
-- **[Beads CLI](https://github.com/steveyegge/beads)** (`bd`) on your PATH
+- At least one supported memory manager CLI on your PATH:
+  - **[Knots](https://github.com/acartine/knots)** (`kno`) — primary backend
+  - **[Beads CLI](https://github.com/steveyegge/beads)** (`bd`) — alternative backend
 - **[Git](https://git-scm.com)**
 
 ## Getting Started
@@ -249,7 +251,7 @@ Keep titles under 72 characters. Use imperative mood ("add", "fix", not "added",
 
 ## Contribution Guidelines
 
-Foolery builds on top of [Beads](https://github.com/steveyegge/beads) by Steve Yegge. The upstream project values:
+Foolery builds on top of memory managers like [Knots](https://github.com/acartine/knots) and [Beads](https://github.com/steveyegge/beads). Key contribution values:
 
 - **Focused PRs** -- one feature or fix per pull request.
 - **Tests for new functionality** -- if you add it, test it.
@@ -264,24 +266,23 @@ Additional guidelines for Foolery:
 - **Prefer editing existing files** over creating new ones.
 - **No PRs required by default** -- this repo pushes directly to `main` unless a PR workflow is explicitly requested. See `CLAUDE.md` for the full agent workflow.
 
-## Work Tracking with Beads
+## Work Tracking
 
-This project uses Beads (`bd`) for issue tracking, not GitHub Issues. The workflow:
+This project uses Knots (`kno`) for work tracking, not GitHub Issues. The workflow:
 
 ```bash
-bd ready                                    # find available work
-bd show <id>                                # read the scope
-bd update <id> --status in_progress         # claim it
+kno list --status=open                      # find available work
+kno show <id>                               # read the scope
+kno claim <id>                              # claim it
 
 # ... implement, test, commit ...
 
 SHORT_SHA=$(git rev-parse --short HEAD)
-bd update <id> --add-label commit:$SHORT_SHA
-bd sync
+kno update <id> --add-tag "$SHORT_SHA" --add-handoff-capsule "summary"
 git push
 ```
 
-See `AGENTS.md` for the full bead lifecycle and handoff protocol.
+See `AGENTS.md` for the full handoff protocol.
 
 ## Release Process
 
@@ -326,5 +327,5 @@ Publishing a GitHub release triggers `release-runtime-artifact`, which builds an
 - [Project Manifest](MANIFEST.md) -- architecture, API docs, component inventory
 - [Settings Guide](SETTINGS.md) -- how settings work and how to add new ones
 - [Beads Dolt Hook Setup](BEADS_DOLT_HOOKS.md) -- local hook setup for Dolt-native Beads sync
-- [Beads CLI](https://github.com/steveyegge/beads) -- the memory manager Foolery wraps
-- [Beads Contributing Guide](https://github.com/steveyegge/beads/blob/main/CONTRIBUTING.md) -- upstream contribution standards
+- [Knots](https://github.com/acartine/knots) -- primary memory manager backend
+- [Beads CLI](https://github.com/steveyegge/beads) -- alternative memory manager backend

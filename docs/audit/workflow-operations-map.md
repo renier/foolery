@@ -466,12 +466,12 @@ parseSession(content: string, query: AgentHistoryQuery) -> SessionParseResult | 
 listRepos() -> RegisteredRepo[]
 
 addRepo(repoPath: string) -> RegisteredRepo
-  Validates .beads/ directory exists. Prevents duplicates.
+  Validates .knots/ or .beads/ directory exists. Prevents duplicates.
 
 removeRepo(repoPath: string) -> void
 
 listDirectory(dirPath?: string) -> DirEntry[]
-  Browse filesystem directories, marking which contain .beads/ repos.
+  Browse filesystem directories, marking which contain .knots/ or .beads/ repos.
 ```
 
 ### 2.12 Settings Operations

@@ -5,6 +5,8 @@ Surface audit of all beads (`bd`) touchpoints in the Foolery codebase.
 **Generated:** 2026-02-22
 **Bead:** foolery-1guy.1.1
 
+> **Note:** This inventory was generated before the Knots backend was added. Foolery now supports both Beads (`bd`) and Knots (`kno`) backends via the `BackendPort` abstraction. Many of the Beads-specific touchpoints listed below are wrapped by the port-adapter pattern described in [docs/backend-extension-guide.md](../backend-extension-guide.md).
+
 ---
 
 ## API Routes
