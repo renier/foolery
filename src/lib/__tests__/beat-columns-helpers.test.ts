@@ -39,10 +39,22 @@ describe("getBeatColumns", () => {
     expect(hasAction).toBe(true);
   });
 
+  it("hides the action column in the active view", () => {
+    const cols = getBeatColumns({ showAgentColumns: true, onShipBeat: () => {} });
+    const hasAction = cols.some((c) => c.id === "action");
+    expect(hasAction).toBe(false);
+  });
+
   it("does not add action column when onShipBeat is not provided", () => {
     const cols = getBeatColumns({});
     const hasAction = cols.some((c) => c.id === "action");
     expect(hasAction).toBe(false);
+  });
+
+  it("hides the type column in the active view", () => {
+    const cols = getBeatColumns({ showAgentColumns: true });
+    const hasType = cols.some((c) => c.id === "type");
+    expect(hasType).toBe(false);
   });
 
   it("always adds ownerType column", () => {

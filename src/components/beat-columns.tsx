@@ -316,6 +316,7 @@ function TitleCell({ beat, onTitleClick, onUpdateBeat, allLabels }: {
 export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDef<Beat>[] {
   const showRepoColumn = typeof opts === "boolean" ? opts : (opts.showRepoColumn ?? false);
   const showAgentColumns = typeof opts === "boolean" ? false : (opts.showAgentColumns ?? false);
+  const isActiveView = showAgentColumns;
   const agentInfoByBeatId = typeof opts === "boolean" ? {} : (opts.agentInfoByBeatId ?? {});
   const onUpdateBeat = typeof opts === "boolean" ? undefined : opts.onUpdateBeat;
   const onTitleClick = typeof opts === "boolean" ? undefined : opts.onTitleClick;
@@ -466,20 +467,6 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
       },
     },
     {
-      accessorKey: "type",
-      header: "Type",
-      size: 80,
-      minSize: 80,
-      maxSize: 80,
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <BeatTypeBadge type={row.original.type} />
-          </div>
-        );
-      },
-    },
-    {
       accessorKey: "profileId",
       header: "Profile",
       size: 130,
@@ -525,6 +512,24 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
       },
     },
   ];
+
+  if (!isActiveView) {
+    columns.splice(4, 0, {
+      id: "type",
+      accessorKey: "type",
+      header: "Type",
+      size: 80,
+      minSize: 80,
+      maxSize: 80,
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center">
+            <BeatTypeBadge type={row.original.type} />
+          </div>
+        );
+      },
+    });
+  }
 
   // Owner Type column: shows "Agent" or "Human" based on nextActionOwnerKind
   columns.push({
@@ -666,7 +671,7 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
   }
 
   // Action column: shows Take!/Scene!/Rolling... buttons as the last column
-  if (onShipBeat) {
+  if (onShipBeat && !isActiveView) {
     columns.push({
       id: "action",
       header: "Action",
