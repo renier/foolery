@@ -1734,20 +1734,14 @@ export function abortSession(id: string): boolean {
     try { proc.kill("SIGTERM"); } catch { /* already dead */ }
   }
 
-  // Escalate to SIGKILL after 5 s if the process is still alive.
+  // Escalate to SIGKILL after 5 s. Target the process group directly so a
+  // surviving detached descendant is still killed even if the group leader
+  // exits after the initial SIGTERM.
   setTimeout(() => {
     try {
-      // process.kill(pid, 0) throws if the process is gone — use it as a
-      // liveness check instead of the unreliable child.killed flag.
-      if (pid) process.kill(pid, 0);
-      // Still alive — force-kill the group (or single process).
-      try {
-        if (pid) process.kill(-pid, "SIGKILL");
-      } catch {
-        try { proc.kill("SIGKILL"); } catch { /* already dead */ }
-      }
+      if (pid) process.kill(-pid, "SIGKILL");
     } catch {
-      // Process already exited — nothing to do.
+      try { proc.kill("SIGKILL"); } catch { /* already dead */ }
     }
   }, 5000);
 

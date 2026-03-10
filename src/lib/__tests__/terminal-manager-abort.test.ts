@@ -311,4 +311,40 @@ describe("terminal-manager abort behavior", () => {
       expect(interactionLog.logEnd).toHaveBeenCalledWith(0, "aborted");
     });
   });
+
+  it("abortSession force-kills the process group even if the leader exits first", async () => {
+    vi.useFakeTimers();
+    const processKillSpy = vi.spyOn(process, "kill").mockImplementation((target, signal) => {
+      if (target === -4321 && signal === "SIGTERM") return true;
+      if (target === -4321 && signal === "SIGKILL") return true;
+      throw new Error(`unexpected kill(${String(target)}, ${String(signal)})`);
+    });
+
+    try {
+      backend.get.mockResolvedValue({
+        ok: true,
+        data: {
+          id: "foolery-a006",
+          title: "Abort descendant cleanup",
+          state: "ready_for_implementation",
+          isAgentClaimable: true,
+        },
+      });
+      backend.listWorkflows.mockResolvedValue({ ok: true, data: [] });
+      backend.list.mockResolvedValue({ ok: true, data: [] });
+
+      const session = await createSession("foolery-a006", "/tmp/repo", "custom prompt");
+
+      expect(abortSession(session.id)).toBe(true);
+
+      vi.advanceTimersByTime(5000);
+
+      expect(processKillSpy).toHaveBeenCalledWith(-4321, "SIGTERM");
+      expect(processKillSpy).toHaveBeenCalledWith(-4321, "SIGKILL");
+      expect(processKillSpy).not.toHaveBeenCalledWith(4321, 0);
+    } finally {
+      processKillSpy.mockRestore();
+      vi.useRealTimers();
+    }
+  });
 });
