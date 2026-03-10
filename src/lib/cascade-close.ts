@@ -7,6 +7,7 @@ import type { Beat } from "@/lib/types";
  */
 export interface CascadeDescendant {
   id: string;
+  aliases?: string[];
   title: string;
   state: string;
 }
@@ -54,7 +55,12 @@ function collectDescendants(
     // Recurse first to get leaf-first ordering
     collectDescendants(child.id, childrenIndex, result);
     if (child.state !== "closed") {
-      result.push({ id: child.id, title: child.title, state: child.state });
+      result.push({
+        id: child.id,
+        aliases: child.aliases,
+        title: child.title,
+        state: child.state,
+      });
     }
   }
 }

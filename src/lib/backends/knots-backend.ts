@@ -1044,6 +1044,19 @@ export class KnotsBackend implements BackendPort {
     const edgesResult = await this.getEdgesForId(id, rp);
     if (!edgesResult.ok) return propagateError<BeatDependency[]>(edgesResult);
 
+    const aliasCache = new Map<string, string[] | undefined>();
+    const loadAliases = async (beatId: string): Promise<string[] | undefined> => {
+      if (aliasCache.has(beatId)) return aliasCache.get(beatId);
+      const knotResult = beatId === id
+        ? showResult
+        : fromKnots(await knots.showKnot(beatId, rp));
+      const aliases = knotResult.ok && knotResult.data
+        ? knotResult.data.aliases?.filter((alias) => typeof alias === "string" && alias.trim().length > 0)
+        : undefined;
+      aliasCache.set(beatId, aliases);
+      return aliases;
+    };
+
     const deps: BeatDependency[] = [];
     for (const edge of edgesResult.data ?? []) {
       if (edge.kind === "blocked_by") {
@@ -1051,9 +1064,11 @@ export class KnotsBackend implements BackendPort {
         const blockerId = edge.dst;
         const blockedId = edge.src;
         if (id !== blockerId && id !== blockedId) continue;
+        const linkedId = id === blockerId ? blockedId : blockerId;
 
         deps.push({
-          id: id === blockerId ? blockedId : blockerId,
+          id: linkedId,
+          aliases: await loadAliases(linkedId),
           type: "blocks",
           source: blockerId,
           target: blockedId,
@@ -1065,9 +1080,11 @@ export class KnotsBackend implements BackendPort {
         const parentId = edge.src;
         const childId = edge.dst;
         if (id !== parentId && id !== childId) continue;
+        const linkedId = id === parentId ? childId : parentId;
 
         deps.push({
-          id: id === parentId ? childId : parentId,
+          id: linkedId,
+          aliases: await loadAliases(linkedId),
           type: "parent-child",
           source: parentId,
           target: childId,

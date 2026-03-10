@@ -41,6 +41,7 @@ export const componentSchemas = {
     required: ["id"],
     properties: {
       id: { type: "string" },
+      aliases: { type: "array", items: { type: "string" } },
       type: { type: "string" },
       source: { type: "string" },
       target: { type: "string" },

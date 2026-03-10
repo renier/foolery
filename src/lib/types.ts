@@ -92,6 +92,7 @@ export interface Beat {
 
 export interface BeatDependency {
   id: string;
+  aliases?: string[];
   type?: string;
   source?: string;
   target?: string;
