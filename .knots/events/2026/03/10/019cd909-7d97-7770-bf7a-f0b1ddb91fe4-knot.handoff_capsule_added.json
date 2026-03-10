@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd909-7d97-7770-bf7a-f0b1ddb91fe4",
+  "occurred_at": "2026-03-10T18:36:43.799236Z",
+  "knot_id": "foolery-813a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Second follow-up fix for the queue overview: moved description/notes out of the title cell into a separate detail row that starts under Title and spans through the Action/Take column, so each panel now gets half of the actual row width instead of half of the title cell. Verified with bun run lint, bunx tsc --noEmit, bun run test, and bun run build.",
+    "datetime": "2026-03-10T18:36:43.799236Z",
+    "entry_id": "019cd909-7d97-7770-bf7a-f0a2c0121728",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

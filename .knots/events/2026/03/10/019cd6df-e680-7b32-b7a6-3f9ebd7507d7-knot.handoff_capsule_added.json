@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6df-e680-7b32-b7a6-3f9ebd7507d7",
+  "occurred_at": "2026-03-10T08:32:03.712093Z",
+  "knot_id": "foolery-aa57",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Implemented on feat/foolery-aa57 at 33681cfa7a27. Detail view now shows the full beat ID and any bead aliases, the knots backend maps aliases onto Beat.aliases, and tests cover both mappings and detail-view display helpers. Validation passed: bun run lint (repo has existing warnings only), bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-10T08:31:20Z",
+    "entry_id": "019cd6df-e680-7b32-b7a6-3f8323ce1f84",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

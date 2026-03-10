@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd68e-8e96-78c3-ba8a-715f14b9677c",
+  "occurred_at": "2026-03-10T07:03:12.790597Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Planned alias display feature. KnotRecord and Beat types need an alias field, toBeat() needs to map it, and 6 view components (beat-columns, beat-detail-lightbox, dep-tree, wave-planner, retakes-view, relationship-picker) need to show alias when present with short-ID fallback. Medium complexity, ~8 files, mechanical changes.",
+    "datetime": "2026-03-10T07:00:00Z",
+    "entry_id": "019cd68e-8e96-78c3-ba8a-714394733246",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

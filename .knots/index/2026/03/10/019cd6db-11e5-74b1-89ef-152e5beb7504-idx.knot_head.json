@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6db-11e5-74b1-89ef-152e5beb7504",
+  "occurred_at": "2026-03-10T08:26:47.1274Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-e0cc",
+    "profile_id": "autopilot",
+    "state": "planning",
+    "terminal": false,
+    "title": "b71a did not terminate after clicking terminate",
+    "updated_at": "2026-03-10T08:26:47.1274Z"
+  }
+}

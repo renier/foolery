@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd739-7045-72a0-95cd-8f9bb3e80bb0",
+  "occurred_at": "2026-03-10T10:09:51.685428Z",
+  "knot_id": "foolery-3715",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review APPROVED. Merge commit 931bfc607b1b confirmed on origin/main. Both commit tags present. CI checks (coverage, changesets, ci) passed. Changes scoped to beat-columns.tsx and test file only — removes Type and Action columns from Active view. No invariants. No regressions.",
+    "datetime": "2026-03-10T18:10:00Z",
+    "entry_id": "019cd739-7045-72a0-95cd-8f83cd373a88",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

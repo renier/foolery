@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd691-62e3-7d42-83be-6b16d1d1198b",
+  "occurred_at": "2026-03-10T07:06:18.211736Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan needs revision: alias propagation is not fully specified for the waves path or dependency rendering. Add alias to the public Beat/WaveBeat data contracts, map it in /api/waves/route.ts, decide how DepTree resolves linked-beat aliases without a beat lookup today (for example via enriched dependency data or an explicit lookup map/prop), and expand tests beyond toBeat() to cover waves payload/rendering plus dependency alias fallback behavior.",
+    "datetime": "2026-03-10T07:06:18.211736Z",
+    "entry_id": "019cd691-62e3-7d42-83be-6b017de8563b",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

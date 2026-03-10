@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6ee-2c54-7590-9497-6b1c104f7014",
+  "occurred_at": "2026-03-10T08:47:39.092847Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Fixed abortSession so the 5s escalation always targets the process group, covering the leader-exits-descendant-survives case; added a regression test and passed lint (warnings only), tsc, unit tests, and build on branch work/foolery-e0cc at commit fdccf8a37a57.",
+    "datetime": "2026-03-10T08:47:39Z",
+    "entry_id": "019cd6ee-2c54-7590-9497-6b0b628a4a5c",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex-cli"
+  }
+}

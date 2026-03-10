@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd697-4396-7010-886e-8db43218ea0d",
+  "occurred_at": "2026-03-10T07:12:43.414676Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Plan review requested revisions. The proposed alias propagation across KnotRecord/Beat/WaveBeat/BeatDependency and most view surfaces is directionally correct, but it misses a real waves-route bug: /api/waves currently checks dep.dependency_type for 'blocks' even though listDependencies emits dependency_type='blocked_by' and type='blocks', so blockedBy/readiness data will stay wrong unless that extraction logic is corrected as part of the plan. The relationship-picker step is also underspecified because selected badges only get selectedIds today; the revised plan should define how aliases are resolved for already-selected IDs and include test coverage for that component.",
+    "datetime": "2026-03-10T07:12:33Z",
+    "entry_id": "019cd697-4396-7010-886e-8da6e70118e4",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd713-140a-7ea0-85b5-e1d9a33cf654",
+  "occurred_at": "2026-03-10T09:27:57.706522Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review APPROVED. Merge commit 6ccd1125c6dc verified on origin/main. All 3 CI workflows (Changesets, Coverage Badge, CI) passed. No invariants to check. Alias threading confirmed end-to-end: KnotRecord→toBeat()→Beat/WaveBeat/BeatDependency/CascadeDescendant→8 view components. All implementation commits tagged on knot. No regressions detected.",
+    "datetime": "2026-03-10T10:30:00Z",
+    "entry_id": "019cd713-140a-7ea0-85b5-e1c34f1f567a",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

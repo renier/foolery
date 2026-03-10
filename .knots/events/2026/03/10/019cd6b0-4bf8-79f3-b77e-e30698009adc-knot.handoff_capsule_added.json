@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6b0-4bf8-79f3-b77e-e30698009adc",
+  "occurred_at": "2026-03-10T07:40:03.960857Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Needs changes after implementation review. 1) Selected relationship badges still show short IDs because RelationshipPicker only carries selectedIds, so alias display is missing in the beat form and beat detail lightbox. 2) Blocked wave cards still display short IDs in readinessReason because /api/waves builds 'Waiting on ...' from shortId instead of aliases. Tests added in this branch cover backend alias passthrough and cascade-close only; they do not cover the missed relationship-picker or wave-planner alias paths.",
+    "datetime": "2026-03-10T07:39:46Z",
+    "entry_id": "019cd6b0-4bf8-79f3-b77e-e2f9ea3b8b4b",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

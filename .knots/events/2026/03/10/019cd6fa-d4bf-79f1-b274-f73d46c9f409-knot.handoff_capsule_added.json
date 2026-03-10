@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6fa-d4bf-79f1-b274-f73d46c9f409",
+  "occurred_at": "2026-03-10T09:01:28.639155Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Resolved merge conflict in beat-detail-lightbox.tsx (kept HEAD's displayedBeatId with alias badge system over feature branch's simpler inline approach). Merged feat/df3a-alias-in-views into main and pushed. All quality gates pass: tsc clean, 1975 tests pass, build succeeds, no new lint errors. Alias field threaded through full pipeline: KnotRecord→toBeat()→Beat/WaveBeat/BeatDependency/CascadeDescendant→all 8 view components. Includes dep.type fix in waves route.",
+    "datetime": "2026-03-10T10:05:00Z",
+    "entry_id": "019cd6fa-d4bf-79f1-b274-f72971acada4",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

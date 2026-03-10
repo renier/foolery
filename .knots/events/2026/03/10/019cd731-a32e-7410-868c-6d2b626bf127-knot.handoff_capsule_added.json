@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd731-a32e-7410-868c-6d2b626bf127",
+  "occurred_at": "2026-03-10T10:01:20.430249Z",
+  "knot_id": "foolery-3715",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Removed the Type and Action columns from the Active beats view by suppressing those columns when showAgentColumns is enabled. Added regression coverage in beat-columns helper tests. Validation in worktree work/foolery-3715: bun run lint, bunx tsc --noEmit, bun run test, bun run build. Commit a46ff997e24c pushed to origin/work/foolery-3715.",
+    "datetime": "2026-03-10T10:00:05Z",
+    "entry_id": "019cd731-a32e-7410-868c-6d1dd3fbd7b1",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

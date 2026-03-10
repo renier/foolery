@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6da-4e2b-7010-8374-8e2e4c78ad37",
+  "occurred_at": "2026-03-10T08:25:57.035049Z",
+  "knot_id": "foolery-aa57",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "No implementation found. The feat/foolery-aa57 branch is identical to main with zero diff. The detail view (beat-detail-lightbox.tsx) still strips the project prefix from the ID (line 257: beatId.replace(/^[^-]+-/, '')) and shows only the short suffix. The Beat type has no alias field on main. Neither the full bead ID nor bead aliases are displayed in the detail view. Implementation is needed to: (1) show the full bead ID (project-prefixed) in the lightbox header, (2) add alias support to the Beat type and data pipeline, and (3) display aliases in the detail view.",
+    "datetime": "2026-03-10T08:25:57.035049Z",
+    "entry_id": "019cd6da-4e2b-7010-8374-8e12c330df84",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

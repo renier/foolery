@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6ea-0197-73d2-8804-2a5b561d93e6",
+  "occurred_at": "2026-03-10T08:43:06.007435Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review rejected: alias display exists only in beat-detail-lightbox.tsx. Four views still missing alias support: (1) beat-columns.tsx shows stripped IDs, not aliases; (2) dep-tree.tsx shows stripped IDs for dependency links — critical since aliases define relationships; (3) retakes-view.tsx shows stripped IDs in retake rows; (4) cascade-close-dialog.tsx shows stripped IDs in descendant list. The backend data pipeline is correct (normalizeAliases in knots-backend.ts, aliases field on Beat type). Each view component needs to accept and render aliases — the getDisplayedBeatAliases helper from beat-detail-lightbox.tsx can be reused. All quality gates pass (tests green, tsc clean, build succeeds, lint errors are pre-existing).",
+    "datetime": "2026-03-10T09:45:00Z",
+    "entry_id": "019cd6ea-0197-73d2-8804-2a45221ccd50",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

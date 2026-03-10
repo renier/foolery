@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6a4-3cdb-7922-b0ea-e36f755436a1",
+  "occurred_at": "2026-03-10T07:26:53.659302Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Approved plan. Alias threading from KnotRecord through Beat, WaveBeat, BeatDependency, and CascadeDescendant is coherent; the waves route dep.type filter fix is required; and RelationshipPicker selectedItems plus readOnly solves the missing delete-path issue safely. No invariants were present. Implementation note: the lightbox does not currently hydrate persisted dependencies into local state, so read-only selected items should be derived from fetched deps plus staged additions.",
+    "datetime": "2026-03-10T07:26:44Z",
+    "entry_id": "019cd6a4-3cdb-7922-b0ea-e35c4733474b",
+    "model": "GPT-5",
+    "username": "cartine",
+    "version": "2026-03-10"
+  }
+}

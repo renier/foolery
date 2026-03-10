@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6f2-840c-7dd0-b9d7-6bbf98b3e31c",
+  "occurred_at": "2026-03-10T08:52:23.692774Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review APPROVED (round 4). All four views (beat-columns, dep-tree, retakes-view, cascade-close-dialog) now display aliases with stripped-ID fallback via shared beat-display.ts utility. Data pipeline threads aliases through BeatDependency, WaveBeat, CascadeDescendant types and both backends. Waves API uses alias index for readiness reasons. Tests cover display utility, view contracts, relationship picker aliases, and waves route alias flow. All quality gates pass: 0 lint errors, clean typecheck, 1978 tests pass, build succeeds.",
+    "datetime": "2026-03-10T09:55:00Z",
+    "entry_id": "019cd6f2-840c-7dd0-b9d7-6bae8cac979c",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

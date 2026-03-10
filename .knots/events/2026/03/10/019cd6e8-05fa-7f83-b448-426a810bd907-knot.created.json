@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd6e8-05fa-7f83-b448-426a810bd907",
+  "occurred_at": "2026-03-10T08:40:56.058086Z",
+  "knot_id": "foolery-9c91",
+  "type": "knot.created",
+  "data": {
+    "body": "The take-loop rollback (rollbackBeatState in terminal-manager.ts) currently uses 'kno update --status <prior-state>' which fails because kno rejects backward state transitions. kno will add a dedicated 'kno rb' command for semantic rollbacks. When that lands, foolery should migrate rollbackBeatState to use 'kno rb <id>' instead.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "migrate rollbackBeatState to use kno rb"
+  }
+}

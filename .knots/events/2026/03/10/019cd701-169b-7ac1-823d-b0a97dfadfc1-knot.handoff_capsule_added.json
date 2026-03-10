@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd701-169b-7ac1-823d-b0a97dfadfc1",
+  "occurred_at": "2026-03-10T09:08:18.715454Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Approved shipment review. The shipped fix commit fdccf8a37a57 remains on origin/main, the knot already carries commit tags commit:072b665e8143 and commit:fdccf8a37a57, no invariants are defined, current main GitHub workflows (CI, Coverage Badge, Changesets) are green, and local regression validation passed via bun run test -- src/lib/__tests__/terminal-manager-abort.test.ts src/lib/__tests__/session-connection-manager.test.ts.",
+    "datetime": "2026-03-10T09:08:11Z",
+    "entry_id": "019cd701-169b-7ac1-823d-b0941163a397",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex-cli"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd69d-09ec-7962-9123-33df9bfaad56",
+  "occurred_at": "2026-03-10T07:19:01.868499Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan review requested revision. The waves route filter fix and alias pipeline are valid, but the RelationshipPicker proposal is unsafe in beat-detail-lightbox: showing existing dependencies as selected badges implies removability, while the current onRemove only mutates local UI state and there is no DELETE /api/beats/[id]/deps path wired here. Revise the plan to either keep existing relationships read-only in the lightbox or explicitly add dependency-removal API/UI behavior and distinguish persisted vs staged selections. Also, cascade-close-dialog cannot show aliases with the proposed changes alone because CascadeDescendant/getOpenDescendants do not carry alias; either extend that data path or remove that item from scope.",
+    "datetime": "2026-03-10T07:19:01.868499Z",
+    "entry_id": "019cd69d-09ec-7962-9123-33cdbaee083c",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

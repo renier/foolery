@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd738-7343-7542-9e7c-2bb4eff5b1d7",
+  "occurred_at": "2026-03-10T10:08:46.915487Z",
+  "knot_id": "foolery-3715",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Merged work/foolery-3715 into main as 931bfc607b1b and pushed to origin/main. Remote GitHub checks coverage, changesets, and ci completed successfully for commit 931bfc607b1b.",
+    "datetime": "2026-03-10T10:07:57Z",
+    "entry_id": "019cd738-7343-7542-9e7c-2bab499650d5",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

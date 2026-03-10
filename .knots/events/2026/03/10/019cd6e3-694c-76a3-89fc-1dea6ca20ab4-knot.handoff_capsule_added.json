@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6e3-694c-76a3-89fc-1dea6ca20ab4",
+  "occurred_at": "2026-03-10T08:35:53.804645Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implemented terminate-hang fix. Changes: (1) Added sessionAborted flag in terminal-manager so finishSession preserves 'aborted' status instead of overwriting with completed/error. (2) Wired entry.abort to set the flag, preventing take-loop from spawning new iterations after terminate. (3) Spawn agent children with detached:true and use process-group kill so descendants don't survive. (4) SIGKILL fallback checks real process liveness via kill(pid,0). (5) session-connection-manager preserves 'aborted' status on exit event. (6) Added 7 new tests covering abort behavior. All 1965 tests pass, build clean, pushed to main.",
+    "datetime": "2026-03-10T09:36:00Z",
+    "entry_id": "019cd6e3-694c-76a3-89fc-1dde574cd2b0",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

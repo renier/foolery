@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6f0-9edc-77b0-8d1a-4ee81ec1b800",
+  "occurred_at": "2026-03-10T08:50:19.484499Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Approved implementation review: abortSession now escalates directly to SIGKILL on the process group instead of gating on leader liveness, which covers the reported leader-exits-descendant-survives termination failure. Added regression coverage in src/lib/__tests__/terminal-manager-abort.test.ts for the forced group-kill path. No invariants were defined for this knot. Validation passed on work/foolery-e0cc at fdccf8a3: bun run lint (warnings only), bunx tsc --noEmit, bun run test, and bun run build.",
+    "datetime": "2026-03-10T08:49:54Z",
+    "entry_id": "019cd6f0-9edc-77b0-8d1a-4edde06b732e",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex-cli"
+  }
+}

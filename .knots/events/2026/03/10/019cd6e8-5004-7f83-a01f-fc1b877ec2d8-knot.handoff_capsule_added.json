@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6e8-5004-7f83-a01f-fc1b877ec2d8",
+  "occurred_at": "2026-03-10T08:41:15.012125Z",
+  "knot_id": "foolery-aa57",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment review approved: origin/main is at merge commit b3c4695e0d40 with implementation commit 33681cfa7a27 tagged on the knot; main contains the full beat ID header plus alias propagation/display code and covering tests; no invariants were defined; GitHub Actions runs 22893998660 (CI), 22893998647 (Coverage Badge), and 22893998646 (Changesets) all completed successfully for b3c4695e0d40d0cd09b8f75e0ff001efa756c39a, with no dependent-system regressions evident from the shipped diff and green pipeline.",
+    "datetime": "2026-03-10T08:40:52Z",
+    "entry_id": "019cd6e8-5004-7f83-a01f-fc00d9082ed3",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}

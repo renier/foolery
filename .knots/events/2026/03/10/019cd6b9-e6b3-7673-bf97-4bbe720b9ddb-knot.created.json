@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd6b9-e6b3-7673-bf97-4bbe720b9ddb",
+  "occurred_at": "2026-03-10T07:50:33.395497Z",
+  "knot_id": "foolery-aa57",
+  "type": "knot.created",
+  "data": {
+    "body": "just so it's clear what project it is from and how else we might refer to the bead.",
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "detail view should show full bead id and bead aliases"
+  }
+}

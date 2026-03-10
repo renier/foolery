@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd68e-6d38-7063-a525-fbd34714730a",
+  "occurred_at": "2026-03-10T07:03:04.248137Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "## Implementation Plan\n\n### Problem\nKnot aliases (the `alias` field from `kno ls/show --json`) are not carried through the data pipeline or displayed in any views. Since aliases define hierarchical relationships between knots, not showing them makes the UI confusing.\n\n### Data Flow Gap\n```\nkno ls --json → KnotRecord (missing alias) → toBeat() (no mapping) → Beat (missing alias) → Views (show only short ID)\n```\n\n### Changes Required\n\n#### 1. Add `alias` to KnotRecord (src/lib/knots.ts)\n- Add `alias?: string | null` to the `KnotRecord` interface (line ~31)\n\n#### 2. Add `alias` to Beat type (src/lib/types.ts)\n- Add `alias?: string` to the `Beat` interface (after `id` field, line ~63)\n\n#### 3. Map alias in toBeat() (src/lib/backends/knots-backend.ts)\n- In `toBeat()` function (~line 340), read `knot.alias` and pass it to Beat\n- Both code paths (with and without workflow) need the mapping\n\n#### 4. Update view components to display alias when present\nShow alias alongside or instead of the short ID in these components:\n\n- **beat-columns.tsx** (~line 356-380): ID column in main table — show alias if present, short ID as fallback\n- **beat-detail-lightbox.tsx** (~line 246-257): Dialog header — show alias alongside short ID\n- **dep-tree.tsx** (~line 62-79): Dependency badges — show alias for linked beats\n- **wave-planner.tsx** (~line 85-88): Pipeline cards — show alias instead of bare short ID\n- **retakes-view.tsx** (~line 430): Retake rows — show alias if present\n- **relationship-picker.tsx** (~line 109): Dependency selection badges — show alias\n\n### Display Strategy\n- When alias exists: show alias (e.g., \"auth-refactor\")  \n- When alias is null: fall back to current short ID (e.g., \"df3a\")\n- For dep-tree: resolve linked IDs to aliases from the available beat data\n\n### Test Strategy\n- Unit test: verify toBeat() maps alias correctly (null and non-null cases)\n- Visual verification: check each view renders alias when present\n\n### Complexity\nMedium — touches ~8 files but changes are mechanical (add field + conditional display).\n\n### Risks\n- dep-tree.tsx shows linked beat IDs that may not have been loaded; need to handle lookup gracefully\n- Some views may need the full beats list to resolve aliases for dependency IDs",
+    "datetime": "2026-03-10T07:03:04.248137Z",
+    "entry_id": "019cd68e-6d38-7063-a525-fbc71da0d622",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

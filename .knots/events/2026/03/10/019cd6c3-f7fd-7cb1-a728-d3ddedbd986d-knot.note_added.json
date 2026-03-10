@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6c3-f7fd-7cb1-a728-d3ddedbd986d",
+  "occurred_at": "2026-03-10T08:01:33.181388Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review: work/foolery-df3a only updates 3 of 8 views (relationship-picker, wave-planner, waves/route). The following views still use raw shortId and do NOT show aliases: beat-columns.tsx, beat-detail-lightbox.tsx, dep-tree.tsx, retakes-view.tsx, cascade-close-dialog.tsx. A separate feat/df3a-alias-in-views branch addressed some of these, but those changes were not incorporated into the work branch. The beat-display.ts utility, types, and tests that ARE present are well-structured. Next implementer should merge the feat branch changes or re-apply alias support to the remaining 5 views using the displayBeatLabel() utility.",
+    "datetime": "2026-03-10T08:01:33.181388Z",
+    "entry_id": "019cd6c3-f7fd-7cb1-a728-d3cb33fc148c",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd6cd-1b93-7a72-b5fe-d993d1fc6156",
+  "occurred_at": "2026-03-10T08:11:32.115185Z",
+  "knot_id": "foolery-afbb",
+  "type": "knot.created",
+  "data": {
+    "body": null,
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "test rollback behavior"
+  }
+}

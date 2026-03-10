@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6da-da5f-7863-9d81-23289926482d",
+  "occurred_at": "2026-03-10T08:26:32.927502Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review rejected: alias display is still missing from beat-columns.tsx, beat-detail-lightbox.tsx, dep-tree.tsx, retakes-view.tsx, and cascade-close-dialog.tsx, so the views still show stripped IDs instead of knot aliases when present. Targeted alias tests pass, bunx tsc --noEmit passes, and bun run lint exits with warnings only.",
+    "datetime": "2026-03-10T08:26:32.927502Z",
+    "entry_id": "019cd6da-da5f-7863-9d81-231efe71d79a",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

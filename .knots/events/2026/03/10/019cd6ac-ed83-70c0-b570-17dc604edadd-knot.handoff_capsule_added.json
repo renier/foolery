@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6ac-ed83-70c0-b570-17dc604edadd",
+  "occurred_at": "2026-03-10T07:36:23.171164Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation complete. Alias field threaded through full data pipeline: KnotRecord → toBeat() → Beat/WaveBeat/BeatDependency/CascadeDescendant → all view components. 15 files changed across 6 layers: types, backend mapping (toBeat + listDependencies enrichment), waves API (alias passthrough + dep filter fix), OpenAPI schemas, 8 view components, and 2 new test files. All quality gates pass: 0 lint errors, 0 type errors, 1963 tests passing, build succeeds. Critical fix included: waves route dep filter used dependency_type instead of type, silently skipping all blocking edges.",
+    "datetime": "2026-03-10T08:00:00Z",
+    "entry_id": "019cd6ac-ed83-70c0-b570-17c16b66bf67",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6f4-5416-7142-902e-642213937e32",
+  "occurred_at": "2026-03-10T08:54:22.478896Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-df3a",
+    "profile_id": "autopilot",
+    "state": "shipment",
+    "terminal": false,
+    "title": "views should use knot aliases if they exist",
+    "updated_at": "2026-03-10T08:54:22.478896Z"
+  }
+}

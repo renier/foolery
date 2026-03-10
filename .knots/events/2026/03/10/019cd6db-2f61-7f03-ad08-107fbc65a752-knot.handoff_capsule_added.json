@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6db-2f61-7f03-ad08-107fbc65a752",
+  "occurred_at": "2026-03-10T08:26:54.689428Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Planned fix centers on terminal-manager abort semantics, process-tree teardown, and preserving aborted status through SSE exit handling; test coverage should target abort during active child and take-loop cases plus session-connection-manager status preservation.",
+    "datetime": "2026-03-10T08:25:59Z",
+    "entry_id": "019cd6db-2f61-7f03-ad08-1065ad87f30f",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "5"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6a1-9a8d-7f90-b9f2-593b0990e098",
+  "occurred_at": "2026-03-10T07:24:01.037045Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Plan v4 resolves both prior review gaps: (1) RelationshipPicker in lightbox — extends selectedIds to selectedItems:{id,alias?,readOnly?} so persisted deps show as read-only badges (no X button), avoiding the missing DELETE endpoint issue; newly-staged deps remain removable. (2) cascade-close-dialog — extends CascadeDescendant with alias field; getOpenDescendants() already fetches full Beat objects so alias pipes through once Beat has the field. Also retains the waves dep filter fix (dep.dependency_type→dep.type) and full alias pipeline: KnotRecord→Beat→WaveBeat→BeatDependency→CascadeDescendant type additions, toBeat() mapping, listDependencies() enrichment, 8 view components updated. ~15 files, medium complexity.",
+    "datetime": "2026-03-10T07:30:00Z",
+    "entry_id": "019cd6a1-9a8d-7f90-b9f2-59294d9c74a7",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

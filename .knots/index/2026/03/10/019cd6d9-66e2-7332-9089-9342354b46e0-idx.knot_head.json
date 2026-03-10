@@ -1,0 +1,18 @@
+{
+  "event_id": "019cd6d9-66e2-7332-9089-9342354b46e0",
+  "occurred_at": "2026-03-10T08:24:57.826267Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-aa57",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation_review",
+    "terminal": false,
+    "title": "detail view should show full bead id and bead aliases",
+    "updated_at": "2026-03-10T08:24:57.826267Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd6d7-f0af-72f1-a8d2-8f067890f2d8"
+  }
+}

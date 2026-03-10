@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6e9-ecd1-70b3-8e65-97fa6008ef3b",
+  "occurred_at": "2026-03-10T08:43:00.688995Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review blocked: src/lib/terminal-manager.ts uses process.kill(pid, 0) on the group leader before the SIGKILL fallback. If the leader exits but a detached descendant remains alive, the check throws and process.kill(-pid, 'SIGKILL') is skipped, so terminate can still leave the real worker running. Please change the fallback to target the process group independently of leader liveness and add a regression test for the leader-exits-descendant-survives case.",
+    "datetime": "2026-03-10T08:43:00.688995Z",
+    "entry_id": "019cd6e9-ecd1-70b3-8e65-97e04af10a47",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

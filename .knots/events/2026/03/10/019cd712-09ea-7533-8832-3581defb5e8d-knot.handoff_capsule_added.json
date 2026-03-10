@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd712-09ea-7533-8832-3581defb5e8d",
+  "occurred_at": "2026-03-10T09:26:49.578316Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Shipped merge commit 6ccd1125c6dc to origin/main. Resolved alias model/view merge conflicts, restored alias-aware wave dependency reasons, and verified local lint, tsc, tests, build plus remote CI 22895704277 and Coverage Badge 22895704280 succeeded.",
+    "datetime": "2026-03-10T09:26:49Z",
+    "entry_id": "019cd712-09ea-7533-8832-35738bf4b696",
+    "model": "GPT-5",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

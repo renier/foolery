@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6da-6324-7991-83b2-d21a56cf86b6",
+  "occurred_at": "2026-03-10T08:26:02.404059Z",
+  "knot_id": "foolery-aa57",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review: REJECTED. No implementation exists — feat/foolery-aa57 branch is identical to main (zero diff). The detail view header (beat-detail-lightbox.tsx:257) still strips the project prefix and only shows the short ID suffix. The Beat type lacks an alias field. Neither requirement (full bead ID display, bead aliases display) has been addressed. Sent back to implementation.",
+    "datetime": "2026-03-10T08:30:00Z",
+    "entry_id": "019cd6da-6324-7991-83b2-d20c80a60ecc",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

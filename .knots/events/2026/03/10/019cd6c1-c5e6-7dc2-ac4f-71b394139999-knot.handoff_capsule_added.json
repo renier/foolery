@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6c1-c5e6-7dc2-ac4f-71b394139999",
+  "occurred_at": "2026-03-10T07:59:09.286281Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Implemented alias-aware beat labels across the missed views. RelationshipPicker now fetches selected beat details so selected dependency badges use aliases when present, /api/waves now formats blocked readiness reasons from aliases and passes aliases through to the wave planner, and focused alias tests were added. Validation completed in the implementation worktree: bun run lint (repo has existing warnings only), bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-10T07:58:30Z",
+    "entry_id": "019cd6c1-c5e6-7dc2-ac4f-71a9aab62edd",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-10"
+  }
+}

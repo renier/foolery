@@ -1,0 +1,18 @@
+{
+  "event_id": "019cd712-6b40-7e03-b6fd-4d353eef5d23",
+  "occurred_at": "2026-03-10T09:27:14.496914Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-df3a",
+    "profile_id": "autopilot",
+    "state": "shipment_review",
+    "terminal": false,
+    "title": "views should use knot aliases if they exist",
+    "updated_at": "2026-03-10T09:27:14.496914Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd712-33a3-7060-b17a-e5de307f2d50"
+  }
+}

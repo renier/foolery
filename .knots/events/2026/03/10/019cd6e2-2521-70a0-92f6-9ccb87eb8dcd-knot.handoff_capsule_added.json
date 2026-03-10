@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6e2-2521-70a0-92f6-9ccb87eb8dcd",
+  "occurred_at": "2026-03-10T08:34:30.817954Z",
+  "knot_id": "foolery-aa57",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Approved implementation review. The beat detail header now shows the full beat ID, displays normalized aliases when present, and the Knots backend maps knot aliases onto Beat.aliases. Verified on /Users/cartine/foolery-wt-aa57 with bun run lint (existing warnings only), bunx tsc --noEmit, bun run test, and bun run build.",
+    "datetime": "2026-03-10T08:34:23Z",
+    "entry_id": "019cd6e2-2521-70a0-92f6-9cb35ab98b2c",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

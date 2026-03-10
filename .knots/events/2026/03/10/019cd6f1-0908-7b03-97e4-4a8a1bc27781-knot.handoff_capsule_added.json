@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6f1-0908-7b03-97e4-4a8a1bc27781",
+  "occurred_at": "2026-03-10T08:50:46.664253Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Rebased work/foolery-df3a onto main. Alias labels now render in beat columns, dependency tree, retakes, and cascade close views with stripped ID fallback, and alias data is threaded into dependency and cascade payloads. Added alias view contract coverage. Gates passed in /Users/cartine/foolery-wt-df3a: bun install --frozen-lockfile, bun run lint with existing warnings only, bunx tsc --noEmit, bun run test, and bun run build.",
+    "datetime": "2026-03-10T08:49:27Z",
+    "entry_id": "019cd6f1-0908-7b03-97e4-4a7780cf2ac2",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-10"
+  }
+}

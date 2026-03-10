@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6b0-3704-7632-ad73-fd1637b96729",
+  "occurred_at": "2026-03-10T07:39:58.596966Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "1. RelationshipPicker still only accepts selectedIds and renders SelectedBadges from raw IDs, so both the create form and the beat detail lightbox continue to show short IDs instead of aliases for selected relationships. 2. The wave planner blocked-state copy still formats blocker references with shortId in /api/waves, so blocked cards still surface raw IDs in readinessReason even when aliases exist.",
+    "datetime": "2026-03-10T07:39:58.596966Z",
+    "entry_id": "019cd6b0-3704-7632-ad73-fd035fbee2b3",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

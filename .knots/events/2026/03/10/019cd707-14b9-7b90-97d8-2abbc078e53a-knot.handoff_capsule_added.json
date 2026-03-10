@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd707-14b9-7b90-97d8-2abbc078e53a",
+  "occurred_at": "2026-03-10T09:14:51.449341Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review APPROVED. Alias threading verified end-to-end: KnotRecord.alias/aliases → toBeat() with normalizeAliases() → Beat/BeatDependency/WaveBeat/CascadeDescendant types → 7 view components (beat-columns, beat-detail-lightbox, cascade-close-dialog, dep-tree, relationship-picker, retakes-view, wave-planner). All use consistent 'alias ?? fallbackId' display pattern. Tests cover alias mapping (3 cases) and cascade passthrough (2 cases). Quality gates: tsc clean, 1975 tests pass, build succeeds, no new lint errors. OpenAPI schemas updated.",
+    "datetime": "2026-03-10T10:10:00Z",
+    "entry_id": "019cd707-14b9-7b90-97d8-2aa554231163",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "event_id": "019cd72c-9166-7c93-9d8c-d2a66eeb6086",
+  "occurred_at": "2026-03-10T09:55:48.198722Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "invariants": [],
+    "knot_id": "foolery-3715",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "remove action column and Type from Active view",
+    "updated_at": "2026-03-10T09:55:48.198722Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd72b-e129-7871-b6e6-30cc8f036442"
+  }
+}

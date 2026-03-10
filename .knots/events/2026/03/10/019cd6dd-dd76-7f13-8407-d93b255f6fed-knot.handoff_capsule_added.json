@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6dd-dd76-7f13-8407-d93b255f6fed",
+  "occurred_at": "2026-03-10T08:29:50.326095Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Plan approved: terminal-manager is the correct fix point because abortSession currently only marks aborted and signals the tracked child while finishSession and session-connection-manager later relabel the session from exit code. The proposed work to preserve aborted as a first-class terminal outcome, harden teardown for descendant processes, cancel pending follow-up/timer activity, and add abort-focused coverage is complete, feasible, and aligned with the reported failure. Keep repeated terminate calls idempotent and preserve terminated notification semantics when exit arrives.",
+    "datetime": "2026-03-10T08:27:25Z",
+    "entry_id": "019cd6dd-dd76-7f13-8407-d92c03a82988",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5-codex"
+  }
+}

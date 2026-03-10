@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6e9-e099-7240-b074-08275fef7747",
+  "occurred_at": "2026-03-10T08:42:57.561865Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review rejected (round 3): aliases are only displayed in beat-detail-lightbox.tsx. The following views still show stripped beat IDs and do not use or show aliases: (1) beat-columns.tsx — the main board view where beats are listed, (2) dep-tree.tsx — the dependency tree, which is the most critical since the description says aliases determine relationships, (3) retakes-view.tsx — retake listings, (4) cascade-close-dialog.tsx — cascade close confirmation showing descendant beats. The data pipeline is correct (aliases flow from backend to Beat type), but each of these four view components needs to be updated to display alias information when present. This is the same deficiency noted in the prior review.",
+    "datetime": "2026-03-10T08:42:57.561865Z",
+    "entry_id": "019cd6e9-e099-7240-b074-081d44a9b2a6",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

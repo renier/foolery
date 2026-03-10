@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6e4-41c8-7a92-9725-a7ea0ba04482",
+  "occurred_at": "2026-03-10T08:36:49.224695Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Alias-first labels now render in beat columns, detail lightbox, dependency tree, retakes, and cascade-close views; dependency and cascade payloads now preserve aliases; added alias regression coverage. Gates: bun run lint (warnings only), bunx tsc --noEmit, bun run test, bun run build.",
+    "datetime": "2026-03-10T08:36:49Z",
+    "entry_id": "019cd6e4-41c8-7a92-9725-a7d2d6690f24",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex-cli"
+  }
+}

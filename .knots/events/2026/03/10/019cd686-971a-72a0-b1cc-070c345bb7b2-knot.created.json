@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd686-971a-72a0-b1cc-070c345bb7b2",
+  "occurred_at": "2026-03-10T06:54:30.682494Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.created",
+  "data": {
+    "body": "the knots aliases are used to determine relationships between knots.  not using or showing them in the different views is confusing.\n\nwe can/should show them in the views.",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "views should use knot aliases if they exist"
+  }
+}

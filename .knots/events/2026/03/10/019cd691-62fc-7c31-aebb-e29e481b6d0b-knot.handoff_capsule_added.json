@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd691-62fc-7c31-aebb-e29e481b6d0b",
+  "occurred_at": "2026-03-10T07:06:18.23675Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Plan review requested revisions. The current plan correctly identifies KnotRecord -> Beat alias propagation and most view updates, but it misses two required data-flow changes: 1) wave-planner only receives WaveBeat objects from /api/waves, and WaveBeat plus the waves API/OpenAPI contract currently have no alias field, so that path must be added explicitly; 2) DepTree only receives BeatDependency edges and cannot resolve aliases today, so the plan needs a concrete source of linked-beat alias data rather than assuming it is available. Test coverage should include alias mapping in toBeat(), waves API propagation/rendering, and dependency alias fallback behavior.",
+    "datetime": "2026-03-10T07:05:10Z",
+    "entry_id": "019cd691-62fc-7c31-aebb-e28d71fd394a",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

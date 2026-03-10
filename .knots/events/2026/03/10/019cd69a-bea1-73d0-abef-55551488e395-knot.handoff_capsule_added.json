@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd69a-bea1-73d0-abef-55551488e395",
+  "occurred_at": "2026-03-10T07:16:31.521467Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Plan v3 addresses all prior review gaps: (1) Fixes waves route dependency_type bug — line 194 checks dep.dependency_type!='blocks' but listDependencies emits dependency_type='blocked_by', so ALL deps are silently skipped; fix to use dep.type!='blocks'. (2) relationship-picker alias resolution — changes selectedIds:string[] prop to selectedItems:{id,alias?}[] with parent component updates for beat-form and beat-detail-lightbox. (3) Full alias pipeline: KnotRecord→Beat→WaveBeat→BeatDependency type additions, toBeat() mapping, listDependencies() enrichment via showKnot lookups, /api/waves alias passthrough, OpenAPI schema updates, and 7 view components updated to show alias??shortId. (4) Test coverage for toBeat, listDependencies enrichment, waves dep filter regression, and relationship-picker rendering. ~14 files, medium complexity.",
+    "datetime": "2026-03-10T07:15:00Z",
+    "entry_id": "019cd69a-bea1-73d0-abef-554ea68bca8b",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "opus-4.6"
+  }
+}

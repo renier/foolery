@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6da-efe5-7663-8d18-d082190c4f46",
+  "occurred_at": "2026-03-10T08:26:38.437102Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "1. The knot requires views to use and show aliases when present. 2. Five views still render stripped IDs instead of aliases: beat-columns.tsx, beat-detail-lightbox.tsx, dep-tree.tsx, retakes-view.tsx, and cascade-close-dialog.tsx. 3. Alias support is implemented and tested for beat-display, relationship-picker, wave-planner, and waves route, but the remaining views are not covered. 4. Review-only checks: targeted alias tests passed, bunx tsc --noEmit passed, and bun run lint exited with warnings only.",
+    "datetime": "2026-03-10T08:26:15Z",
+    "entry_id": "019cd6da-efe5-7663-8d18-d07557cbb954",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

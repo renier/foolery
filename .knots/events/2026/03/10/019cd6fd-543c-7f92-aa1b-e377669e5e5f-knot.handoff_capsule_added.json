@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6fd-543c-7f92-aa1b-e377669e5e5f",
+  "occurred_at": "2026-03-10T09:04:12.348649Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment complete: merged work/foolery-e0cc to main (commit fdccf8a3). Feature fixes terminal abort group-kill fallback so SIGKILL targets the process group independently of leader liveness. Quality gates passed: typecheck clean, 129 test files / 1970 tests passed, build succeeded. CI green on remote main (all 3 workflows succeeded). Code is on origin/main.",
+    "datetime": "2026-03-10T09:55:00Z",
+    "entry_id": "019cd6fd-543c-7f92-aa1b-e36cca8a7693",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

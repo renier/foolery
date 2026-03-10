@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd732-e5e0-77f3-82ae-e5a1d1a976be",
+  "occurred_at": "2026-03-10T10:02:43.040515Z",
+  "knot_id": "foolery-3715",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review APPROVED. Diff removes Type column from default array and re-inserts it conditionally for non-active views; Action column guarded by !isActiveView. Two regression tests added. All quality gates pass (lint 0 errors, tsc clean, 1981 tests pass, build OK). No security or regression concerns.",
+    "datetime": "2026-03-10T11:05:00-07:00",
+    "entry_id": "019cd732-e5e0-77f3-82ae-e59a9aa34477",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

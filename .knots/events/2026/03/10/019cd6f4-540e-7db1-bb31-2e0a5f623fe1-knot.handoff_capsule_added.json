@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6f4-540e-7db1-bb31-2e0a5f623fe1",
+  "occurred_at": "2026-03-10T08:54:22.478896Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment blocked on 2026-03-10 by a merge conflict while merging feat/df3a-alias-in-views into main. The conflict is isolated to src/components/beat-detail-lightbox.tsx; the rest of the alias-view shipment merge applied cleanly. Status moved back to ready_for_implementation for conflict resolution before another shipment attempt.",
+    "datetime": "2026-03-10T08:54:08Z",
+    "entry_id": "019cd6f4-540e-7db1-bb31-2dff6db8c048",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-10"
+  }
+}

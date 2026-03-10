@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd697-2dee-70a0-a321-8ae1b7e0b1fd",
+  "occurred_at": "2026-03-10T07:12:37.870741Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Plan needs revision before implementation. Two concrete gaps: (1) /api/waves currently filters dependencies with dep.dependency_type !== 'blocks', but listDependencies emits type='blocks' and dependency_type='blocked_by', so the plan must explicitly fix wave dependency extraction before alias-aware readiness text can work. (2) relationship-picker selected badges only receive selectedIds, so showing aliases there requires a defined data source or prop/interface change; the plan should spell out how selected-id aliases are resolved and tested. Also expand component test coverage to include relationship-picker, since it is part of the proposed view changes.",
+    "datetime": "2026-03-10T07:12:37.870741Z",
+    "entry_id": "019cd697-2dee-70a0-a321-8ad0a4b452ff",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

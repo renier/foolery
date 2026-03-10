@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6f4-c810-7fe3-a270-f2b421004935",
+  "occurred_at": "2026-03-10T08:54:52.176233Z",
+  "knot_id": "foolery-df3a",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment merge conflict on 2026-03-10: merging feat/df3a-alias-in-views into main conflicted in src/components/beat-detail-lightbox.tsx against the alias/detail-view changes already on main. Resolve the beat-detail-lightbox merge and retry shipment.",
+    "datetime": "2026-03-10T08:54:08Z",
+    "entry_id": "019cd6f4-c810-7fe3-a270-f2a0719e57f8",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "2026-03-10"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6e6-bacd-7452-95f3-968ef2967e50",
+  "occurred_at": "2026-03-10T08:39:31.277449Z",
+  "knot_id": "foolery-aa57",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "codex",
+    "content": "Shipment complete: merged feat/foolery-aa57 into main as b3c4695e0d40, pushed to origin/main, and verified remote workflows passed for b3c4695e0d40d0cd09b8f75e0ff001efa756c39a (CI #22893998660, Coverage Badge #22893998647, Changesets #22893998646).",
+    "datetime": "2026-03-10T08:39:21Z",
+    "entry_id": "019cd6e6-bacd-7452-95f3-967945c019dd",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "1"
+  }
+}

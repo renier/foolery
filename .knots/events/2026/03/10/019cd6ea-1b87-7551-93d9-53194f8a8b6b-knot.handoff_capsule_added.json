@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd6ea-1b87-7551-93d9-53194f8a8b6b",
+  "occurred_at": "2026-03-10T08:43:12.647451Z",
+  "knot_id": "foolery-e0cc",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Implementation review requested changes. 1. src/lib/terminal-manager.ts:1738-1749 still lets runaway descendants survive terminate: the 5 s SIGKILL fallback first checks process.kill(pid, 0) on the process-group leader, so if the leader exits after SIGTERM but a child in the detached group stays alive, the check throws and the code never sends process.kill(-pid, 'SIGKILL'). That leaves the original failure mode unresolved for wrapper/descendant processes. Tests and build passed otherwise (bunx tsc --noEmit, bun run test, bun run build, and targeted eslint on the touched files), but this kill-path gap blocks approval until the fallback is made group-safe and covered by a regression test.",
+    "datetime": "2026-03-10T08:42:45Z",
+    "entry_id": "019cd6ea-1b87-7551-93d9-53045b9dbd3e",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "codex"
+  }
+}
