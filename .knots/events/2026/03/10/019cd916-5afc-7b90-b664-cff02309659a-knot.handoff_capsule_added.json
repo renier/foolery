@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd916-5afc-7b90-b664-cff02309659a",
+  "occurred_at": "2026-03-10T18:50:46.908165Z",
+  "knot_id": "foolery-02d0",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation verified and all quality gates pass. The beat-detail-lightbox header now shows the natural beat ID and all aliases inline with click-to-copy (ClickToCopyId component), formatted as 'proj-1234 | proj-5678.3 (alias)'. Key changes in commit a978a9ff: getDisplayedBeatId and getDisplayedBeatAliases exported helpers, ClickToCopyId shared chip component, LightboxHeader renders aliases with pipe separators. Tests in beat-detail-lightbox.test.ts cover identity helpers. The dep-tree.tsx merge conflict from stashed changes was already resolved on main (worktree is clean). Lint (0 errors), typecheck, tests, and build all pass. Branch work/foolery-02d0 pushed to origin.",
+    "datetime": "2026-03-10T19:50:00Z",
+    "entry_id": "019cd916-5afc-7b90-b664-cfe0e38250e7",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

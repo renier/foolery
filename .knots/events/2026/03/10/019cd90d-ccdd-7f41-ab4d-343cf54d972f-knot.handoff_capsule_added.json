@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd90d-ccdd-7f41-ab4d-343cf54d972f",
+  "occurred_at": "2026-03-10T18:41:26.237105Z",
+  "knot_id": "foolery-9c91",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Plan approved: replace the knots rollback command in rollbackBeatState with the dedicated kno rollback/rb command, keep the best-effort note, leave the beads path unchanged, and add a unit test at the memory-manager-commands layer because the terminal-manager tests only cover the call site. No invariant, security, performance, or maintainability issues found; CLI 0.7.6 exposes rollback and accepts rb as an alias.",
+    "datetime": "2026-03-10T18:41:20Z",
+    "entry_id": "019cd90d-ccdd-7f41-ab4d-342a79811696",
+    "model": "GPT-5",
+    "username": "cartine",
+    "version": "GPT-5-Codex"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "event_id": "019cd910-ba7d-7d43-8dbc-f2f1067ce5c8",
+  "occurred_at": "2026-03-10T18:44:38.141563Z",
+  "knot_id": "foolery-8caa",
+  "type": "knot.created",
+  "data": {
+    "body": "make like 80% of the screen width",
+    "gate": {
+      "owner_kind": "agent"
+    },
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Beat Detail:  Make lightbox wider",
+    "type": "work"
+  }
+}

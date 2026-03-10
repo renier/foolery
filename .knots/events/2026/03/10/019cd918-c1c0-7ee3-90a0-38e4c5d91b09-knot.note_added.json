@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd918-c1c0-7ee3-90a0-38e4c5d91b09",
+  "occurred_at": "2026-03-10T18:53:24.288734Z",
+  "knot_id": "foolery-02d0",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review blocked: beat-detail natural-id/alias rendering looks correct, but sanity gates are not green. bun run test currently fails in src/lib/__tests__/knots-backend.test.ts:504 with 'infers parent from hierarchical dotted alias when id has no dots' expecting parent '8792' and receiving undefined. Resolve the failing test suite, rerun gates, then resubmit for implementation review.",
+    "datetime": "2026-03-10T18:53:24.288734Z",
+    "entry_id": "019cd918-c1c0-7ee3-90a0-38d71b110acf",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

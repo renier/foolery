@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd90d-a3ee-7751-ac29-288c2c281a4c",
+  "occurred_at": "2026-03-10T18:41:15.758634Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation plan:\n1. Add a small action-mode helper for beat rows that treats parent knots repos as single-beat Take targets instead of Scene targets, while leaving beads repos on the current parent->Scene path. The helper should derive repo memory-manager type from the beat's `_repoPath` plus registered repo metadata so the label and click behavior match the active backend.\n2. Update the beats table action rendering in `src/components/beat-columns.tsx` to use that helper so parent knots display `Take!` instead of `Scene!`. Keep existing terminal-state, human-owned, and inherited-rolling guards unchanged.\n3. Update `src/lib/terminal-manager.ts` so `createSession()` only enters parent/scene orchestration mode for repos that should actually orchestrate children. For knots repos, parent beats should flow through the normal single-beat path: rollback/assert only the parent, call `buildTakePrompt()` without `isParent/childBeatIds`, and wrap with the take boundary instead of the scene boundary.\n4. Keep backend prompt generation unchanged unless the implementation shows a missing abstraction. `src/lib/backends/knots-backend.ts` already has the correct single-beat prompt (`kno claim <id> --json` for the parent itself); the bug is that the caller incorrectly forces parent knots through scene mode.\n5. Add regression coverage:\n- `src/lib/__tests__/terminal-manager-knots-next-guard.test.ts`: parent knot with children should still produce a Take boundary/prompt in knots mode and should not request child scene claims.\n- UI/unit coverage around `src/components/beat-columns.tsx` or the nearest helper test file to verify parent knots render `Take!` while parent beads still render `Scene!`.\n6. Validate with focused tests first, then broader quality gates in the implementation step: at minimum the new/updated terminal-manager test and the action-label test; implementation should also run the repo standard lint/typecheck/test/build gates before closeout.\n\nExpected file touch set:\n- `src/components/beat-columns.tsx`\n- `src/lib/terminal-manager.ts`\n- likely a small shared helper or type-adjacent utility if needed\n- matching tests under `src/lib/__tests__/...` and/or component tests\n\nComplexity and risk:\n- Low-to-moderate. The core fix is small, but it crosses UI labeling and terminal session bootstrapping.\n- Main regression risk is accidentally downgrading real beads parent orchestration from Scene to Take, so tests need to assert the behavior split by memory-manager type.\n- Secondary risk is relying on repo metadata that is unavailable in some views; if that happens, derive from `resolveMemoryManagerType(repoPath)` at the execution layer and mirror the same decision in the UI via registered repo lookup.",
+    "datetime": "2026-03-10T18:41:15.758634Z",
+    "entry_id": "019cd90d-a3ee-7751-ac29-287a48a27a05",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

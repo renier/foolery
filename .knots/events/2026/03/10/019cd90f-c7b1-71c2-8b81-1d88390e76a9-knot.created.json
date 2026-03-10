@@ -1,0 +1,16 @@
+{
+  "event_id": "019cd90f-c7b1-71c2-8b81-1d88390e76a9",
+  "occurred_at": "2026-03-10T18:43:35.985779Z",
+  "knot_id": "foolery-02d0",
+  "type": "knot.created",
+  "data": {
+    "body": "should say \n\nproj-1234 | proj-5678.3 (alias)\n\nboth beat ids should be click to copy.",
+    "gate": {
+      "owner_kind": "agent"
+    },
+    "profile_id": "autopilot_no_planning",
+    "state": "ready_for_implementation",
+    "title": "Beat Detail: only shows natural beat id, even if alias is present",
+    "type": "work"
+  }
+}

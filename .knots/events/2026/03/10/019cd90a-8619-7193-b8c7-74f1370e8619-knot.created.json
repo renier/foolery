@@ -1,0 +1,12 @@
+{
+  "event_id": "019cd90a-8619-7193-b8c7-74f1370e8619",
+  "occurred_at": "2026-03-10T18:37:51.51338Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.created",
+  "data": {
+    "body": "for example, in the 1brutus project, beat/knot 8792 - if you click on scene it throws that error. \n\n",
+    "profile_id": "autopilot",
+    "state": "ready_for_planning",
+    "title": "clicking on parent beat's scene action fails with 'knot not claimable' error"
+  }
+}

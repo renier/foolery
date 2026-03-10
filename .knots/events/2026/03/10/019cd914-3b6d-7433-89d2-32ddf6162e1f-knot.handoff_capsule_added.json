@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd914-3b6d-7433-89d2-32ddf6162e1f",
+  "occurred_at": "2026-03-10T18:48:27.757985Z",
+  "knot_id": "foolery-9c91",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Review outcome: needs changes. The requested rollback migration is implemented in src/lib/memory-manager-commands.ts using 'kno rollback <id>', and focused tests pass in src/lib/__tests__/memory-manager-commands-coverage.test.ts and src/lib/__tests__/terminal-manager-knots-next-guard.test.ts. Approval is blocked because the required repo sanity gates fail for reasons outside this change: 'bunx tsc --noEmit' fails on unresolved conflict markers, and 'bun run build' fails on the same markers. Violations against acceptance for this review step: 1) required sanity gates do not pass, 2) repository parse state is broken in unrelated modified files including src/components/beat-columns.tsx, src/components/cascade-close-dialog.tsx, src/components/dep-tree.tsx, src/components/relationship-picker.tsx, src/components/retakes-view.tsx, and src/components/wave-planner.tsx.",
+    "datetime": "2026-03-10T18:48:16Z",
+    "entry_id": "019cd914-3b6d-7433-89d2-32cdc0488725",
+    "model": "GPT-5",
+    "username": "cartine",
+    "version": "GPT-5"
+  }
+}

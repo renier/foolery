@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd914-c015-7a20-b019-c6a2bc851de2",
+  "occurred_at": "2026-03-10T18:49:01.717457Z",
+  "knot_id": "foolery-8caa",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Widened beat detail lightbox from max-w 1120px to 80vw. Changed w-[96vw] max-w-[min(1120px,96vw)] to w-[80vw] max-w-[80vw] in DialogContent className. All tests pass. Merged to main and pushed.",
+    "datetime": "2026-03-10T19:49:00Z",
+    "entry_id": "019cd914-c015-7a20-b019-c6998690752a",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

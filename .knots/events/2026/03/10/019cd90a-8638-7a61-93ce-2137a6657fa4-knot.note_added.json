@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd90a-8638-7a61-93ce-2137a6657fa4",
+  "occurred_at": "2026-03-10T18:37:51.544622Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "foolery",
+    "content": "Acceptance Criteria:\nclicking on a parent should be \"Take\" and provide the parent beat/knot to the agent.",
+    "datetime": "2026-03-10T18:37:51.544622Z",
+    "entry_id": "019cd90a-8638-7a61-93ce-212234d0940f",
+    "model": "unknown",
+    "username": "foolery",
+    "version": "unknown"
+  }
+}

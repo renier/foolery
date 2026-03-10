@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd914-3ba7-7b82-a3c8-a0b6b7e12821",
+  "occurred_at": "2026-03-10T18:48:27.815401Z",
+  "knot_id": "foolery-9c91",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review blocked: the rollbackBeatState change matches the knot requirements and focused tests pass, but required sanity gates cannot pass because unrelated files contain unresolved merge-conflict markers (for example src/components/beat-columns.tsx, src/components/cascade-close-dialog.tsx, src/components/dep-tree.tsx, src/components/relationship-picker.tsx, src/components/retakes-view.tsx, and src/components/wave-planner.tsx). Resolve those conflicts and rerun lint, typecheck, and build before resubmitting.",
+    "datetime": "2026-03-10T18:48:27.815401Z",
+    "entry_id": "019cd914-3ba7-7b82-a3c8-a0a1b7c777c6",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "event_id": "019cd916-5b03-7ea3-9b09-d8181b5f5f35",
+  "occurred_at": "2026-03-10T18:50:46.908165Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "gate": {
+      "owner_kind": "agent"
+    },
+    "invariants": [],
+    "knot_id": "foolery-02d0",
+    "profile_id": "autopilot_no_planning",
+    "state": "implementation",
+    "terminal": false,
+    "title": "Beat Detail: only shows natural beat id, even if alias is present",
+    "type": "work",
+    "updated_at": "2026-03-10T18:50:46.908165Z"
+  }
+}

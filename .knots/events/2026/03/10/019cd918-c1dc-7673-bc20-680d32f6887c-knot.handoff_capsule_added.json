@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd918-c1dc-7673-bc20-680d32f6887c",
+  "occurred_at": "2026-03-10T18:53:24.316751Z",
+  "knot_id": "foolery-02d0",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Review result: requested beat-detail behavior appears implemented in src/components/beat-detail-lightbox.tsx. The header renders the natural beat id first, then aliases as separate click-to-copy controls formatted with a pipe separator and '(alias)' suffix, matching the requested 'proj-1234 | proj-5678.3 (alias)' shape. Supporting tests exist in src/lib/__tests__/beat-detail-lightbox.test.ts and alias wiring is covered in src/lib/__tests__/alias-view-contract.test.ts. Typecheck and build passed. Approval withheld because bun run test fails outside this beat scope in src/lib/__tests__/knots-backend.test.ts:504, so the required sanity-gate condition for implementation_review is not met.",
+    "datetime": "2026-03-10T18:53:10Z",
+    "entry_id": "019cd918-c1dc-7673-bc20-67f92e4b29d0",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "gpt-5"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd91c-5ec5-7a31-a390-90c63c766d5d",
+  "occurred_at": "2026-03-10T18:57:21.093666Z",
+  "knot_id": "foolery-8caa",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Shipment verified on origin/main at 555970607190; approved lightbox widening commit a3dee9a5726b was already merged on main, so no new merge commit was required. Remote CI and Coverage Badge runs for a3dee9a5726b and current main are green.",
+    "datetime": "2026-03-10T18:57:04Z",
+    "entry_id": "019cd91c-5ec5-7a31-a390-90b0f44f81e5",
+    "model": "GPT-5",
+    "username": "cartine",
+    "version": "codex-cli"
+  }
+}

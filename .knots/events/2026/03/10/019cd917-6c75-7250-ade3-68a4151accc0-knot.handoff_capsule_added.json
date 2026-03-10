@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd917-6c75-7250-ade3-68a4151accc0",
+  "occurred_at": "2026-03-10T18:51:56.917367Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Fixed parent knots Scene action failure. Root cause: parent beats in knots repos were forced through Scene orchestration mode which asserts child claimability — fails because knots children may not be claimable. Fix introduces effectiveParent flag in terminal-manager.ts that routes knots parents through single-beat Take path instead. UI updated to show Take! (blue) for knots parents, Scene! (purple) for beads parents. BeatWithRepo enriched with _memoryManagerType for client-side detection. 6 files changed, 142 insertions. All 1994 tests pass, lint/typecheck/build clean.",
+    "datetime": "2026-03-10T20:00:00Z",
+    "entry_id": "019cd917-6c75-7250-ade3-689122347882",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

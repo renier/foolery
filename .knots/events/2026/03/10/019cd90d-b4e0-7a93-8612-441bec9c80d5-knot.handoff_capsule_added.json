@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd90d-b4e0-7a93-8612-441bec9c80d5",
+  "occurred_at": "2026-03-10T18:41:20.096599Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Plan: treat parent knots as single-beat Take targets in the UI and terminal bootstrap, preserve Scene orchestration for beads parents, and add regression tests for both the label and prompt path.",
+    "datetime": "2026-03-10T18:41:00Z",
+    "entry_id": "019cd90d-b4e0-7a93-8612-440d8da8f5b3",
+    "model": "gpt-5",
+    "username": "cartine",
+    "version": "unknown"
+  }
+}

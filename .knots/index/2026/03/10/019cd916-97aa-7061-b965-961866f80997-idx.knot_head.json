@@ -1,0 +1,22 @@
+{
+  "event_id": "019cd916-97aa-7061-b965-961866f80997",
+  "occurred_at": "2026-03-10T18:51:02.442156Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "gate": {
+      "owner_kind": "agent"
+    },
+    "invariants": [],
+    "knot_id": "foolery-8caa",
+    "profile_id": "autopilot_no_planning",
+    "state": "shipment",
+    "terminal": false,
+    "title": "Beat Detail:  Make lightbox wider",
+    "type": "work",
+    "updated_at": "2026-03-10T18:51:02.442156Z"
+  },
+  "precondition": {
+    "profile_etag": "019cd916-54c3-7c40-92f3-808c70b14449"
+  }
+}

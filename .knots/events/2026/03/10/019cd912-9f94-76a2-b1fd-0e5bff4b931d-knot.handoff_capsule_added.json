@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd912-9f94-76a2-b1fd-0e5bff4b931d",
+  "occurred_at": "2026-03-10T18:46:42.324714Z",
+  "knot_id": "foolery-9c91",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Migrated rollbackBeatState in src/lib/memory-manager-commands.ts to use 'kno rollback <id>' instead of 'kno update <id> --status <state>'. Also applied quoteId to beatId in the note command for consistency. Added 3 unit tests in memory-manager-commands-coverage.test.ts verifying: rollback command format, note addition with reason, and no note when reason omitted. All quality gates pass (lint, typecheck, test, build). Commit b62626d3 pushed to main.",
+    "datetime": "2026-03-10T00:00:00Z",
+    "entry_id": "019cd912-9f94-76a2-b1fd-0e435eb94272",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd913-f23c-7250-b33f-0abde06ade6f",
+  "occurred_at": "2026-03-10T18:48:09.019949Z",
+  "knot_id": "foolery-02d0",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Implementation review blocked: required sanity-gate verification failed because the current working tree contains unresolved merge markers in src/components/dep-tree.tsx:73-80, which breaks TypeScript transform before the beat-detail tests can run. Resolve the conflict and rerun the targeted/unit gates, then resubmit for review.",
+    "datetime": "2026-03-10T18:48:09.019949Z",
+    "entry_id": "019cd913-f23b-7bf0-8f82-485e4bca04cd",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

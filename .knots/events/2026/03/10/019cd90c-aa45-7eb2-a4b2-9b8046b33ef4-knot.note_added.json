@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd90c-aa45-7eb2-a4b2-9b8046b33ef4",
+  "occurred_at": "2026-03-10T18:40:11.845656Z",
+  "knot_id": "foolery-9c91",
+  "type": "knot.note_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "# Implementation Plan: Migrate rollbackBeatState to use kno rollback\n\n## Summary\nReplace the `kno update <id> --status <prior-state>` call in `rollbackBeatState` with `kno rollback <id>`, which is now available in kno 0.7.6.\n\n## Current State\n- `rollbackBeatState` in `src/lib/memory-manager-commands.ts:51-77` handles rollbacks for both knots and beads backends.\n- The knots branch (line 60) currently runs: `kno update <beatId> --status <toState>` — this fails because kno rejects backward state transitions.\n- After the rollback, it optionally adds a note with the reason (best-effort).\n\n## Changes Required\n\n### 1. `src/lib/memory-manager-commands.ts` — rollbackBeatState function (lines 59-72)\n- Replace `kno update ${beatId} --status ${toState}` with `kno rollback ${beatId}`\n- The `toState` parameter is no longer needed for the knots path since `kno rollback` automatically determines the prior ready state.\n- The `fromState` parameter is also unused in the knots path currently.\n- Keep the best-effort note addition (reason), as `kno rollback` does not appear to accept a `--reason` or `--add-note` flag.\n- The beads backend path (else branch) remains unchanged.\n\n### 2. `src/lib/__tests__/terminal-manager-knots-next-guard.test.ts` — update mock assertions\n- The mock for `rollbackBeatState` remains a vi.fn() — no change needed to the mock itself.\n- The assertions checking `rollbackBeatState` call args remain valid since the function signature doesn't change (fromState/toState are still passed by callers).\n\n### 3. No signature change needed\n- Keep the existing `rollbackBeatState(beatId, fromState, toState, repoPath, memoryManagerType, reason?)` signature.\n- The `fromState` and `toState` params are still used by the beads backend path and may be useful for logging/notes.\n- Callers in terminal-manager.ts do not need to change.\n\n## Test Strategy\n- Existing tests mock `rollbackBeatState`, so they validate call-site behavior, not the internal command.\n- Add or update a unit test for `rollbackBeatState` itself to verify it constructs `kno rollback <id>` instead of `kno update <id> --status <state>`.\n- Run full quality gates: lint, typecheck, test, build.\n\n## Risks\n- Low risk: single-line command change in a well-isolated function.\n- `kno rollback` may fail if the knot is not in an action state — but that matches the existing semantics (rollback is only called when a knot is in an active/action state).\n\n## Complexity\n- Small — ~5 lines of code change + test update.",
+    "datetime": "2026-03-10T18:40:11.845656Z",
+    "entry_id": "019cd90c-aa45-7eb2-a4b2-9b7c05a0cb72",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd90c-c774-7392-a5ec-523c7949d18c",
+  "occurred_at": "2026-03-10T18:40:19.316822Z",
+  "knot_id": "foolery-9c91",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Planning complete. The migration is straightforward: replace 'kno update <id> --status <toState>' with 'kno rollback <id>' in the knots branch of rollbackBeatState (memory-manager-commands.ts:60). Function signature stays the same, callers unchanged. Keep best-effort note addition for reason. Update/add unit test for the new command. Low risk, small change.",
+    "datetime": "2026-03-10T12:00:00Z",
+    "entry_id": "019cd90c-c774-7392-a5ec-52287dc900e3",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "4.6"
+  }
+}

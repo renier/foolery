@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd918-5187-7c90-bf22-572a33a5457c",
+  "occurred_at": "2026-03-10T18:52:55.55912Z",
+  "knot_id": "foolery-8caa",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Shipment review could not be completed because the local main checkout was dirty, including beat-detail-lightbox and related files. origin/main is at 555970607190 and the knot already carries commit tag commit:a3dee9a5726b, but review was rolled back per workflow because clean shipped-code verification was not possible from this workspace.",
+    "datetime": "2026-03-10T18:52:49Z",
+    "entry_id": "019cd918-5187-7c90-bf22-5715c7049c8a",
+    "model": "gpt-5-codex",
+    "username": "cartine",
+    "version": "2026-03-10"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd91b-2e4e-7b41-9860-9a668390da14",
+  "occurred_at": "2026-03-10T18:56:03.15041Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment review APPROVED. Verified: (1) commit 555970607190 is on main, (2) commit tag matches 12-char short hash, (3) all 3 CI workflows (Changesets, Coverage Badge, CI) passed green, (4) no invariants to check, (5) no regressions — 1994 tests passing per implementation review. Fix correctly routes knots parent beats through Take path instead of Scene orchestration.",
+    "datetime": "2026-03-10T19:30:00Z",
+    "entry_id": "019cd91b-2e4e-7b41-9860-9a5a07437ffa",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

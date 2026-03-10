@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd919-a08a-7170-9de4-978ce9840298",
+  "occurred_at": "2026-03-10T18:54:21.322563Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Implementation review APPROVED. Committed fix (55597060) correctly routes knots parent beats through single-beat Take path instead of Scene orchestration by introducing effectiveParent flag in terminal-manager.ts. UI updated to show Take\\!/blue for knots parents, Scene\\!/purple for beads parents via _memoryManagerType threaded through BeatWithRepo. 3 new test files with good routing and prompt-wrapping coverage. All 1994 tests pass, typecheck clean. No beads regression. Note: 10 uncommitted working tree files contain separate follow-up work with 1 failing test (knots-backend.test.ts:551) — outside this beat's scope.",
+    "datetime": "2026-03-10T19:55:00+01:00",
+    "entry_id": "019cd919-a08a-7170-9de4-977edd295254",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

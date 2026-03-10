@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd91c-33e5-7aa2-a34b-4187a72064b1",
+  "occurred_at": "2026-03-10T18:57:10.117938Z",
+  "knot_id": "foolery-813a",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "unknown",
+    "content": "Third follow-up fix for the queue overview: expanded the selected-row detail strip to a 3-column layout with Description, Notes, and Handoff Capsules, and parsed capsule metadata from knotsHandoffCapsules so the right column shows agent/user/time context with latest capsules first. Verified with bun run lint, bunx tsc --noEmit, bun run test, and bun run build.",
+    "datetime": "2026-03-10T18:57:10.117938Z",
+    "entry_id": "019cd91c-33e5-7aa2-a34b-417b8b0cffed",
+    "model": "unknown",
+    "username": "unknown",
+    "version": "unknown"
+  }
+}

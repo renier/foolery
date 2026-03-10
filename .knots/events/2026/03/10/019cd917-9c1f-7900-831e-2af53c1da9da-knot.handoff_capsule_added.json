@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd917-9c1f-7900-831e-2af53c1da9da",
+  "occurred_at": "2026-03-10T18:52:09.119318Z",
+  "knot_id": "foolery-8caa",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "Codex",
+    "content": "Verified shipment: origin/main already contains commit a3dee9a5726b, push was up-to-date, and GitHub Actions CI/Coverage Badge succeeded for both the feature commit and current main head 555970607190 as of 2026-03-10T18:51:49Z.",
+    "datetime": "2026-03-10T18:51:49Z",
+    "entry_id": "019cd917-9c1f-7900-831e-2ae461695205",
+    "model": "gpt-5-codex",
+    "username": "cartine",
+    "version": "2026-03-10"
+  }
+}

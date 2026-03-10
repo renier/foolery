@@ -1,0 +1,19 @@
+{
+  "event_id": "019cd919-a090-7341-9ba5-0b03724d9fb8",
+  "occurred_at": "2026-03-10T18:54:21.322563Z",
+  "type": "idx.knot_head",
+  "data": {
+    "deferred_from_state": null,
+    "gate": {
+      "owner_kind": "agent"
+    },
+    "invariants": [],
+    "knot_id": "foolery-433b",
+    "profile_id": "autopilot",
+    "state": "implementation_review",
+    "terminal": false,
+    "title": "clicking on parent beat's scene action fails with 'knot not claimable' error",
+    "type": "work",
+    "updated_at": "2026-03-10T18:54:21.322563Z"
+  }
+}

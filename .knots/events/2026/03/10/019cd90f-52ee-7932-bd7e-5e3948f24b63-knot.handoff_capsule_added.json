@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd90f-52ee-7932-bd7e-5e3948f24b63",
+  "occurred_at": "2026-03-10T18:43:06.094731Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Plan review: APPROVED. Root cause correctly identified — parent knots forced through Scene orchestration path which asserts claimability on children that may not be claimable. Fix approach is sound: split UI label and terminal-manager session path by memory-manager type (knots parents → Take, beads parents → Scene). _repoPath already available in UI for type detection. Test strategy covers both regression paths. Minor suggestion: inline the helper in beat-columns.tsx rather than creating a separate utility file.",
+    "datetime": "2026-03-10T00:00:00Z",
+    "entry_id": "019cd90f-52ee-7932-bd7e-5e265eed82d0",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}

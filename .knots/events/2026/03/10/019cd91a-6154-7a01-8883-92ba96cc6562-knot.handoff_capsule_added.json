@@ -1,0 +1,15 @@
+{
+  "event_id": "019cd91a-6154-7a01-8883-92ba96cc6562",
+  "occurred_at": "2026-03-10T18:55:10.676373Z",
+  "knot_id": "foolery-433b",
+  "type": "knot.handoff_capsule_added",
+  "data": {
+    "agentname": "claude-code",
+    "content": "Shipment complete. Commit 555970607190 on main fixes parent knots beats routing through Take path instead of Scene orchestration. CI green on all 3 workflows (Changesets, Coverage Badge, CI). No merge needed — fix was already committed and pushed to main in prior step.",
+    "datetime": "2026-03-10T19:00:00Z",
+    "entry_id": "019cd91a-6154-7a01-8883-92a7aa646d25",
+    "model": "claude-opus-4-6",
+    "username": "cartine",
+    "version": "claude-opus-4-6"
+  }
+}
