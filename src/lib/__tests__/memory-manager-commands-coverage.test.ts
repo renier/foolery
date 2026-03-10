@@ -6,13 +6,21 @@ vi.mock("@/lib/memory-manager-detection", () => ({
   detectMemoryManagerType: (...args: unknown[]) => mockDetectMemoryManagerType(...args),
 }));
 
+type ExecCallback = (err: Error | null, stdout: string, stderr: string) => void;
+const mockExec = vi.fn((_cmd: string, _opts: unknown, cb: ExecCallback) => cb(null, "", ""));
+vi.mock("node:child_process", () => ({
+  exec: (cmd: string, opts: unknown, cb: ExecCallback) => mockExec(cmd, opts, cb),
+}));
+
 import {
   buildClaimCommand,
   buildWorkflowStateCommand,
+  rollbackBeatState,
 } from "@/lib/memory-manager-commands";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockExec.mockImplementation((_cmd: string, _opts: unknown, cb: ExecCallback) => cb(null, "", ""));
 });
 
 describe("buildClaimCommand (line 32-34)", () => {
@@ -67,5 +75,25 @@ describe("quoteId helper (line 9)", () => {
   it("JSON-encodes special characters in id for beats", () => {
     const cmd = buildWorkflowStateCommand('id"special', "state", "beads");
     expect(cmd).toContain('"id\\"special"');
+  });
+});
+
+describe("rollbackBeatState", () => {
+  it("uses kno rollback with quoted id for knots", async () => {
+    await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots");
+    expect(mockExec).toHaveBeenCalledTimes(1);
+    expect(mockExec.mock.calls[0][0]).toBe('kno rollback "beat-42"');
+  });
+
+  it("adds a note when reason is provided for knots", async () => {
+    await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots", "flaky test");
+    expect(mockExec).toHaveBeenCalledTimes(2);
+    expect(mockExec.mock.calls[0][0]).toBe('kno rollback "beat-42"');
+    expect(mockExec.mock.calls[1][0]).toBe('kno update "beat-42" --add-note "flaky test"');
+  });
+
+  it("does not add a note when reason is omitted for knots", async () => {
+    await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots");
+    expect(mockExec).toHaveBeenCalledTimes(1);
   });
 });

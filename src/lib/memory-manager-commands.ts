@@ -57,7 +57,7 @@ export async function rollbackBeatState(
   reason?: string,
 ): Promise<void> {
   if (memoryManagerType === "knots") {
-    const cmd = `kno update ${beatId} --status ${toState}`;
+    const cmd = `kno rollback ${quoteId(beatId)}`;
     const { exec: execCb } = await import("node:child_process");
     const { promisify } = await import("node:util");
     const execAsync = promisify(execCb);
@@ -66,7 +66,7 @@ export async function rollbackBeatState(
     // Add a note on the knot documenting the rollback (best-effort)
     if (reason) {
       try {
-        const noteCmd = `kno update ${beatId} --add-note ${JSON.stringify(reason)}`;
+        const noteCmd = `kno update ${quoteId(beatId)} --add-note ${JSON.stringify(reason)}`;
         await execAsync(noteCmd, { cwd: repoPath });
       } catch { /* note is best-effort */ }
     }
