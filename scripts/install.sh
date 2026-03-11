@@ -13,16 +13,116 @@ RELEASE_TAG="${FOOLERY_RELEASE_TAG:-latest}"
 ASSET_BASENAME="${FOOLERY_ASSET_BASENAME:-foolery-runtime}"
 ARTIFACT_URL="${FOOLERY_ARTIFACT_URL:-}"
 
+_supports_color() {
+  local fd="${1:-1}"
+  if [[ -n "${NO_COLOR:-}" || -n "${CI:-}" || "${TERM:-}" == "dumb" ]]; then
+    return 1
+  fi
+  if [[ "$fd" == "2" ]]; then
+    [[ -t 2 ]]
+  else
+    [[ -t 1 ]]
+  fi
+}
+
+_supports_emoji() {
+  local fd="${1:-1}"
+  local locale="${LC_ALL:-${LC_CTYPE:-${LANG:-}}}"
+  if [[ "$locale" != *UTF-8* && "$locale" != *utf8* ]]; then
+    return 1
+  fi
+  if [[ "$fd" == "2" ]]; then
+    [[ -t 2 ]]
+  else
+    [[ -t 1 ]]
+  fi
+}
+
+_color_code() {
+  case "$1" in
+    blue) printf '\033[1;34m' ;;
+    green) printf '\033[1;32m' ;;
+    yellow) printf '\033[1;33m' ;;
+    red) printf '\033[1;31m' ;;
+    cyan) printf '\033[1;36m' ;;
+    reset) printf '\033[0m' ;;
+  esac
+}
+
+_icon_for() {
+  local kind="$1" fd="${2:-1}"
+  if _supports_emoji "$fd"; then
+    case "$kind" in
+      step) printf '🚀' ;;
+      success) printf '✅' ;;
+      warn) printf '⚠️' ;;
+      error) printf '❌' ;;
+      tip) printf '👉' ;;
+      *) printf 'ℹ️' ;;
+    esac
+    return 0
+  fi
+
+  case "$kind" in
+    step) printf '==>' ;;
+    success) printf '[ok]' ;;
+    warn) printf '[!]' ;;
+    error) printf '[x]' ;;
+    tip) printf '->' ;;
+    *) printf '[i]' ;;
+  esac
+}
+
+_emit_message() {
+  local fd="$1" kind="$2"
+  shift 2
+
+  local color=""
+  if _supports_color "$fd"; then
+    case "$kind" in
+      step) color="$(_color_code blue)" ;;
+      success) color="$(_color_code green)" ;;
+      warn) color="$(_color_code yellow)" ;;
+      error) color="$(_color_code red)" ;;
+      tip) color="$(_color_code cyan)" ;;
+      *) color="$(_color_code cyan)" ;;
+    esac
+  fi
+
+  local reset=""
+  if [[ -n "$color" ]]; then
+    reset="$(_color_code reset)"
+  fi
+
+  if [[ "$fd" == "2" ]]; then
+    printf '%b[foolery-install]%b %s %s\n' "$color" "$reset" "$(_icon_for "$kind" "$fd")" "$*" >&2
+  else
+    printf '%b[foolery-install]%b %s %s\n' "$color" "$reset" "$(_icon_for "$kind" "$fd")" "$*"
+  fi
+}
+
 log() {
-  printf '[foolery-install] %s\n' "$*"
+  _emit_message 1 info "$*"
+}
+
+step() {
+  _emit_message 1 step "$*"
+}
+
+success() {
+  _emit_message 1 success "$*"
+}
+
+tip() {
+  _emit_message 1 tip "$*"
 }
 
 warn() {
-  printf '[foolery-install] WARNING: %s\n' "$*" >&2
+  _emit_message 2 warn "$*"
 }
 
 fail() {
-  printf '[foolery-install] ERROR: %s\n' "$*" >&2
+  _emit_message 2 error "$*"
   exit 1
 }
 
@@ -114,12 +214,112 @@ if [[ ! "\$UPDATE_CHECK_INTERVAL_SECONDS" =~ ^[0-9]+$ ]]; then
   UPDATE_CHECK_INTERVAL_SECONDS=21600
 fi
 
+supports_color() {
+  local fd="\${1:-1}"
+  if [[ -n "\${NO_COLOR:-}" || -n "\${CI:-}" || "\${TERM:-}" == "dumb" ]]; then
+    return 1
+  fi
+  if [[ "\$fd" == "2" ]]; then
+    [[ -t 2 ]]
+  else
+    [[ -t 1 ]]
+  fi
+}
+
+supports_emoji() {
+  local fd="\${1:-1}"
+  local locale="\${LC_ALL:-\${LC_CTYPE:-\${LANG:-}}}"
+  if [[ "\$locale" != *UTF-8* && "\$locale" != *utf8* ]]; then
+    return 1
+  fi
+  if [[ "\$fd" == "2" ]]; then
+    [[ -t 2 ]]
+  else
+    [[ -t 1 ]]
+  fi
+}
+
+color_code() {
+  case "\$1" in
+    blue) printf '\033[1;34m' ;;
+    green) printf '\033[1;32m' ;;
+    yellow) printf '\033[1;33m' ;;
+    red) printf '\033[1;31m' ;;
+    cyan) printf '\033[1;36m' ;;
+    reset) printf '\033[0m' ;;
+  esac
+}
+
+icon_for() {
+  local kind="\$1" fd="\${2:-1}"
+  if supports_emoji "\$fd"; then
+    case "\$kind" in
+      step) printf '🚀' ;;
+      success) printf '✅' ;;
+      warn) printf '⚠️' ;;
+      error) printf '❌' ;;
+      tip) printf '👉' ;;
+      *) printf 'ℹ️' ;;
+    esac
+    return 0
+  fi
+
+  case "\$kind" in
+    step) printf '==>' ;;
+    success) printf '[ok]' ;;
+    warn) printf '[!]' ;;
+    error) printf '[x]' ;;
+    tip) printf '->' ;;
+    *) printf '[i]' ;;
+  esac
+}
+
+emit_message() {
+  local fd="\$1" kind="\$2"
+  shift 2
+
+  local color=""
+  if supports_color "\$fd"; then
+    case "\$kind" in
+      step) color="\$(color_code blue)" ;;
+      success) color="\$(color_code green)" ;;
+      warn) color="\$(color_code yellow)" ;;
+      error) color="\$(color_code red)" ;;
+      tip) color="\$(color_code cyan)" ;;
+      *) color="\$(color_code cyan)" ;;
+    esac
+  fi
+
+  local reset=""
+  if [[ -n "\$color" ]]; then
+    reset="\$(color_code reset)"
+  fi
+
+  if [[ "\$fd" == "2" ]]; then
+    printf '%b[foolery]%b %s %s\n' "\$color" "\$reset" "\$(icon_for "\$kind" "\$fd")" "\$*" >&2
+  else
+    printf '%b[foolery]%b %s %s\n' "\$color" "\$reset" "\$(icon_for "\$kind" "\$fd")" "\$*"
+  fi
+}
+
 log() {
-  printf '[foolery] %s\n' "\$*"
+  emit_message 1 info "\$*"
+}
+
+step() {
+  emit_message 1 step "\$*"
+}
+
+success() {
+  emit_message 1 success "\$*"
+}
+
+tip() {
+  emit_message 1 tip "\$*"
 }
 
 fail() {
-  printf '[foolery] ERROR: %s\n' "\$*" >&2
+  emit_message 2 error "\$*"
   exit 1
 }
 
@@ -378,10 +578,8 @@ maybe_print_update_banner() {
   fi
 
   if is_newer_version "\$installed_version" "\$latest_tag"; then
-    log "------------------------------------------------------------"
-    log "New Foolery version available: \${latest_tag} (installed \${installed_version})"
-    log "Upgrade: curl -fsSL https://raw.githubusercontent.com/\$RELEASE_OWNER/\$RELEASE_REPO/main/scripts/install.sh | bash"
-    log "------------------------------------------------------------"
+    tip "New Foolery version available: \${latest_tag} (installed \${installed_version})"
+    tip "Upgrade: curl -fsSL https://raw.githubusercontent.com/\$RELEASE_OWNER/\$RELEASE_REPO/main/scripts/install.sh | bash"
   fi
 }
 
@@ -523,7 +721,7 @@ start_cmd() {
     fail "Port \$PORT is already in use by pid \$listen_pid. Stop that process or set FOOLERY_PORT to another port."
   fi
 
-  log "Starting Foolery on \$URL"
+  step "Starting Foolery on \$URL"
   (
     cd "\$APP_DIR"
     nohup env NODE_ENV=production node "\$NEXT_BIN" start --hostname "\$HOST" --port "\$PORT" >>"\$STDOUT_LOG" 2>>"\$STDERR_LOG" < /dev/null &
@@ -542,7 +740,7 @@ start_cmd() {
     fail "Server exited during startup. Check logs: \$STDERR_LOG"
   fi
 
-  log "Started (pid \$pid)"
+  success "Started (pid \$pid)"
   log "stdout: \$STDOUT_LOG"
   log "stderr: \$STDERR_LOG"
   open_browser
@@ -573,14 +771,14 @@ stop_cmd() {
     return 0
   fi
 
-  log "Stopping Foolery (pid \$pid)"
+  step "Stopping Foolery (pid \$pid)"
   kill "\$pid" >/dev/null 2>&1 || true
 
   local attempts=20
   while ((attempts > 0)); do
     if ! kill -0 "\$pid" >/dev/null 2>&1; then
       rm -f "\$PID_FILE" "\$LEGACY_PID_FILE"
-      log "Stopped."
+      success "Stopped."
       return 0
     fi
     attempts=\$((attempts - 1))
@@ -590,7 +788,7 @@ stop_cmd() {
   log "Process did not stop gracefully; forcing kill."
   kill -9 "\$pid" >/dev/null 2>&1 || true
   rm -f "\$PID_FILE" "\$LEGACY_PID_FILE"
-  log "Stopped."
+  success "Stopped."
 }
 
 status_cmd() {
@@ -625,7 +823,7 @@ update_cmd() {
   local install_url
   install_url="https://raw.githubusercontent.com/\$RELEASE_OWNER/\$RELEASE_REPO/main/scripts/install.sh"
 
-  log "Updating Foolery runtime from \$RELEASE_OWNER/\$RELEASE_REPO (\$RELEASE_TAG)..."
+  step "Updating Foolery runtime from \$RELEASE_OWNER/\$RELEASE_REPO (\$RELEASE_TAG)..."
   if ! curl --fail --location --silent --show-error "\$install_url" | \
     env \
       FOOLERY_INSTALL_ROOT="\$INSTALL_ROOT" \
@@ -641,7 +839,7 @@ update_cmd() {
   fi
 
   rm -f "\$UPDATE_CHECK_FILE" >/dev/null 2>&1 || true
-  log "Update complete."
+  success "Update complete."
 }
 
 uninstall_cmd() {
@@ -794,12 +992,12 @@ prompt_cmd() {
 
     found=\$((found + 1))
     if append_guidance_prompt "\$target_file" "\$prompt_template_file"; then
-      log "Updated: \$target_file"
+      success "Updated: \$target_file"
       updated=\$((updated + 1))
     else
       local code="\$?"
       if [[ "\$code" -eq 2 ]]; then
-        log "Already contains Foolery guidance: \$target_file"
+        tip "Already contains Foolery guidance: \$target_file"
         skipped=\$((skipped + 1))
       else
         fail "Failed updating \$target_file"
@@ -811,7 +1009,7 @@ prompt_cmd() {
     fail "No AGENTS.md or CLAUDE.md found in \$cwd."
   fi
 
-  log "Prompt update complete: \$updated updated, \$skipped already up to date."
+  success "Prompt update complete: \$updated updated, \$skipped already up to date."
 }
 
 render_doctor_report() {
@@ -1300,7 +1498,7 @@ install_runtime() {
   extract_dir="$tmp_dir/extract"
   mkdir -p "$extract_dir"
 
-  log "Downloading runtime artifact: $asset"
+  step "Downloading runtime artifact: $asset"
   log "Source: $archive_url"
   if ! curl --fail --location --silent --show-error --retry 3 --retry-delay 1 --output "$archive_path" "$archive_url"; then
     fail "Failed to download release artifact. Verify release/tag exists and includes $asset"
@@ -1340,7 +1538,7 @@ main() {
 
   install_runtime
 
-  log "Writing launcher to $LAUNCHER_PATH"
+  step "Writing launcher to $LAUNCHER_PATH"
   write_launcher
 
   local existing_pid=""
@@ -1359,23 +1557,23 @@ main() {
     fi
   fi
 
-  log "Install complete"
-  log "Commands: foolery start | foolery setup | foolery prompt | foolery update | foolery stop | foolery restart | foolery status | foolery uninstall"
+  success "Install complete"
+  tip "Commands: foolery start | foolery setup | foolery prompt | foolery update | foolery stop | foolery restart | foolery status | foolery uninstall"
 
   case ":$PATH:" in
     *":$BIN_DIR:"*)
-      log "Launcher is on PATH."
+      success "Launcher is on PATH."
       ;;
     *)
-      log "Add $BIN_DIR to PATH:"
+      tip "Add $BIN_DIR to PATH:"
       log "  export PATH=\"$BIN_DIR:\$PATH\""
       ;;
   esac
 
-  log "Get started: foolery"
+  tip "Get started: foolery"
   log "Log files default to: $STATE_DIR/logs"
-  log ""
-  log "Configure repos and agents: foolery setup"
+  printf '\n'
+  tip "Configure repos and agents: foolery setup"
 }
 
 main "$@"

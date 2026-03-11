@@ -11,14 +11,126 @@ set -euo pipefail
 # Shared helpers
 # ---------------------------------------------------------------------------
 
+_setup_supports_color() {
+  local fd="${1:-1}"
+  if [[ -n "${NO_COLOR:-}" || -n "${CI:-}" || "${TERM:-}" == "dumb" ]]; then
+    return 1
+  fi
+  if [[ "$fd" == "2" ]]; then
+    [[ -t 2 ]]
+  else
+    [[ -t 1 ]]
+  fi
+}
+
+_setup_supports_emoji() {
+  local fd="${1:-1}"
+  local locale="${LC_ALL:-${LC_CTYPE:-${LANG:-}}}"
+  if [[ "$locale" != *UTF-8* && "$locale" != *utf8* ]]; then
+    return 1
+  fi
+  if [[ "$fd" == "2" ]]; then
+    [[ -t 2 ]]
+  else
+    [[ -t 1 ]]
+  fi
+}
+
+_setup_color() {
+  case "$1" in
+    blue) printf '\033[1;34m' ;;
+    green) printf '\033[1;32m' ;;
+    yellow) printf '\033[1;33m' ;;
+    cyan) printf '\033[1;36m' ;;
+    red) printf '\033[1;31m' ;;
+    reset) printf '\033[0m' ;;
+  esac
+}
+
+_setup_icon() {
+  local kind="$1" fd="${2:-1}"
+  if _setup_supports_emoji "$fd"; then
+    case "$kind" in
+      heading) printf '✨' ;;
+      prompt) printf '👉' ;;
+      repo) printf '📁' ;;
+      success) printf '✅' ;;
+      warn) printf '⚠️' ;;
+      error) printf '❌' ;;
+      *) printf 'ℹ️' ;;
+    esac
+    return 0
+  fi
+
+  case "$kind" in
+    heading) printf '==>' ;;
+    prompt) printf '->' ;;
+    repo) printf '[repo]' ;;
+    success) printf '[ok]' ;;
+    warn) printf '[!]' ;;
+    error) printf '[x]' ;;
+    *) printf '[i]' ;;
+  esac
+}
+
+_setup_emit() {
+  local fd="$1" kind="$2"
+  shift 2
+
+  local color=""
+  if _setup_supports_color "$fd"; then
+    case "$kind" in
+      heading|prompt) color="$(_setup_color blue)" ;;
+      success) color="$(_setup_color green)" ;;
+      warn) color="$(_setup_color yellow)" ;;
+      error) color="$(_setup_color red)" ;;
+      *) color="$(_setup_color cyan)" ;;
+    esac
+  fi
+
+  local reset=""
+  if [[ -n "$color" ]]; then
+    reset="$(_setup_color reset)"
+  fi
+
+  if [[ "$fd" == "2" ]]; then
+    printf '%b[foolery]%b %s %s\n' "$color" "$reset" "$(_setup_icon "$kind" "$fd")" "$*" >&2
+  else
+    printf '%b[foolery]%b %s %s\n' "$color" "$reset" "$(_setup_icon "$kind" "$fd")" "$*"
+  fi
+}
+
 _setup_log() {
-  printf '[foolery] %s\n' "$*"
+  _setup_emit 1 info "$*"
+}
+
+_setup_success() {
+  _setup_emit 1 success "$*"
+}
+
+_setup_heading() {
+  local color="" reset=""
+  if _setup_supports_color 2; then
+    color="$(_setup_color blue)"
+    reset="$(_setup_color reset)"
+  fi
+  printf '\n%b[foolery]%b %s %s\n' "$color" "$reset" "$(_setup_icon heading 2)" "$1" >/dev/tty
+}
+
+_setup_prompt() {
+  local color="" reset=""
+  if _setup_supports_color 2; then
+    color="$(_setup_color blue)"
+    reset="$(_setup_color reset)"
+  fi
+  printf '%b[foolery]%b %s %s' "$color" "$reset" "$(_setup_icon prompt 2)" "$1" >/dev/tty
 }
 
 _setup_confirm() {
   local prompt="$1" default="${2:-y}"
   local answer
-  read -r -p "$prompt" answer </dev/tty || answer=""
+  _setup_prompt "$prompt"
+  read -r answer </dev/tty || answer=""
   answer="${answer:-$default}"
   case "$answer" in
     [Yy]*) return 0 ;;
@@ -194,7 +306,7 @@ _show_mounted_repos() {
   if [[ -z "$mounted" ]]; then
     return 1
   fi
-  printf '\nThe following clones are already mounted:\n'
+  _setup_heading 'The following clones are already mounted:'
   while IFS= read -r p; do
     [[ -z "$p" ]] && continue
     printf '  - %s (%s)\n' "$p" "$(basename "$p")"
@@ -268,7 +380,8 @@ _write_registry_entry() {
 
 _display_scan_results() {
   local found_repos="$1" i=0 new_count=0
-  printf '\nFound repositories:\n' >&2
+  printf '\n' >&2
+  _setup_emit 2 repo 'Found repositories:'
   while IFS= read -r record; do
     [[ -z "$record" ]] && continue
     local memory_manager_type repo_dir
@@ -289,7 +402,8 @@ EOF
 
 _mount_selected_repos() {
   local found_repos="$1" choice
-  read -r -p "Enter numbers to mount (comma-separated, or 'all') [all]: " choice </dev/tty || choice=""
+  _setup_prompt "Enter numbers to mount (comma-separated, or 'all') [all]: "
+  read -r choice </dev/tty || choice=""
   choice="${choice:-all}"
   choice="${choice// /}"
 
@@ -354,7 +468,8 @@ EOF
 _handle_manual_entry() {
   while true; do
     local repo_path
-    read -r -p "Enter repository path (or empty to finish): " repo_path </dev/tty || break
+    _setup_prompt 'Enter repository path (or empty to finish): '
+    read -r repo_path </dev/tty || break
     if [[ -z "$repo_path" ]]; then
       break
     fi
@@ -384,17 +499,19 @@ _handle_manual_entry() {
 }
 
 _prompt_scan_method() {
-  printf '\nHow would you like to find repositories?\n'
+  _setup_heading 'How would you like to find repositories?'
   printf '  1) Scan a directory for supported memory managers (default: ~, up to 2 levels deep)\n'
   printf '  2) Manually specify paths\n'
   local method
-  read -r -p "Choice [1]: " method </dev/tty || method=""
+  _setup_prompt 'Choice [1]: '
+  read -r method </dev/tty || method=""
   method="${method:-1}"
 
   case "$method" in
     1)
       local scan_dir
-      read -r -p "Directory to scan [$HOME]: " scan_dir </dev/tty || scan_dir=""
+      _setup_prompt "Directory to scan [$HOME]: "
+      read -r scan_dir </dev/tty || scan_dir=""
       scan_dir="${scan_dir:-$HOME}"
       case "$scan_dir" in
         "~"*) scan_dir="${HOME}${scan_dir#"~"}" ;;
@@ -405,7 +522,7 @@ _prompt_scan_method() {
       _handle_manual_entry
       ;;
     *)
-      _setup_log "Invalid choice: $method"
+      _setup_emit 2 warn "Invalid choice: $method"
       ;;
   esac
 }
@@ -470,14 +587,14 @@ _prompt_guidance_wizard() {
       found_in_repo=1
 
       if _append_guidance_prompt_to_file "$target_file" "$prompt_file"; then
-        _setup_log "Updated prompt guidance: $target_file"
+        _setup_success "Updated prompt guidance: $target_file"
         updated=$((updated + 1))
       else
         local code="$?"
         if [[ "$code" -eq 2 ]]; then
           already=$((already + 1))
         else
-          _setup_log "Failed updating prompt guidance: $target_file"
+          _setup_emit 2 warn "Failed updating prompt guidance: $target_file"
         fi
       fi
     done
@@ -553,7 +670,7 @@ _detect_agents() {
     if command -v "$aid" >/dev/null 2>&1; then
       local agent_path
       agent_path="$(command -v "$aid")"
-      _setup_log "  Found: $aid (at $agent_path)"
+      _setup_log "Found: $aid (at $agent_path)"
       FOUND_AGENTS+=("$aid")
     fi
   done
@@ -565,14 +682,14 @@ _prompt_action_choice() {
   local agents=("$@")
   local count=${#agents[@]}
 
-  printf '\nWhich agent for "%s"?\n' "$action_label" >/dev/tty
+  _setup_heading "Which agent for \"$action_label\"?"
   local i
   for ((i = 0; i < count; i++)); do
     printf '  %d) %s\n' "$((i + 1))" "${agents[$i]}" >/dev/tty
   done
 
   local choice
-  printf 'Choice [1]: ' >/dev/tty
+  _setup_prompt 'Choice [1]: '
   read -r choice </dev/tty || true
   choice="${choice:-1}"
 
@@ -591,7 +708,7 @@ _prompt_model() {
   if [[ -z "$models_list" ]]; then
     # No discovery available — free-text fallback
     local model
-    printf 'Model for %s (optional, press Enter to skip): ' "$aid" >/dev/tty
+    _setup_prompt "Model for $aid (optional, press Enter to skip): "
     read -r model </dev/tty || true
     printf '%s' "$model"
     return
@@ -606,7 +723,7 @@ $models_list
 EOF
 
   local count=${#models[@]}
-  printf '\nAvailable models for %s:\n' "$aid" >/dev/tty
+  _setup_heading "Available models for $aid"
   local i
   for ((i = 0; i < count; i++)); do
     printf '  %d) %s\n' "$((i + 1))" "${models[$i]}" >/dev/tty
@@ -615,7 +732,7 @@ EOF
   printf '  %d) Other (type manually)\n' "$((count + 2))" >/dev/tty
 
   local choice
-  printf 'Choice [%d]: ' "$((count + 1))" >/dev/tty
+  _setup_prompt "Choice [$((count + 1))]: "
   read -r choice </dev/tty || true
   choice="${choice:-$((count + 1))}"
 
@@ -625,7 +742,7 @@ EOF
       return
     elif ((choice == count + 2)); then
       local model
-      printf 'Enter model name: ' >/dev/tty
+      _setup_prompt 'Enter model name: '
       read -r model </dev/tty || true
       printf '%s' "$model"
       return
@@ -683,14 +800,14 @@ _agent_wizard() {
     for action in take scene breakdown; do
       _kv_set ACTION_MAP "$action" "$sole"
     done
-    _setup_log "Registered $sole for all actions."
+    _setup_success "Registered $sole for all actions."
   else
     _prompt_all_models
     _prompt_action_mappings
   fi
 
   _write_settings_toml
-  _setup_log "Agent settings saved to $_AGENT_SETTINGS_FILE"
+  _setup_success "Agent settings saved to $_AGENT_SETTINGS_FILE"
 }
 
 # ---------------------------------------------------------------------------
@@ -699,15 +816,15 @@ _agent_wizard() {
 
 foolery_setup() {
   if [[ ! -t 0 ]]; then
-    printf '[foolery] setup requires an interactive terminal.\n' >&2
+    _setup_emit 2 error 'setup requires an interactive terminal.'
     return 1
   fi
 
-  _setup_log "Foolery interactive setup"
+  _setup_heading 'Foolery interactive setup'
   _repo_wizard
   _prompt_guidance_wizard
   _agent_wizard
-  _setup_log "Setup complete."
+  _setup_success 'Setup complete.'
 }
 
 # Allow direct execution: bash setup.sh

@@ -11,8 +11,81 @@ SETTINGS_FILE="${CONFIG_DIR}/settings.toml"
 # Known agent ids checked during detection.
 KNOWN_AGENTS=(claude codex gemini openrouter)
 
+_wizard_supports_color() {
+  if [[ -n "${NO_COLOR:-}" || -n "${CI:-}" || "${TERM:-}" == "dumb" ]]; then
+    return 1
+  fi
+  [[ -t 1 ]]
+}
+
+_wizard_supports_emoji() {
+  local locale="${LC_ALL:-${LC_CTYPE:-${LANG:-}}}"
+  [[ -t 1 ]] || return 1
+  [[ "$locale" == *UTF-8* || "$locale" == *utf8* ]]
+}
+
+_wizard_color() {
+  case "$1" in
+    cyan) printf '\033[1;36m' ;;
+    blue) printf '\033[1;34m' ;;
+    green) printf '\033[1;32m' ;;
+    reset) printf '\033[0m' ;;
+  esac
+}
+
+_wizard_icon() {
+  local kind="$1"
+  if _wizard_supports_emoji; then
+    case "$kind" in
+      heading) printf '✨' ;;
+      prompt) printf '👉' ;;
+      found) printf '🤖' ;;
+      success) printf '✅' ;;
+      *) printf 'ℹ️' ;;
+    esac
+    return 0
+  fi
+
+  case "$kind" in
+    heading) printf '==>' ;;
+    prompt) printf '->' ;;
+    found) printf '[agent]' ;;
+    success) printf '[ok]' ;;
+    *) printf '[i]' ;;
+  esac
+}
+
+_wizard_prefix() {
+  local kind="${1:-info}" color=""
+  if _wizard_supports_color; then
+    case "$kind" in
+      success) color="$(_wizard_color green)" ;;
+      heading|prompt) color="$(_wizard_color blue)" ;;
+      *) color="$(_wizard_color cyan)" ;;
+    esac
+  fi
+
+  if [[ -n "$color" ]]; then
+    printf '%b[foolery-install]%b %s' "$color" "$(_wizard_color reset)" "$(_wizard_icon "$kind")"
+  else
+    printf '[foolery-install] %s' "$(_wizard_icon "$kind")"
+  fi
+}
+
 _wizard_log() {
-  printf '[foolery-install] %s\n' "$*"
+  printf '%s %s\n' "$(_wizard_prefix info)" "$*"
+}
+
+_wizard_success() {
+  printf '%s %s\n' "$(_wizard_prefix success)" "$*"
+}
+
+_wizard_heading() {
+  printf '\n%s %s\n' "$(_wizard_prefix heading)" "$1" >/dev/tty
+}
+
+_wizard_prompt() {
+  printf '%s %s' "$(_wizard_prefix prompt)" "$1" >/dev/tty
 }
 
 # Bash 3.2-safe key-value helpers (replaces associative arrays).
@@ -102,7 +175,7 @@ detect_agents() {
     if command -v "$aid" >/dev/null 2>&1; then
       local agent_path
       agent_path="$(command -v "$aid")"
-      _wizard_log "  Found: $aid (at $agent_path)"
+      printf '%s Found: %s (at %s)\n' "$(_wizard_prefix found)" "$aid" "$agent_path"
       FOUND_AGENTS+=("$aid")
     fi
   done
@@ -120,14 +193,14 @@ _prompt_action_choice() {
   local agents=("$@")
   local count=${#agents[@]}
 
-  printf '\nWhich agent for "%s"?\n' "$action_label" >/dev/tty
+  _wizard_heading "Which agent for \"$action_label\"?"
   local i
   for ((i = 0; i < count; i++)); do
     printf '  %d) %s\n' "$((i + 1))" "${agents[$i]}" >/dev/tty
   done
 
   local choice
-  printf 'Choice [1]: ' >/dev/tty
+  _wizard_prompt 'Choice [1]: '
   read -r choice </dev/tty || true
   choice="${choice:-1}"
 
@@ -147,7 +220,7 @@ _prompt_model() {
   if [[ -z "$models_list" ]]; then
     # No discovery available — free-text fallback
     local model
-    printf 'Model for %s (optional, press Enter to skip): ' "$aid" >/dev/tty
+    _wizard_prompt "Model for $aid (optional, press Enter to skip): "
     read -r model </dev/tty || true
     printf '%s' "$model"
     return
@@ -162,7 +235,7 @@ $models_list
 EOF
 
   local count=${#models[@]}
-  printf '\nAvailable models for %s:\n' "$aid" >/dev/tty
+  _wizard_heading "Available models for $aid"
   local i
   for ((i = 0; i < count; i++)); do
     printf '  %d) %s\n' "$((i + 1))" "${models[$i]}" >/dev/tty
@@ -171,7 +244,7 @@ EOF
   printf '  %d) Other (type manually)\n' "$((count + 2))" >/dev/tty
 
   local choice
-  printf 'Choice [%d]: ' "$((count + 1))" >/dev/tty
+  _wizard_prompt "Choice [$((count + 1))]: "
   read -r choice </dev/tty || true
   choice="${choice:-$((count + 1))}"
 
@@ -181,7 +254,7 @@ EOF
       return
     elif ((choice == count + 2)); then
       local model
-      printf 'Enter model name: ' >/dev/tty
+      _wizard_prompt 'Enter model name: '
       read -r model </dev/tty || true
       printf '%s' "$model"
       return
@@ -227,7 +300,8 @@ maybe_agent_wizard() {
     return 0
   fi
 
-  printf '\nWould you like Foolery to scan for and auto-register AI agents? [Y/n] '
+  printf '\n' >/dev/tty
+  _wizard_prompt 'Scan for and auto-register AI agents? [Y/n] '
   local answer
   read -r answer </dev/tty || true
   case "$answer" in [nN]) return 0 ;; esac
@@ -248,12 +322,12 @@ maybe_agent_wizard() {
     for action in take scene breakdown; do
       _kv_set ACTION_MAP "$action" "$sole"
     done
-    _wizard_log "Registered $sole for all actions."
+    _wizard_success "Registered $sole for all actions."
   else
     _prompt_all_models
     _prompt_action_mappings
   fi
 
   _write_settings_toml
-  _wizard_log "Agent settings saved to $SETTINGS_FILE"
+  _wizard_success "Agent settings saved to $SETTINGS_FILE"
 }
