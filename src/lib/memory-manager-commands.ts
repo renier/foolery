@@ -57,7 +57,7 @@ export async function rollbackBeatState(
   reason?: string,
 ): Promise<void> {
   if (memoryManagerType === "knots") {
-    const cmd = `kno rollback ${quoteId(beatId)}`;
+    const cmd = `kno rb ${quoteId(beatId)}`;
     const { exec: execCb } = await import("node:child_process");
     const { promisify } = await import("node:util");
     const execAsync = promisify(execCb);

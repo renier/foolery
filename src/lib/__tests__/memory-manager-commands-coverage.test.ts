@@ -79,16 +79,16 @@ describe("quoteId helper (line 9)", () => {
 });
 
 describe("rollbackBeatState", () => {
-  it("uses kno rollback with quoted id for knots", async () => {
+  it("uses kno rb with quoted id for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots");
     expect(mockExec).toHaveBeenCalledTimes(1);
-    expect(mockExec.mock.calls[0][0]).toBe('kno rollback "beat-42"');
+    expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
   });
 
   it("adds a note when reason is provided for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots", "flaky test");
     expect(mockExec).toHaveBeenCalledTimes(2);
-    expect(mockExec.mock.calls[0][0]).toBe('kno rollback "beat-42"');
+    expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
     expect(mockExec.mock.calls[1][0]).toBe('kno update "beat-42" --add-note "flaky test"');
   });
 
