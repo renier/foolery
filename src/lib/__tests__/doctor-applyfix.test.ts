@@ -525,6 +525,46 @@ describe("applyFix: prompt-guidance", () => {
     }
   });
 
+  it("collapses duplicate managed blocks to one canonical prompt block", async () => {
+    const repoPath = await mkdtemp(join(tmpdir(), "foolery-fix-prompt-duplicates-"));
+    try {
+      const duplicateBlocks =
+        "# Agents\n\n<!-- FOOLERY_GUIDANCE_PROMPT_START -->\nFOOLERY_PROMPT_PROFILE: beads-coarse-human-gated\nLegacy guidance\n<!-- FOOLERY_GUIDANCE_PROMPT_END -->\n\n<!-- FOOLERY_GUIDANCE_PROMPT_START -->\nFOOLERY_PROMPT_PROFILE: autopilot\nStale duplicate guidance\n<!-- FOOLERY_GUIDANCE_PROMPT_END -->\n";
+      await writeFile(join(repoPath, "AGENTS.md"), duplicateBlocks);
+      const originalCwd = process.cwd();
+      process.chdir(repoPath);
+      await writeFile(
+        join(repoPath, "PROMPT_BEATS.md"),
+        "<!-- FOOLERY_GUIDANCE_PROMPT_START -->\nFOOLERY_PROMPT_PROFILE: autopilot\nCanonical guidance\n<!-- FOOLERY_GUIDANCE_PROMPT_END -->",
+      );
+
+      mockListWorkflows.mockResolvedValue({
+        ok: true,
+        data: [{ id: "autopilot", promptProfileId: "autopilot" }],
+      });
+      mockListRepos.mockResolvedValue([
+        { path: repoPath, name: "test-repo", addedAt: "2026-01-01" },
+      ]);
+      mockList.mockResolvedValue({ ok: true, data: [] });
+
+      const fixReport = await runDoctorFix({ "prompt-guidance": "append" });
+      const fix = fixReport.fixes.find((f) => f.check === "prompt-guidance");
+      expect(fix?.success).toBe(true);
+      expect(fix?.message).toContain("Updated Foolery guidance");
+
+      const content = await readFile(join(repoPath, "AGENTS.md"), "utf8");
+      expect(content).toContain("Canonical guidance");
+      expect(content).not.toContain("Legacy guidance");
+      expect(content).not.toContain("Stale duplicate guidance");
+      expect(content).not.toContain("beads-coarse-human-gated");
+      expect(content.split("FOOLERY_GUIDANCE_PROMPT_START").length).toBe(2);
+
+      process.chdir(originalCwd);
+    } finally {
+      await rm(repoPath, { recursive: true, force: true });
+    }
+  });
+
   it("injects profile marker into knots template that lacks one", async () => {
     const repoPath = await mkdtemp(join(tmpdir(), "foolery-fix-knots-"));
     try {

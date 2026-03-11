@@ -106,9 +106,44 @@ const PROMPT_PROFILE_MARKER = "FOOLERY_PROMPT_PROFILE:";
 const PROMPT_PROFILE_REGEX = new RegExp(
   `${PROMPT_PROFILE_MARKER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*([A-Za-z0-9._-]+)`,
 );
-const MANAGED_BLOCK_REGEX = new RegExp(
-  `(<!-- ${PROMPT_GUIDANCE_START_MARKER} -->)[\\s\\S]*?(<!-- ${PROMPT_GUIDANCE_END_MARKER} -->)`,
-);
+const MANAGED_BLOCK_PATTERN =
+  `(<!-- ${PROMPT_GUIDANCE_START_MARKER} -->)[\\s\\S]*?(<!-- ${PROMPT_GUIDANCE_END_MARKER} -->)`;
+const MANAGED_BLOCK_REGEX = new RegExp(MANAGED_BLOCK_PATTERN);
+
+function getFirstManagedBlock(content: string): string | undefined {
+  return content.match(MANAGED_BLOCK_REGEX)?.[0];
+}
+
+function getManagedBlocks(content: string): RegExpMatchArray[] {
+  return Array.from(content.matchAll(new RegExp(MANAGED_BLOCK_PATTERN, "g")));
+}
+
+function replaceManagedBlocks(content: string, managedBlock: string): string {
+  const matches = getManagedBlocks(content);
+  if (matches.length === 0) return content;
+
+  let updatedContent = "";
+  let cursor = 0;
+
+  for (const [index, match] of matches.entries()) {
+    const start = match.index ?? 0;
+    const end = start + match[0].length;
+    const interstitialContent = content.slice(cursor, start);
+
+    // Preserve surrounding prose while collapsing duplicate managed blocks.
+    if (index === 0 || interstitialContent.trim().length > 0) {
+      updatedContent += interstitialContent;
+    }
+    if (index === 0) {
+      updatedContent += managedBlock;
+    }
+
+    cursor = end;
+  }
+
+  updatedContent += content.slice(cursor);
+  return updatedContent;
+}
 
 function promptProfileTemplateFor(_profileId: string, repoPath?: string): string {
   if (repoPath && detectMemoryManagerType(repoPath) === "knots") {
@@ -706,7 +741,7 @@ export async function checkPromptGuidance(repos: RegisteredRepo[]): Promise<Diag
         }
 
         // Extract the profile from the managed block only (not the whole file).
-        const managedBlock = content.match(MANAGED_BLOCK_REGEX)?.[0] ?? content;
+        const managedBlock = getFirstManagedBlock(content) ?? content;
         const profileMatch = managedBlock.match(PROMPT_PROFILE_REGEX);
         const actualProfileRaw = profileMatch?.[1];
         const actualProfile = normalizeProfileId(actualProfileRaw) ?? actualProfileRaw;
@@ -1362,10 +1397,10 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
         const filePath = join(repoPath, file);
         const existingContent = await readFile(filePath, "utf8");
 
-        if (existingContent.match(MANAGED_BLOCK_REGEX)) {
-          // Replace existing managed block in-place instead of appending a duplicate.
-          const managedBlock = templateContent.match(MANAGED_BLOCK_REGEX)?.[0] ?? templateContent;
-          const updatedContent = existingContent.replace(MANAGED_BLOCK_REGEX, managedBlock);
+        if (getManagedBlocks(existingContent).length > 0) {
+          // Replace the first managed block with the canonical template and drop stale duplicates.
+          const managedBlock = getFirstManagedBlock(templateContent) ?? templateContent;
+          const updatedContent = replaceManagedBlocks(existingContent, managedBlock);
           await writeFile(filePath, updatedContent, "utf8");
           return {
             check: diag.check,
