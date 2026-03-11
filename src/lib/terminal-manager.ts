@@ -564,9 +564,7 @@ export async function createSession(
   const isParent = isWave || Boolean(hasChildren && waveBeatIds.length > 0);
   const resolvedRepoPath = repoPath || process.cwd();
   const memoryManagerType = resolveMemoryManagerType(resolvedRepoPath);
-  // In knots repos, parent beats use single-beat Take mode, not Scene orchestration.
-  // Scene orchestration asserts child claimability which fails for knots parents.
-  const effectiveParent = isParent && memoryManagerType !== "knots";
+  const effectiveParent = isParent;
   const targets = effectiveParent ? waveBeats : [beat];
   const healedTargets = await Promise.all(
     targets.map((target) =>
@@ -583,7 +581,9 @@ export async function createSession(
   if (effectiveParent) {
     waveBeats = healedTargets.filter((h) => !isTerminalBeatState(h.beat.state)).map(h => h.beat);
     waveBeatIds = waveBeats.map((child) => child.id);
-    assertClaimable(waveBeats, "Scene", memoryManagerType);
+    if (memoryManagerType !== "knots") {
+      assertClaimable(waveBeats, "Scene", memoryManagerType);
+    }
   } else {
     beat = healedTargets[0]?.beat ?? beat;
     assertClaimable([beat], "Take", memoryManagerType);

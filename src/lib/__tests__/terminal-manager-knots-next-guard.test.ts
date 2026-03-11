@@ -293,8 +293,9 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     expect(interactionLog.logPrompt).toHaveBeenCalledWith(initialPrompt, { source: "initial" });
   });
 
-  it("wraps knots parent prompt as Take instead of Scene", async () => {
-    // Knots parents should use single-beat Take mode, not Scene orchestration.
+  it("wraps knots parent prompt as Scene", async () => {
+    // Knots parents should use Scene orchestration, with the prompt instructing
+    // the agent to claim and advance each child beat individually.
     resolveMemoryManagerTypeMock.mockReturnValue("knots");
     backend.get.mockResolvedValue({
       ok: true,
@@ -325,13 +326,18 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     await createSession("foolery-3050", "/tmp/repo");
 
     expect(spawnedChildren).toHaveLength(1);
+    expect(backend.buildTakePrompt).toHaveBeenCalledWith(
+      "foolery-3050",
+      { isParent: true, childBeatIds: ["foolery-3051"] },
+      "/tmp/repo",
+    );
     expect(interactionLog.logPrompt).toHaveBeenCalledTimes(1);
     const initialPrompt = interactionLog.logPrompt.mock.calls[0]?.[0];
     expect(typeof initialPrompt).toBe("string");
     expect(initialPrompt).toContain("FOOLERY EXECUTION BOUNDARY:");
-    // Should use Take wrapping, not Scene wrapping
-    expect(initialPrompt).toContain("Execute only the currently assigned workflow action described below.");
-    expect(initialPrompt).not.toContain("Execute only the child beats explicitly listed below.");
+    // Should use Scene wrapping, not Take wrapping
+    expect(initialPrompt).toContain("Execute only the child beats explicitly listed below.");
+    expect(initialPrompt).not.toContain("Execute only the currently assigned workflow action described below.");
     expect(initialPrompt).toContain("knots parent prompt");
   });
 
