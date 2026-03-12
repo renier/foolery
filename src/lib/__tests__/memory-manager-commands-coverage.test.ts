@@ -12,6 +12,11 @@ vi.mock("node:child_process", () => ({
   exec: (cmd: string, opts: unknown, cb: ExecCallback) => mockExec(cmd, opts, cb),
 }));
 
+const mockBackendUpdate = vi.fn().mockResolvedValue({ ok: true });
+vi.mock("@/lib/backend-instance", () => ({
+  getBackend: () => ({ update: mockBackendUpdate }),
+}));
+
 import {
   buildClaimCommand,
   buildWorkflowStateCommand,
@@ -21,6 +26,7 @@ import {
 beforeEach(() => {
   vi.clearAllMocks();
   mockExec.mockImplementation((_cmd: string, _opts: unknown, cb: ExecCallback) => cb(null, "", ""));
+  mockBackendUpdate.mockResolvedValue({ ok: true });
 });
 
 describe("buildClaimCommand (line 32-34)", () => {
@@ -95,5 +101,37 @@ describe("rollbackBeatState", () => {
   it("does not add a note when reason is omitted for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots");
     expect(mockExec).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses backend.update() for beads instead of exec", async () => {
+    await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "beads");
+    expect(mockExec).not.toHaveBeenCalled();
+    expect(mockBackendUpdate).toHaveBeenCalledWith("beat-42", { state: "triage" }, "/tmp");
+  });
+
+  it("propagates exec errors for knots", async () => {
+    mockExec.mockImplementation((_cmd: string, _opts: unknown, cb: ExecCallback) =>
+      cb(new Error("command failed"), "", "kno: not found"),
+    );
+    await expect(
+      rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots"),
+    ).rejects.toThrow("command failed");
+  });
+
+  it("escapes special characters in beatId via JSON.stringify", async () => {
+    await rollbackBeatState('id with "quotes" & spaces', "impl", "triage", "/tmp", "knots");
+    expect(mockExec.mock.calls[0][0]).toBe('kno rb "id with \\"quotes\\" & spaces"');
+  });
+
+  it("does not add a note when reason is an empty string for knots", async () => {
+    await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots", "");
+    expect(mockExec).toHaveBeenCalledTimes(1);
+    expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
+  });
+
+  it("does not add a note when reason is undefined for knots", async () => {
+    await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots", undefined);
+    expect(mockExec).toHaveBeenCalledTimes(1);
+    expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
   });
 });
