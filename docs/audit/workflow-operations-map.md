@@ -204,7 +204,6 @@ Backend: `src/lib/doctor.ts`
 | `updates` | Check for new foolery releases |
 | `settings-defaults` | Verify settings.toml has required defaults |
 | `stale-parent` | Find parents where all children are closed |
-| `prompt-guidance` | Verify AGENTS.md/CLAUDE.md has foolery prompt |
 
 Each diagnostic can be fixable with selectable strategies.
 
@@ -440,7 +439,6 @@ checkAgents() -> Diagnostic[]
 checkUpdates() -> Diagnostic[]
 checkSettingsDefaults() -> Diagnostic[]
 checkStaleParents(repos: RegisteredRepo[]) -> Diagnostic[]
-checkPromptGuidance(repos: RegisteredRepo[]) -> Diagnostic[]
 ```
 
 ### 2.10 Agent History Operations
@@ -535,7 +533,7 @@ fetchBeadsFromAllRepos(repos: RegisteredRepo[], filters?) -> BeadWithRepo[]
 | **Orchestration** | `startOrchestration`, `streamOrchestrationEvents`, `listOrchestrationSessions`, `applyOrchestrationPlan` (uses `createBead`, `addDep`), `restageOrchestration`, `abortOrchestration` |
 | **Wave planning** | `computeWavePlan` (uses `listBeads`, `listDeps`, `computeWaves`, `inferReadiness`) |
 | **Merge** | `mergeBeads` (uses `getBead` x2, `updateBead`, `closeBead`) |
-| **Doctor / health** | `runDoctor`, `streamDoctor`, `runDoctorFix`, `checkAgents`, `checkUpdates`, `checkSettingsDefaults`, `checkStaleParents` (uses `listBeads`), `checkPromptGuidance`, `listRepos` |
+| **Doctor / health** | `runDoctor`, `streamDoctor`, `runDoctorFix`, `checkAgents`, `checkUpdates`, `checkSettingsDefaults`, `checkStaleParents` (uses `listBeads`), `listRepos` |
 | **Agent history** | `readAgentHistory`, `collectLogFiles`, `readLogFile`, `parseSession` |
 | **Registry** | `listRepos`, `addRepo`, `removeRepo`, `listDirectory` |
 | **Settings** | `loadSettings`, `updateSettings`, `getActionAgent`, `getRegisteredAgents`, `inspectSettingsDefaults`, `backfillMissingSettingsDefaults`, `scanAgents` |

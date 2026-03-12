@@ -52,7 +52,8 @@ describe("foolery help CLI", () => {
     });
 
     expect(help.stdout).toContain("Usage: foolery <command>");
-    expect(help.stdout).toContain("Manage Foolery guidance prompt in AGENTS.md/CLAUDE.md");
+    expect(help.stdout).toContain("Download and install the latest Foolery runtime");
+    expect(help.stdout).not.toContain("Manage Foolery guidance prompt in AGENTS.md/CLAUDE.md");
     expect(help.stdout).not.toMatch(/\u001b\[[0-9;]*m/);
   });
 
