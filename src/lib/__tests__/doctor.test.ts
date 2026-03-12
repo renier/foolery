@@ -88,7 +88,6 @@ import {
   checkBackendTypeMigration,
   checkRepoMemoryManagerTypes,
   checkStaleParents,
-  checkPromptGuidance,
   checkMemoryManagerCliAvailability,
   checkRegistryConsistency,
   runDoctor,
@@ -546,102 +545,6 @@ describe("checkStaleParents", () => {
   });
 });
 
-// ── checkPromptGuidance ───────────────────────────────────
-
-describe("checkPromptGuidance", () => {
-  it("warns when AGENTS.md exists but guidance marker is missing", async () => {
-    const repoPath = await mkdtemp(join(tmpdir(), "foolery-doctor-guidance-"));
-    try {
-      await writeFile(join(repoPath, "AGENTS.md"), "# Agent Instructions\n");
-
-      const diags = await checkPromptGuidance([
-        { path: repoPath, name: "repo-a", addedAt: "2026-01-01" },
-      ]);
-
-      expect(diags).toHaveLength(1);
-      expect(diags[0].check).toBe("prompt-guidance");
-      expect(diags[0].severity).toBe("warning");
-      expect(diags[0].fixable).toBe(true);
-      expect(diags[0].fixOptions).toEqual([
-        { key: "append", label: "Append or update Foolery guidance prompt" },
-      ]);
-      expect(diags[0].message).toContain("missing Foolery guidance prompt");
-      expect(diags[0].context?.file).toBe("AGENTS.md");
-    } finally {
-      await rm(repoPath, { recursive: true, force: true });
-    }
-  });
-
-  it("does not warn when prompt marker is present with matching canonical profile", async () => {
-    const repoPath = await mkdtemp(join(tmpdir(), "foolery-doctor-guidance-"));
-    try {
-      mockListWorkflows.mockResolvedValue({
-        ok: true,
-        data: [{ id: "semiauto", promptProfileId: "semiauto" }],
-      });
-      await writeFile(
-        join(repoPath, "CLAUDE.md"),
-        "<!-- FOOLERY_GUIDANCE_PROMPT_START -->\nFOOLERY_PROMPT_PROFILE: semiauto\n## rules\n<!-- FOOLERY_GUIDANCE_PROMPT_END -->"
-      );
-
-      const diags = await checkPromptGuidance([
-        { path: repoPath, name: "repo-b", addedAt: "2026-01-01" },
-      ]);
-
-      expect(diags).toHaveLength(0);
-    } finally {
-      await rm(repoPath, { recursive: true, force: true });
-    }
-  });
-
-  it("does not warn when file has legacy alias that normalizes to expected profile", async () => {
-    const repoPath = await mkdtemp(join(tmpdir(), "foolery-doctor-guidance-"));
-    try {
-      mockListWorkflows.mockResolvedValue({
-        ok: true,
-        data: [{ id: "semiauto", promptProfileId: "semiauto" }],
-      });
-      // File uses legacy alias "beads-coarse-human-gated" which normalizes to "semiauto"
-      await writeFile(
-        join(repoPath, "CLAUDE.md"),
-        "<!-- FOOLERY_GUIDANCE_PROMPT_START -->\nFOOLERY_PROMPT_PROFILE: beads-coarse-human-gated\n## rules\n<!-- FOOLERY_GUIDANCE_PROMPT_END -->"
-      );
-
-      const diags = await checkPromptGuidance([
-        { path: repoPath, name: "repo-legacy", addedAt: "2026-01-01" },
-      ]);
-
-      expect(diags).toHaveLength(0);
-    } finally {
-      await rm(repoPath, { recursive: true, force: true });
-    }
-  });
-
-  it("does not warn when expected profile is legacy alias and file has canonical ID", async () => {
-    const repoPath = await mkdtemp(join(tmpdir(), "foolery-doctor-guidance-"));
-    try {
-      // Backend returns legacy promptProfileId
-      mockListWorkflows.mockResolvedValue({
-        ok: true,
-        data: [{ id: "bc", promptProfileId: "beads-coarse-human-gated" }],
-      });
-      // File uses canonical profile
-      await writeFile(
-        join(repoPath, "CLAUDE.md"),
-        "<!-- FOOLERY_GUIDANCE_PROMPT_START -->\nFOOLERY_PROMPT_PROFILE: semiauto\n## rules\n<!-- FOOLERY_GUIDANCE_PROMPT_END -->"
-      );
-
-      const diags = await checkPromptGuidance([
-        { path: repoPath, name: "repo-reverse", addedAt: "2026-01-01" },
-      ]);
-
-      expect(diags).toHaveLength(0);
-    } finally {
-      await rm(repoPath, { recursive: true, force: true });
-    }
-  });
-});
-
 // ── runDoctor ──────────────────────────────────────────────
 
 describe("runDoctor", () => {
@@ -814,10 +717,10 @@ describe("streamDoctor", () => {
     });
 
     const events = await collectStream();
-    expect(events).toHaveLength(13);
+    expect(events).toHaveLength(12);
 
-    // First 12 are check results
-    for (let i = 0; i < 12; i++) {
+    // First 11 are check results
+    for (let i = 0; i < 11; i++) {
       const ev = events[i] as DoctorCheckResult;
       expect(ev.done).toBeUndefined();
       expect(ev.category).toBeTruthy();
@@ -828,7 +731,7 @@ describe("streamDoctor", () => {
     }
 
     // Last is summary
-    const summary = events[12] as DoctorStreamSummary;
+    const summary = events[11] as DoctorStreamSummary;
     expect(summary.done).toBe(true);
     expect(typeof summary.passed).toBe("number");
     expect(typeof summary.failed).toBe("number");
@@ -855,7 +758,6 @@ describe("streamDoctor", () => {
       "repo-memory-managers",
       "memory-implementation",
       "stale-parents",
-      "prompt-guidance",
       "memory-manager-cli",
       "registry-consistency",
     ]);

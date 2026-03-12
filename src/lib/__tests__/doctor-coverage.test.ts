@@ -89,7 +89,6 @@ import {
   checkSettingsDefaults,
   checkStaleSettingsKeys,
   checkRepoMemoryManagerTypes,
-  checkPromptGuidance,
   runDoctorFix,
   streamDoctor,
   type DoctorCheckResult,
@@ -602,51 +601,6 @@ describe("applyFix: missing context", () => {
     const fix = report.fixes.find((f) => f.check === "stale-parent");
     expect(fix?.success).toBe(false);
     expect(fix?.message).toContain("not found");
-  });
-});
-
-// ── checkPromptGuidance additional coverage ────────────────
-
-describe("checkPromptGuidance (additional coverage)", () => {
-  it("warns when prompt marker exists but profile mismatches", async () => {
-    const repoPath = await mkdtemp(join(tmpdir(), "foolery-doc-cov-"));
-    try {
-      await writeFile(
-        join(repoPath, "CLAUDE.md"),
-        "<!-- FOOLERY_GUIDANCE_PROMPT_START -->\nFOOLERY_PROMPT_PROFILE: wrong-profile\n",
-      );
-      mockListWorkflows.mockResolvedValue({
-        ok: true,
-        data: [{ id: "w1", mode: "a", promptProfileId: "expected-profile" }],
-      });
-
-      const diags = await checkPromptGuidance([
-        { path: repoPath, name: "mismatch-repo", addedAt: "2026-01-01" },
-      ]);
-      expect(diags.length).toBeGreaterThanOrEqual(1);
-      expect(diags[0].severity).toBe("warning");
-      expect(diags[0].message).toContain("mismatched prompt profile");
-    } finally {
-      await rm(repoPath, { recursive: true, force: true });
-    }
-  });
-
-  it("warns when prompt marker exists but no profile tag", async () => {
-    const repoPath = await mkdtemp(join(tmpdir(), "foolery-doc-cov-"));
-    try {
-      await writeFile(
-        join(repoPath, "AGENTS.md"),
-        "<!-- FOOLERY_GUIDANCE_PROMPT_START -->\nNo profile tag here.\n",
-      );
-      const diags = await checkPromptGuidance([
-        { path: repoPath, name: "no-profile", addedAt: "2026-01-01" },
-      ]);
-      expect(diags.length).toBeGreaterThanOrEqual(1);
-      expect(diags[0].severity).toBe("warning");
-      expect(diags[0].message).toContain("mismatched prompt profile");
-    } finally {
-      await rm(repoPath, { recursive: true, force: true });
-    }
   });
 });
 

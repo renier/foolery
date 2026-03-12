@@ -1,7 +1,4 @@
 import { execFile } from "node:child_process";
-import { constants as fsConstants } from "node:fs";
-import { access, appendFile, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { getBackend } from "./backend-instance";
 import {
   getRegisteredAgents,
@@ -27,7 +24,6 @@ import { getReleaseVersionStatus, type ReleaseVersionStatus } from "./release-ve
 import type { Beat, MemoryWorkflowDescriptor } from "./types";
 import { detectMemoryManagerType } from "./memory-manager-detection";
 import { isKnownMemoryManagerType } from "./memory-managers";
-import { normalizeProfileId } from "./workflows";
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -99,58 +95,6 @@ export interface DoctorStreamSummary {
 }
 
 export type DoctorStreamEvent = DoctorCheckResult | DoctorStreamSummary;
-
-const PROMPT_GUIDANCE_START_MARKER = "FOOLERY_GUIDANCE_PROMPT_START";
-const PROMPT_GUIDANCE_END_MARKER = "FOOLERY_GUIDANCE_PROMPT_END";
-const PROMPT_PROFILE_MARKER = "FOOLERY_PROMPT_PROFILE:";
-const PROMPT_PROFILE_REGEX = new RegExp(
-  `${PROMPT_PROFILE_MARKER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*([A-Za-z0-9._-]+)`,
-);
-const MANAGED_BLOCK_PATTERN =
-  `(<!-- ${PROMPT_GUIDANCE_START_MARKER} -->)[\\s\\S]*?(<!-- ${PROMPT_GUIDANCE_END_MARKER} -->)`;
-const MANAGED_BLOCK_REGEX = new RegExp(MANAGED_BLOCK_PATTERN);
-
-function getFirstManagedBlock(content: string): string | undefined {
-  return content.match(MANAGED_BLOCK_REGEX)?.[0];
-}
-
-function getManagedBlocks(content: string): RegExpMatchArray[] {
-  return Array.from(content.matchAll(new RegExp(MANAGED_BLOCK_PATTERN, "g")));
-}
-
-function replaceManagedBlocks(content: string, managedBlock: string): string {
-  const matches = getManagedBlocks(content);
-  if (matches.length === 0) return content;
-
-  let updatedContent = "";
-  let cursor = 0;
-
-  for (const [index, match] of matches.entries()) {
-    const start = match.index ?? 0;
-    const end = start + match[0].length;
-    const interstitialContent = content.slice(cursor, start);
-
-    // Preserve surrounding prose while collapsing duplicate managed blocks.
-    if (index === 0 || interstitialContent.trim().length > 0) {
-      updatedContent += interstitialContent;
-    }
-    if (index === 0) {
-      updatedContent += managedBlock;
-    }
-
-    cursor = end;
-  }
-
-  updatedContent += content.slice(cursor);
-  return updatedContent;
-}
-
-function promptProfileTemplateFor(_profileId: string, repoPath?: string): string {
-  if (repoPath && detectMemoryManagerType(repoPath) === "knots") {
-    return "PROMPT_KNOTS.md";
-  }
-  return "PROMPT_BEATS.md";
-}
 
 function fallbackPromptProfileForRepoPath(repoPath: string): string {
   void repoPath;
@@ -684,98 +628,6 @@ export async function checkStaleParents(repos: RegisteredRepo[]): Promise<Diagno
   return diagnostics;
 }
 
-async function fileExists(path: string): Promise<boolean> {
-  try {
-    await access(path, fsConstants.F_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-const PROMPT_GUIDANCE_FIX_OPTIONS: FixOption[] = [
-  { key: "append", label: "Append or update Foolery guidance prompt" },
-];
-
-/**
- * Warn when AGENTS.md/CLAUDE.md exists but is missing Foolery guidance prompt.
- */
-export async function checkPromptGuidance(repos: RegisteredRepo[]): Promise<Diagnostic[]> {
-  const diagnostics: Diagnostic[] = [];
-
-  for (const repo of repos) {
-    const workflows = await listWorkflowsSafe(repo.path);
-    const rawExpectedProfiles = Array.from(
-      new Set(workflows.map((workflow) => workflow.promptProfileId)),
-    );
-    const fallbackProfile = fallbackPromptProfileForRepoPath(repo.path);
-    if (rawExpectedProfiles.length === 0) rawExpectedProfiles.push(fallbackProfile);
-
-    // Normalize expected profiles so canonical and legacy aliases are treated equivalently.
-    const expectedProfiles = Array.from(
-      new Set(rawExpectedProfiles.map((p) => normalizeProfileId(p) ?? p)),
-    );
-
-    for (const fileName of ["AGENTS.md", "CLAUDE.md"]) {
-      const filePath = join(repo.path, fileName);
-      if (!(await fileExists(filePath))) continue;
-
-      try {
-        const content = await readFile(filePath, "utf8");
-        if (!content.includes(PROMPT_GUIDANCE_START_MARKER)) {
-          diagnostics.push({
-            check: "prompt-guidance",
-            severity: "warning",
-            fixable: true,
-            fixOptions: PROMPT_GUIDANCE_FIX_OPTIONS,
-            message: `Repo "${repo.name}" has ${fileName} but it is missing Foolery guidance prompt. Run \`foolery prompt\` in ${repo.path}.`,
-            context: {
-              repoPath: repo.path,
-              repoName: repo.name,
-              file: fileName,
-              expectedProfiles: expectedProfiles.join(","),
-              expectedProfile: expectedProfiles[0]!,
-            },
-          });
-          continue;
-        }
-
-        // Extract the profile from the managed block only (not the whole file).
-        const managedBlock = getFirstManagedBlock(content) ?? content;
-        const profileMatch = managedBlock.match(PROMPT_PROFILE_REGEX);
-        const actualProfileRaw = profileMatch?.[1];
-        const actualProfile = normalizeProfileId(actualProfileRaw) ?? actualProfileRaw;
-        if (!actualProfile || !expectedProfiles.includes(actualProfile)) {
-          diagnostics.push({
-            check: "prompt-guidance",
-            severity: "warning",
-            fixable: true,
-            fixOptions: PROMPT_GUIDANCE_FIX_OPTIONS,
-            message: `Repo "${repo.name}" has ${fileName} with mismatched prompt profile${actualProfileRaw ? ` (${actualProfileRaw})` : ""}. Expected one of: ${expectedProfiles.join(", ")}.`,
-            context: {
-              repoPath: repo.path,
-              repoName: repo.name,
-              file: fileName,
-              expectedProfiles: expectedProfiles.join(","),
-              expectedProfile: expectedProfiles[0]!,
-            },
-          });
-        }
-      } catch {
-        diagnostics.push({
-          check: "prompt-guidance",
-          severity: "warning",
-          fixable: false,
-          message: `Could not read ${fileName} in repo "${repo.name}" (${repo.path}).`,
-          context: { repoPath: repo.path, repoName: repo.name, file: fileName },
-        });
-      }
-    }
-  }
-
-  return diagnostics;
-}
-
 // ── Memory manager CLI availability checks ─────────────────
 
 const CLI_FOR_MEMORY_MANAGER: Record<string, { envVar: string; fallback: string }> = {
@@ -891,7 +743,6 @@ export async function runDoctor(): Promise<DoctorReport> {
     repoMemoryManagerDiags,
     memoryCompatibilityDiags,
     staleDiags,
-    promptDiags,
     cliAvailDiags,
     registryConsistencyDiags,
   ] = await Promise.all([
@@ -904,7 +755,6 @@ export async function runDoctor(): Promise<DoctorReport> {
     checkRepoMemoryManagerTypes(),
     checkMemoryImplementationCompatibility(repos),
     checkStaleParents(repos),
-    checkPromptGuidance(repos),
     checkMemoryManagerCliAvailability(repos),
     checkRegistryConsistency(repos),
   ]);
@@ -919,7 +769,6 @@ export async function runDoctor(): Promise<DoctorReport> {
     ...repoMemoryManagerDiags,
     ...memoryCompatibilityDiags,
     ...staleDiags,
-    ...promptDiags,
     ...cliAvailDiags,
     ...registryConsistencyDiags,
   ];
@@ -985,7 +834,6 @@ export async function* streamDoctor(): AsyncGenerator<DoctorStreamEvent> {
     { category: "repo-memory-managers", label: "Repo memory managers", run: () => checkRepoMemoryManagerTypes() },
     { category: "memory-implementation", label: "Memory implementation", run: () => checkMemoryImplementationCompatibility(repos) },
     { category: "stale-parents", label: "Stale parents", run: () => checkStaleParents(repos) },
-    { category: "prompt-guidance", label: "Prompt guidance", run: () => checkPromptGuidance(repos) },
     { category: "memory-manager-cli", label: "Memory manager CLI", run: () => checkMemoryManagerCliAvailability(repos) },
     { category: "registry-consistency", label: "Registry consistency", run: () => checkRegistryConsistency(repos) },
   ];
@@ -1357,72 +1205,6 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
       }
     }
 
-    case "prompt-guidance": {
-      const { repoPath, file } = ctx;
-      if (!repoPath || !file) {
-        return { check: diag.check, success: false, message: "Missing context for fix.", context: ctx };
-      }
-      try {
-        const expectedProfile = ctx.expectedProfile;
-        const templateCandidates = expectedProfile
-          ? [promptProfileTemplateFor(expectedProfile, repoPath), "PROMPT.md"]
-          : ["PROMPT.md"];
-        let templateContent = await readPromptTemplate(templateCandidates);
-        if (!templateContent) {
-          return {
-            check: diag.check,
-            success: false,
-            message: `Prompt template not found (${templateCandidates.join(", ")}).`,
-            context: ctx,
-          };
-        }
-
-        // Inject or replace the profile marker in the template with the expected canonical profile.
-        if (expectedProfile) {
-          const canonicalProfile = normalizeProfileId(expectedProfile) ?? expectedProfile;
-          if (templateContent.match(PROMPT_PROFILE_REGEX)) {
-            templateContent = templateContent.replace(
-              PROMPT_PROFILE_REGEX,
-              `${PROMPT_PROFILE_MARKER} ${canonicalProfile}`,
-            );
-          } else {
-            // Template has no profile marker (e.g. PROMPT_KNOTS.md); inject one after the start marker line.
-            templateContent = templateContent.replace(
-              new RegExp(`(<!-- ${PROMPT_GUIDANCE_START_MARKER} -->\\n[^\\n]*\\n)`),
-              `$1${PROMPT_PROFILE_MARKER} ${canonicalProfile}\n`,
-            );
-          }
-        }
-
-        const filePath = join(repoPath, file);
-        const existingContent = await readFile(filePath, "utf8");
-
-        if (getManagedBlocks(existingContent).length > 0) {
-          // Replace the first managed block with the canonical template and drop stale duplicates.
-          const managedBlock = getFirstManagedBlock(templateContent) ?? templateContent;
-          const updatedContent = replaceManagedBlocks(existingContent, managedBlock);
-          await writeFile(filePath, updatedContent, "utf8");
-          return {
-            check: diag.check,
-            success: true,
-            message: `Updated Foolery guidance in ${file} in "${ctx.repoName}".`,
-            context: ctx,
-          };
-        }
-
-        // No existing managed block — append.
-        await appendFile(filePath, "\n\n" + templateContent + "\n", "utf8");
-        return {
-          check: diag.check,
-          success: true,
-          message: `Appended Foolery guidance to ${file} in "${ctx.repoName}".`,
-          context: ctx,
-        };
-      } catch (e) {
-        return { check: diag.check, success: false, message: String(e), context: ctx };
-      }
-    }
-
     case "backend-type-migration": {
       if (strategy && strategy !== "migrate" && strategy !== "default") {
         return {
@@ -1448,31 +1230,4 @@ async function applyFix(diag: Diagnostic, strategy?: string): Promise<FixResult>
     default:
       return { check: diag.check, success: false, message: "No fix available for this check.", context: ctx };
   }
-}
-
-async function readPromptTemplate(
-  fileNames: string[] = ["PROMPT.md"],
-): Promise<string | null> {
-  const appDir = process.env.FOOLERY_APP_DIR;
-  const candidates = fileNames.flatMap((fileName) => {
-    const paths: string[] = [];
-    try {
-      paths.push(join(process.cwd(), fileName));
-    } catch {
-      // process.cwd() can throw in isolated temp directories during tests.
-    }
-    if (appDir) {
-      paths.push(join(appDir, fileName));
-    }
-    return paths;
-  });
-
-  for (const path of candidates) {
-    try {
-      return await readFile(path, "utf8");
-    } catch {
-      continue;
-    }
-  }
-  return null;
 }
