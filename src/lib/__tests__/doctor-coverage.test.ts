@@ -3,7 +3,7 @@
  * Targets uncovered paths: checkMemoryImplementationCompatibility,
  * applyFix for stale-parent (both strategies),
  * settings-defaults file-missing, stale-parent missing context,
- * prompt-guidance profile mismatch, streamDoctor exception,
+ * stale-parent missing context, streamDoctor exception,
  * unknown strategy for settings-defaults and repo-memory-managers,
  * summarizeMissingSettings >4 paths, summarizePaths >3 paths.
  */

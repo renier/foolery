@@ -191,44 +191,6 @@ For backend authors, see **[Foolery Agent Memory Contract](docs/FOOLERY_AGENT_ME
 For Knots compatibility decisions, see **[Knots Compatibility ADR](docs/adr-knots-compatibility.md)**.
 For clones that use Dolt-native Beads sync hooks, run `bash scripts/setup-beads-dolt-hooks.sh` once and see **[docs/BEADS_DOLT_HOOKS.md](docs/BEADS_DOLT_HOOKS.md)**.
 
-## Foolery Prompt Guidance (Highly Recommended)
-
-Foolery works best when every repo has explicit agent handoff rules in `AGENTS.md` and/or `CLAUDE.md`.
-Use:
-
-```bash
-foolery prompt
-```
-
-This appends Foolery's guidance prompt into whichever default prompt files already exist in the current repository.
-
-Preview changes first:
-
-```bash
-foolery prompt --dry-run
-```
-
-Remove Foolery-managed guidance blocks:
-
-```bash
-foolery prompt --remove
-```
-
-See prompt-specific options:
-
-```bash
-foolery prompt --help
-```
-
-Why this matters:
-- Agents must move a bead to `in_progress` before any edits or commits.
-- Handoff must include `commit:<short-sha>` label.
-- Beads stay open; do not close unless explicitly instructed.
-- Work is not complete until changes are pushed to `origin/main`.
-
-During `foolery setup`, Foolery will ask if you want to apply this guidance to mounted repos and marks it as highly recommended.
-`foolery doctor` also warns when prompt files are present but missing Foolery guidance.
-
 ## Key Shortcuts
 Shift+H to view at any time!
 

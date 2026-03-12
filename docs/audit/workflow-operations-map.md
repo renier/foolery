@@ -204,7 +204,6 @@ Backend: `src/lib/doctor.ts`
 | `updates` | Check for new foolery releases |
 | `settings-defaults` | Verify settings.toml has required defaults |
 | `stale-parent` | Find parents where all children are closed |
-| `prompt-guidance` | Verify AGENTS.md/CLAUDE.md has foolery prompt |
 
 Each diagnostic can be fixable with selectable strategies.
 

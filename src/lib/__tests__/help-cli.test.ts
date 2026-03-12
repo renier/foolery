@@ -52,7 +52,7 @@ describe("foolery help CLI", () => {
     });
 
     expect(help.stdout).toContain("Usage: foolery <command>");
-    expect(help.stdout).toContain("Manage Foolery guidance prompt in AGENTS.md/CLAUDE.md");
+    expect(help.stdout).not.toContain("\nprompt");
     expect(help.stdout).not.toMatch(/\u001b\[[0-9;]*m/);
   });
 
