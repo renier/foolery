@@ -218,7 +218,6 @@ Uses `addDep`, `createBead`, `listBeads` from `@/lib/bd`.
 | `runDoctor()` | Run all diagnostic checks including beads-specific ones |
 | `streamDoctor()` | Stream diagnostic check results |
 | `checkStaleParents()` | Detect orphaned parent references |
-| `checkPromptGuidance()` | Verify CLAUDE.md/AGENTS.md contain guidance prompt |
 | `runDoctorFix()` | Apply fixes for detected issues |
 
 Uses `listBeads()` from `@/lib/bd`.
@@ -385,7 +384,6 @@ Configuration and infrastructure files that reference beads.
 | `.gitattributes` | Custom merge driver: `.beads/issues.jsonl merge=beads` |
 | `CLAUDE.md` | Agent instructions: mandates `bd` usage, handoff contract with `bd update`/`bd sync` commands |
 | `AGENTS.md` | Agent instructions (subset of CLAUDE.md): `bd show`, `bd update`, `bd sync` commands |
-| `PROMPT.md` | Guidance prompt template appended to repo CLAUDE.md/AGENTS.md during setup: `bd show`, `bd update`, `bd sync` |
 | `.claude/settings.local.json` | Claude Code local settings (may reference beads repo paths) |
 
 ---
