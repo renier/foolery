@@ -270,13 +270,10 @@ describe("terminal-manager step-failure rollback", () => {
     });
   });
 
-  it("max iterations on take-loop triggers enforceQueueTerminalInvariant with rollback", async () => {
-    // Use custom prompt so this is a non-take-loop session, and instead test
-    // that the take-loop non-zero exit path on the initial child triggers the
-    // same enforceQueueTerminalInvariant rollback. The max-iterations code path
-    // (line 1231) calls the identical enforceQueueTerminalInvariant function.
-    // Here we verify that non-zero exit on the initial child of a take-loop
-    // session also triggers the invariant enforcement rollback.
+  it("non-zero exit on initial take-loop child triggers enforceQueueTerminalInvariant rollback", async () => {
+    // Verify that when the *initial* child of a take-loop session exits
+    // with a non-zero code, enforceQueueTerminalInvariant runs and rolls
+    // the beat back from an active state to its queue state.
     backend.get.mockResolvedValueOnce({
       ok: true,
       data: {
@@ -344,6 +341,78 @@ describe("terminal-manager step-failure rollback", () => {
     await waitFor(() => {
       expect(interactionLog.logEnd).toHaveBeenCalledWith(1, "error");
     });
+  });
+
+  it("max iterations on take-loop triggers enforceQueueTerminalInvariant with rollback", async () => {
+    // Drive the take-loop through MAX_TAKE_ITERATIONS (10) successful
+    // iterations so the max-iterations branch fires, calling
+    // enforceQueueTerminalInvariant before finishing the session.
+    const beatId = "foolery-r006";
+    const queueData = {
+      id: beatId,
+      title: "Max iterations rollback",
+      state: "ready_for_implementation",
+      isAgentClaimable: true,
+    };
+    const activeData = {
+      id: beatId,
+      title: "Max iterations rollback",
+      state: "implementation",
+      isAgentClaimable: false,
+    };
+
+    backend.listWorkflows.mockResolvedValue({ ok: true, data: [] });
+    backend.list.mockResolvedValue({ ok: true, data: [] });
+    // Default: all backend.get calls return queue state (buildNextTakePrompt + background fetches)
+    backend.get.mockResolvedValue({ ok: true, data: queueData });
+    // Default: all buildTakePrompt calls return a prompt
+    backend.buildTakePrompt.mockResolvedValue({ ok: true, data: { prompt: "take prompt" } });
+
+    await createSession(beatId, "/tmp/repo");
+    expect(spawnedChildren).toHaveLength(1);
+
+    // Drive the take-loop through 9 successful iterations.
+    // Each iteration: child exits code 0 → buildNextTakePrompt → takeIteration++ → spawnTakeChild.
+    // takeIteration goes from 1 → 2 → ... → 10.
+    for (let i = 0; i < 9; i++) {
+      spawnedChildren[i].emit("close", 0, null);
+      await waitFor(() => {
+        expect(spawnedChildren).toHaveLength(i + 2);
+      });
+    }
+
+    // Now takeIteration === 10 and the 10th child (index 9) is running.
+    // When it exits with code 0, the take-loop close handler hits the
+    // max-iterations branch (takeIteration >= MAX_TAKE_ITERATIONS).
+    //
+    // Set up mocks for the final close handler:
+    //   1. Background fire-and-forget backend.get → queue state (doesn't matter)
+    //   2. enforceQueueTerminalInvariant → backend.get → active state → triggers rollback
+    //   3. Post-rollback verification → backend.get → queue state
+    backend.get
+      .mockResolvedValueOnce({ ok: true, data: queueData })
+      .mockResolvedValueOnce({ ok: true, data: activeData })
+      .mockResolvedValueOnce({ ok: true, data: queueData });
+
+    spawnedChildren[9].emit("close", 0, null);
+
+    await waitFor(() => {
+      expect(rollbackBeatState).toHaveBeenCalledWith(
+        beatId,
+        "implementation",
+        "ready_for_implementation",
+        "/tmp/repo",
+        "knots",
+      );
+    });
+
+    // Session finishes with exit code 1 (max iterations is an error condition)
+    await waitFor(() => {
+      expect(interactionLog.logEnd).toHaveBeenCalledWith(1, "error");
+    });
+
+    // No additional children spawned after max iterations
+    expect(spawnedChildren).toHaveLength(10);
   });
 
   it("after rollback the beat is in a queue (claimable) state, not stuck active", async () => {
