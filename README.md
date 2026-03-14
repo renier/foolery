@@ -34,8 +34,8 @@ Foolery helps you capture work, break it down, dispatch agents, review what they
   </tr>
   <tr>
     <td align="center">
-      <a href="docs/screenshots/history.png">
-        <img src="docs/screenshots/history.png" width="160" alt="History" />
+      <a href="docs/screenshots/history-20260314.png">
+        <img src="docs/screenshots/history-20260314.png" width="160" alt="History" />
       </a>
       <br />
       <sub><b>History</b></sub>
@@ -155,7 +155,7 @@ The review lane for shipped beats. Browse handoff capsules from agent sessions, 
 
 A focused history feed for agent sessions. Browse recent beat activity, inspect beat metadata, and review app-to-agent and agent-to-app conversation logs in one timeline.
 
-![History view](docs/screenshots/history.png)
+![History view](docs/screenshots/history-20260314.png)
 
 ### Hot Keys
 
