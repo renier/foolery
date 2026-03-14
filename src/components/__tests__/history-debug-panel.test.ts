@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { AgentHistorySession } from "@/lib/agent-history-types";
 import {
   buildFallbackHistoryDebugPrompt,
   HistoryDebugPanel,
+  launchHistoryDebugSession,
   validateHistoryDebugForm,
 } from "@/components/history-debug-panel";
 
@@ -70,5 +71,22 @@ describe("HistoryDebugPanel", () => {
     expect(html).toContain(
       "Submit the form to open a dedicated debug terminal for this conversation.",
     );
+  });
+
+  it("converts thrown startSession failures into a user-facing error result", async () => {
+    const startSessionMock = vi.fn().mockRejectedValue(new Error("Network offline"));
+
+    await expect(
+      launchHistoryDebugSession(
+        "foolery-70ec",
+        "/tmp/foolery",
+        "debug prompt",
+        startSessionMock,
+      ),
+    ).resolves.toEqual({
+      ok: false,
+      error:
+        "Failed to start debug session. Check the terminal service and try again. Network offline",
+    });
   });
 });

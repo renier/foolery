@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { AgentHistorySession } from "@/lib/agent-history-types";
 import { connectToSession, startSession } from "@/lib/terminal-api";
-import type { TerminalEvent, TerminalSession } from "@/lib/types";
+import type { BdResult, TerminalEvent, TerminalSession } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type DebugSessionStatus =
@@ -76,6 +76,26 @@ export function buildFallbackHistoryDebugPrompt({
     "Explain why the actual outcome happened instead of the expected outcome.",
     "Ground the answer in the session context, call out any missing information, and offer concrete fix options the user could convert into knots after approval.",
   ].join("\n");
+}
+
+export async function launchHistoryDebugSession(
+  beatId: string,
+  repoPath: string | undefined,
+  prompt: string,
+  startSessionFn: typeof startSession = startSession,
+): Promise<BdResult<TerminalSession>> {
+  try {
+    return await startSessionFn(beatId, repoPath, prompt);
+  } catch (error) {
+    const detail =
+      error instanceof Error && error.message.trim()
+        ? ` ${error.message.trim()}`
+        : "";
+    return {
+      ok: false,
+      error: `Failed to start debug session. Check the terminal service and try again.${detail}`,
+    };
+  }
 }
 
 function appendEventToTerminal(term: XtermTerminal, event: TerminalEvent): void {
@@ -182,23 +202,35 @@ export function HistoryDebugPanel({
     setExitCode(null);
     setDebugStatus("running");
     resetTerminalBuffer();
+    try {
+      const prompt = buildPrompt({
+        session,
+        expectedOutcome,
+        actualOutcome,
+      });
+      const result = await launchHistoryDebugSession(
+        beatId,
+        resolvedRepoPath,
+        prompt,
+      );
+      if (!result.ok || !result.data) {
+        setDebugStatus("error");
+        setError(result.error ?? "Failed to start debug session.");
+        return;
+      }
 
-    const prompt = buildPrompt({
-      session,
-      expectedOutcome,
-      actualOutcome,
-    });
-    const result = await startSession(beatId, resolvedRepoPath, prompt);
-    if (!result.ok || !result.data) {
+      setDebugSession(result.data);
+      onSessionStarted?.(result.data);
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message.trim()
+          ? error.message.trim()
+          : "Failed to start debug session.";
       setDebugStatus("error");
-      setError(result.error ?? "Failed to start debug session.");
+      setError(message);
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-
-    setDebugSession(result.data);
-    onSessionStarted?.(result.data);
-    setIsSubmitting(false);
   }, [
     actualOutcome,
     beatId,
