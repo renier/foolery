@@ -27,11 +27,18 @@ function DebugButtonHarness({
   loadedSummary,
   sessions,
   debugPanelOpen,
+  selectedSessionId,
 }: {
   loadedSummary: { beatId: string; repoPath: string } | null;
   sessions: AgentHistorySession[];
   debugPanelOpen: boolean;
+  selectedSessionId?: string | null;
 }) {
+  const selectedSession =
+    sessions.find((session) => session.sessionId === selectedSessionId) ??
+    sessions[0] ??
+    null;
+
   return createElement(
     "div",
     null,
@@ -42,10 +49,26 @@ function DebugButtonHarness({
           debugPanelOpen ? "Close Debug" : "Debug",
         )
       : null,
-    debugPanelOpen && sessions.length > 0 && loadedSummary
+    loadedSummary && sessions.length > 0
+      ? createElement(
+          "div",
+          { "data-testid": "conversation-selector" },
+          sessions.map((session, index) =>
+            createElement(
+              "button",
+              {
+                key: session.sessionId,
+                "data-selected": session.sessionId === selectedSession?.sessionId ? "true" : "false",
+              },
+              `#${index + 1} ${session.sessionId}`,
+            ),
+          ),
+        )
+      : null,
+    debugPanelOpen && selectedSession && loadedSummary
       ? createElement(HistoryDebugPanel, {
           beatId: loadedSummary.beatId,
-          session: sessions[0],
+          session: selectedSession,
           repoPath: loadedSummary.repoPath,
           beatTitle: "Test beat",
         })
@@ -55,7 +78,13 @@ function DebugButtonHarness({
 
 describe("AgentHistoryView debug integration", () => {
   const summary = { beatId: "foolery-70ec", repoPath: "/tmp/foolery" };
-  const sessions = [makeSession()];
+  const sessions = [
+    makeSession(),
+    makeSession({
+      sessionId: "history-session-2",
+      interactionType: "direct",
+    }),
+  ];
 
   it("does not render the debug button when no sessions are loaded", () => {
     const html = renderToStaticMarkup(
@@ -109,13 +138,29 @@ describe("AgentHistoryView debug integration", () => {
         loadedSummary: summary,
         sessions,
         debugPanelOpen: true,
+        selectedSessionId: "history-session-2",
       }),
     );
     expect(html).toContain("History Debugger");
     expect(html).toContain("Expected Outcome");
     expect(html).toContain("Actual Outcome");
     expect(html).toContain("Test beat");
-    expect(html).toContain("history-session-1");
+    expect(html).toContain("history-session-2");
+  });
+
+  it("renders a conversation selector and marks the selected session", () => {
+    const html = renderToStaticMarkup(
+      createElement(DebugButtonHarness, {
+        loadedSummary: summary,
+        sessions,
+        debugPanelOpen: false,
+        selectedSessionId: "history-session-2",
+      }),
+    );
+    expect(html).toContain("conversation-selector");
+    expect(html).toContain("#1 history-session-1");
+    expect(html).toContain("#2 history-session-2");
+    expect(html).toContain("data-selected=\"true\"");
   });
 
   it("does not render HistoryDebugPanel when closed", () => {

@@ -550,6 +550,7 @@ export function AgentHistoryView() {
   const [loadedBeatKey, setLoadedBeatKey] = useState<string | null>(null);
   const [windowStart, setWindowStart] = useState(0);
   const [debugPanelOpen, setDebugPanelOpen] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const beatButtonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const beatListRef = useRef<HTMLDivElement | null>(null);
   const consolePanelRef = useRef<HTMLDivElement | null>(null);
@@ -795,6 +796,11 @@ export function AgentHistoryView() {
   }, [sessionsQuery.data]);
 
   const picker = useInteractionPicker(sessions);
+  const selectedDebugSession = useMemo<AgentHistorySession | null>(() => {
+    if (sessions.length === 0) return null;
+    if (!selectedSessionId) return sessions[0] ?? null;
+    return sessions.find((session) => session.sessionId === selectedSessionId) ?? sessions[0] ?? null;
+  }, [selectedSessionId, sessions]);
 
   const repoNames = useMemo(
     () =>
@@ -826,6 +832,17 @@ export function AgentHistoryView() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Debug panel must close when loaded beat changes.
     setDebugPanelOpen(false);
   }, [loadedBeatKey]);
+
+  useEffect(() => {
+    if (sessions.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Session selection must reset when the loaded beat has no conversations.
+      setSelectedSessionId(null);
+      return;
+    }
+    if (!selectedSessionId || !sessions.some((session) => session.sessionId === selectedSessionId)) {
+      setSelectedSessionId(sessions[0]?.sessionId ?? null);
+    }
+  }, [selectedSessionId, sessions]);
 
   if (!activeRepo && registeredRepos.length === 0) {
     return (
@@ -1079,6 +1096,36 @@ export function AgentHistoryView() {
           <InteractionPicker picker={picker} />
         ) : null}
 
+        {loadedSummary && sessions.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2 border-b border-slate-700 px-2.5 py-2 text-[11px]">
+            <span className="font-medium text-slate-300">Conversation</span>
+            {sessions.map((session, index) => {
+              const selected = session.sessionId === selectedDebugSession?.sessionId;
+              return (
+                <button
+                  key={session.sessionId}
+                  type="button"
+                  onClick={() => setSelectedSessionId(session.sessionId)}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 font-mono transition-colors",
+                    selected
+                      ? "border-cyan-400/60 bg-cyan-500/15 text-cyan-100"
+                      : "border-slate-600 text-slate-300 hover:border-slate-500 hover:text-white",
+                  )}
+                  title={`Select conversation ${session.sessionId} for debugging`}
+                >
+                  {`#${index + 1} ${session.sessionId}`}
+                </button>
+              );
+            })}
+            {selectedDebugSession ? (
+              <span className="ml-auto text-[11px] text-slate-400">
+                Debug target: {selectedDebugSession.sessionId}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className={debugPanelOpen && sessions.length > 0 ? "grid grid-cols-2 gap-0" : ""}>
           <div
             ref={consolePanelRef}
@@ -1133,11 +1180,11 @@ export function AgentHistoryView() {
               </div>
             )}
           </div>
-          {debugPanelOpen && sessions.length > 0 && loadedSummary ? (
+          {debugPanelOpen && selectedDebugSession && loadedSummary ? (
             <div className="max-h-[calc(100vh-500px)] overflow-y-auto">
               <HistoryDebugPanel
                 beatId={loadedSummary.beatId}
-                session={sessions[0]}
+                session={selectedDebugSession}
                 repoPath={loadedSummary.repoPath}
                 beatTitle={loadedTitle ?? undefined}
               />
