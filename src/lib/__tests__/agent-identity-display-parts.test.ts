@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { parseAgentDisplayParts } from "../agent-identity";
+import {
+  formatAgentDisplayLabel,
+  formatAgentOptionLabel,
+  parseAgentDisplayParts,
+} from "../agent-identity";
 
 describe("parseAgentDisplayParts", () => {
   it("adds cli pill for claude agent", () => {
@@ -62,6 +66,57 @@ describe("parseAgentDisplayParts", () => {
     });
     expect(result.label).toBe("OpenCode");
     expect(result.pills).toEqual(["cli"]);
+  });
+
+  it("parses crush model with provider/model path", () => {
+    const result = parseAgentDisplayParts({
+      command: "crush",
+      model: "bedrock/anthropic.claude-opus-4-6-v1",
+    });
+    expect(result.label).toBe("Bedrock Anthropic Claude Opus 4 6 V1");
+    expect(result.pills).toEqual(["bedrock", "cli"]);
+  });
+
+  it("parses crush model with deeper provider path", () => {
+    const result = parseAgentDisplayParts({
+      command: "crush",
+      model: "openrouter/mistral/devstral-2512",
+    });
+    expect(result.label).toBe("Mistral Devstral 2512");
+    expect(result.pills).toEqual(["openrouter", "cli"]);
+  });
+
+  it("handles crush with no model", () => {
+    const result = parseAgentDisplayParts({
+      command: "crush",
+    });
+    expect(result.label).toBe("Crush");
+    expect(result.pills).toEqual(["cli"]);
+  });
+
+  it("formats crush display labels via the shared formatter", () => {
+    expect(
+      formatAgentDisplayLabel({
+        command: "crush",
+        provider: "Crush",
+        model: "bedrock/anthropic.claude-opus-4-6-v1",
+      }),
+    ).toBe("Bedrock Anthropic Claude Opus 4 6 V1");
+
+    expect(
+      formatAgentOptionLabel({
+        provider: "Crush",
+        model: "openrouter/mistral/devstral-2512",
+      }),
+    ).toBe("Mistral Devstral 2512");
+
+    expect(
+      formatAgentDisplayLabel({
+        command: "crush",
+        provider: "crush",
+        model: "bedrock/anthropic.claude-opus-4-6-v1",
+      }),
+    ).toBe("Bedrock Anthropic Claude Opus 4 6 V1");
   });
 
   it("adds cli pill for gemini agent", () => {

@@ -823,7 +823,7 @@ export async function createSession(
   const dialect = resolveDialect(agent.command);
   const isInteractive = dialect === "claude";
 
-  // For interactive (claude) sessions, use stream-json stdin; for codex/opencode, use one-shot prompt mode
+  // For interactive (claude) sessions, use stream-json stdin; for codex/opencode/crush, use one-shot prompt mode
   let agentCmd: string;
   let args: string[];
   if (isInteractive) {

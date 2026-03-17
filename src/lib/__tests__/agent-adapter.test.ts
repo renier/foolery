@@ -34,6 +34,14 @@ describe("resolveDialect", () => {
     expect(resolveDialect("/usr/local/bin/claude")).toBe("claude");
   });
 
+  it("returns 'crush' for bare command 'crush'", () => {
+    expect(resolveDialect("crush")).toBe("crush");
+  });
+
+  it("returns 'crush' for full path to crush binary", () => {
+    expect(resolveDialect("/opt/homebrew/bin/crush")).toBe("crush");
+  });
+
   it("returns 'claude' for unknown commands (default)", () => {
     expect(resolveDialect("my-custom-agent")).toBe("claude");
   });
@@ -98,6 +106,34 @@ describe("buildPromptModeArgs", () => {
       prompt,
     );
     expect(result.args[0]).toBe("exec");
+  });
+
+  it("builds correct crush args without model", () => {
+    const result = buildPromptModeArgs({ command: "crush" }, prompt);
+    expect(result.command).toBe("crush");
+    expect(result.args).toEqual([
+      "run",
+      "-o",
+      "stream-json",
+      "-q",
+      prompt,
+    ]);
+  });
+
+  it("builds correct crush args with model", () => {
+    const result = buildPromptModeArgs(
+      { command: "crush", model: "bedrock/anthropic.claude-opus-4-6-v1" },
+      prompt,
+    );
+    expect(result.args).toEqual([
+      "run",
+      "-o",
+      "stream-json",
+      "-q",
+      "-m",
+      "bedrock/anthropic.claude-opus-4-6-v1",
+      prompt,
+    ]);
   });
 });
 
@@ -257,6 +293,86 @@ describe("createLineNormalizer — codex dialect", () => {
       type: "result",
       result: "First\nSecond",
       is_error: false,
+    });
+  });
+});
+
+describe("createLineNormalizer — crush dialect", () => {
+  it("skips init and empty content events", () => {
+    const normalize = createLineNormalizer("crush");
+    expect(
+      normalize({
+        type: "init",
+        session_id: "session-1",
+        model: { name: "AWS Claude Opus 4.6" },
+      }),
+    ).toBeNull();
+    expect(normalize({ type: "content" })).toBeNull();
+  });
+
+  it("normalizes streaming content and final result metadata", () => {
+    const normalize = createLineNormalizer("crush");
+    expect(
+      normalize({
+        type: "content",
+        session_id: "session-1",
+        content: "hello",
+      }),
+    ).toEqual({
+      type: "stream_event",
+      event: {
+        type: "content_block_delta",
+        delta: { type: "text_delta", text: "hello" },
+      },
+    });
+    expect(
+      normalize({
+        type: "content",
+        session_id: "session-1",
+        content: " world",
+      }),
+    ).toEqual({
+      type: "stream_event",
+      event: {
+        type: "content_block_delta",
+        delta: { type: "text_delta", text: " world" },
+      },
+    });
+
+    expect(
+      normalize({
+        type: "result",
+        session_id: "session-1",
+        duration_ms: 1234,
+        is_error: false,
+        usage: {
+          input_tokens: 3,
+          output_tokens: 2,
+          cost_estimate: 0.125,
+        },
+      }),
+    ).toMatchObject({
+      type: "result",
+      result: "hello world",
+      is_error: false,
+      duration_ms: 1234,
+      cost_usd: 0.125,
+      input_tokens: 3,
+      output_tokens: 2,
+    });
+  });
+
+  it("normalizes error events to result errors", () => {
+    const normalize = createLineNormalizer("crush");
+    expect(
+      normalize({
+        type: "error",
+        message: "Something went wrong",
+      }),
+    ).toEqual({
+      type: "result",
+      result: "Something went wrong",
+      is_error: true,
     });
   });
 });

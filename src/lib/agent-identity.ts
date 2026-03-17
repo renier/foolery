@@ -5,6 +5,7 @@ export type AgentProviderId =
   | "openai"
   | "gemini"
   | "opencode"
+  | "crush"
   | "unknown";
 
 export interface AgentIdentityLike {
@@ -30,6 +31,7 @@ const PROVIDER_LABELS: Record<Exclude<AgentProviderId, "unknown">, string> = {
   openai: "OpenAI",
   gemini: "Gemini",
   opencode: "OpenCode",
+  crush: "Crush",
 };
 
 const MODEL_LABELS: Record<string, string> = {
@@ -61,6 +63,7 @@ function cleanValue(value?: string): string | undefined {
 export function detectAgentProviderId(command?: string): AgentProviderId {
   const lower = command?.trim().toLowerCase() ?? "";
   if (!lower) return "unknown";
+  if (lower.includes("crush")) return "crush";
   if (lower.includes("opencode")) return "opencode";
   if (lower.includes("claude")) return "claude";
   if (
@@ -166,6 +169,14 @@ export function normalizeAgentIdentity(agent: AgentIdentityLike): {
       ...(version ? { version } : {}),
     };
   }
+  if (provider === "Crush") {
+    return {
+      provider,
+      ...(rawModel ? { model: rawModel } : {}),
+      ...(flavor ? { flavor } : {}),
+      ...(version ? { version } : {}),
+    };
+  }
   if (provider === "OpenAI") {
     const normalized = normalizeCodexModel(rawModel);
     return {
@@ -207,6 +218,7 @@ const COMMAND_DISPLAY_LABELS: Record<string, string> = {
   "codex-cli": "Codex",
   gemini: "Gemini",
   opencode: "OpenCode",
+  crush: "Crush",
 };
 
 export function displayCommandLabel(command?: string): string | undefined {
@@ -243,6 +255,16 @@ export function formatAgentFamily(option: AgentOptionSeed): string {
   const provider = providerLabel(option.provider, option.model);
   const model = formatModelDisplay(option.model);
   const flavor = formatFlavorDisplay(option.flavor);
+  const providerKey = provider?.toLowerCase();
+
+  if (providerKey === "crush") {
+    const providerDisplay = "Crush";
+    const crushModel = formatCrushModelDisplay(option.model);
+    if (crushModel) {
+      return [crushModel, flavor].filter(Boolean).join(" ");
+    }
+    return [providerDisplay, flavor].filter(Boolean).join(" ");
+  }
 
   if (provider === "OpenAI" && model === "GPT") {
     return [model, flavor].filter(Boolean).join(" ");
@@ -291,6 +313,45 @@ function formatModelToken(token: string): string {
     .join(" ");
 }
 
+function formatCrushModelToken(token: string): string {
+  return token
+    .split(/[.\-:]/)
+    .filter(Boolean)
+    .map((part) => (MODEL_LABELS[part.toLowerCase()] ?? capitalizeToken(part)))
+    .join(" ");
+}
+
+function parseCrushModelPath(rawModel: string): {
+  label: string;
+  providerPill?: string;
+} {
+  const tokens = rawModel.split("/").filter(Boolean);
+  if (tokens.length >= 3) {
+    const provider = tokens[0]!;
+    const vendor = capitalizeToken(tokens[tokens.length - 2]!);
+    const modelVersion = formatCrushModelToken(tokens[tokens.length - 1]!);
+    return { label: `${vendor} ${modelVersion}`, providerPill: provider };
+  }
+  if (tokens.length === 2) {
+    const provider = capitalizeToken(tokens[0]!);
+    const model = formatCrushModelToken(tokens[1]!);
+    return { label: `${provider} ${model}`, providerPill: tokens[0] };
+  }
+  if (tokens.length === 1) {
+    return { label: formatCrushModelToken(tokens[0]!), providerPill: undefined };
+  }
+  return { label: rawModel, providerPill: undefined };
+}
+
+function formatCrushModelDisplay(rawModel?: string): string | undefined {
+  const cleaned = cleanValue(rawModel);
+  if (!cleaned) return undefined;
+  if (cleaned.includes("/")) {
+    return parseCrushModelPath(cleaned).label;
+  }
+  return formatCrushModelToken(cleaned);
+}
+
 function parseOpenCodeModelPath(rawModel: string): {
   label: string;
   routerPill?: string;
@@ -335,6 +396,23 @@ export function parseAgentDisplayParts(
     }
     pills.push("cli");
     return { label: "OpenCode", pills };
+  }
+
+  if (providerId === "crush") {
+    const rawModel = cleanValue(agent.model);
+    if (rawModel && rawModel.includes("/")) {
+      const parsed = parseCrushModelPath(rawModel);
+      if (parsed.providerPill) pills.push(parsed.providerPill);
+      pills.push("cli");
+      return { label: parsed.label, pills };
+    }
+    if (rawModel) {
+      pills.push("crush");
+      pills.push("cli");
+      return { label: formatCrushModelToken(rawModel), pills };
+    }
+    pills.push("cli");
+    return { label: "Crush", pills };
   }
 
   // Claude, Codex (OpenAI), Gemini — use existing label, add cli pill

@@ -161,6 +161,16 @@ _discover_models() {
     gemini)
       printf '%s\n' gemini-2.5-pro gemini-2.5-flash
       ;;
+    opencode)
+      if command -v opencode >/dev/null 2>&1; then
+        opencode models 2>/dev/null
+      fi
+      ;;
+    crush)
+      if command -v crush >/dev/null 2>&1; then
+        crush models 2>/dev/null
+      fi
+      ;;
   esac
 }
 
@@ -516,7 +526,7 @@ _repo_wizard() {
 
 _AGENT_CONFIG_DIR="${HOME}/.config/foolery"
 _AGENT_SETTINGS_FILE="${_AGENT_CONFIG_DIR}/settings.toml"
-KNOWN_AGENTS=(claude codex gemini opencode)
+KNOWN_AGENTS=(claude codex gemini opencode crush)
 
 _agent_label() {
   case "$1" in
@@ -524,6 +534,7 @@ _agent_label() {
     codex)  printf 'OpenAI Codex' ;;
     gemini) printf 'Google Gemini' ;;
     opencode) printf 'OpenCode' ;;
+    crush) printf 'Crush' ;;
     *)      printf '%s' "$1" ;;
   esac
 }

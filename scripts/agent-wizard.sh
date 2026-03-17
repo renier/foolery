@@ -9,7 +9,7 @@ CONFIG_DIR="${HOME}/.config/foolery"
 SETTINGS_FILE="${CONFIG_DIR}/settings.toml"
 
 # Known agent ids checked during detection.
-KNOWN_AGENTS=(claude codex gemini openrouter)
+KNOWN_AGENTS=(claude codex gemini opencode crush)
 
 _wizard_supports_color() {
   if [[ -n "${NO_COLOR:-}" || -n "${CI:-}" || "${TERM:-}" == "dumb" ]]; then
@@ -111,6 +111,16 @@ _discover_models() {
     gemini)
       printf '%s\n' gemini-2.5-pro gemini-2.5-flash
       ;;
+    opencode)
+      if command -v opencode >/dev/null 2>&1; then
+        opencode models 2>/dev/null
+      fi
+      ;;
+    crush)
+      if command -v crush >/dev/null 2>&1; then
+        crush models 2>/dev/null
+      fi
+      ;;
   esac
 }
 
@@ -120,7 +130,8 @@ _agent_label() {
     claude) printf 'Claude Code' ;;
     codex)  printf 'OpenAI Codex' ;;
     gemini) printf 'Google Gemini' ;;
-    openrouter) printf 'OpenRouter' ;;
+    opencode) printf 'OpenCode' ;;
+    crush) printf 'Crush' ;;
     *)      printf '%s' "$1" ;;
   esac
 }

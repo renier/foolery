@@ -13,7 +13,7 @@ import type { AgentTarget } from "@/lib/types-agent-target";
 
 // ── Types ───────────────────────────────────────────────────
 
-export type AgentDialect = "claude" | "codex" | "opencode";
+export type AgentDialect = "claude" | "codex" | "opencode" | "crush";
 
 export interface PromptModeArgs {
   command: string;
@@ -25,13 +25,14 @@ export interface PromptModeArgs {
 /**
  * Determine CLI dialect from a command string.
  * Any path or name containing "codex" or "chatgpt" → codex;
- * "opencode" → opencode; everything else → claude.
+ * "opencode" → opencode; "crush" → crush; everything else → claude.
  */
 export function resolveDialect(command: string): AgentDialect {
   const base = command.includes("/")
     ? command.slice(command.lastIndexOf("/") + 1)
     : command;
   const lower = base.toLowerCase();
+  if (lower.includes("crush")) return "crush";
   if (lower.includes("opencode")) return "opencode";
   if (lower.includes("codex") || lower.includes("chatgpt")) return "codex";
   return "claude";
@@ -42,13 +43,13 @@ export function resolveDialect(command: string): AgentDialect {
 /**
  * Build CLI args for a one-shot prompt invocation (orchestration / breakdown).
  *
- * | Concern            | Claude                                    | Codex                                         | OpenCode                  |
- * |--------------------|-------------------------------------------|-----------------------------------------------|---------------------------|
- * | Subcommand         | (none)                                    | exec                                          | run                       |
- * | Prompt             | -p <prompt>                               | positional arg after exec                     | positional arg after run  |
- * | JSONL output       | --output-format stream-json               | --json                                        | --format json             |
- * | Skip approvals     | --dangerously-skip-permissions            | --dangerously-bypass-approvals-and-sandbox    | (not needed)              |
- * | Model              | --model <m>                               | -m <m>                                        | -m <m>                    |
+ * | Concern            | Claude                                    | Codex                                         | OpenCode                  | Crush                               |
+ * |--------------------|-------------------------------------------|-----------------------------------------------|---------------------------|-------------------------------------|
+ * | Subcommand         | (none)                                    | exec                                          | run                       | run                                 |
+ * | Prompt             | -p <prompt>                               | positional arg after exec                     | positional arg after run  | positional arg after run            |
+ * | JSONL output       | --output-format stream-json               | --json                                        | --format json             | -o stream-json                      |
+ * | Skip approvals     | --dangerously-skip-permissions            | --dangerously-bypass-approvals-and-sandbox    | (not needed)              | (not needed; run is already non-tty) |
+ * | Model              | --model <m>                               | -m <m>                                        | -m <m>                    | -m <m>                              |
  */
 export function buildPromptModeArgs(
   agent: RegisteredAgent | AgentTarget,
@@ -61,6 +62,13 @@ export function buildPromptModeArgs(
 
   if (dialect === "opencode") {
     const args = ["run", "--format", "json"];
+    if (agent.model) args.push("-m", agent.model);
+    args.push(prompt);
+    return { command, args };
+  }
+
+  if (dialect === "crush") {
+    const args = ["run", "-o", "stream-json", "-q"];
     if (agent.model) args.push("-m", agent.model);
     args.push(prompt);
     return { command, args };
@@ -102,6 +110,7 @@ export function buildPromptModeArgs(
  * For "claude" dialect the normalizer is identity (passthrough).
  * For "codex" dialect the normalizer maps Codex events → Claude shapes.
  * For "opencode" dialect the normalizer maps OpenCode JSON events → Claude shapes.
+ * For "crush" dialect the normalizer maps Crush JSONL events → Claude shapes.
  *
  * Returns `null` for events that should be skipped.
  */
@@ -144,6 +153,64 @@ export function createLineNormalizer(
           type: "result",
           result: accumulatedText,
           is_error: reason === "error",
+        };
+      }
+
+      return null;
+    };
+  }
+
+  if (dialect === "crush") {
+    let accumulatedText = "";
+
+    return (parsed) => {
+      if (!parsed || typeof parsed !== "object") return null;
+      const obj = parsed as Record<string, unknown>;
+      const type = obj.type;
+
+      if (type === "init") return null;
+
+      if (type === "content") {
+        const text = typeof obj.content === "string" ? obj.content : "";
+        if (!text) return null;
+        accumulatedText += text;
+        return {
+          type: "stream_event",
+          event: {
+            type: "content_block_delta",
+            delta: { type: "text_delta", text },
+          },
+        };
+      }
+
+      if (type === "result") {
+        const usage = obj.usage as Record<string, unknown> | undefined;
+        const durationMs =
+          typeof obj.duration_ms === "number" ? obj.duration_ms : undefined;
+        const costUsd =
+          typeof usage?.cost_estimate === "number" ? usage.cost_estimate : undefined;
+        return {
+          type: "result",
+          result: accumulatedText,
+          is_error: Boolean(obj.is_error),
+          ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
+          ...(costUsd !== undefined ? { cost_usd: costUsd } : {}),
+          ...(typeof usage?.input_tokens === "number"
+            ? { input_tokens: usage.input_tokens }
+            : {}),
+          ...(typeof usage?.output_tokens === "number"
+            ? { output_tokens: usage.output_tokens }
+            : {}),
+        };
+      }
+
+      if (type === "error") {
+        const msg =
+          typeof obj.message === "string" ? obj.message : "Unknown error";
+        return {
+          type: "result",
+          result: msg,
+          is_error: true,
         };
       }
 

@@ -17,15 +17,18 @@ vi.mock("node:fs/promises", () => ({
 
 const mockExecCb = vi.fn();
 vi.mock("node:child_process", () => ({
-  exec: (
-    cmd: string,
-    cb: (err: Error | null, result?: { stdout: string; stderr: string }) => void,
-  ) => {
-    const p = mockExecCb(cmd);
-    p.then(
-      (r: { stdout: string; stderr: string }) => cb(null, r),
-      (e: Error) => cb(e),
-    );
+  exec: (...args: unknown[]) => {
+    const cmd = args[0] as string;
+    const cb = args[args.length - 1] as
+      | ((err: Error | null, result?: { stdout: string; stderr: string }) => void)
+      | undefined;
+    const p = Promise.resolve(mockExecCb(cmd));
+    if (typeof cb === "function") {
+      p.then(
+        (r: { stdout: string; stderr: string }) => cb(null, r),
+        (e: Error) => cb(e),
+      );
+    }
   },
 }));
 
@@ -52,8 +55,8 @@ describe("scanForAgents", () => {
     });
 
     const agents = await scanForAgents();
-    expect(agents).toHaveLength(4);
-    expect(agents.map((agent) => agent.id)).toEqual(["claude", "codex", "gemini", "opencode"]);
+    expect(agents).toHaveLength(5);
+    expect(agents.map((agent) => agent.id)).toEqual(["claude", "codex", "gemini", "opencode", "crush"]);
 
     const claude = agents.find((agent) => agent.id === "claude");
     expect(claude).toEqual({
@@ -73,7 +76,7 @@ describe("scanForAgents", () => {
     mockExecCb.mockRejectedValue(new Error("not found"));
 
     const agents = await scanForAgents();
-    expect(agents).toHaveLength(4);
+    expect(agents).toHaveLength(5);
     for (const agent of agents) {
       expect(agent.installed).toBe(false);
       expect(agent.path).toBe("");
@@ -178,5 +181,43 @@ describe("scanForAgents", () => {
     });
     expect(gemini!.options!.length).toBeGreaterThan(0);
     expect(gemini!.options![0].label).toBe("Gemini Pro 2.5");
+  });
+
+  it("captures Crush model metadata from `crush models`", async () => {
+    mockExecCb.mockImplementation(async (cmd: string) => {
+      if (cmd === "command -v crush") {
+        return { stdout: "/opt/homebrew/bin/crush\n", stderr: "" };
+      }
+      if (cmd === "crush models") {
+        return {
+          stdout: [
+            "bedrock/anthropic.claude-opus-4-6-v1",
+            "bedrock/anthropic.claude-sonnet-4-6",
+          ].join("\n") + "\n",
+          stderr: "",
+        };
+      }
+      throw new Error("not found");
+    });
+
+    const agents = await scanForAgents();
+    const crush = agents.find((agent) => agent.id === "crush");
+    expect(crush).toMatchObject({
+      id: "crush",
+      command: "crush",
+      path: "/opt/homebrew/bin/crush",
+      installed: true,
+      provider: "Crush",
+      model: "bedrock/anthropic.claude-opus-4-6-v1",
+      modelId: "bedrock/anthropic.claude-opus-4-6-v1",
+    });
+    expect(crush?.options?.[0]).toMatchObject({
+      id: "crush-bedrock-anthropic-claude-opus-4-6-v1",
+      label: "bedrock/anthropic.claude-opus-4-6-v1",
+      provider: "Crush",
+      model: "bedrock/anthropic.claude-opus-4-6-v1",
+      modelId: "bedrock/anthropic.claude-opus-4-6-v1",
+    });
+    expect(crush?.selectedOptionId).toBe("crush-bedrock-anthropic-claude-opus-4-6-v1");
   });
 });

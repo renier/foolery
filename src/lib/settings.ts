@@ -746,6 +746,7 @@ const SCANNABLE_AGENTS: readonly ScannableAgent[] = [
   { id: "codex", command: "codex" },
   { id: "gemini", command: "gemini" },
   { id: "opencode", command: "opencode" },
+  { id: "crush", command: "crush" },
 ] as const;
 
 async function readCodexConfiguredModel(): Promise<string | undefined> {
@@ -844,17 +845,19 @@ async function readGeminiConfiguredModel(): Promise<string | undefined> {
   }
 }
 
-/** Read available models from `opencode models`. */
-async function readOpenCodeModels(): Promise<ScannedAgentOption[]> {
+async function readModelsFromCommand(
+  command: string,
+  provider: string,
+): Promise<ScannedAgentOption[]> {
   try {
-    const { stdout } = await execAsync("opencode models", { timeout: 10_000 });
+    const { stdout } = await execAsync(`${command} models`, { timeout: 10_000 });
     const lines = stdout.trim().split("\n").filter(Boolean);
     return lines.map((line) => {
       const modelId = line.trim();
       return {
-        id: `opencode-${modelId.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        id: `${command}-${modelId.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
         label: modelId,
-        provider: "OpenCode",
+        provider,
         model: modelId,
         modelId,
       };
@@ -862,6 +865,16 @@ async function readOpenCodeModels(): Promise<ScannedAgentOption[]> {
   } catch {
     return [];
   }
+}
+
+/** Read available models from `opencode models`. */
+async function readOpenCodeModels(): Promise<ScannedAgentOption[]> {
+  return readModelsFromCommand("opencode", "OpenCode");
+}
+
+/** Read available models from `crush models`. */
+async function readCrushModels(): Promise<ScannedAgentOption[]> {
+  return readModelsFromCommand("crush", "Crush");
 }
 
 async function resolveInstalledAgentCommand(
@@ -938,6 +951,15 @@ async function inspectInstalledAgentMetadata(
       ...(first?.modelId ? { modelId: first.modelId } : {}),
     };
   }
+  if (agent.id === "crush") {
+    const models = await readCrushModels();
+    const first = models[0];
+    return {
+      provider: "Crush",
+      ...(first?.model ? { model: first.model } : {}),
+      ...(first?.modelId ? { modelId: first.modelId } : {}),
+    };
+  }
   const normalized = normalizeAgentIdentity({
     command: resolvedCommand,
     provider,
@@ -961,9 +983,11 @@ export async function scanForAgents(): Promise<ScannedAgent[]> {
           installed.command,
         );
         let options: ScannedAgent["options"];
-        if (agent.id === "opencode") {
-          // OpenCode uses dynamic model discovery
-          const models = await readOpenCodeModels();
+        if (agent.id === "opencode" || agent.id === "crush") {
+          // OpenCode and Crush use dynamic model discovery
+          const models = agent.id === "opencode"
+            ? await readOpenCodeModels()
+            : await readCrushModels();
           options = models.length > 0 ? models : await buildAgentImportOptions(agent.id, metadata);
         } else {
           options = await buildAgentImportOptions(agent.id, metadata);

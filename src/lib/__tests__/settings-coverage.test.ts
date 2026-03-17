@@ -80,7 +80,7 @@ describe("scanForAgents", () => {
     });
 
     const results = await scanForAgents();
-    expect(results).toHaveLength(4);
+    expect(results).toHaveLength(5);
 
     const claude = results.find((r) => r.id === "claude");
     expect(claude?.installed).toBe(true);
@@ -94,5 +94,9 @@ describe("scanForAgents", () => {
     const opencode = results.find((r) => r.id === "opencode");
     expect(opencode?.installed).toBe(false);
     expect(opencode?.provider).toBe("OpenCode");
+
+    const crush = results.find((r) => r.id === "crush");
+    expect(crush?.installed).toBe(false);
+    expect(crush?.provider).toBe("Crush");
   });
 });
