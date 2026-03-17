@@ -215,6 +215,34 @@ describe("rollbackIteration", () => {
     expect(again.error?.code).toBe("NOT_FOUND");
   });
 
+  it("passes agent metadata as fallback on rollback note", async () => {
+    mockResolveMemoryManagerType.mockReturnValue("knots");
+    mockClaimKnot.mockResolvedValue({
+      ok: true,
+      data: { id: "beat-1", title: "Test", state: "in_progress", profile_id: "default", prompt: "do work" },
+    });
+    const prepResult = await seb.prepareTake({
+      beatId: "beat-1",
+      repoPath: "/repo",
+      mode: "take",
+      agentInfo: { agentName: "Claude", agentModel: "opus/claude", agentVersion: "4.6" },
+    });
+    expect(prepResult.ok).toBe(true);
+    const leaseId = prepResult.data!.leaseId;
+
+    mockResolveMemoryManagerType.mockReturnValue("knots");
+    mockUpdateKnot.mockResolvedValue({ ok: true });
+
+    const result = await seb.rollbackIteration({ leaseId, reason: "test failure" });
+
+    expect(result.ok).toBe(true);
+    expect(mockUpdateKnot).toHaveBeenCalledOnce();
+    const [, updateInput] = mockUpdateKnot.mock.calls[0];
+    expect(updateInput.noteAgentname).toBe("Claude");
+    expect(updateInput.noteModel).toBe("opus/claude");
+    expect(updateInput.noteVersion).toBe("4.6");
+  });
+
   it("skips note block when kind=note on non-knots repo", async () => {
     const leaseId = await seedNoteLease(seb);
     // Switch memory manager to beads for the rollback call

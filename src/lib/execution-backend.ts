@@ -120,7 +120,11 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
     }
 
     if (memoryManagerType === "knots") {
-      const claimResult = await claimKnot(input.beatId, input.repoPath);
+      const claimResult = await claimKnot(input.beatId, input.repoPath, {
+        agentName: input.agentInfo?.agentName,
+        agentModel: input.agentInfo?.agentModel,
+        agentVersion: input.agentInfo?.agentVersion,
+      });
       if (!claimResult.ok || !claimResult.data) {
         return fail(
           claimResult.error ?? `Failed to claim knot ${input.beatId}`,
@@ -150,6 +154,7 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
         claimed: true,
         completion: { kind: "advance", expectedState: claimResult.data.state },
         rollback: { kind: "note", note: "Take iteration failed before completion." },
+        agentInfo: input.agentInfo,
       };
       leaseStore.set(leaseId, { lease });
       return ok(lease);
@@ -250,6 +255,7 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
         claimed: true,
         completion: { kind: "advance", expectedState: pollResult.data.state },
         rollback: { kind: "note", note: "Poll iteration failed before completion." },
+        agentInfo: input.agentInfo,
       };
       leaseStore.set(lease.leaseId, { lease });
       return ok({ lease, claimedId: pollResult.data.id });
@@ -306,7 +312,12 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
       const memoryManagerType = resolveMemoryManagerType(lease.repoPath);
       if (memoryManagerType === "knots") {
         const note = `${lease.rollback.note} Reason: ${input.reason}`;
-        const result = await updateKnot(lease.beatId, { addNote: note }, lease.repoPath);
+        const result = await updateKnot(lease.beatId, {
+          addNote: note,
+          noteAgentname: lease.agentInfo?.agentName,
+          noteModel: lease.agentInfo?.agentModel,
+          noteVersion: lease.agentInfo?.agentVersion,
+        }, lease.repoPath);
         if (!result.ok) {
           return fail(result.error ?? `Failed to record rollback note for ${lease.beatId}`);
         }

@@ -32,7 +32,8 @@ import { ORCHESTRATION_WAVE_LABEL } from "@/lib/wave-slugs";
 import { updateMessageTypeIndexFromSession } from "@/lib/agent-message-type-index";
 import type { Beat, MemoryWorkflowDescriptor } from "@/lib/types";
 import type { CliAgentTarget } from "@/lib/types-agent-target";
-import { agentDisplayName } from "@/lib/agent-identity";
+import { agentDisplayName, toExecutionAgentInfo } from "@/lib/agent-identity";
+import { terminateLease } from "@/lib/knots";
 import { buildShipFollowUpBoundaryLines, wrapExecutionPrompt } from "@/lib/agent-prompt-guardrails";
 import {
   StepPhase,
@@ -53,6 +54,7 @@ interface SessionEntry {
   emitter: EventEmitter;
   buffer: TerminalEvent[];
   interactionLog: InteractionLog;
+  knotsLeaseId?: string;
 }
 
 
@@ -599,6 +601,8 @@ export async function createSession(
     ? await getStepAgent(resolved.step, "take", beatId)
     : await getActionAgent("take");
 
+  const agentInfo = toExecutionAgentInfo(agent);
+
   // Record initial agent selection for cross-agent review tracking
   if (resolved && agent.agentId) {
     recordStepAgent(beatId, resolved.step, agent.agentId);
@@ -738,6 +742,12 @@ export async function createSession(
           console.error(`[terminal-manager] message type index update failed:`, err);
         });
       }
+    }
+
+    if (entry.knotsLeaseId && memoryManagerType === "knots") {
+      terminateLease(entry.knotsLeaseId, resolvedRepoPath).catch((err) => {
+        console.warn(`[terminal-manager] Failed to terminate lease ${entry.knotsLeaseId}:`, err);
+      });
     }
 
     setTimeout(() => { emitter.removeAllListeners(); }, 2000);

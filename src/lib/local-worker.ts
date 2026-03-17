@@ -4,7 +4,7 @@ import { applyPatch } from "diff";
 import { join, resolve } from "node:path";
 import { readdir, writeFile } from "node:fs/promises";
 import { StructuredExecutionBackend } from "@/lib/execution-backend";
-import type { ExecutionLease, ExecutionSnapshot, PollLeaseResult } from "@/lib/execution-port";
+import type { ExecutionAgentInfo, ExecutionLease, ExecutionSnapshot, PollLeaseResult } from "@/lib/execution-port";
 import type { BackendResult } from "@/lib/backend-port";
 
 const BLOCKED_SHELL_COMMANDS = new Set(["kno", "bd", "claude", "codex", "opencode"]);
@@ -34,6 +34,7 @@ export interface WorkerSessionRequest {
   repoPath?: string;
   isParent: boolean;
   childBeatIds: string[];
+  agentInfo?: ExecutionAgentInfo;
 }
 
 export interface WorkerSessionEvents {
@@ -70,11 +71,12 @@ export class LocalWorkerService {
       repoPath: request.repoPath,
       mode: request.isParent ? "scene" : "take",
       childBeatIds: request.childBeatIds,
+      agentInfo: request.agentInfo,
     });
   }
 
-  async preparePoll(repoPath?: string): Promise<BackendResult<PollLeaseResult>> {
-    return this.executionBackend.preparePoll({ repoPath });
+  async preparePoll(repoPath?: string, agentInfo?: ExecutionAgentInfo): Promise<BackendResult<PollLeaseResult>> {
+    return this.executionBackend.preparePoll({ repoPath, agentInfo });
   }
 
   async completeIteration(leaseId: string): Promise<BackendResult<ExecutionSnapshot>> {

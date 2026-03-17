@@ -1,3 +1,5 @@
+import type { ExecutionAgentInfo } from "@/lib/execution-port";
+
 export type AgentProviderId =
   | "claude"
   | "openai"
@@ -354,4 +356,13 @@ export function buildAgentOptionId(
     cleanValue(option.version)?.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
   ].filter(Boolean);
   return parts.join("-");
+}
+
+export function toExecutionAgentInfo(agent: AgentIdentityLike): ExecutionAgentInfo {
+  const n = normalizeAgentIdentity(agent);
+  return {
+    agentName: agentDisplayName(agent),
+    agentModel: [n.flavor, n.model].filter(Boolean).join("/") || agent.model,
+    agentVersion: n.version,
+  };
 }

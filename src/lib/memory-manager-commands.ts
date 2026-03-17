@@ -1,6 +1,7 @@
 import { detectMemoryManagerType } from "@/lib/memory-manager-detection";
 import type { MemoryManagerType } from "@/lib/memory-managers";
 import { mapWorkflowStateToCompatStatus } from "@/lib/workflows";
+import { updateKnot } from "@/lib/knots";
 import type { Beat } from "@/lib/types";
 
 interface MemoryManagerCommandOptions {
@@ -66,8 +67,7 @@ export async function rollbackBeatState(
     // Add a note on the knot documenting the rollback (best-effort)
     if (reason) {
       try {
-        const noteCmd = `kno update ${quoteId(beatId)} --add-note ${JSON.stringify(reason)}`;
-        await execAsync(noteCmd, { cwd: repoPath });
+        await updateKnot(beatId, { addNote: reason }, repoPath);
       } catch { /* note is best-effort */ }
     }
   } else {

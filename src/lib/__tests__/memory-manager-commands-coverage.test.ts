@@ -17,6 +17,11 @@ vi.mock("@/lib/backend-instance", () => ({
   getBackend: () => ({ update: mockBackendUpdate }),
 }));
 
+const mockUpdateKnot = vi.fn().mockResolvedValue({ ok: true });
+vi.mock("@/lib/knots", () => ({
+  updateKnot: (...args: unknown[]) => mockUpdateKnot(...args),
+}));
+
 import {
   buildClaimCommand,
   buildWorkflowStateCommand,
@@ -27,6 +32,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockExec.mockImplementation((_cmd: string, _opts: unknown, cb: ExecCallback) => cb(null, "", ""));
   mockBackendUpdate.mockResolvedValue({ ok: true });
+  mockUpdateKnot.mockResolvedValue({ ok: true });
 });
 
 describe("buildClaimCommand (line 32-34)", () => {
@@ -93,14 +99,16 @@ describe("rollbackBeatState", () => {
 
   it("adds a note when reason is provided for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots", "flaky test");
-    expect(mockExec).toHaveBeenCalledTimes(2);
+    expect(mockExec).toHaveBeenCalledTimes(1);
     expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
-    expect(mockExec.mock.calls[1][0]).toBe('kno update "beat-42" --add-note "flaky test"');
+    expect(mockUpdateKnot).toHaveBeenCalledOnce();
+    expect(mockUpdateKnot).toHaveBeenCalledWith("beat-42", { addNote: "flaky test" }, "/tmp");
   });
 
   it("does not add a note when reason is omitted for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots");
     expect(mockExec).toHaveBeenCalledTimes(1);
+    expect(mockUpdateKnot).not.toHaveBeenCalled();
   });
 
   it("uses backend.update() for beads instead of exec", async () => {

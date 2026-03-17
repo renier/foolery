@@ -54,6 +54,18 @@ export interface KnotRecord {
   invariants?: Invariant[];
   workflow_etag?: string | null;
   created_at?: string | null;
+  lease_id?: string | null;
+  lease?: {
+    lease_type: string;
+    nickname: string;
+    agent_info?: {
+      agent_type: string;
+      provider: string;
+      agent_name: string;
+      model: string;
+      model_version: string;
+    };
+  } | null;
 }
 
 export interface KnotWorkflowDefinition {
@@ -627,6 +639,61 @@ export async function removeEdge(
   const { stderr, exitCode } = await execWrite(["edge", "remove", src, kind, dst], { repoPath });
   if (exitCode !== 0) return { ok: false, error: stderr || "knots edge remove failed" };
   return { ok: true };
+}
+
+export interface CreateLeaseOptions {
+  nickname: string;
+  type?: "agent" | "manual";
+  agentName?: string;
+  model?: string;
+  modelVersion?: string;
+  provider?: string;
+  agentType?: string;
+}
+
+export async function createLease(
+  options: CreateLeaseOptions,
+  repoPath?: string,
+): Promise<BdResult<KnotRecord>> {
+  const args = ["lease", "create", "--nickname", options.nickname];
+  if (options.type) args.push("--type", options.type);
+  if (options.agentName) args.push("--agent-name", options.agentName);
+  if (options.model) args.push("--model", options.model);
+  if (options.modelVersion) args.push("--model-version", options.modelVersion);
+  if (options.provider) args.push("--provider", options.provider);
+  if (options.agentType) args.push("--agent-type", options.agentType);
+  args.push("--json");
+  const { stdout, stderr, exitCode } = await execWrite(args, { repoPath });
+  if (exitCode !== 0) return { ok: false, error: stderr || "knots lease create failed" };
+  try {
+    return { ok: true, data: parseJson<KnotRecord>(stdout) };
+  } catch {
+    return { ok: false, error: "Failed to parse knots lease create output" };
+  }
+}
+
+export async function terminateLease(
+  id: string,
+  repoPath?: string,
+): Promise<BdResult<void>> {
+  const { stderr, exitCode } = await execWrite(["lease", "terminate", id], { repoPath });
+  if (exitCode !== 0) return { ok: false, error: stderr || "knots lease terminate failed" };
+  return { ok: true };
+}
+
+export async function listLeases(
+  repoPath?: string,
+  all?: boolean,
+): Promise<BdResult<KnotRecord[]>> {
+  const args = ["lease", "list", "--json"];
+  if (all) args.push("--all");
+  const { stdout, stderr, exitCode } = await exec(args, { repoPath });
+  if (exitCode !== 0) return { ok: false, error: stderr || "knots lease list failed" };
+  try {
+    return { ok: true, data: parseJson<KnotRecord[]>(stdout) };
+  } catch {
+    return { ok: false, error: "Failed to parse knots lease list output" };
+  }
 }
 
 /** @internal Exposed for testing only. */

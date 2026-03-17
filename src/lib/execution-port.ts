@@ -32,6 +32,8 @@ export interface ExecutionLease {
   claimed: boolean;
   completion: ExecutionCompletionAction;
   rollback: ExecutionRollbackAction;
+  agentInfo?: ExecutionAgentInfo;
+  knotsLeaseId?: string;
 }
 
 export interface ExecutionSnapshot {
@@ -47,6 +49,7 @@ export interface PrepareTakeInput {
   repoPath?: string;
   mode: "take" | "scene";
   childBeatIds?: string[];
+  agentInfo?: ExecutionAgentInfo;
 }
 
 export interface PreparePollInput {
