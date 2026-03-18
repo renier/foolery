@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ data: session }, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to create session";
+    console.error(`[terminal-api] POST /api/terminal failed for beatId=${beatId} repo=${_repo ?? "(none)"}:`, err);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

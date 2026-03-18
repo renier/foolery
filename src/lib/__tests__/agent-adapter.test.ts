@@ -116,6 +116,7 @@ describe("buildPromptModeArgs", () => {
       "-o",
       "stream-json",
       "-q",
+      "--yolo",
       prompt,
     ]);
   });
@@ -130,6 +131,7 @@ describe("buildPromptModeArgs", () => {
       "-o",
       "stream-json",
       "-q",
+      "--yolo",
       "-m",
       "bedrock/anthropic.claude-opus-4-6-v1",
       prompt,

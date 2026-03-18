@@ -554,7 +554,9 @@ export async function createSession(
   // Fetch beat details for prompt
   const result = await getBackend().get(beatId, repoPath);
   if (!result.ok || !result.data) {
-    throw new Error(result.error?.message ?? "Failed to fetch beat");
+    const msg = result.error?.message ?? "Failed to fetch beat";
+    console.error(`[terminal-manager] get(${beatId}, ${repoPath ?? "undefined"}) failed: ${msg}`);
+    throw new Error(msg);
   }
   let beat = result.data;
   const workflowsResult = await getBackend().listWorkflows(repoPath);
@@ -720,7 +722,9 @@ export async function createSession(
       repoPath,
     );
     if (!takePromptResult.ok || !takePromptResult.data) {
-      throw new Error(takePromptResult.error?.message ?? "Failed to build take prompt");
+      const msg = takePromptResult.error?.message ?? "Failed to build take prompt";
+      console.error(`[terminal-manager] buildTakePrompt(${beat.id}, repoPath=${repoPath ?? "undefined"}) failed: ${msg}`);
+      throw new Error(msg);
     }
     const taskPrompt = takePromptResult.data.prompt;
 
