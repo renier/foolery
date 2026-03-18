@@ -71,14 +71,13 @@ describe("updateBeat label transitions", () => {
     expect(result).toEqual({ ok: true });
     expect(execCalls).toContainEqual(["show", "foolery-123", "--json"]);
     expect(execCalls).toContainEqual(["update", "foolery-123", "--status", "open"]);
-    expect(execCalls).toContainEqual(["label", "remove", "foolery-123", "stage:implementation", "--no-daemon"]);
-    expect(execCalls).toContainEqual(["label", "remove", "foolery-123", "attempts:2", "--no-daemon"]);
-    expect(execCalls).toContainEqual(["label", "add", "foolery-123", "stage:retry", "--no-daemon"]);
-    expect(execCalls).toContainEqual(["label", "add", "foolery-123", "attempts:3", "--no-daemon"]);
-    expect(execCalls).toContainEqual(["sync", "--no-daemon"]);
+    expect(execCalls).toContainEqual(["label", "remove", "foolery-123", "stage:implementation"]);
+    expect(execCalls).toContainEqual(["label", "remove", "foolery-123", "attempts:2"]);
+    expect(execCalls).toContainEqual(["label", "add", "foolery-123", "stage:retry"]);
+    expect(execCalls).toContainEqual(["label", "add", "foolery-123", "attempts:3"]);
   });
 
-  it("fails when sync fails after label mutation", async () => {
+  it("fails when label remove operation fails", async () => {
     const beatJson = JSON.stringify({
       id: "foolery-456",
       issue_type: "task",
@@ -91,9 +90,7 @@ describe("updateBeat label transitions", () => {
 
     queueExec(
       { stdout: beatJson }, // show
-      { stdout: "" }, // remove stage:implementation
-      { stdout: "" }, // add stage:retry
-      { stderr: "sync exploded", exitCode: 1 } // sync
+      { stderr: "label remove exploded", exitCode: 1 }, // remove stage:implementation
     );
 
     const { updateBeat } = await import("@/lib/bd");
@@ -103,15 +100,13 @@ describe("updateBeat label transitions", () => {
     });
 
     expect(result.ok).toBe(false);
-    expect(result.error).toContain("sync");
-    expect(execCalls).toContainEqual(["label", "remove", "foolery-456", "stage:implementation", "--no-daemon"]);
-    expect(execCalls).toContainEqual(["label", "add", "foolery-456", "stage:retry", "--no-daemon"]);
+    expect(result.error).toContain("label remove exploded");
+    expect(execCalls).toContainEqual(["label", "remove", "foolery-456", "stage:implementation"]);
   });
 
-  it("retries label add without --no-daemon when flag is unsupported", async () => {
+  it("label add without extra flags", async () => {
     queueExec(
-      { stderr: "unknown flag: --no-daemon", exitCode: 1 }, // add with --no-daemon
-      { stdout: "" } // add fallback without --no-daemon
+      { stdout: "" } // add succeeds
     );
 
     const { updateBeat } = await import("@/lib/bd");
@@ -126,21 +121,12 @@ describe("updateBeat label transitions", () => {
       "add",
       "foolery-789",
       "orchestration:wave",
-      "--no-daemon",
-    ]);
-    expect(execCalls).toContainEqual([
-      "label",
-      "add",
-      "foolery-789",
-      "orchestration:wave",
     ]);
   });
 
-  it("retries sync without --no-daemon when flag is unsupported", async () => {
+  it("label remove without extra flags", async () => {
     queueExec(
-      { stdout: "" }, // remove label with --no-daemon
-      { stderr: "unknown flag: --no-daemon", exitCode: 1 }, // sync with --no-daemon
-      { stdout: "" } // sync fallback without --no-daemon
+      { stdout: "" }, // remove label
     );
 
     const { updateBeat } = await import("@/lib/bd");
@@ -155,9 +141,6 @@ describe("updateBeat label transitions", () => {
       "remove",
       "foolery-101",
       "legacy:label",
-      "--no-daemon",
     ]);
-    expect(execCalls).toContainEqual(["sync", "--no-daemon"]);
-    expect(execCalls).toContainEqual(["sync"]);
   });
 });

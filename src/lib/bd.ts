@@ -23,7 +23,6 @@ import {
 const BD_BIN = process.env.BD_BIN ?? "bd";
 const BD_DB = process.env.BD_DB;
 const OUT_OF_SYNC_SIGNATURE = "Database out of sync with JSONL";
-const NO_DAEMON_FLAG = "--no-daemon";
 const BD_NO_DB_FLAG = "BD_NO_DB";
 const READ_NO_DB_DISABLE_FLAG = "FOOLERY_BD_READ_NO_DB";
 const DOLT_NIL_PANIC_SIGNATURE = "panic: runtime error: invalid memory address or nil pointer dereference";
@@ -240,13 +239,7 @@ function isOutOfSyncError(result: ExecResult): boolean {
   return `${result.stderr}\n${result.stdout}`.includes(OUT_OF_SYNC_SIGNATURE);
 }
 
-function isUnknownNoDaemonFlagError(result: ExecResult): boolean {
-  return `${result.stderr}\n${result.stdout}`.includes(`unknown flag: ${NO_DAEMON_FLAG}`);
-}
 
-function stripNoDaemonFlag(args: string[]): string[] {
-  return args.filter((arg) => arg !== NO_DAEMON_FLAG);
-}
 
 function isTruthyEnvValue(value: string | undefined): boolean {
   if (!value) return false;
@@ -264,7 +257,7 @@ function isIdempotentWriteCommand(args: string[]): boolean {
   if (isReadOnlyCommand(args)) return false;
   if (command === "update") return true;
   if (command === "label" && (subcommand === "add" || subcommand === "remove")) return true;
-  if (command === "sync") return true;
+  if (command === "sync" || command === "import" || command === "export") return true;
   if (command === "dep" && subcommand === "remove") return true;
   return false;
 }
@@ -348,14 +341,14 @@ async function execSerializedAttempt(
       return fallbackResult;
     }
 
-    if (args[0] === "sync" || !isOutOfSyncError(firstResult)) {
+    if (args[0] === "import" || !isOutOfSyncError(firstResult)) {
       return firstResult;
     }
 
     // Auto-heal stale bd SQLite metadata after repo switches/pulls by importing JSONL
     // and retrying the original command once in the same repo.
-    const syncResult = await execOnce(["sync", "--import-only"], options);
-    if (syncResult.exitCode !== 0) return firstResult;
+    const importResult = await execOnce(["import"], options);
+    if (importResult.exitCode !== 0) return firstResult;
     return execOnce(args, options);
   });
 }
@@ -394,17 +387,7 @@ async function exec(
   };
 }
 
-async function execWithNoDaemonFallback(
-  args: string[],
-  options?: { cwd?: string }
-): Promise<ExecResult> {
-  const firstResult = await exec(args, options);
-  if (firstResult.exitCode === 0) return firstResult;
-  if (!args.includes(NO_DAEMON_FLAG) || !isUnknownNoDaemonFlagError(firstResult)) {
-    return firstResult;
-  }
-  return exec(stripNoDaemonFlag(args), options);
-}
+
 
 function parseJson<T>(raw: string): T {
   return JSON.parse(raw) as T;
@@ -627,7 +610,10 @@ export async function queryBeats(
 
 export async function showBeat(id: string, repoPath?: string): Promise<BdResult<Beat>> {
   const { stdout, stderr, exitCode } = await exec(["show", id, "--json"], { cwd: repoPath });
-  if (exitCode !== 0) return { ok: false, error: stderr || "bd show failed" };
+  if (exitCode !== 0) {
+    console.error(`[bd] show ${id} failed (cwd=${repoPath ?? "undefined"}, exit=${exitCode}): ${stderr}`);
+    return { ok: false, error: stderr || "bd show failed" };
+  }
   try {
     const parsed = JSON.parse(stdout);
     const item = Array.isArray(parsed) ? parsed[0] : parsed;
@@ -650,6 +636,15 @@ export async function createBeat(
         : null;
   delete nextFields.profileId;
   delete nextFields.workflowId;
+  delete nextFields.state;
+  delete nextFields.workflowMode;
+  delete nextFields.nextActionState;
+  delete nextFields.nextActionOwnerKind;
+  delete nextFields.requiresHumanAction;
+  delete nextFields.isAgentClaimable;
+  delete nextFields.invariants;
+  delete nextFields.created;
+  delete nextFields.updated;
   const workflow = builtinProfileDescriptor(selectedProfileId);
 
   const explicitWorkflowState =
@@ -667,8 +662,8 @@ export async function createBeat(
   const workflowState =
     explicitWorkflowState ||
     (explicitStatus ? mapStatusToDefaultWorkflowState(explicitStatus, workflow) : workflow.initialState);
-  const compatStatus = explicitStatus ?? deriveWorkflowRuntimeState(workflow, workflowState).compatStatus;
-  nextFields.status = compatStatus;
+  // const compatStatus = explicitStatus ?? deriveWorkflowRuntimeState(workflow, workflowState).compatStatus;
+  // nextFields.status = compatStatus;
 
   const existingLabels = Array.isArray(nextFields.labels)
     ? nextFields.labels.filter((label): label is string => typeof label === "string")
@@ -677,6 +672,10 @@ export async function createBeat(
     withWorkflowStateLabel(existingLabels, workflowState),
     workflow.id,
   );
+
+  if (nextFields.type === "work") {
+    nextFields.type = "task";
+  }
 
   const args = ["create", "--json"];
   for (const [key, val] of Object.entries(nextFields)) {
@@ -845,15 +844,12 @@ export async function updateBeat(
   }
 
   // Run all label add/remove operations in parallel.
-  // Use --no-daemon to bypass the daemon and write directly to the database.
-  // The daemon's label remove command acknowledges success but doesn't persist
-  // the removal, causing labels to reappear on the next list/show call.
   const labelOps: Promise<{ stdout: string; stderr: string; exitCode: number }>[] = [];
   const labelOpDescs: string[] = [];
 
   for (const label of normalizedLabelsToRemove) {
     labelOps.push(
-      execWithNoDaemonFallback(["label", "remove", id, label, NO_DAEMON_FLAG], {
+      exec(["label", "remove", id, label], {
         cwd: repoPath,
       })
     );
@@ -861,7 +857,7 @@ export async function updateBeat(
   }
   for (const label of normalizedLabelsToAdd) {
     labelOps.push(
-      execWithNoDaemonFallback(["label", "add", id, label, NO_DAEMON_FLAG], {
+      exec(["label", "add", id, label], {
         cwd: repoPath,
       })
     );
@@ -877,17 +873,7 @@ export async function updateBeat(
     }
   }
 
-  // Flush to JSONL so the daemon's auto-import picks up the direct DB writes.
-  // Only sync after label removals — the daemon persistence bug only affects removes.
-  if (normalizedLabelsToRemove.length > 0) {
-    const { stderr, exitCode } = await execWithNoDaemonFallback(
-      ["sync", NO_DAEMON_FLAG],
-      { cwd: repoPath }
-    );
-    if (exitCode !== 0) {
-      return { ok: false, error: stderr || "bd sync failed after label update" };
-    }
-  }
+
 
   return { ok: true };
 }

@@ -43,7 +43,7 @@ describe("bd auto-import retry for out-of-sync repos", () => {
     vi.resetModules();
   });
 
-  it("runs `bd sync --import-only` and retries list once on out-of-sync error", async () => {
+  it("runs `bd import` and retries list once on out-of-sync error", async () => {
     queueExec(
       {
         stdout: JSON.stringify({
@@ -61,7 +61,7 @@ describe("bd auto-import retry for out-of-sync repos", () => {
     expect(result).toEqual({ ok: true, data: [] });
     expect(execCalls).toEqual([
       ["list", "--json", "--limit", "0", "--all"],
-      ["sync", "--import-only"],
+      ["import"],
       ["list", "--json", "--limit", "0", "--all"],
     ]);
   });

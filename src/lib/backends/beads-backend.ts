@@ -178,7 +178,7 @@ export class BeadsBackend implements BackendPort {
     const entry = await this.ensureLoaded(rp);
     let items = Array.from(entry.beads.values());
     items = applyFilters(items, filters);
-    return ok(items);
+    return ok(items.map(shallowCloneBeat));
   }
 
   async listReady(
@@ -192,7 +192,7 @@ export class BeadsBackend implements BackendPort {
       (b) => resolveStep(b.state)?.phase === StepPhase.Queued && !blockedIds.has(b.id) && !b.requiresHumanAction,
     );
     items = applyFilters(items, filters);
-    return ok(items);
+    return ok(items.map(shallowCloneBeat));
   }
 
   async search(
@@ -211,7 +211,7 @@ export class BeadsBackend implements BackendPort {
         (b.description ?? "").toLowerCase().includes(lower),
     );
     items = applyFilters(items, filters);
-    return ok(items);
+    return ok(items.map(shallowCloneBeat));
   }
 
   async query(
@@ -224,7 +224,7 @@ export class BeadsBackend implements BackendPort {
     const items = Array.from(entry.beads.values()).filter((b) =>
       matchExpression(b, expression),
     );
-    return ok(items);
+    return ok(items.map(shallowCloneBeat));
   }
 
   async get(
@@ -235,7 +235,7 @@ export class BeadsBackend implements BackendPort {
     const entry = await this.ensureLoaded(rp);
     const beat = entry.beads.get(id);
     if (!beat) return backendError("NOT_FOUND", `Beat ${id} not found`);
-    return ok(beat);
+    return ok({ ...beat, labels: [...beat.labels] });
   }
 
   // -- Write operations ---------------------------------------------------
@@ -370,8 +370,8 @@ export class BeadsBackend implements BackendPort {
     let matches = entry.deps.filter(
       (d) => d.blockerId === id || d.blockedId === id,
     );
-    if (options?.type) {
-      matches = matches.filter(() => options.type === "blocks");
+    if (options?.type && options.type !== "blocks") {
+      matches = [];
     }
     const result: BeatDependency[] = matches.map((d) => ({
       id: d.blockerId === id ? d.blockedId : d.blockerId,
@@ -500,9 +500,15 @@ export class BeadsBackend implements BackendPort {
   }
 
   private async claimBeat(
-    beat: Beat,
+    beatOrId: Beat | string,
     repoPath: string,
   ): Promise<{ target: string; step: import("@/lib/workflows").WorkflowStep } | null> {
+    const entry = await this.ensureLoaded(repoPath);
+    const beat = typeof beatOrId === "string"
+      ? entry.beads.get(beatOrId)
+      : entry.beads.get(beatOrId.id) ?? beatOrId;
+    if (!beat) return null;
+
     const resolved = resolveStep(beat.state);
     if (!resolved || resolved.phase !== StepPhase.Queued) return null;
     if (!beat.isAgentClaimable) return null;
@@ -523,6 +529,10 @@ export class BeadsBackend implements BackendPort {
 }
 
 // ── Internal helpers (kept below 75 lines each) ─────────────────
+
+function shallowCloneBeat(beat: Beat): Beat {
+  return { ...beat, labels: [...beat.labels] };
+}
 
 function applyFilters(beats: Beat[], filters?: BeatListFilters): Beat[] {
   if (!filters) return beats;
@@ -698,7 +708,10 @@ function applyUpdate(beat: Beat, input: UpdateBeatInput): void {
 function matchExpression(beat: Beat, expression: string): boolean {
   const terms = expression.split(/\s+/);
   return terms.every((term) => {
-    const [field, value] = term.split(":");
+    const colonIdx = term.indexOf(":");
+    if (colonIdx === -1) return true;
+    const field = term.slice(0, colonIdx);
+    const value = term.slice(colonIdx + 1);
     if (!field || !value) return true;
     switch (field) {
       case "status":

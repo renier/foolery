@@ -3,36 +3,7 @@
  * Tests the BdCliBackend adapter which wraps bd.ts functions.
  */
 import { describe, expect, it, vi, beforeEach } from "vitest";
-
-const {
-  mockBeadsBuildTakePrompt,
-  mockBeadsBuildPollPrompt,
-  mockBeadsBackendCtor,
-  MockBeadsBackend,
-} = vi.hoisted(() => {
-  const mockBeadsBuildTakePrompt = vi.fn();
-  const mockBeadsBuildPollPrompt = vi.fn();
-  const mockBeadsBackendCtor = vi.fn();
-  class MockBeadsBackend {
-    constructor(...args: unknown[]) {
-      mockBeadsBackendCtor(...args);
-    }
-
-    buildTakePrompt(...args: unknown[]): Promise<unknown> {
-      return mockBeadsBuildTakePrompt(...(args as []));
-    }
-
-    buildPollPrompt(...args: unknown[]): Promise<unknown> {
-      return mockBeadsBuildPollPrompt(...(args as []));
-    }
-  }
-  return {
-    mockBeadsBuildTakePrompt,
-    mockBeadsBuildPollPrompt,
-    mockBeadsBackendCtor,
-    MockBeadsBackend,
-  };
-});
+import type { Beat } from "@/lib/types";
 
 vi.mock("@/lib/bd", () => ({
   listBeats: vi.fn(),
@@ -49,28 +20,31 @@ vi.mock("@/lib/bd", () => ({
   removeDep: vi.fn(),
 }));
 
-vi.mock("@/lib/backends/beads-backend", () => ({
-  BeadsBackend: MockBeadsBackend,
-}));
-
 import { BdCliBackend } from "@/lib/backends/bd-cli-backend";
 import * as bd from "@/lib/bd";
 
 const bdMock = bd as unknown as Record<string, ReturnType<typeof vi.fn>>;
+
+const CLAIMABLE_BEAT: Beat = {
+  id: "beat-1",
+  title: "Claimable",
+  type: "task",
+  state: "ready_for_planning",
+  workflowId: "autopilot",
+  workflowMode: "granular_autonomous",
+  profileId: "autopilot",
+  isAgentClaimable: true,
+  priority: 2,
+  labels: [],
+  created: "2026-01-01T00:00:00Z",
+  updated: "2026-01-01T00:00:00Z",
+} as Beat;
 
 describe("BdCliBackend", () => {
   let backend: BdCliBackend;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockBeadsBuildTakePrompt.mockResolvedValue({
-      ok: true,
-      data: { prompt: "delegated take", claimed: false },
-    });
-    mockBeadsBuildPollPrompt.mockResolvedValue({
-      ok: true,
-      data: { prompt: "delegated poll", claimedId: "beat-1" },
-    });
     backend = new BdCliBackend();
   });
 
@@ -203,55 +177,36 @@ describe("BdCliBackend", () => {
   });
 
   // --- buildTakePrompt ---
-  it("buildTakePrompt delegates to BeadsBackend", async () => {
-    const delegated = {
-      ok: true as const,
-      data: { prompt: "delegated take prompt", claimed: true },
-    };
-    mockBeadsBuildTakePrompt.mockResolvedValue(delegated);
+  it("buildTakePrompt uses bd show to fetch beat", async () => {
+    bdMock.showBeat.mockResolvedValue({ ok: true, data: CLAIMABLE_BEAT });
+    bdMock.updateBeat.mockResolvedValue({ ok: true });
 
     const r = await backend.buildTakePrompt("beat-1", undefined, "/repo");
-
-    expect(mockBeadsBackendCtor).toHaveBeenCalledTimes(1);
-    expect(mockBeadsBackendCtor).toHaveBeenCalledWith("/repo");
-    expect(mockBeadsBuildTakePrompt).toHaveBeenCalledWith(
-      "beat-1",
-      undefined,
-      "/repo",
-    );
-    expect(r).toEqual(delegated);
+    expect(r.ok).toBe(true);
+    expect(r.data?.claimed).toBe(true);
+    expect(bdMock.showBeat).toHaveBeenCalledWith("beat-1", "/repo");
   });
 
-  it("buildTakePrompt forwards options", async () => {
-    const opts = {
-      isParent: true,
-      childBeatIds: ["child-1", "child-2"],
-    };
+  it("buildTakePrompt forwards parent options", async () => {
+    bdMock.showBeat.mockResolvedValue({ ok: true, data: CLAIMABLE_BEAT });
+    const opts = { isParent: true, childBeatIds: ["child-1", "child-2"] };
 
-    await backend.buildTakePrompt("parent-1", opts);
-    expect(mockBeadsBuildTakePrompt).toHaveBeenCalledWith(
-      "parent-1",
-      opts,
-      undefined,
-    );
+    const r = await backend.buildTakePrompt("beat-1", opts);
+    expect(r.ok).toBe(true);
+    expect(r.data?.claimed).toBe(false);
+    expect(r.data?.prompt).toContain("child-1");
+    expect(r.data?.prompt).toContain("child-2");
   });
 
   // --- buildPollPrompt ---
-  it("buildPollPrompt delegates to BeadsBackend and reuses lazy instance", async () => {
-    const delegated = {
-      ok: true as const,
-      data: { prompt: "delegated poll prompt", claimedId: "beat-2" },
-    };
-    mockBeadsBuildPollPrompt.mockResolvedValue(delegated);
+  it("buildPollPrompt uses bd ready to find claimable beats", async () => {
+    bdMock.readyBeats.mockResolvedValue({ ok: true, data: [CLAIMABLE_BEAT] });
+    bdMock.updateBeat.mockResolvedValue({ ok: true });
 
-    await backend.buildTakePrompt("beat-2");
     const r = await backend.buildPollPrompt({ agentName: "agent-x" }, "/repo");
-
-    expect(mockBeadsBackendCtor).toHaveBeenCalledTimes(1);
-    expect(mockBeadsBuildPollPrompt).toHaveBeenCalledWith(
-      { agentName: "agent-x" },
-      "/repo",
-    );
-    expect(r).toEqual(delegated);
+    expect(r.ok).toBe(true);
+    expect(r.data?.claimedId).toBe("beat-1");
+    expect(bdMock.readyBeats).toHaveBeenCalled();
+    expect(bdMock.updateBeat).toHaveBeenCalled();
   });
 });
