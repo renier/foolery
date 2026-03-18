@@ -24,6 +24,11 @@ vi.mock("@/lib/agent-message-type-index", () => ({
   writeMessageTypeIndex: (index: unknown) => mockWriteMessageTypeIndex(index),
 }));
 
+const mockReconcileOrphanedBeats = vi.fn();
+vi.mock("@/lib/orphan-reconciler", () => ({
+  reconcileOrphanedBeats: () => mockReconcileOrphanedBeats(),
+}));
+
 import { register } from "@/instrumentation";
 
 describe("register startup backfills", () => {
@@ -54,6 +59,11 @@ describe("register startup backfills", () => {
       entries: [],
     });
     mockWriteMessageTypeIndex.mockResolvedValue(undefined);
+    mockReconcileOrphanedBeats.mockResolvedValue({
+      scannedRepos: 0,
+      rolledBack: [],
+      errors: [],
+    });
   });
 
   it("runs both settings and registry backfills", async () => {
@@ -294,5 +304,42 @@ describe("register startup backfills", () => {
     process.env.NEXT_RUNTIME = "edge";
     await register();
     expect(mockReadMessageTypeIndex).not.toHaveBeenCalled();
+  });
+
+  it("runs orphan reconciliation on startup", async () => {
+    await register();
+    expect(mockReconcileOrphanedBeats).toHaveBeenCalledTimes(1);
+  });
+
+  it("warns when orphan reconciliation has errors", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockReconcileOrphanedBeats.mockResolvedValue({
+      scannedRepos: 1,
+      rolledBack: [],
+      errors: [{ repoPath: "/repo", beatId: "B-1", message: "oops" }],
+    });
+
+    await register();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("completed with 1 error(s)"),
+    );
+  });
+
+  it("catches and warns when orphan reconciliation throws", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockReconcileOrphanedBeats.mockRejectedValue(new Error("boom"));
+
+    await register();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[orphan-reconciler] startup reconciliation failed: boom",
+    );
+  });
+
+  it("skips orphan reconciliation when NEXT_RUNTIME is not nodejs", async () => {
+    process.env.NEXT_RUNTIME = "edge";
+    await register();
+    expect(mockReconcileOrphanedBeats).not.toHaveBeenCalled();
   });
 });

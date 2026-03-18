@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Copy,
   Square,
+  RotateCcw,
   Maximize2,
   Minimize2,
   X,
@@ -237,6 +238,30 @@ export function TerminalPanel() {
     await abortSession(activeTerminal.sessionId);
     updateStatus(activeTerminal.sessionId, "aborted");
   }, [activeTerminal, updateStatus]);
+
+  const handleRestart = useCallback(async () => {
+    if (!activeTerminal) return;
+    const { beatId, repoPath, sessionId: oldSessionId } = activeTerminal;
+    const result = await startSession(beatId, repoPath);
+    if (!result.ok || !result.data) {
+      toast.error(result.error ?? "Failed to restart session");
+      return;
+    }
+    upsertTerminal({
+      sessionId: result.data.id,
+      beatId: result.data.beatId,
+      beatTitle: result.data.beatTitle,
+      repoPath: result.data.repoPath ?? repoPath,
+      agentName: result.data.agentName,
+      agentModel: result.data.agentModel,
+      agentVersion: result.data.agentVersion,
+      agentCommand: result.data.agentCommand,
+      status: "running",
+      startedAt: result.data.startedAt,
+    });
+    removeTerminal(oldSessionId);
+    toast.success("Session restarted");
+  }, [activeTerminal, upsertTerminal, removeTerminal]);
 
   const toggleMaximize = useCallback(() => {
     setPanelHeight(isMaximized ? 35 : 80);
@@ -866,7 +891,7 @@ export function TerminalPanel() {
           >
             <Copy className="size-3.5" />
           </button>
-          {activeTerminal?.status === "running" && (
+          {activeTerminal?.status === "running" ? (
             <button
               type="button"
               className="rounded bg-red-600 p-1 text-white hover:bg-red-500"
@@ -874,6 +899,15 @@ export function TerminalPanel() {
               onClick={handleAbort}
             >
               <Square className="size-3.5" />
+            </button>
+          ) : activeTerminal && activeTerminal.status !== "completed" && (
+            <button
+              type="button"
+              className="rounded bg-blue-600 p-1 text-white hover:bg-blue-500"
+              title="Restart session for this beat"
+              onClick={handleRestart}
+            >
+              <RotateCcw className="size-3.5" />
             </button>
           )}
           <button

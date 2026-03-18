@@ -73,4 +73,17 @@ export async function register(): Promise<void> {
     const message = error instanceof Error ? error.message : String(error);
     console.warn(`[message-types] startup index build failed: ${message}`);
   }
+
+  try {
+    const { reconcileOrphanedBeats } = await import("@/lib/orphan-reconciler");
+    const result = await reconcileOrphanedBeats();
+    if (result.errors.length > 0) {
+      console.warn(
+        `[orphan-reconciler] completed with ${result.errors.length} error(s)`,
+      );
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`[orphan-reconciler] startup reconciliation failed: ${message}`);
+  }
 }

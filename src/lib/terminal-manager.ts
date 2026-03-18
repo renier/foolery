@@ -1296,9 +1296,12 @@ export async function createSession(
     const tag = `[terminal-manager] [${id}] [take-loop]`;
     const code = exitCode ?? 1;
 
-    // If the session was aborted, skip everything.
+    // If the session was aborted, skip take-loop continuation but still
+    // enforce the queue/terminal invariant so the beat doesn't stay stuck
+    // in an active state.
     if (sessionAborted) {
       console.log(`${tag} STOP: session was aborted`);
+      await enforceQueueTerminalInvariant();
       finishSession(code);
       return;
     }
@@ -1913,6 +1916,7 @@ export async function createSession(
     child.stdout?.removeAllListeners();
     child.stderr?.removeAllListeners();
     entry.process = null;
+
 
     if (isTakeLoop) {
       // Delegate all take-loop decision logic to the shared handler.
