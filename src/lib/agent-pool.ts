@@ -45,6 +45,51 @@ export function selectFromPool(
 }
 
 /**
+ * Strict variant of selectFromPool that returns null when no alternative
+ * to the excluded agent exists, instead of falling back to the excluded agent.
+ * Used for error-exit retry where re-running the same agent is not desired.
+ */
+export function selectFromPoolStrict(
+  pool: PoolEntry[],
+  agents: Record<string, RegisteredAgentConfig>,
+  excludeAgentId: string,
+): AgentTarget | null {
+  const valid = pool.filter(
+    (entry) => entry.weight > 0 && agents[entry.agentId],
+  );
+  if (valid.length === 0) return null;
+
+  const alternatives = valid.filter(
+    (entry) => entry.agentId !== excludeAgentId,
+  );
+  if (alternatives.length === 0) {
+    console.log(
+      `[agent-pool] Strict exclusion: no alternative to "${excludeAgentId}" — returning null`,
+    );
+    return null;
+  }
+  return selectWeighted(alternatives, agents);
+}
+
+/**
+ * Check whether an alternative agent exists for a step, strictly excluding
+ * the given agent. Returns true if a different agent can be selected.
+ */
+export function hasAlternativeAgent(
+  step: WorkflowStep,
+  pools: PoolsSettings,
+  agents: Record<string, RegisteredAgentConfig>,
+  excludeAgentId: string,
+): boolean {
+  const pool = pools[step];
+  if (!pool || pool.length === 0) return false;
+  const valid = pool.filter(
+    (entry) => entry.weight > 0 && agents[entry.agentId] && entry.agentId !== excludeAgentId,
+  );
+  return valid.length > 0;
+}
+
+/**
  * Weighted random selection from a pre-filtered list of pool entries.
  * Always includes the selected entry's agentId on the returned RegisteredAgent.
  */

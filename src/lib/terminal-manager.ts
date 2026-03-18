@@ -40,12 +40,14 @@ import {
   defaultWorkflowDescriptor,
   isQueueOrTerminal,
   isReviewStep,
+  nextQueueStateForStep,
   priorActionStep,
   queueStateForStep,
   resolveStep,
   workflowDescriptorById,
 } from "@/lib/workflows";
-import { recordStepAgent, resolvePoolAgent, getLastStepAgent } from "@/lib/agent-pool";
+import { recordStepAgent, resolvePoolAgent, selectFromPoolStrict, getLastStepAgent } from "@/lib/agent-pool";
+import { appendOutcomeRecord, type AgentOutcomeRecord } from "@/lib/agent-outcome-stats";
 
 interface SessionEntry {
   session: TerminalSession;
@@ -787,7 +789,7 @@ export async function createSession(
     return wrapExecutionPrompt(taskPrompt, "take");
   };
 
-  const buildNextTakePrompt = async (): Promise<{ prompt: string; beatState: string; agentOverride?: CliAgentTarget } | null> => {
+  const buildNextTakePrompt = async (lastErrorAgentId?: string): Promise<{ prompt: string; beatState: string; agentOverride?: CliAgentTarget } | null> => {
     const tag = `[terminal-manager] [${id}] [take-loop]`;
 
     // Fetch the beat's current state to decide whether to continue.
@@ -891,6 +893,7 @@ export async function createSession(
     }
 
     // Select an agent from the pool for this step:
+    // - Error retry: strictly exclude the agent that errored (no fallback).
     // - Review steps: exclude the agent that did the prior action step so a
     //   different agent reviews (falls back to the same agent if no other exists).
     // - Action steps: select from pool without exclusion.
@@ -898,47 +901,82 @@ export async function createSession(
     // Falls back to the session agent when pools are not configured.
     let stepAgentOverride: CliAgentTarget | undefined;
     {
-      const failedAgentId = stepFailureRollback ? agent.agentId : undefined;
+      const failedAgentId = stepFailureRollback ? agent.agentId : lastErrorAgentId;
+      const isErrorRetry = !!lastErrorAgentId && !stepFailureRollback;
 
       try {
         const settings = await loadSettings();
         if (settings.dispatchMode === "advanced") {
           const isReview = isReviewStep(resolved.step);
           const actionStep = isReview ? priorActionStep(resolved.step) : null;
-          // For review steps, exclude the agent that did the prior action step.
-          // For step failure retries, exclude the agent that failed.
-          // For action steps, no exclusion — select freely from the pool.
-          const excludeId = failedAgentId
-            ?? (isReview
-              ? (agent.agentId ?? (actionStep ? getLastStepAgent(beatId, actionStep) : undefined))
-              : undefined);
 
-          const poolAgent = resolvePoolAgent(
-            resolved.step,
-            settings.pools,
-            settings.agents,
-            excludeId,
-          );
-
-          if (poolAgent?.kind === "cli") {
-            stepAgentOverride = poolAgent;
-            if (poolAgent.agentId) {
-              recordStepAgent(beatId, resolved.step, poolAgent.agentId);
+          if (isErrorRetry && failedAgentId) {
+            // Strict exclusion: must use a different agent or stop.
+            const pool = settings.pools[resolved.step];
+            if (!pool || pool.length === 0) {
+              console.log(`${tag} STOP: no pool configured for error retry exclusion`);
+              return null;
             }
-            const reason = stepFailureRollback
-              ? "step failure retry"
-              : isReview
-                ? "cross-agent review"
-                : "pool selection";
-            console.log(
-              `${tag} ${reason}: step="${resolved.step}" ` +
-              `selected="${poolAgent.agentId ?? poolAgent.command}" ` +
-              `(excluded: ${excludeId ?? "none"})`,
+            const strictAgent = selectFromPoolStrict(pool, settings.agents, failedAgentId);
+            if (!strictAgent) {
+              console.log(`${tag} STOP: no alternative agent for error retry (excluded: ${failedAgentId})`);
+              return null;
+            }
+            if (strictAgent.kind === "cli") {
+              stepAgentOverride = strictAgent;
+              if (strictAgent.agentId) {
+                recordStepAgent(beatId, resolved.step, strictAgent.agentId);
+              }
+              console.log(
+                `${tag} error retry: step="${resolved.step}" ` +
+                `selected="${strictAgent.agentId ?? strictAgent.command}" ` +
+                `(excluded: ${failedAgentId})`,
+              );
+            }
+          } else {
+            // For review steps, exclude the agent that did the prior action step.
+            // For step failure retries, exclude the agent that failed.
+            // For action steps, no exclusion — select freely from the pool.
+            const excludeId = failedAgentId
+              ?? (isReview
+                ? (agent.agentId ?? (actionStep ? getLastStepAgent(beatId, actionStep) : undefined))
+                : undefined);
+
+            const poolAgent = resolvePoolAgent(
+              resolved.step,
+              settings.pools,
+              settings.agents,
+              excludeId,
             );
+
+            if (poolAgent?.kind === "cli") {
+              stepAgentOverride = poolAgent;
+              if (poolAgent.agentId) {
+                recordStepAgent(beatId, resolved.step, poolAgent.agentId);
+              }
+              const reason = stepFailureRollback
+                ? "step failure retry"
+                : isReview
+                  ? "cross-agent review"
+                  : "pool selection";
+              console.log(
+                `${tag} ${reason}: step="${resolved.step}" ` +
+                `selected="${poolAgent.agentId ?? poolAgent.command}" ` +
+                `(excluded: ${excludeId ?? "none"})`,
+              );
+            }
           }
+        } else if (isErrorRetry) {
+          // Non-advanced dispatch mode: no pool, can't select alternative agent.
+          console.log(`${tag} STOP: error retry not possible without advanced dispatch mode`);
+          return null;
         }
       } catch {
         // Settings load failure should not block the take loop
+        if (isErrorRetry) {
+          console.log(`${tag} STOP: settings load failed during error retry`);
+          return null;
+        }
       }
     }
 
@@ -1046,6 +1084,235 @@ export async function createSession(
     }
 
     return false;
+  };
+
+  /**
+   * Classify whether an iteration outcome is a success.
+   * Success = exit code 0 AND beat moved to either:
+   *   - the next queue state (agent advanced the workflow), OR
+   *   - the same-step queue state (agent rolled back / deferred correctly).
+   */
+  const classifyIterationSuccess = (
+    exitCode: number,
+    claimedState: string,
+    postExitState: string,
+  ): boolean => {
+    if (exitCode !== 0) return false;
+
+    const resolved = resolveStep(claimedState);
+    if (!resolved) return false;
+
+    const sameStepQueue = queueStateForStep(resolved.step);
+    const nextQueue = nextQueueStateForStep(resolved.step);
+
+    // Success: beat is in the next queue state or the same-step queue state
+    if (postExitState === sameStepQueue) return true;
+    if (nextQueue && postExitState === nextQueue) return true;
+    // Also treat terminal states (shipped, abandoned, etc.) as success when exit=0
+    const workflow = resolveWorkflowForBeat({ state: postExitState } as Beat, workflowsById, fallbackWorkflow);
+    if (workflow.terminalStates.includes(postExitState)) return true;
+    return false;
+  };
+
+  /**
+   * Shared post-iteration close handler for take-loop iterations.
+   * Handles outcome classification, stats recording, error-exit retry,
+   * max-iteration enforcement, and normal continuation.
+   *
+   * Both the initial child close handler and the take-loop child close handler
+   * call this after flushing their line buffers and cleaning up streams.
+   */
+  const handleTakeIterationClose = async (
+    exitCode: number | null,
+    iterationAgent: CliAgentTarget,
+    claimedState: string,
+  ): Promise<void> => {
+    const tag = `[terminal-manager] [${id}] [take-loop]`;
+    const code = exitCode ?? 1;
+
+    // If the session was aborted, skip everything.
+    if (sessionAborted) {
+      console.log(`${tag} STOP: session was aborted`);
+      finishSession(code);
+      return;
+    }
+
+    // Fetch post-exit beat state for classification and logging.
+    let postExitState = "unknown";
+    try {
+      const r = await getBackend().get(beatId, repoPath);
+      if (r.ok && r.data) {
+        postExitState = r.data.state;
+        const claimable = r.data.isAgentClaimable;
+        console.log(`${tag} post-close beat state: beat=${beatId} state=${postExitState} isAgentClaimable=${claimable}`);
+      }
+    } catch {
+      console.log(`${tag} post-close beat fetch failed: beat=${beatId}`);
+    }
+    interactionLog.logBeatState({
+      beatId,
+      state: postExitState,
+      phase: "after_prompt",
+      iteration: takeIteration,
+    });
+
+    // Classify outcome and compute whether an alternative agent is available.
+    const resolved = resolveStep(claimedState);
+    const success = classifyIterationSuccess(code, claimedState, postExitState);
+    let alternativeAgentAvailable = false;
+    const iterAgentId = iterationAgent.agentId;
+    if (iterAgentId && resolved) {
+      try {
+        const settings = await loadSettings();
+        if (settings.dispatchMode === "advanced") {
+          const pool = settings.pools[resolved.step];
+          if (pool && pool.length > 0) {
+            const valid = pool.filter(
+              (entry) => entry.weight > 0 && settings.agents[entry.agentId] && entry.agentId !== iterAgentId,
+            );
+            alternativeAgentAvailable = valid.length > 0;
+          }
+        }
+      } catch {
+        // Settings load failure — assume no alternative
+      }
+    }
+
+    // Record detailed stats.
+    const record: AgentOutcomeRecord = {
+      timestamp: new Date().toISOString(),
+      beatId,
+      sessionId: id,
+      iteration: takeIteration,
+      agent: {
+        agentId: iterationAgent.agentId,
+        label: iterationAgent.label,
+        model: iterationAgent.model,
+        version: iterationAgent.version,
+        command: iterationAgent.command,
+      },
+      claimedState,
+      claimedStep: resolved?.step,
+      exitCode: code,
+      postExitState,
+      rolledBack: false,
+      alternativeAgentAvailable,
+      success,
+    };
+
+    // ── Non-zero exit: rollback + retry with different agent ──
+    if (code !== 0) {
+      console.log(`${tag} non-zero exit code=${code} — attempting rollback and retry`);
+
+      // Rollback if the beat is stuck in an action state.
+      const invariantOk = await enforceQueueTerminalInvariant();
+      record.rolledBack = invariantOk; // true if rollback happened and succeeded
+
+      // Persist stats before retry attempt.
+      appendOutcomeRecord(record).catch((err) => {
+        console.error(`${tag} failed to write outcome stats:`, err);
+      });
+
+      // Try to retry with a different agent if within iteration budget.
+      if (takeIteration < MAX_TAKE_ITERATIONS && iterAgentId) {
+        try {
+          const nextTake = await buildNextTakePrompt(iterAgentId);
+          if (nextTake) {
+            takeIteration++;
+            const retryAgent = nextTake.agentOverride ?? agent;
+            const retryLabel = retryAgent.label ?? retryAgent.agentId ?? retryAgent.command;
+            if (nextTake.agentOverride) {
+              pushEvent({
+                type: "agent_switch",
+                data: JSON.stringify({
+                  agentName: retryAgent.label ?? retryAgent.agentId ?? retryAgent.command,
+                  agentModel: retryAgent.model,
+                  agentVersion: retryAgent.version,
+                  agentCommand: retryAgent.command,
+                }),
+                timestamp: Date.now(),
+              });
+            }
+            pushEvent({
+              type: "stdout",
+              data: `\n\x1b[33m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} ERROR RETRY ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${retryLabel}] ---\x1b[0m\n`,
+              timestamp: Date.now(),
+            });
+            console.log(`${tag} error retry: starting iteration ${takeIteration}/${MAX_TAKE_ITERATIONS} with agent="${retryLabel}"`);
+            spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
+            return;
+          }
+          console.log(`${tag} STOP: no retry available (buildNextTakePrompt returned null)`);
+        } catch (err) {
+          console.error(`${tag} error retry buildNextTakePrompt threw:`, err);
+        }
+      } else if (takeIteration >= MAX_TAKE_ITERATIONS) {
+        console.log(`${tag} STOP: max iterations reached during error retry (${takeIteration}/${MAX_TAKE_ITERATIONS})`);
+      } else {
+        console.log(`${tag} STOP: no agentId for error retry exclusion`);
+      }
+
+      finishSession(code);
+      return;
+    }
+
+    // ── Zero exit: persist stats and continue normally ──
+
+    // Persist stats for successful iterations.
+    appendOutcomeRecord(record).catch((err) => {
+      console.error(`${tag} failed to write outcome stats:`, err);
+    });
+
+    if (takeIteration >= MAX_TAKE_ITERATIONS) {
+      console.log(`${tag} STOP: max iterations reached (${takeIteration}/${MAX_TAKE_ITERATIONS})`);
+      pushEvent({
+        type: "stdout",
+        data: `\x1b[33m--- ${new Date().toISOString()} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} Take loop stopped: max iterations reached ---\x1b[0m\n`,
+        timestamp: Date.now(),
+      });
+      await enforceQueueTerminalInvariant();
+      finishSession(1);
+      return;
+    }
+
+    console.log(`${tag} evaluating next iteration (code=0, iteration=${takeIteration}/${MAX_TAKE_ITERATIONS})`);
+    try {
+      const nextTake = await buildNextTakePrompt();
+      if (nextTake) {
+        takeIteration++;
+        const iterAgent = nextTake.agentOverride ?? agent;
+        const iterAgentLabel = iterAgent.label ?? iterAgent.agentId ?? iterAgent.command;
+        if (nextTake.agentOverride) {
+          pushEvent({
+            type: "agent_switch",
+            data: JSON.stringify({
+              agentName: iterAgent.label ?? iterAgent.agentId ?? iterAgent.command,
+              agentModel: iterAgent.model,
+              agentVersion: iterAgent.version,
+              agentCommand: iterAgent.command,
+            }),
+            timestamp: Date.now(),
+          });
+        }
+        pushEvent({
+          type: "stdout",
+          data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,
+          timestamp: Date.now(),
+        });
+        spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
+        return;
+      }
+      console.log(`${tag} buildNextTakePrompt returned null — ending session`);
+    } catch (err) {
+      console.error(`${tag} buildNextTakePrompt threw:`, err);
+      pushEvent({
+        type: "stderr",
+        data: `[take ${takeIteration}/${MAX_TAKE_ITERATIONS} | beat: ${beatId.slice(0, 12)}] Take loop check failed: ${err instanceof Error ? err.message : String(err)}\n`,
+        timestamp: Date.now(),
+      });
+    }
+    await enforceQueueTerminalInvariant();
+    finishSession(code);
   };
 
   /** Spawn a fresh agent child process for a take-loop iteration. */
@@ -1199,91 +1466,12 @@ export async function createSession(
       takeChild.stderr?.removeAllListeners();
       entry.process = null;
 
-      const tag = `[terminal-manager] [${id}] [take-loop]`;
-      console.log(`${tag} child close: code=${takeCode} iteration=${takeIteration}/${MAX_TAKE_ITERATIONS} beat=${beatId} aborted=${sessionAborted}`);
+      console.log(`[terminal-manager] [${id}] [take-loop] child close: code=${takeCode} iteration=${takeIteration}/${MAX_TAKE_ITERATIONS} beat=${beatId} aborted=${sessionAborted}`);
 
-      // If the session was aborted, skip take-loop continuation and finish immediately.
-      if (sessionAborted) {
-        console.log(`${tag} STOP: session was aborted`);
+      handleTakeIterationClose(takeCode, effectiveAgent, beatState ?? "unknown").catch((err) => {
+        console.error(`[terminal-manager] [${id}] [take-loop] handleTakeIterationClose error:`, err);
         finishSession(takeCode ?? 1);
-        return;
-      }
-
-      getBackend().get(beatId, repoPath).then((r) => {
-        const state = r.ok && r.data ? r.data.state : "unknown";
-        const claimable = r.ok && r.data ? r.data.isAgentClaimable : "unknown";
-        console.log(`${tag} post-close beat state: beat=${beatId} state=${state} isAgentClaimable=${claimable}`);
-        interactionLog.logBeatState({
-          beatId,
-          state,
-          phase: "after_prompt",
-          iteration: takeIteration,
-        });
-      }).catch(() => {
-        console.log(`${tag} post-close beat fetch failed: beat=${beatId}`);
       });
-
-      if (takeCode !== 0) {
-        console.log(`${tag} STOP: non-zero exit code=${takeCode}`);
-        enforceQueueTerminalInvariant().finally(() => {
-          finishSession(takeCode ?? 1);
-        });
-        return;
-      }
-
-      if (takeIteration >= MAX_TAKE_ITERATIONS) {
-        console.log(`${tag} STOP: max iterations reached (${takeIteration}/${MAX_TAKE_ITERATIONS})`);
-        pushEvent({
-          type: "stdout",
-          data: `\x1b[33m--- ${new Date().toISOString()} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} Take loop stopped: max iterations reached ---\x1b[0m\n`,
-          timestamp: Date.now(),
-        });
-        enforceQueueTerminalInvariant().finally(() => {
-          finishSession(1);
-        });
-        return;
-      }
-
-      console.log(`${tag} evaluating next iteration (code=0, iteration=${takeIteration}/${MAX_TAKE_ITERATIONS})`);
-      (async () => {
-        try {
-          const nextTake = await buildNextTakePrompt();
-          if (nextTake) {
-            takeIteration++;
-            const iterAgent = nextTake.agentOverride ?? agent;
-            const iterAgentLabel = iterAgent.label ?? iterAgent.agentId ?? iterAgent.command;
-            if (nextTake.agentOverride) {
-              pushEvent({
-                type: "agent_switch",
-                data: JSON.stringify({
-                  agentName: iterAgent.label ?? iterAgent.agentId ?? iterAgent.command,
-                  agentModel: iterAgent.model,
-                  agentVersion: iterAgent.version,
-                  agentCommand: iterAgent.command,
-                }),
-                timestamp: Date.now(),
-              });
-            }
-            pushEvent({
-              type: "stdout",
-              data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,
-              timestamp: Date.now(),
-            });
-            spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
-            return;
-          }
-          console.log(`${tag} buildNextTakePrompt returned null — ending session`);
-        } catch (err) {
-          console.error(`${tag} buildNextTakePrompt threw:`, err);
-          pushEvent({
-            type: "stderr",
-            data: `[take ${takeIteration}/${MAX_TAKE_ITERATIONS} | beat: ${beatId.slice(0, 12)}] Take loop check failed: ${err instanceof Error ? err.message : String(err)}\n`,
-            timestamp: Date.now(),
-          });
-        }
-        await enforceQueueTerminalInvariant();
-        finishSession(takeCode ?? 0);
-      })();
     });
 
     const takeErrorPrefix = `[take ${takeIteration}/${MAX_TAKE_ITERATIONS} | beat: ${beatId.slice(0, 12)} | agent: ${effectiveDialect}]`;
@@ -1296,7 +1484,8 @@ export async function createSession(
       takeChild.stdout?.removeAllListeners();
       takeChild.stderr?.removeAllListeners();
       entry.process = null;
-      enforceQueueTerminalInvariant().finally(() => {
+      handleTakeIterationClose(1, effectiveAgent, beatState ?? "unknown").catch((e) => {
+        console.error(`[terminal-manager] [${id}] [take-loop] handleTakeIterationClose error after spawn error:`, e);
         finishSession(1);
       });
     });
@@ -1548,23 +1737,8 @@ export async function createSession(
       lineBuffer = "";
     }
 
-    const tag = `[terminal-manager] [${id}] [take-loop]`;
-
     if (isTakeLoop) {
-      console.log(`${tag} initial child close: code=${code} signal=${signal} beat=${beatId} isTakeLoop=${isTakeLoop}`);
-      getBackend().get(beatId, repoPath).then((r) => {
-        const state = r.ok && r.data ? r.data.state : "unknown";
-        const claimable = r.ok && r.data ? r.data.isAgentClaimable : "unknown";
-        console.log(`${tag} post-close beat state: beat=${beatId} state=${state} isAgentClaimable=${claimable}`);
-        interactionLog.logBeatState({
-          beatId,
-          state,
-          phase: "after_prompt",
-          iteration: takeIteration,
-        });
-      }).catch(() => {
-        console.log(`${tag} post-close beat fetch failed: beat=${beatId}`);
-      });
+      console.log(`[terminal-manager] [${id}] [take-loop] initial child close: code=${code} signal=${signal} beat=${beatId}`);
     } else {
       console.log(`[terminal-manager] [${id}] close: code=${code} signal=${signal} buffer=${buffer.length} events`);
     }
@@ -1579,85 +1753,12 @@ export async function createSession(
     child.stderr?.removeAllListeners();
     entry.process = null;
 
-    // If the session was aborted, skip take-loop continuation and finish immediately.
-    if (sessionAborted) {
-      console.log(`${tag} STOP: session was aborted`);
-      finishSession(code ?? 1);
-      return;
-    }
-
-    // Take loop: check if this session should continue claiming the same beat
-    if (isTakeLoop && code !== 0) {
-      console.log(`${tag} STOP: initial child exited with non-zero code=${code}`);
-      enforceQueueTerminalInvariant().finally(() => {
-        finishSession(code ?? 1);
-      });
-      return;
-    }
-
-    if (isTakeLoop && code === 0 && takeIteration >= MAX_TAKE_ITERATIONS) {
-      console.log(`${tag} STOP: max iterations reached (${takeIteration}/${MAX_TAKE_ITERATIONS})`);
-      pushEvent({
-        type: "stdout",
-        data: `\x1b[33m--- Take loop stopped: max ${MAX_TAKE_ITERATIONS} iterations reached ---\x1b[0m\n`,
-        timestamp: Date.now(),
-      });
-      enforceQueueTerminalInvariant().finally(() => {
-        finishSession(1);
-      });
-      return;
-    }
-
-    if (isTakeLoop && code === 0 && takeIteration < MAX_TAKE_ITERATIONS) {
-      console.log(`${tag} evaluating next iteration after initial child (code=0, iteration=${takeIteration}/${MAX_TAKE_ITERATIONS})`);
-      (async () => {
-        try {
-          const nextTake = await buildNextTakePrompt();
-          if (nextTake) {
-            takeIteration++;
-            const iterAgent = nextTake.agentOverride ?? agent;
-            const iterAgentLabel = iterAgent.label ?? iterAgent.agentId ?? iterAgent.command;
-            if (nextTake.agentOverride) {
-              pushEvent({
-                type: "agent_switch",
-                data: JSON.stringify({
-                  agentName: iterAgent.label ?? iterAgent.agentId ?? iterAgent.command,
-                  agentModel: iterAgent.model,
-                  agentVersion: iterAgent.version,
-                  agentCommand: iterAgent.command,
-                }),
-                timestamp: Date.now(),
-              });
-            }
-            pushEvent({
-              type: "stdout",
-              data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,
-              timestamp: Date.now(),
-            });
-            console.log(`${tag} starting iteration ${takeIteration}/${MAX_TAKE_ITERATIONS}`);
-            spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
-            return;
-          }
-          console.log(`${tag} buildNextTakePrompt returned null — ending session`);
-        } catch (err) {
-          console.error(`${tag} buildNextTakePrompt threw:`, err);
-          pushEvent({
-            type: "stderr",
-            data: `[take ${takeIteration}/${MAX_TAKE_ITERATIONS} | beat: ${beatId.slice(0, 12)}] Take loop check failed: ${err instanceof Error ? err.message : String(err)}\n`,
-            timestamp: Date.now(),
-          });
-        }
-        await enforceQueueTerminalInvariant();
-        finishSession(code ?? 0);
-      })();
-      return;
-    }
-
     if (isTakeLoop) {
-      (async () => {
-        await enforceQueueTerminalInvariant();
+      // Delegate all take-loop decision logic to the shared handler.
+      handleTakeIterationClose(code, agent, beat.state ?? "unknown").catch((err) => {
+        console.error(`[terminal-manager] [${id}] [take-loop] handleTakeIterationClose error:`, err);
         finishSession(code ?? 1);
-      })();
+      });
       return;
     }
 
@@ -1684,9 +1785,16 @@ export async function createSession(
     child.stdout?.removeAllListeners();
     child.stderr?.removeAllListeners();
     entry.process = null;
-    enforceQueueTerminalInvariant().finally(() => {
-      finishSession(1);
-    });
+    if (isTakeLoop) {
+      handleTakeIterationClose(1, agent, beat.state ?? "unknown").catch((e) => {
+        console.error(`[terminal-manager] [${id}] handleTakeIterationClose error after spawn error:`, e);
+        finishSession(1);
+      });
+    } else {
+      enforceQueueTerminalInvariant().finally(() => {
+        finishSession(1);
+      });
+    }
   });
 
   // Log beat state before the initial prompt (iteration 1).

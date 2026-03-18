@@ -93,6 +93,28 @@ export function queueStateForStep(step: WorkflowStep): string {
   }
 }
 
+// ── Step ordering ──────────────────────────────────────────────
+
+/** Ordered workflow steps used for next/prior queue state derivation. */
+const STEP_ORDER: readonly WorkflowStep[] = [
+  WorkflowStep.Planning,
+  WorkflowStep.PlanReview,
+  WorkflowStep.Implementation,
+  WorkflowStep.ImplementationReview,
+  WorkflowStep.Shipment,
+  WorkflowStep.ShipmentReview,
+];
+
+/**
+ * Returns the queue state for the step that follows the given step,
+ * or null if the given step is the last step (shipment_review).
+ */
+export function nextQueueStateForStep(step: WorkflowStep): string | null {
+  const idx = STEP_ORDER.indexOf(step);
+  if (idx < 0 || idx >= STEP_ORDER.length - 1) return null;
+  return queueStateForStep(STEP_ORDER[idx + 1]!);
+}
+
 // ── Review-step helpers ────────────────────────────────────────
 
 /** Maps each review step to the action step it reviews. */
