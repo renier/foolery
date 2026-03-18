@@ -68,7 +68,7 @@ export function buildPromptModeArgs(
   }
 
   if (dialect === "crush") {
-    const args = ["run", "-o", "stream-json", "-q", "--yolo"];
+    const args = ["run", "-o", "stream-json", "-q"];
     if (agent.model) args.push("-m", agent.model);
     args.push(prompt);
     return { command, args };
