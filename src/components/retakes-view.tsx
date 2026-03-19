@@ -13,9 +13,8 @@ import { RetakeDialog } from "@/components/retake-dialog";
 import { BeatTypeBadge } from "@/components/beat-type-badge";
 import { BeatPriorityBadge } from "@/components/beat-priority-badge";
 import { isWaveLabel, extractWaveSlug, isInternalLabel } from "@/lib/wave-slugs";
-import { Clapperboard } from "lucide-react";
+import { Clapperboard, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -304,10 +303,10 @@ function AgentBadge({ entry }: { entry: MetadataEntry }) {
 
 function RetakeDetails({
   beat,
-  showNotesAndHandoffs,
+  showExpandedDetails,
 }: {
   beat: Beat;
-  showNotesAndHandoffs: boolean;
+  showExpandedDetails: boolean;
 }) {
   const description = beat.description ?? readMetadataString(beat, [
     "knotsDescription",
@@ -361,7 +360,7 @@ function RetakeDetails({
         </div>
       )}
 
-      {renderedSteps.length > 0 && (
+      {showExpandedDetails && renderedSteps.length > 0 && (
         <div className="space-y-1.5">
           <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-700">
             Steps
@@ -375,7 +374,7 @@ function RetakeDetails({
         </div>
       )}
 
-      {showNotesAndHandoffs && renderedNotes.length > 0 && (
+      {showExpandedDetails && renderedNotes.length > 0 && (
         <div className="space-y-1.5">
           <div className="text-[10px] font-semibold text-yellow-800 uppercase tracking-wide">
             Notes
@@ -389,7 +388,7 @@ function RetakeDetails({
         </div>
       )}
 
-      {showNotesAndHandoffs && renderedCapsules.length > 0 && (
+      {showExpandedDetails && renderedCapsules.length > 0 && (
         <div className="space-y-1.5">
           <div className="text-[10px] font-semibold text-blue-800 uppercase tracking-wide">
             Handoff Capsules
@@ -410,13 +409,12 @@ function RetakeRow({
   beat,
   onRetake,
   onTitleClick,
-  showNotesAndHandoffs,
 }: {
   beat: Beat;
   onRetake: (beat: Beat) => void;
   onTitleClick?: (beat: Beat) => void;
-  showNotesAndHandoffs: boolean;
 }) {
+  const [showExpandedDetails, setShowExpandedDetails] = useState(false);
   const labels = beat.labels ?? [];
   const waveSlug = extractWaveSlug(labels);
   const isOrchestrated = labels.some(isWaveLabel);
@@ -427,6 +425,18 @@ function RetakeRow({
 
   return (
     <div className="flex items-start gap-3 border-b border-border/40 px-2 py-2.5 hover:bg-muted/30">
+      {/* Disclosure toggle */}
+      <button
+        type="button"
+        className="mt-0.5 shrink-0 rounded p-0.5 text-muted-foreground hover:bg-muted/50 transition-transform"
+        aria-expanded={showExpandedDetails}
+        aria-label={showExpandedDetails ? "Collapse details" : "Expand details"}
+        title={showExpandedDetails ? "Collapse details" : "Expand details"}
+        onClick={() => setShowExpandedDetails((prev) => !prev)}
+      >
+        <ChevronRight className={`size-4 transition-transform ${showExpandedDetails ? "rotate-90" : ""}`} />
+      </button>
+
       {/* Left: beat info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -477,7 +487,7 @@ function RetakeRow({
             </span>
           ))}
         </div>
-        <RetakeDetails beat={beat} showNotesAndHandoffs={showNotesAndHandoffs} />
+        <RetakeDetails beat={beat} showExpandedDetails={showExpandedDetails} />
       </div>
 
       {/* Right: ReTake button */}
@@ -500,7 +510,6 @@ export function RetakesView() {
   const [retakeBeat, setRetakeBeat] = useState<Beat | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
-  const [showNotesAndHandoffs, setShowNotesAndHandoffs] = useState(false);
   const { terminals, setActiveSession, upsertTerminal } = useTerminalStore();
 
   const shippingByBeatId = useMemo(() => buildRetakeShippingIndex(terminals), [terminals]);
@@ -801,22 +810,10 @@ export function RetakesView() {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between px-2">
+      <div className="px-2">
         <div className="text-xs text-muted-foreground">
           {beats.length} shipped beat{beats.length !== 1 ? "s" : ""} — most recently updated first
         </div>
-        <label
-          htmlFor="retakes-details-toggle"
-          className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
-        >
-          <Switch
-            id="retakes-details-toggle"
-            checked={showNotesAndHandoffs}
-            onCheckedChange={(checked) => setShowNotesAndHandoffs(checked === true)}
-            aria-label="Show notes and handoff capsules"
-          />
-          <span>Show notes and handoff capsules</span>
-        </label>
       </div>
       {pageCount > 1 && renderPaginationControls()}
       <div className="rounded-md border border-border/60">
@@ -825,7 +822,6 @@ export function RetakesView() {
             key={beat.id}
             beat={beat}
             onRetake={handleOpenRetake}
-            showNotesAndHandoffs={showNotesAndHandoffs}
           />
         ))}
       </div>
