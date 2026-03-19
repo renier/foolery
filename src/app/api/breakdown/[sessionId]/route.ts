@@ -36,7 +36,6 @@ export async function GET(
 
       const cleanup = () => {
         entry.emitter.off("data", listener);
-        clearInterval(heartbeatTimer);
       };
 
       const closeStream = () => {
@@ -64,9 +63,13 @@ export async function GET(
       entry.emitter.on("data", listener);
 
       // Heartbeat: send an SSE comment periodically to keep the
-      // connection alive during quiet periods.
+      // connection alive during quiet periods.  The callback self-cleans
+      // via the `closed` guard when closeStream() has been called.
       const heartbeatTimer = setInterval(() => {
-        if (closed) { clearInterval(heartbeatTimer); return; }
+        if (closed) {
+          clearInterval(heartbeatTimer);
+          return;
+        }
         try {
           controller.enqueue(encoder.encode(`:keepalive\n\n`));
         } catch {

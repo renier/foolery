@@ -18,6 +18,8 @@ interface Connection {
   buffer: BufferedEvent[];
   exitReceived: boolean;
   exitCode: number | null;
+  /** Number of server-replayed events to skip (set during reconnection). */
+  replaySkip: number;
 }
 
 const MAX_BUFFER = 5_000;
@@ -44,6 +46,7 @@ class SessionConnectionManager {
       buffer: [],
       exitReceived: false,
       exitCode: null,
+      replaySkip: 0,
     };
     this.connections.set(sessionId, conn);
 
@@ -54,14 +57,23 @@ class SessionConnectionManager {
         // transient blips don't permanently exhaust the budget.
         this.reconnectCounts.delete(sessionId);
 
+        // On reconnection the server replays its entire event buffer.
+        // Skip the replayed portion so listeners don't see duplicates,
+        // but still add the events to our buffer (they fill the gap for
+        // any events that arrived while disconnected).
+        const isReplay = conn.replaySkip > 0;
+        if (isReplay) conn.replaySkip--;
+
         // Buffer the event (bounded)
         if (conn.buffer.length < MAX_BUFFER) {
           conn.buffer.push({ type: event.type, data: event.data });
         }
 
-        // Forward to all live listeners
-        for (const listener of conn.listeners) {
-          listener(event);
+        // Only forward genuinely new events to listeners.
+        if (!isReplay) {
+          for (const listener of conn.listeners) {
+            listener(event);
+          }
         }
 
         if (event.type === "agent_switch") {
@@ -150,12 +162,14 @@ class SessionConnectionManager {
           }
         }
       },
-      // onError — the EventSource exhausted its retry budget.
-      // Remove the stale entry and immediately re-establish the connection
-      // so the UI doesn't permanently lose the event stream.
+      // onError — the EventSource gave up.  Save the old connection's
+      // listeners and buffer size, then tear down and reconnect.
       () => {
+        const oldConn = this.connections.get(sessionId);
+        const savedListeners = oldConn ? new Set(oldConn.listeners) : new Set<EventListener>();
+        const replaySkip = oldConn ? oldConn.buffer.length : 0;
         this.connections.delete(sessionId);
-        this.reconnect(sessionId);
+        this.reconnect(sessionId, savedListeners, replaySkip);
       },
     );
 
@@ -173,9 +187,15 @@ class SessionConnectionManager {
 
   /**
    * Re-establish a dropped SSE connection for a still-running session.
+   * Transfers listeners from the old connection and sets `replaySkip`
+   * so the server's buffered-event replay doesn't duplicate UI output.
    * Guards against infinite loops with a per-session retry counter.
    */
-  private reconnect(sessionId: string): void {
+  private reconnect(
+    sessionId: string,
+    savedListeners: Set<EventListener>,
+    replaySkip: number,
+  ): void {
     // Only reconnect if the session is still marked as running in the store.
     const terminal = useTerminalStore
       .getState()
@@ -197,18 +217,32 @@ class SessionConnectionManager {
     // connect() is idempotent — it only creates a new connection when the
     // entry doesn't exist (the onError callback already deleted it).
     this.connect(sessionId);
+
+    // Transfer state from the old connection to the new one.
+    const newConn = this.connections.get(sessionId);
+    if (newConn) {
+      for (const listener of savedListeners) {
+        newConn.listeners.add(listener);
+      }
+      newConn.replaySkip = replaySkip;
+    }
   }
 
   /**
    * Subscribe to live events for a session.
    * Returns an unsubscribe function.
+   *
+   * The unsubscribe function looks up the *current* connection at call
+   * time rather than capturing the connection at subscribe time, so it
+   * still works correctly after a reconnect replaces the Connection.
    */
   subscribe(sessionId: string, listener: EventListener): () => void {
     const conn = this.connections.get(sessionId);
     if (!conn) return () => {};
     conn.listeners.add(listener);
     return () => {
-      conn.listeners.delete(listener);
+      const current = this.connections.get(sessionId);
+      if (current) current.listeners.delete(listener);
     };
   }
 
