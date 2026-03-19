@@ -32,8 +32,9 @@ import { ORCHESTRATION_WAVE_LABEL } from "@/lib/wave-slugs";
 import { updateMessageTypeIndexFromSession } from "@/lib/agent-message-type-index";
 import type { Beat, MemoryWorkflowDescriptor } from "@/lib/types";
 import type { CliAgentTarget } from "@/lib/types-agent-target";
-import { agentDisplayName, toExecutionAgentInfo } from "@/lib/agent-identity";
+import { agentDisplayName, normalizeAgentIdentity, toExecutionAgentInfo } from "@/lib/agent-identity";
 import { terminateLease } from "@/lib/knots";
+import { appendLeaseAuditEvent } from "@/lib/lease-audit";
 import { buildShipFollowUpBoundaryLines, wrapExecutionPrompt } from "@/lib/agent-prompt-guardrails";
 import {
   StepPhase,
@@ -65,7 +66,6 @@ const MAX_BUFFER = 5000;
 const DEFAULT_MAX_SESSIONS = 5;
 const CLEANUP_DELAY_MS = 5 * 60 * 1000;
 const INPUT_CLOSE_GRACE_MS = 2000;
-const MAX_TAKE_ITERATIONS = 10;
 
 /**
  * Resolve a CLI command that may not be on PATH.
@@ -788,6 +788,11 @@ export async function createSession(
   const isTakeLoop = !effectiveParent && !customPrompt;
   let takeIteration = 1;
 
+  // Per-queue-type claim counters (replaces flat MAX_TAKE_ITERATIONS)
+  const claimsPerQueueType = new Map<string, number>();
+  // Track which agent last claimed each queue type
+  const lastAgentPerQueueType = new Map<string, string>();
+
   const wrapSingleBeatPrompt = (taskPrompt: string): string => {
     return wrapExecutionPrompt(taskPrompt, "take");
   };
@@ -895,20 +900,28 @@ export async function createSession(
       return null;
     }
 
+    // Per-queue-type claim limit enforcement
+    const queueType = resolved.step;
+    const currentCount = (claimsPerQueueType.get(queueType) ?? 0) + 1;
+    claimsPerQueueType.set(queueType, currentCount);
+
     // Select an agent from the pool for this step:
     // - Error retry: strictly exclude the agent that errored (no fallback).
     // - Review steps: exclude the agent that did the prior action step so a
     //   different agent reviews (falls back to the same agent if no other exists).
-    // - Action steps: select from pool without exclusion.
+    // - Action steps on repeated queue claims: prefer a different agent (soft exclusion).
     // - Step failure retry: exclude the agent that just failed.
     // Falls back to the session agent when pools are not configured.
     let stepAgentOverride: CliAgentTarget | undefined;
+    let maxClaims = 10; // default
     {
       const failedAgentId = stepFailureRollback ? agent.agentId : lastErrorAgentId;
       const isErrorRetry = !!lastErrorAgentId && !stepFailureRollback;
 
       try {
         const settings = await loadSettings();
+        maxClaims = settings.maxClaimsPerQueueType ?? 10;
+
         if (settings.dispatchMode === "advanced") {
           const isReview = isReviewStep(resolved.step);
           const actionStep = isReview ? priorActionStep(resolved.step) : null;
@@ -939,11 +952,12 @@ export async function createSession(
           } else {
             // For review steps, exclude the agent that did the prior action step.
             // For step failure retries, exclude the agent that failed.
-            // For action steps, no exclusion — select freely from the pool.
+            // For action steps on repeated queue claims, prefer a different agent (soft exclusion).
+            const lastQueueAgent = lastAgentPerQueueType.get(queueType);
             const excludeId = failedAgentId
               ?? (isReview
                 ? (agent.agentId ?? (actionStep ? getLastStepAgent(beatId, actionStep) : undefined))
-                : undefined);
+                : lastQueueAgent);
 
             const poolAgent = resolvePoolAgent(
               resolved.step,
@@ -983,6 +997,18 @@ export async function createSession(
       }
     }
 
+    // Enforce per-queue-type claim limit
+    if (currentCount > maxClaims) {
+      console.log(`${tag} STOP: max claims per queue type reached for "${queueType}" (${currentCount}/${maxClaims})`);
+      pushEvent({
+        type: "stdout",
+        data: `\x1b[33m--- ${new Date().toISOString()} ${current.state} Take loop stopped: max claims per queue type "${queueType}" reached (${currentCount}/${maxClaims}) ---\x1b[0m\n`,
+        timestamp: Date.now(),
+      });
+      await enforceQueueTerminalInvariant();
+      return null;
+    }
+
     // Claim the same beat into its next workflow state.
     console.log(`${tag} claiming ${beatId} from state=${current.state}`);
     const takeResult = await getBackend().buildTakePrompt(
@@ -1002,11 +1028,28 @@ export async function createSession(
 
     const claimAgent = stepAgentOverride ?? agent;
     const claimAgentLabel = claimAgent.label ?? claimAgent.agentId ?? claimAgent.command;
+    const selectedAgentId = claimAgent.agentId;
+    if (selectedAgentId) {
+      lastAgentPerQueueType.set(queueType, selectedAgentId);
+    }
     console.log(`${tag} CONTINUE: claimed ${beatId} → iteration ${takeIteration + 1}`);
     pushEvent({
       type: "stdout",
       data: `\x1b[36m--- ${new Date().toISOString()} ${current.state} Claimed ${beatId} (iteration ${takeIteration + 1}) [agent: ${claimAgentLabel}] ---\x1b[0m\n`,
       timestamp: Date.now(),
+    });
+
+    // Fire-and-forget lease audit event
+    const normalizedAgent = normalizeAgentIdentity(claimAgent);
+    Promise.resolve(appendLeaseAuditEvent({
+      timestamp: new Date().toISOString(),
+      beatId,
+      sessionId: id,
+      agent: normalizedAgent,
+      queueType,
+      outcome: "claim",
+    })).catch((err) => {
+      console.error(`${tag} failed to write lease audit event:`, err);
     });
 
     return { prompt: wrapSingleBeatPrompt(takeResult.data.prompt), beatState: current.state, agentOverride: stepAgentOverride };
@@ -1212,8 +1255,8 @@ export async function createSession(
         console.error(`${tag} failed to write outcome stats:`, err);
       });
 
-      // Try to retry with a different agent if within iteration budget.
-      if (takeIteration < MAX_TAKE_ITERATIONS && iterAgentId) {
+      // Try to retry with a different agent (per-queue-type limit is enforced in buildNextTakePrompt).
+      if (iterAgentId) {
         try {
           const nextTake = await buildNextTakePrompt(iterAgentId);
           if (nextTake) {
@@ -1234,10 +1277,10 @@ export async function createSession(
             }
             pushEvent({
               type: "stdout",
-              data: `\n\x1b[33m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} ERROR RETRY ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${retryLabel}] ---\x1b[0m\n`,
+              data: `\n\x1b[33m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} ERROR RETRY ${takeIteration} [agent: ${retryLabel}] ---\x1b[0m\n`,
               timestamp: Date.now(),
             });
-            console.log(`${tag} error retry: starting iteration ${takeIteration}/${MAX_TAKE_ITERATIONS} with agent="${retryLabel}"`);
+            console.log(`${tag} error retry: starting iteration ${takeIteration} with agent="${retryLabel}"`);
             spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
             return;
           }
@@ -1245,8 +1288,6 @@ export async function createSession(
         } catch (err) {
           console.error(`${tag} error retry buildNextTakePrompt threw:`, err);
         }
-      } else if (takeIteration >= MAX_TAKE_ITERATIONS) {
-        console.log(`${tag} STOP: max iterations reached during error retry (${takeIteration}/${MAX_TAKE_ITERATIONS})`);
       } else {
         console.log(`${tag} STOP: no agentId for error retry exclusion`);
       }
@@ -1262,19 +1303,7 @@ export async function createSession(
       console.error(`${tag} failed to write outcome stats:`, err);
     });
 
-    if (takeIteration >= MAX_TAKE_ITERATIONS) {
-      console.log(`${tag} STOP: max iterations reached (${takeIteration}/${MAX_TAKE_ITERATIONS})`);
-      pushEvent({
-        type: "stdout",
-        data: `\x1b[33m--- ${new Date().toISOString()} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} Take loop stopped: max iterations reached ---\x1b[0m\n`,
-        timestamp: Date.now(),
-      });
-      await enforceQueueTerminalInvariant();
-      finishSession(1);
-      return;
-    }
-
-    console.log(`${tag} evaluating next iteration (code=0, iteration=${takeIteration}/${MAX_TAKE_ITERATIONS})`);
+    console.log(`${tag} evaluating next iteration (code=0, iteration=${takeIteration})`);
     try {
       const nextTake = await buildNextTakePrompt();
       if (nextTake) {
@@ -1295,7 +1324,7 @@ export async function createSession(
         }
         pushEvent({
           type: "stdout",
-          data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration}/${MAX_TAKE_ITERATIONS} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,
+          data: `\n\x1b[36m--- ${new Date().toISOString()} ${nextTake.beatState ?? "unknown"} TAKE ${takeIteration} [agent: ${iterAgentLabel}] ---\x1b[0m\n`,
           timestamp: Date.now(),
         });
         spawnTakeChild(nextTake.prompt, nextTake.beatState, nextTake.agentOverride);
@@ -1306,7 +1335,7 @@ export async function createSession(
       console.error(`${tag} buildNextTakePrompt threw:`, err);
       pushEvent({
         type: "stderr",
-        data: `[take ${takeIteration}/${MAX_TAKE_ITERATIONS} | beat: ${beatId.slice(0, 12)}] Take loop check failed: ${err instanceof Error ? err.message : String(err)}\n`,
+        data: `[take ${takeIteration} | beat: ${beatId.slice(0, 12)}] Take loop check failed: ${err instanceof Error ? err.message : String(err)}\n`,
         timestamp: Date.now(),
       });
     }
@@ -1465,7 +1494,7 @@ export async function createSession(
       takeChild.stderr?.removeAllListeners();
       entry.process = null;
 
-      console.log(`[terminal-manager] [${id}] [take-loop] child close: code=${takeCode} iteration=${takeIteration}/${MAX_TAKE_ITERATIONS} beat=${beatId} aborted=${sessionAborted}`);
+      console.log(`[terminal-manager] [${id}] [take-loop] child close: code=${takeCode} iteration=${takeIteration} beat=${beatId} aborted=${sessionAborted}`);
 
       handleTakeIterationClose(takeCode, effectiveAgent, beatState ?? "unknown").catch((err) => {
         console.error(`[terminal-manager] [${id}] [take-loop] handleTakeIterationClose error:`, err);
@@ -1473,7 +1502,7 @@ export async function createSession(
       });
     });
 
-    const takeErrorPrefix = `[take ${takeIteration}/${MAX_TAKE_ITERATIONS} | beat: ${beatId.slice(0, 12)} | agent: ${effectiveDialect}]`;
+    const takeErrorPrefix = `[take ${takeIteration} | beat: ${beatId.slice(0, 12)} | agent: ${effectiveDialect}]`;
 
     takeChild.on("error", (err) => {
       console.error(`[terminal-manager] [${id}] [take-loop] spawn error:`, err.message);

@@ -123,6 +123,10 @@ vi.mock("@/lib/agent-outcome-stats", () => ({
   appendOutcomeRecord: vi.fn(async () => undefined),
 }));
 
+vi.mock("@/lib/lease-audit", () => ({
+  appendLeaseAuditEvent: vi.fn(async () => undefined),
+}));
+
 import { createSession, getSession } from "@/lib/terminal-manager";
 import { rollbackBeatState } from "@/lib/memory-manager-commands";
 import { appendOutcomeRecord } from "@/lib/agent-outcome-stats";
@@ -144,6 +148,7 @@ async function waitFor(fn: () => void, { timeout = 2000, interval = 10 } = {}): 
 // Settings with two agents in the implementation pool
 const advancedSettingsWithTwoAgents = {
   dispatchMode: "advanced",
+  maxClaimsPerQueueType: 10,
   pools: {
     planning: [{ agentId: "agent-a", weight: 1 }, { agentId: "agent-b", weight: 1 }],
     plan_review: [{ agentId: "agent-a", weight: 1 }, { agentId: "agent-b", weight: 1 }],
@@ -164,6 +169,7 @@ const advancedSettingsWithTwoAgents = {
 // Settings with only one agent in the implementation pool
 const advancedSettingsOneAgent = {
   dispatchMode: "advanced",
+  maxClaimsPerQueueType: 10,
   pools: {
     planning: [{ agentId: "agent-a", weight: 1 }],
     plan_review: [{ agentId: "agent-a", weight: 1 }],

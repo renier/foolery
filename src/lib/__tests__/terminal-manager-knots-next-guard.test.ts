@@ -103,6 +103,10 @@ vi.mock("@/lib/agent-message-type-index", () => ({
   updateMessageTypeIndexFromSession: vi.fn(async () => undefined),
 }));
 
+vi.mock("@/lib/lease-audit", () => ({
+  appendLeaseAuditEvent: vi.fn(async () => undefined),
+}));
+
 import { createSession, getSession } from "@/lib/terminal-manager";
 import { rollbackBeatState, assertClaimable } from "@/lib/memory-manager-commands";
 
@@ -546,7 +550,7 @@ describe("terminal-manager nextKnot expected-state guard", () => {
     expect(claimedLine).toContain("[agent: Codex]");
 
     // TAKE line should include [agent: Codex]
-    const takeLine = stdoutEvents.find((d) => d.includes("TAKE 2/"));
+    const takeLine = stdoutEvents.find((d) => d.includes("TAKE 2"));
     expect(takeLine).toBeDefined();
     expect(takeLine).toContain("[agent: Codex]");
   });

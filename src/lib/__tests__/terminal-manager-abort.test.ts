@@ -103,6 +103,10 @@ vi.mock("@/lib/agent-message-type-index", () => ({
   updateMessageTypeIndexFromSession: vi.fn(async () => undefined),
 }));
 
+vi.mock("@/lib/lease-audit", () => ({
+  appendLeaseAuditEvent: vi.fn(async () => undefined),
+}));
+
 import { createSession, abortSession, getSession } from "@/lib/terminal-manager";
 
 /** Polls `fn` until it stops throwing, or rejects after `timeout` ms. */
