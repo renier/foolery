@@ -15,6 +15,7 @@ import { BeatPriorityBadge } from "@/components/beat-priority-badge";
 import { isWaveLabel, extractWaveSlug, isInternalLabel } from "@/lib/wave-slugs";
 import { Clapperboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -301,7 +302,13 @@ function AgentBadge({ entry }: { entry: MetadataEntry }) {
   );
 }
 
-function RetakeDetails({ beat }: { beat: Beat }) {
+function RetakeDetails({
+  beat,
+  showNotesAndHandoffs,
+}: {
+  beat: Beat;
+  showNotesAndHandoffs: boolean;
+}) {
   const description = beat.description ?? readMetadataString(beat, [
     "knotsDescription",
     "description",
@@ -368,7 +375,7 @@ function RetakeDetails({ beat }: { beat: Beat }) {
         </div>
       )}
 
-      {renderedNotes.length > 0 && (
+      {showNotesAndHandoffs && renderedNotes.length > 0 && (
         <div className="space-y-1.5">
           <div className="text-[10px] font-semibold text-yellow-800 uppercase tracking-wide">
             Notes
@@ -382,7 +389,7 @@ function RetakeDetails({ beat }: { beat: Beat }) {
         </div>
       )}
 
-      {renderedCapsules.length > 0 && (
+      {showNotesAndHandoffs && renderedCapsules.length > 0 && (
         <div className="space-y-1.5">
           <div className="text-[10px] font-semibold text-blue-800 uppercase tracking-wide">
             Handoff Capsules
@@ -403,10 +410,12 @@ function RetakeRow({
   beat,
   onRetake,
   onTitleClick,
+  showNotesAndHandoffs,
 }: {
   beat: Beat;
   onRetake: (beat: Beat) => void;
   onTitleClick?: (beat: Beat) => void;
+  showNotesAndHandoffs: boolean;
 }) {
   const labels = beat.labels ?? [];
   const waveSlug = extractWaveSlug(labels);
@@ -468,7 +477,7 @@ function RetakeRow({
             </span>
           ))}
         </div>
-        <RetakeDetails beat={beat} />
+        <RetakeDetails beat={beat} showNotesAndHandoffs={showNotesAndHandoffs} />
       </div>
 
       {/* Right: ReTake button */}
@@ -491,6 +500,7 @@ export function RetakesView() {
   const [retakeBeat, setRetakeBeat] = useState<Beat | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
+  const [showNotesAndHandoffs, setShowNotesAndHandoffs] = useState(false);
   const { terminals, setActiveSession, upsertTerminal } = useTerminalStore();
 
   const shippingByBeatId = useMemo(() => buildRetakeShippingIndex(terminals), [terminals]);
@@ -795,11 +805,28 @@ export function RetakesView() {
         <div className="text-xs text-muted-foreground">
           {beats.length} shipped beat{beats.length !== 1 ? "s" : ""} — most recently updated first
         </div>
+        <label
+          htmlFor="retakes-details-toggle"
+          className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
+        >
+          <Switch
+            id="retakes-details-toggle"
+            checked={showNotesAndHandoffs}
+            onCheckedChange={(checked) => setShowNotesAndHandoffs(checked === true)}
+            aria-label="Show notes and handoff capsules"
+          />
+          <span>Show notes and handoff capsules</span>
+        </label>
       </div>
       {pageCount > 1 && renderPaginationControls()}
       <div className="rounded-md border border-border/60">
         {paginatedBeats.map((beat) => (
-          <RetakeRow key={beat.id} beat={beat} onRetake={handleOpenRetake} />
+          <RetakeRow
+            key={beat.id}
+            beat={beat}
+            onRetake={handleOpenRetake}
+            showNotesAndHandoffs={showNotesAndHandoffs}
+          />
         ))}
       </div>
       {pageCount > 1 && renderPaginationControls()}
