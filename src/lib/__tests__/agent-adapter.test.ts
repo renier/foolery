@@ -1025,13 +1025,13 @@ describe("createLineParser — crush dialect", () => {
       tool_call: {
         id: "toolu_456",
         name: "ls",
-        input: '{"path": "/Users/renier/Projects/flock", "depth": 2}',
+        input: '{"path": "/home/user/projects/flock", "depth": 2}',
         finished: true,
       },
     });
     const plain = stripAnsi(result!);
     expect(plain).toContain("▶ ls");
-    expect(plain).toContain("/Users/renier/Projects/flock");
+    expect(plain).toContain("/home/user/projects/flock");
   });
 
   it("suppresses unfinished tool_call events", () => {
