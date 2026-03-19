@@ -16,6 +16,7 @@ import {
   buildPromptModeArgs,
   resolveDialect,
   createLineNormalizer,
+  createLineParser,
 } from "@/lib/agent-adapter";
 
 import type { MemoryManagerType } from "@/lib/memory-managers";
@@ -454,6 +455,27 @@ export function listSessions(): TerminalSession[] {
   return Array.from(sessions.values()).map((e) => e.session);
 }
 
+/** Ensure display text ends with a newline for clean terminal rendering. */
+function ensureTrailingNewline(text: string): string {
+  return text.endsWith("\n") ? text : text + "\n";
+}
+
+/** Format a prompt for display in the terminal pane. */
+function formatPromptForDisplay(prompt: string): string {
+  // Show up to the first 5 lines (or 500 chars) so the user can see
+  // what task was sent without flooding the terminal.
+  const lines = prompt.split("\n");
+  const maxLines = 5;
+  const maxChars = 500;
+  let preview = lines.slice(0, maxLines).join("\n");
+  if (preview.length > maxChars) preview = preview.slice(0, maxChars);
+  const truncated = lines.length > maxLines || prompt.length > maxChars;
+  return `\x1b[90m┌─ prompt${truncated ? ` (${prompt.length} chars, showing first ${maxLines} lines)` : ""}\x1b[0m\n`
+    + `\x1b[90m│ ${preview.replace(/\n/g, "\n│ ")}\x1b[0m\n`
+    + (truncated ? `\x1b[90m│ …\x1b[0m\n` : "")
+    + `\x1b[90m└──\x1b[0m\n`;
+}
+
 /** Format a stream-json event into human-readable terminal output. */
 function formatStreamEvent(obj: Record<string, unknown>): string | null {
   // Assistant message content blocks
@@ -847,6 +869,7 @@ export async function createSession(
   }
   agentCmd = resolveAgentCommand(agentCmd);
   const normalizeEvent = createLineNormalizer(dialect);
+  const parseEvent = createLineParser(dialect);
 
   // ── Take loop infrastructure (single-beat only) ─────────
   const isTakeLoop = !effectiveParent && !customPrompt;
@@ -1505,6 +1528,7 @@ export async function createSession(
     }
     effectiveCmd = resolveAgentCommand(effectiveCmd);
     const effectiveNormalizeEvent = createLineNormalizer(effectiveDialect);
+    const effectiveParseEvent = createLineParser(effectiveDialect);
 
     const takeChild = spawn(effectiveCmd, effectiveArgs, {
       cwd,
@@ -1594,7 +1618,8 @@ export async function createSession(
           } else {
             takeCancelInputClose();
           }
-          const display = formatStreamEvent(obj);
+          const parsed = effectiveParseEvent(raw);
+          const display = parsed != null ? ensureTrailingNewline(parsed) : formatStreamEvent(obj);
           if (display) {
             pushEvent({ type: "stdout", data: display, timestamp: Date.now() });
           }
@@ -1613,10 +1638,12 @@ export async function createSession(
       if (takeLineBuffer.trim()) {
         interactionLog.logResponse(takeLineBuffer);
         try {
-          const obj = JSON.parse(takeLineBuffer) as Record<string, unknown>;
+          const raw = JSON.parse(takeLineBuffer) as Record<string, unknown>;
+          const obj = (effectiveNormalizeEvent(raw) ?? raw) as Record<string, unknown>;
           takeAutoAnswerAskUser(obj);
           if (obj.type === "result") takeScheduleInputClose();
-          const display = formatStreamEvent(obj);
+          const parsed = effectiveParseEvent(raw);
+          const display = parsed != null ? ensureTrailingNewline(parsed) : formatStreamEvent(obj);
           if (display) pushEvent({ type: "stdout", data: display, timestamp: Date.now() });
         } catch {
           pushEvent({ type: "stdout", data: takeLineBuffer + "\n", timestamp: Date.now() });
@@ -1678,6 +1705,13 @@ export async function createSession(
       // log it here so history shows what was sent.
       interactionLog.logPrompt(takePrompt, { source: `take_${takeIteration}` });
     }
+
+    // Show the take-loop prompt in the terminal pane.
+    pushEvent({
+      type: "stdout",
+      data: formatPromptForDisplay(takePrompt),
+      timestamp: Date.now(),
+    });
   };
 
   const child = spawn(agentCmd, args, {
@@ -1833,7 +1867,7 @@ export async function createSession(
     }
   };
 
-  // Parse stream-json NDJSON output from claude CLI
+  // Parse stream-json NDJSON output from agent CLI
   let lineBuffer = "";
   child.stdout?.on("data", (chunk: Buffer) => {
     interactionLog.logStdout(chunk.toString());
@@ -1846,6 +1880,8 @@ export async function createSession(
       interactionLog.logResponse(line);
       try {
         const raw = JSON.parse(line) as Record<string, unknown>;
+
+        // Normalizer: Claude-shaped event for functional checks
         const obj = (normalizeEvent(raw) ?? raw) as Record<string, unknown>;
         maybeAutoAnswerAskUser(obj);
 
@@ -1857,7 +1893,10 @@ export async function createSession(
           cancelInputClose();
         }
 
-        const display = formatStreamEvent(obj);
+        // Parser: dialect-aware display text (falls back to
+        // formatStreamEvent for claude/codex dialects).
+        const parsed = parseEvent(raw);
+        const display = parsed != null ? ensureTrailingNewline(parsed) : formatStreamEvent(obj);
         if (display) {
           console.log(`[terminal-manager] [${id}] display (${display.length} chars): ${display.slice(0, 150).replace(/\n/g, "\\n")}`);
           pushEvent({ type: "stdout", data: display, timestamp: Date.now() });
@@ -1882,7 +1921,8 @@ export async function createSession(
     if (lineBuffer.trim()) {
       interactionLog.logResponse(lineBuffer);
       try {
-        const obj = JSON.parse(lineBuffer) as Record<string, unknown>;
+        const raw = JSON.parse(lineBuffer) as Record<string, unknown>;
+        const obj = (normalizeEvent(raw) ?? raw) as Record<string, unknown>;
         maybeAutoAnswerAskUser(obj);
 
         if (obj.type === "result") {
@@ -1893,7 +1933,8 @@ export async function createSession(
           cancelInputClose();
         }
 
-        const display = formatStreamEvent(obj);
+        const parsed = parseEvent(raw);
+        const display = parsed != null ? ensureTrailingNewline(parsed) : formatStreamEvent(obj);
         if (display) pushEvent({ type: "stdout", data: display, timestamp: Date.now() });
       } catch {
         pushEvent({ type: "stdout", data: lineBuffer + "\n", timestamp: Date.now() });
@@ -1991,6 +2032,14 @@ export async function createSession(
     // log it here so history shows what was sent.
     interactionLog.logPrompt(prompt, { source: "initial" });
   }
+
+  // Show an abbreviated prompt in the terminal pane so the user can
+  // see what task was sent to the agent.
+  pushEvent({
+    type: "stdout",
+    data: formatPromptForDisplay(prompt),
+    timestamp: Date.now(),
+  });
 
   return session;
 }

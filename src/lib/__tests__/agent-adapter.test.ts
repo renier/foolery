@@ -3,6 +3,7 @@ import {
   resolveDialect,
   buildPromptModeArgs,
   createLineNormalizer,
+  createLineParser,
 } from "@/lib/agent-adapter";
 
 describe("resolveDialect", () => {
@@ -535,5 +536,380 @@ describe("createLineNormalizer — crush dialect", () => {
       result: "Something went wrong",
       is_error: true,
     });
+  });
+});
+
+// ── createLineParser tests ──────────────────────────────────
+
+/** Strip ANSI escape codes so assertions are readable. */
+function stripAnsi(text: string): string {
+  return text.replace(/\x1b\[[0-9;]*m/g, "");
+}
+
+describe("createLineParser — claude/codex dialects return null (fallthrough)", () => {
+  it("claude parser returns null for any event", () => {
+    const parse = createLineParser("claude");
+    expect(parse({ type: "assistant", message: { content: [] } })).toBeNull();
+    expect(parse({ type: "stream_event", event: {} })).toBeNull();
+    expect(parse({ type: "result", result: "done" })).toBeNull();
+  });
+
+  it("codex parser returns null for any event", () => {
+    const parse = createLineParser("codex");
+    expect(parse({ type: "item.completed", item: {} })).toBeNull();
+    expect(parse({ type: "turn.completed" })).toBeNull();
+  });
+});
+
+describe("createLineParser — opencode dialect", () => {
+  it("returns null for null/non-object input", () => {
+    const parse = createLineParser("opencode");
+    expect(parse(null)).toBeNull();
+    expect(parse("string")).toBeNull();
+    expect(parse(42)).toBeNull();
+  });
+
+  it("shows step counter for step_start events", () => {
+    const parse = createLineParser("opencode");
+    const first = parse({
+      type: "step_start",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "step-start", snapshot: "abc123" },
+    });
+    const second = parse({
+      type: "step_start",
+      timestamp: 1700000000100,
+      sessionID: "ses_abc",
+      part: { type: "step-start", snapshot: "def456" },
+    });
+    expect(stripAnsi(first!)).toContain("step 1");
+    expect(stripAnsi(second!)).toContain("step 2");
+  });
+
+  it("returns text content directly without accumulation", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "text",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "text", text: "Hello world" },
+    });
+    expect(result).toBe("Hello world");
+  });
+
+  it("returns null for text events with empty text", () => {
+    const parse = createLineParser("opencode");
+    expect(
+      parse({
+        type: "text",
+        timestamp: 1700000000000,
+        sessionID: "ses_abc",
+        part: { type: "text", text: "" },
+      }),
+    ).toBeNull();
+  });
+
+  it("does NOT repeat accumulated text in step_finish (only shows cost/tokens)", () => {
+    const parse = createLineParser("opencode");
+    // Send some text first
+    parse({
+      type: "text",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "text", text: "First step output" },
+    });
+    // step_finish should NOT contain the text
+    const finish = parse({
+      type: "step_finish",
+      timestamp: 1700000000100,
+      sessionID: "ses_abc",
+      part: {
+        type: "step-finish",
+        reason: "stop",
+        cost: 0.1234,
+        tokens: { total: 100, input: 10, output: 20 },
+      },
+    });
+    const plain = stripAnsi(finish!);
+    expect(plain).toContain("$0.1234");
+    expect(plain).toContain("in:10");
+    expect(plain).toContain("out:20");
+    expect(plain).not.toContain("First step output");
+  });
+
+  it("returns null for step_finish with no cost/token metadata", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "step_finish",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "step-finish", reason: "stop" },
+    });
+    expect(result).toBeNull();
+  });
+
+  it("marks step_finish with reason error", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "step_finish",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "step-finish", reason: "error", cost: 0.01 },
+    });
+    expect(stripAnsi(result!)).toContain("error");
+  });
+
+  it("formats tool_use with tool name and input summary", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "tool_use",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: {
+        tool: "bash",
+        state: {
+          status: "completed",
+          input: { command: "ls -la" },
+          output: "file1\nfile2\nfile3",
+        },
+      },
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("▶ bash");
+    expect(plain).toContain("ls -la");
+    expect(plain).toContain("file1");
+  });
+
+  it("formats tool_use with filePath input", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "tool_use",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: {
+        tool: "read",
+        state: {
+          status: "completed",
+          input: { filePath: "/src/main.ts" },
+          output: "file contents here",
+        },
+      },
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("▶ read");
+    expect(plain).toContain("/src/main.ts");
+  });
+
+  it("formats tool_use with pattern input (glob)", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "tool_use",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: {
+        tool: "glob",
+        state: {
+          status: "completed",
+          input: { pattern: "**/*.ts" },
+          output: "file1.ts\nfile2.ts",
+        },
+      },
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("▶ glob");
+    expect(plain).toContain("**/*.ts");
+  });
+
+  it("abbreviates long tool output", () => {
+    const parse = createLineParser("opencode");
+    const longOutput = "x".repeat(500);
+    const result = parse({
+      type: "tool_use",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: {
+        tool: "bash",
+        state: {
+          status: "completed",
+          input: { command: "cat big.txt" },
+          output: longOutput,
+        },
+      },
+    });
+    // Output should be truncated to ~300 chars + ellipsis
+    expect(result!.length).toBeLessThan(longOutput.length);
+    expect(result).toContain("…");
+  });
+
+  it("returns null for tool_use with no part", () => {
+    const parse = createLineParser("opencode");
+    expect(parse({ type: "tool_use" })).toBeNull();
+  });
+
+  it("omits output preview for non-completed tools", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "tool_use",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: {
+        tool: "bash",
+        state: {
+          status: "running",
+          input: { command: "sleep 10" },
+        },
+      },
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("▶ bash");
+    expect(plain).toContain("sleep 10");
+    // Should only have one line (the tool header), no output preview
+    expect(plain.trim().split("\n")).toHaveLength(1);
+  });
+
+  it("formats error events", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "error",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      error: {
+        name: "AuthError",
+        data: { message: "Invalid API key" },
+      },
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("error:");
+    expect(plain).toContain("Invalid API key");
+  });
+
+  it("falls back to error.name when data.message is missing", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "error",
+      error: { name: "AuthenticationError" },
+    });
+    expect(stripAnsi(result!)).toContain("AuthenticationError");
+  });
+
+  it("returns null for unknown event types", () => {
+    const parse = createLineParser("opencode");
+    expect(parse({ type: "something.unknown" })).toBeNull();
+  });
+});
+
+describe("createLineParser — crush dialect", () => {
+  it("returns null for null/non-object input", () => {
+    const parse = createLineParser("crush");
+    expect(parse(null)).toBeNull();
+    expect(parse("string")).toBeNull();
+  });
+
+  it("returns null for init events", () => {
+    const parse = createLineParser("crush");
+    expect(
+      parse({
+        type: "init",
+        session_id: "session-1",
+        model: { name: "Claude" },
+      }),
+    ).toBeNull();
+  });
+
+  it("returns content text directly without accumulation", () => {
+    const parse = createLineParser("crush");
+    expect(
+      parse({
+        type: "content",
+        session_id: "session-1",
+        content: "hello",
+      }),
+    ).toBe("hello");
+    expect(
+      parse({
+        type: "content",
+        session_id: "session-1",
+        content: " world",
+      }),
+    ).toBe(" world");
+  });
+
+  it("returns null for empty content", () => {
+    const parse = createLineParser("crush");
+    expect(parse({ type: "content", content: "" })).toBeNull();
+  });
+
+  it("does NOT repeat accumulated text in result (only shows cost/tokens)", () => {
+    const parse = createLineParser("crush");
+    // Stream some content first
+    parse({ type: "content", content: "First output" });
+    parse({ type: "content", content: " second output" });
+    // Result should NOT contain the content text
+    const result = parse({
+      type: "result",
+      session_id: "session-1",
+      duration_ms: 5000,
+      is_error: false,
+      usage: {
+        input_tokens: 100,
+        output_tokens: 50,
+        cost_estimate: 0.0125,
+      },
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("$0.0125");
+    expect(plain).toContain("5.0s");
+    expect(plain).toContain("in:100");
+    expect(plain).toContain("out:50");
+    expect(plain).not.toContain("First output");
+    expect(plain).not.toContain("second output");
+  });
+
+  it("returns null for result with no metadata", () => {
+    const parse = createLineParser("crush");
+    const result = parse({ type: "result", is_error: false });
+    expect(result).toBeNull();
+  });
+
+  it("includes error marker for error results", () => {
+    const parse = createLineParser("crush");
+    const result = parse({
+      type: "result",
+      is_error: true,
+      usage: { cost_estimate: 0.01 },
+    });
+    expect(stripAnsi(result!)).toContain("error");
+  });
+
+  it("formats error events", () => {
+    const parse = createLineParser("crush");
+    const result = parse({
+      type: "error",
+      message: "Connection refused",
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("error:");
+    expect(plain).toContain("Connection refused");
+  });
+
+  it("formats unknown events as ad-hoc with type name", () => {
+    const parse = createLineParser("crush");
+    const result = parse({
+      type: "tool_call",
+      text: "calling bash",
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("tool_call");
+    expect(plain).toContain("calling bash");
+  });
+
+  it("shows (no text) for unknown events without text fields", () => {
+    const parse = createLineParser("crush");
+    const result = parse({
+      type: "heartbeat",
+      ts: 12345,
+    });
+    expect(stripAnsi(result!)).toContain("(no text)");
   });
 });
