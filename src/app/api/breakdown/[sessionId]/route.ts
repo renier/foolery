@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { getBreakdownSession } from "@/lib/breakdown-manager";
 import type { BreakdownEvent } from "@/lib/types";
 
+const HEARTBEAT_INTERVAL_MS = 15_000;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
@@ -26,13 +28,15 @@ export async function GET(
         try {
           const payload = `data: ${JSON.stringify(event)}\n\n`;
           controller.enqueue(encoder.encode(payload));
-        } catch {
-          // stream is closed
+        } catch (err) {
+          console.warn(`[breakdown-sse] [${sessionId}] enqueue failed, closing stream:`, err);
+          closeStream();
         }
       };
 
       const cleanup = () => {
         entry.emitter.off("data", listener);
+        clearInterval(heartbeatTimer);
       };
 
       const closeStream = () => {
@@ -58,6 +62,17 @@ export async function GET(
       };
 
       entry.emitter.on("data", listener);
+
+      // Heartbeat: send an SSE comment periodically to keep the
+      // connection alive during quiet periods.
+      const heartbeatTimer = setInterval(() => {
+        if (closed) { clearInterval(heartbeatTimer); return; }
+        try {
+          controller.enqueue(encoder.encode(`:keepalive\n\n`));
+        } catch {
+          closeStream();
+        }
+      }, HEARTBEAT_INTERVAL_MS);
 
       if (entry.session.status !== "running") {
         const hasExit = entry.buffer.some((event) => event.type === "exit");

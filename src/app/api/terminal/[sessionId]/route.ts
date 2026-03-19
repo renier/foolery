@@ -15,6 +15,8 @@ export async function GET(
     });
   }
 
+  const HEARTBEAT_INTERVAL_MS = 15_000;
+
   const stream = new ReadableStream({
     start(controller) {
       const encoder = new TextEncoder();
@@ -26,13 +28,17 @@ export async function GET(
           const payload = `data: ${JSON.stringify(event)}\n\n`;
           console.log(`[terminal-sse] [${sessionId}] sending ${event.type} (${event.data.length} chars)`);
           controller.enqueue(encoder.encode(payload));
-        } catch {
-          // stream closed
+        } catch (err) {
+          // Stream is broken — clean up the emitter listener so we stop
+          // silently swallowing events and let the client detect the drop.
+          console.warn(`[terminal-sse] [${sessionId}] enqueue failed, closing stream:`, err);
+          closeStream();
         }
       };
 
       const cleanup = () => {
         entry.emitter.off("data", listener);
+        clearInterval(heartbeatTimer);
       };
 
       const closeStream = () => {
@@ -65,6 +71,18 @@ export async function GET(
         }
       };
       entry.emitter.on("data", listener);
+
+      // Heartbeat: send an SSE comment every 15 s to keep the connection
+      // alive during quiet periods (e.g. while the agent executes tools).
+      const heartbeatTimer = setInterval(() => {
+        if (closed) { clearInterval(heartbeatTimer); return; }
+        try {
+          controller.enqueue(encoder.encode(`:keepalive\n\n`));
+        } catch {
+          // Stream gone — stop heartbeat and clean up.
+          closeStream();
+        }
+      }, HEARTBEAT_INTERVAL_MS);
 
       // If process already exited and we've replayed all, close after delay
       if (entry.session.status !== "running" && entry.session.status !== "idle") {

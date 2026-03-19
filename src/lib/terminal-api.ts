@@ -54,6 +54,14 @@ async function fetchSessionStatus(
   }
 }
 
+/**
+ * Maximum number of consecutive reconnection attempts before giving up.
+ * EventSource auto-reconnects on transient errors; we allow up to this
+ * many retries before treating the connection as permanently failed.
+ */
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_RESET_MS = 30_000;
+
 export function connectToSession(
   sessionId: string,
   onEvent: (event: TerminalEvent) => void,
@@ -62,6 +70,8 @@ export function connectToSession(
   const es = new EventSource(`${BASE}/${sessionId}`);
   let gotExit = false;
   let gotStreamEnd = false;
+  let reconnectAttempts = 0;
+  let lastErrorTs = 0;
 
   es.onmessage = (msg) => {
     try {
@@ -73,6 +83,9 @@ export function connectToSession(
         return;
       }
       onEvent(event);
+      // Successful message receipt — reset the reconnect counter so
+      // transient blips don't accumulate across long-running sessions.
+      reconnectAttempts = 0;
     } catch {
       // ignore parse errors
     }
@@ -84,6 +97,26 @@ export function connectToSession(
       es.close();
       return;
     }
+
+    // Track consecutive errors.  Reset the counter if enough time has
+    // passed since the last error (the connection was healthy in between).
+    const now = Date.now();
+    if (now - lastErrorTs > RECONNECT_RESET_MS) {
+      reconnectAttempts = 0;
+    }
+    lastErrorTs = now;
+    reconnectAttempts++;
+
+    // If EventSource is CONNECTING (readyState 0), the browser is already
+    // trying to reconnect automatically.  Let it — unless we've exceeded
+    // the retry budget.
+    if (es.readyState === EventSource.CONNECTING && reconnectAttempts <= MAX_RECONNECT_ATTEMPTS) {
+      console.log(
+        `[terminal-sse-client] [${sessionId}] reconnecting (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`,
+      );
+      return; // let the browser's built-in reconnect proceed
+    }
+
     // Defer briefly so any pending onmessage (exit) can run first.
     // EventSource fires queued messages before onerror, but a server-
     // initiated close can race with the last data frame at the TCP level.
@@ -108,6 +141,8 @@ export function connectToSession(
         // Use sentinel exit code -2 so callers can distinguish from clean exit.
         onEvent({ type: "exit", data: "-2", timestamp: Date.now() });
       } else {
+        // Session is still running — signal the connection manager so it
+        // can tear down this stale entry and establish a fresh connection.
         onError?.(err);
       }
       es.close();

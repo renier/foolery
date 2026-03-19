@@ -22,8 +22,15 @@ interface Connection {
 
 const MAX_BUFFER = 5_000;
 
+/**
+ * Maximum number of times the manager will try to re-establish a dropped
+ * connection for the same session before giving up entirely.
+ */
+const MAX_MANAGER_RECONNECTS = 3;
+
 class SessionConnectionManager {
   private connections = new Map<string, Connection>();
+  private reconnectCounts = new Map<string, number>();
   private storeUnsubscribe: (() => void) | null = null;
   private queryClientRef: QueryClient | null = null;
 
@@ -43,6 +50,10 @@ class SessionConnectionManager {
     const close = connectToSession(
       sessionId,
       (event: TerminalEvent) => {
+        // Successful event receipt — reset the reconnect counter so
+        // transient blips don't permanently exhaust the budget.
+        this.reconnectCounts.delete(sessionId);
+
         // Buffer the event (bounded)
         if (conn.buffer.length < MAX_BUFFER) {
           conn.buffer.push({ type: event.type, data: event.data });
@@ -139,10 +150,12 @@ class SessionConnectionManager {
           }
         }
       },
-      // onError — remove the connection entry so sync can reconnect,
-      // but do NOT write disconnect messages (the old UI bug).
+      // onError — the EventSource exhausted its retry budget.
+      // Remove the stale entry and immediately re-establish the connection
+      // so the UI doesn't permanently lose the event stream.
       () => {
         this.connections.delete(sessionId);
+        this.reconnect(sessionId);
       },
     );
 
@@ -155,6 +168,35 @@ class SessionConnectionManager {
     if (!conn) return;
     conn.close();
     this.connections.delete(sessionId);
+    this.reconnectCounts.delete(sessionId);
+  }
+
+  /**
+   * Re-establish a dropped SSE connection for a still-running session.
+   * Guards against infinite loops with a per-session retry counter.
+   */
+  private reconnect(sessionId: string): void {
+    // Only reconnect if the session is still marked as running in the store.
+    const terminal = useTerminalStore
+      .getState()
+      .terminals.find((t) => t.sessionId === sessionId);
+    if (!terminal || terminal.status !== "running") return;
+
+    const attempts = this.reconnectCounts.get(sessionId) ?? 0;
+    if (attempts >= MAX_MANAGER_RECONNECTS) {
+      console.warn(
+        `[session-connection-manager] [${sessionId}] giving up after ${attempts} reconnection attempts`,
+      );
+      return;
+    }
+    this.reconnectCounts.set(sessionId, attempts + 1);
+
+    console.log(
+      `[session-connection-manager] [${sessionId}] reconnecting (manager attempt ${attempts + 1}/${MAX_MANAGER_RECONNECTS})`,
+    );
+    // connect() is idempotent — it only creates a new connection when the
+    // entry doesn't exist (the onError callback already deleted it).
+    this.connect(sessionId);
   }
 
   /**
