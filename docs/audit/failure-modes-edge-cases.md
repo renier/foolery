@@ -80,8 +80,8 @@ handling, severity, and what the new abstraction layer must account for.
 - **Trigger:** The embedded Dolt DB gets out of sync with the JSONL source of truth
   (e.g., after a repo switch or git pull that changes `.beads/`).
 - **Current handling:** If stderr contains `Database out of sync with JSONL`, the
-  module runs `bd sync --import-only` and retries the original command once. If
-  sync itself fails, the original error is returned.
+  module runs `bd import` and retries the original command once. If
+  the import itself fails, the original error is returned.
 - **Severity:** Medium -- temporary inability to read/write beads until sync
   completes. The auto-heal is transparent to callers.
 - **Abstraction implication:** The abstraction should expose sync status and
@@ -146,7 +146,7 @@ handling, severity, and what the new abstraction layer must account for.
 - **Trigger:** The bd daemon's `label remove` command acknowledges success but does
   not persist the removal. Labels reappear on the next `list` or `show` call.
 - **Current handling:** All label remove operations use `--no-daemon` to bypass
-  the daemon and write directly to the DB. After label removes, a `bd sync
+  the daemon and write directly to the DB. After label removes, a `bd export
   --no-daemon` flushes changes to JSONL so the daemon's auto-import picks up the
   direct DB writes.
 - **Severity:** High -- silent data corruption. Without the workaround, stage

@@ -53,7 +53,7 @@ describe("getBeatsSkillPrompt", () => {
 
       expect(prompt).toContain(entry.heading);
       expect(prompt).toContain(showCmd);
-      expect(prompt).toContain("bd sync");
+      expect(prompt).not.toContain("bd sync");
       expect(prompt).toContain(currentState);
       expect(prompt).not.toContain("kno claim");
       expect(prompt).toContain("## Authority Boundary");

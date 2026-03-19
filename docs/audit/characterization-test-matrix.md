@@ -33,7 +33,7 @@ behavior so that post-refactor parity can be verified mechanically.
 | LIB-014  | `searchBeads` maps priority to min/max                        | `{ priority: "1" }`                             | `--priority-min 1 --priority-max 1`                     | must-have  | existing |
 | LIB-015  | `createBead` joins labels with comma                          | `{ labels: ["a","b"] }`                         | `--labels a,b`                                          | must-have  | existing |
 | LIB-016  | `createBead` falls back to raw stdout as ID                   | Non-JSON stdout                                 | Returns stdout as `data.id`                             | must-have  | existing |
-| LIB-017  | Auto-sync on out-of-sync error                                | First call returns out-of-sync                  | Runs `sync --import-only`, retries                      | must-have  | existing |
+| LIB-017  | Auto-import on out-of-sync error                              | First call returns out-of-sync                  | Runs `bd import`, retries                              | must-have  | existing |
 | LIB-018  | `isReadOnlyCommand` classification                            | Various command names                           | Correctly identifies read-only vs write commands         | must-have  | scaffolded |
 | LIB-019  | `isIdempotentWriteCommand` classification                     | Various command/subcommand pairs                | Correctly identifies idempotent writes                   | must-have  | scaffolded |
 | LIB-020  | `canRetryAfterTimeout` returns true for reads+idem writes     | Read commands and idempotent write commands      | Returns true                                            | must-have  | scaffolded |

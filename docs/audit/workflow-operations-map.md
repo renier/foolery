@@ -82,9 +82,9 @@ How data is synchronized between the bd CLI data store and foolery.
 1. All bd commands run through a serialized execution queue per repo
    (`withRepoSerialization`) with process-level file locking.
 2. Out-of-sync errors (SQLite vs JSONL drift) trigger automatic
-   `bd sync --import-only` before retrying the original command.
+   `bd import` before retrying the original command.
 3. Label remove operations use `--no-daemon` flag to bypass daemon persistence
-   bugs, followed by a `bd sync` to flush changes.
+   bugs.
 4. Read-only commands default to `BD_NO_DB=true` (JSONL mode) to avoid
    embedded Dolt panics.
 5. Commands have configurable timeouts with retry for idempotent operations.

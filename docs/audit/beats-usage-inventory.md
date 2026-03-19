@@ -47,7 +47,7 @@ Primary interface to the `bd` CLI binary. All beads CRUD operations flow through
 | `queryBeads()` | Query beads with expression | `bd query <expr> --json` |
 | `showBead()` | Fetch single bead by ID | `bd show <id> --json` |
 | `createBead()` | Create a new bead | `bd create --json` |
-| `updateBead()` | Update bead fields and labels | `bd update <id>`, `bd label add/remove`, `bd sync` |
+| `updateBead()` | Update bead fields and labels | `bd update <id>`, `bd label add/remove` |
 | `closeBead()` | Close a bead | `bd close <id>` |
 | `deleteBead()` | Delete a bead | `bd delete <id> --force` |
 | `listDeps()` | List bead dependencies | `bd dep list <id> --json` |
@@ -56,7 +56,7 @@ Primary interface to the `bd` CLI binary. All beads CRUD operations flow through
 
 Internal infrastructure:
 - Per-repo serialization queue with file-system process locks
-- Auto-sync on out-of-sync errors (`bd sync --import-only`)
+- Auto-import on out-of-sync errors (`bd import`)
 - Dolt panic detection with JSONL fallback
 - Configurable timeouts (read/write) with retry policy
 

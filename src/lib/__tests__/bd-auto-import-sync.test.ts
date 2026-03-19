@@ -47,7 +47,7 @@ describe("bd auto-import retry for out-of-sync repos", () => {
     queueExec(
       {
         stdout: JSON.stringify({
-          error: "Database out of sync with JSONL. Run 'bd sync --import-only' to fix.",
+          error: "Database out of sync with JSONL. Run 'bd import' to fix.",
         }),
         exitCode: 1,
       },
