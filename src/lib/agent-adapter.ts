@@ -137,11 +137,13 @@ export function createLineNormalizer(
       if (type === "text") {
         const part = obj.part as Record<string, unknown> | undefined;
         const text = typeof part?.text === "string" ? part.text : "";
-        accumulatedText += (accumulatedText ? "\n" : "") + text;
+        if (!text) return null;
+        accumulatedText += text;
         return {
-          type: "assistant",
-          message: {
-            content: [{ type: "text", text }],
+          type: "stream_event",
+          event: {
+            type: "content_block_delta",
+            delta: { type: "text_delta", text },
           },
         };
       }
@@ -149,10 +151,36 @@ export function createLineNormalizer(
       if (type === "step_finish") {
         const part = obj.part as Record<string, unknown> | undefined;
         const reason = typeof part?.reason === "string" ? part.reason : "";
+        const costUsd =
+          typeof part?.cost === "number" ? part.cost : undefined;
+        const tokens = part?.tokens as Record<string, unknown> | undefined;
         return {
           type: "result",
           result: accumulatedText,
           is_error: reason === "error",
+          ...(costUsd !== undefined ? { cost_usd: costUsd } : {}),
+          ...(typeof tokens?.input === "number"
+            ? { input_tokens: tokens.input }
+            : {}),
+          ...(typeof tokens?.output === "number"
+            ? { output_tokens: tokens.output }
+            : {}),
+        };
+      }
+
+      if (type === "error") {
+        const error = obj.error as Record<string, unknown> | undefined;
+        const data = error?.data as Record<string, unknown> | undefined;
+        const msg =
+          typeof data?.message === "string"
+            ? data.message
+            : typeof error?.name === "string"
+              ? error.name
+              : "Unknown error";
+        return {
+          type: "result",
+          result: msg,
+          is_error: true,
         };
       }
 

@@ -152,6 +152,167 @@ describe("createLineNormalizer — claude dialect", () => {
   });
 });
 
+describe("createLineNormalizer — opencode dialect", () => {
+  it("skips step_start events", () => {
+    const normalize = createLineNormalizer("opencode");
+    expect(
+      normalize({
+        type: "step_start",
+        timestamp: 1700000000000,
+        sessionID: "ses_abc",
+        part: { type: "step-start", snapshot: "abc123" },
+      }),
+    ).toBeNull();
+  });
+
+  it("skips text events with empty text", () => {
+    const normalize = createLineNormalizer("opencode");
+    expect(
+      normalize({
+        type: "text",
+        timestamp: 1700000000000,
+        sessionID: "ses_abc",
+        part: { type: "text", text: "" },
+      }),
+    ).toBeNull();
+  });
+
+  it("normalizes text events to stream_event content_block_delta", () => {
+    const normalize = createLineNormalizer("opencode");
+    expect(
+      normalize({
+        type: "text",
+        timestamp: 1700000000000,
+        sessionID: "ses_abc",
+        part: { type: "text", text: "hello world" },
+      }),
+    ).toEqual({
+      type: "stream_event",
+      event: {
+        type: "content_block_delta",
+        delta: { type: "text_delta", text: "hello world" },
+      },
+    });
+  });
+
+  it("accumulates text and returns it in step_finish result", () => {
+    const normalize = createLineNormalizer("opencode");
+    normalize({
+      type: "text",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "text", text: "first" },
+    });
+    normalize({
+      type: "text",
+      timestamp: 1700000000001,
+      sessionID: "ses_abc",
+      part: { type: "text", text: " second" },
+    });
+    const result = normalize({
+      type: "step_finish",
+      timestamp: 1700000000002,
+      sessionID: "ses_abc",
+      part: { type: "step-finish", reason: "stop" },
+    });
+    expect(result).toMatchObject({
+      type: "result",
+      result: "first second",
+      is_error: false,
+    });
+  });
+
+  it("extracts cost and token usage from step_finish", () => {
+    const normalize = createLineNormalizer("opencode");
+    normalize({
+      type: "text",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "text", text: "hello" },
+    });
+    const result = normalize({
+      type: "step_finish",
+      timestamp: 1700000000100,
+      sessionID: "ses_abc",
+      part: {
+        type: "step-finish",
+        reason: "stop",
+        cost: 0.11172875,
+        tokens: {
+          total: 17865,
+          input: 2,
+          output: 4,
+          reasoning: 0,
+          cache: { read: 0, write: 17859 },
+        },
+      },
+    });
+    expect(result).toMatchObject({
+      type: "result",
+      result: "hello",
+      is_error: false,
+      cost_usd: 0.11172875,
+      input_tokens: 2,
+      output_tokens: 4,
+    });
+  });
+
+  it("marks step_finish with reason 'error' as is_error", () => {
+    const normalize = createLineNormalizer("opencode");
+    const result = normalize({
+      type: "step_finish",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "step-finish", reason: "error" },
+    });
+    expect(result).toMatchObject({
+      type: "result",
+      result: "",
+      is_error: true,
+    });
+  });
+
+  it("normalizes error events to result errors using data.message", () => {
+    const normalize = createLineNormalizer("opencode");
+    expect(
+      normalize({
+        type: "error",
+        timestamp: 1700000000000,
+        sessionID: "ses_abc",
+        error: {
+          name: "UnknownError",
+          data: { message: "Model not found: nonexistent/fake-model-xyz." },
+        },
+      }),
+    ).toEqual({
+      type: "result",
+      result: "Model not found: nonexistent/fake-model-xyz.",
+      is_error: true,
+    });
+  });
+
+  it("falls back to error.name when data.message is missing", () => {
+    const normalize = createLineNormalizer("opencode");
+    expect(
+      normalize({
+        type: "error",
+        timestamp: 1700000000000,
+        sessionID: "ses_abc",
+        error: { name: "AuthenticationError" },
+      }),
+    ).toEqual({
+      type: "result",
+      result: "AuthenticationError",
+      is_error: true,
+    });
+  });
+
+  it("returns null for unknown event types", () => {
+    const normalize = createLineNormalizer("opencode");
+    expect(normalize({ type: "something.unknown" })).toBeNull();
+  });
+});
+
 describe("createLineNormalizer — codex dialect", () => {
   it("skips thread.started and turn.started", () => {
     const normalize = createLineNormalizer("codex");
