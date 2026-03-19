@@ -537,6 +537,40 @@ describe("createLineNormalizer — crush dialect", () => {
       is_error: true,
     });
   });
+
+  it("skips message_start, message_finish, tool_call, and tool_result events", () => {
+    const normalize = createLineNormalizer("crush");
+    expect(
+      normalize({
+        type: "message_start",
+        session_id: "session-1",
+        message_id: "msg-1",
+        role: "assistant",
+      }),
+    ).toBeNull();
+    expect(
+      normalize({
+        type: "message_finish",
+        session_id: "session-1",
+        message_id: "msg-1",
+        finish_reason: "stop",
+      }),
+    ).toBeNull();
+    expect(
+      normalize({
+        type: "tool_call",
+        session_id: "session-1",
+        tool_call: { id: "t1", name: "bash", finished: true },
+      }),
+    ).toBeNull();
+    expect(
+      normalize({
+        type: "tool_result",
+        session_id: "session-1",
+        tool_result: { tool_call_id: "t1", name: "bash", content: "output" },
+      }),
+    ).toBeNull();
+  });
 });
 
 // ── createLineParser tests ──────────────────────────────────
@@ -587,7 +621,7 @@ describe("createLineParser — opencode dialect", () => {
     expect(stripAnsi(second!)).toContain("step 2");
   });
 
-  it("returns text content directly without accumulation", () => {
+  it("returns text content with trailing newline", () => {
     const parse = createLineParser("opencode");
     const result = parse({
       type: "text",
@@ -595,7 +629,18 @@ describe("createLineParser — opencode dialect", () => {
       sessionID: "ses_abc",
       part: { type: "text", text: "Hello world" },
     });
-    expect(result).toBe("Hello world");
+    expect(result).toBe("Hello world\n");
+  });
+
+  it("does not double newline when text already ends with one", () => {
+    const parse = createLineParser("opencode");
+    const result = parse({
+      type: "text",
+      timestamp: 1700000000000,
+      sessionID: "ses_abc",
+      part: { type: "text", text: "Hello world\n" },
+    });
+    expect(result).toBe("Hello world\n");
   });
 
   it("returns null for text events with empty text", () => {
@@ -607,7 +652,7 @@ describe("createLineParser — opencode dialect", () => {
         sessionID: "ses_abc",
         part: { type: "text", text: "" },
       }),
-    ).toBeNull();
+    ).toBe("");
   });
 
   it("does NOT repeat accumulated text in step_finish (only shows cost/tokens)", () => {
@@ -646,7 +691,7 @@ describe("createLineParser — opencode dialect", () => {
       sessionID: "ses_abc",
       part: { type: "step-finish", reason: "stop" },
     });
-    expect(result).toBeNull();
+    expect(result).toBe("");
   });
 
   it("marks step_finish with reason error", () => {
@@ -742,9 +787,9 @@ describe("createLineParser — opencode dialect", () => {
     expect(result).toContain("…");
   });
 
-  it("returns null for tool_use with no part", () => {
+  it("returns empty string for tool_use with no part", () => {
     const parse = createLineParser("opencode");
-    expect(parse({ type: "tool_use" })).toBeNull();
+    expect(parse({ type: "tool_use" })).toBe("");
   });
 
   it("omits output preview for non-completed tools", () => {
@@ -806,7 +851,7 @@ describe("createLineParser — crush dialect", () => {
     expect(parse("string")).toBeNull();
   });
 
-  it("returns null for init events", () => {
+  it("suppresses init events", () => {
     const parse = createLineParser("crush");
     expect(
       parse({
@@ -814,7 +859,7 @@ describe("createLineParser — crush dialect", () => {
         session_id: "session-1",
         model: { name: "Claude" },
       }),
-    ).toBeNull();
+    ).toBe("");
   });
 
   it("returns content text directly without accumulation", () => {
@@ -835,9 +880,9 @@ describe("createLineParser — crush dialect", () => {
     ).toBe(" world");
   });
 
-  it("returns null for empty content", () => {
+  it("suppresses empty content", () => {
     const parse = createLineParser("crush");
-    expect(parse({ type: "content", content: "" })).toBeNull();
+    expect(parse({ type: "content", content: "" })).toBe("");
   });
 
   it("does NOT repeat accumulated text in result (only shows cost/tokens)", () => {
@@ -866,10 +911,10 @@ describe("createLineParser — crush dialect", () => {
     expect(plain).not.toContain("second output");
   });
 
-  it("returns null for result with no metadata", () => {
+  it("suppresses result with no metadata", () => {
     const parse = createLineParser("crush");
     const result = parse({ type: "result", is_error: false });
-    expect(result).toBeNull();
+    expect(result).toBe("");
   });
 
   it("includes error marker for error results", () => {
@@ -893,23 +938,175 @@ describe("createLineParser — crush dialect", () => {
     expect(plain).toContain("Connection refused");
   });
 
-  it("formats unknown events as ad-hoc with type name", () => {
+  it("suppresses message_start and emits newline on message_finish", () => {
+    const parse = createLineParser("crush");
+
+    // message_start begins a message — suppressed
+    expect(
+      parse({
+        type: "message_start",
+        session_id: "session-1",
+        message_id: "msg-1",
+        role: "assistant",
+      }),
+    ).toBe("");
+
+    // Content tokens flow without trailing newlines
+    expect(parse({ type: "content", content: "Hello" })).toBe("Hello");
+    expect(parse({ type: "content", content: " world" })).toBe(" world");
+
+    // message_finish terminates the content line with a newline
+    expect(
+      parse({
+        type: "message_finish",
+        session_id: "session-1",
+        message_id: "msg-1",
+        finish_reason: "stop",
+      }),
+    ).toBe("\n");
+  });
+
+  it("message_finish without preceding message_start suppresses", () => {
+    const parse = createLineParser("crush");
+    expect(
+      parse({
+        type: "message_finish",
+        session_id: "session-1",
+        message_id: "msg-1",
+        finish_reason: "stop",
+      }),
+    ).toBe("");
+  });
+
+  it("prepends newline to tool_call when content was streaming", () => {
+    const parse = createLineParser("crush");
+    // Start a message and stream some content
+    parse({ type: "message_start", session_id: "s1", message_id: "m1", role: "assistant" });
+    parse({ type: "content", content: "I'll inspect the details." });
+    // tool_call arrives before message_finish
+    const result = parse({
+      type: "tool_call",
+      session_id: "s1",
+      tool_call: {
+        id: "toolu_1",
+        name: "bash",
+        input: '{"command": "ls"}',
+        finished: true,
+      },
+    });
+    const plain = stripAnsi(result!);
+    // Should start with a newline to terminate the content line
+    expect(result!.startsWith("\n")).toBe(true);
+    expect(plain).toContain("▶ bash");
+  });
+
+  it("formats finished tool_call with tool name and input summary", () => {
     const parse = createLineParser("crush");
     const result = parse({
       type: "tool_call",
-      text: "calling bash",
+      session_id: "session-1",
+      tool_call: {
+        id: "toolu_123",
+        name: "bash",
+        input: '{"command": "ls -la", "description": "List files"}',
+        finished: true,
+      },
     });
     const plain = stripAnsi(result!);
-    expect(plain).toContain("tool_call");
-    expect(plain).toContain("calling bash");
+    expect(plain).toContain("▶ bash");
+    expect(plain).toContain("ls -la");
   });
 
-  it("shows (no text) for unknown events without text fields", () => {
+  it("formats tool_call with path input", () => {
     const parse = createLineParser("crush");
     const result = parse({
-      type: "heartbeat",
-      ts: 12345,
+      type: "tool_call",
+      session_id: "session-1",
+      tool_call: {
+        id: "toolu_456",
+        name: "ls",
+        input: '{"path": "/Users/renier/Projects/flock", "depth": 2}',
+        finished: true,
+      },
     });
-    expect(stripAnsi(result!)).toContain("(no text)");
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("▶ ls");
+    expect(plain).toContain("/Users/renier/Projects/flock");
+  });
+
+  it("suppresses unfinished tool_call events", () => {
+    const parse = createLineParser("crush");
+    expect(
+      parse({
+        type: "tool_call",
+        session_id: "session-1",
+        tool_call: {
+          id: "toolu_789",
+          name: "bash",
+          finished: false,
+        },
+      }),
+    ).toBe("");
+  });
+
+  it("suppresses tool_call with no tool_call field", () => {
+    const parse = createLineParser("crush");
+    expect(parse({ type: "tool_call" })).toBe("");
+  });
+
+  it("formats tool_result with content preview", () => {
+    const parse = createLineParser("crush");
+    const result = parse({
+      type: "tool_result",
+      session_id: "session-1",
+      tool_result: {
+        tool_call_id: "toolu_123",
+        name: "bash",
+        content: "file1\nfile2\nfile3",
+        is_error: false,
+      },
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("file1");
+    expect(plain).toContain("file2");
+  });
+
+  it("formats error tool_result with error marker", () => {
+    const parse = createLineParser("crush");
+    const result = parse({
+      type: "tool_result",
+      session_id: "session-1",
+      tool_result: {
+        tool_call_id: "toolu_123",
+        name: "bash",
+        content: "command not found",
+        is_error: true,
+      },
+    });
+    const plain = stripAnsi(result!);
+    expect(plain).toContain("✗");
+    expect(plain).toContain("bash");
+    expect(plain).toContain("command not found");
+  });
+
+  it("suppresses tool_result with no content and no error", () => {
+    const parse = createLineParser("crush");
+    expect(
+      parse({
+        type: "tool_result",
+        session_id: "session-1",
+        tool_result: {
+          tool_call_id: "toolu_123",
+          name: "bash",
+          content: "",
+          is_error: false,
+        },
+      }),
+    ).toBe("");
+  });
+
+  it("returns null for unknown event types", () => {
+    const parse = createLineParser("crush");
+    expect(parse({ type: "something.unknown" })).toBeNull();
   });
 });

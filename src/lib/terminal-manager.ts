@@ -455,11 +455,6 @@ export function listSessions(): TerminalSession[] {
   return Array.from(sessions.values()).map((e) => e.session);
 }
 
-/** Ensure display text ends with a newline for clean terminal rendering. */
-function ensureTrailingNewline(text: string): string {
-  return text.endsWith("\n") ? text : text + "\n";
-}
-
 /** Format a prompt for display in the terminal pane. */
 function formatPromptForDisplay(prompt: string): string {
   // Show up to the first 5 lines (or 500 chars) so the user can see
@@ -1619,7 +1614,12 @@ export async function createSession(
             takeCancelInputClose();
           }
           const parsed = effectiveParseEvent(raw);
-          const display = parsed != null ? ensureTrailingNewline(parsed) : formatStreamEvent(obj);
+          // Parser returns non-null (including "") when it recognises the
+          // event.  Only fall back to formatStreamEvent for truly unhandled
+          // events (null).  Empty string means "suppress".
+          const display = parsed != null
+            ? (parsed || null)
+            : formatStreamEvent(obj);
           if (display) {
             pushEvent({ type: "stdout", data: display, timestamp: Date.now() });
           }
@@ -1643,7 +1643,9 @@ export async function createSession(
           takeAutoAnswerAskUser(obj);
           if (obj.type === "result") takeScheduleInputClose();
           const parsed = effectiveParseEvent(raw);
-          const display = parsed != null ? ensureTrailingNewline(parsed) : formatStreamEvent(obj);
+          const display = parsed != null
+            ? (parsed || null)
+            : formatStreamEvent(obj);
           if (display) pushEvent({ type: "stdout", data: display, timestamp: Date.now() });
         } catch {
           pushEvent({ type: "stdout", data: takeLineBuffer + "\n", timestamp: Date.now() });
@@ -1735,16 +1737,16 @@ export async function createSession(
       ? null
       : !supportsAutoFollowUp(memoryManagerType)
         ? null
-      : effectiveParent
-        ? buildWaveCompletionFollowUp(
-          beat.id,
-          sceneTargets,
-          memoryManagerType,
-        )
-        : buildSingleBeatCompletionFollowUp(
-          primaryTarget,
-          memoryManagerType,
-        );
+        : effectiveParent
+          ? buildWaveCompletionFollowUp(
+            beat.id,
+            sceneTargets,
+            memoryManagerType,
+          )
+          : buildSingleBeatCompletionFollowUp(
+            primaryTarget,
+            memoryManagerType,
+          );
   let executionPromptSent = true;
   let shipCompletionPromptSent = false;
 
@@ -1895,8 +1897,12 @@ export async function createSession(
 
         // Parser: dialect-aware display text (falls back to
         // formatStreamEvent for claude/codex dialects).
+        // Non-null return (including "") means the parser handled the event;
+        // empty string means "suppress".  Only null falls through.
         const parsed = parseEvent(raw);
-        const display = parsed != null ? ensureTrailingNewline(parsed) : formatStreamEvent(obj);
+        const display = parsed != null
+          ? (parsed || null)
+          : formatStreamEvent(obj);
         if (display) {
           console.log(`[terminal-manager] [${id}] display (${display.length} chars): ${display.slice(0, 150).replace(/\n/g, "\\n")}`);
           pushEvent({ type: "stdout", data: display, timestamp: Date.now() });
@@ -1934,7 +1940,9 @@ export async function createSession(
         }
 
         const parsed = parseEvent(raw);
-        const display = parsed != null ? ensureTrailingNewline(parsed) : formatStreamEvent(obj);
+        const display = parsed != null
+          ? (parsed || null)
+          : formatStreamEvent(obj);
         if (display) pushEvent({ type: "stdout", data: display, timestamp: Date.now() });
       } catch {
         pushEvent({ type: "stdout", data: lineBuffer + "\n", timestamp: Date.now() });

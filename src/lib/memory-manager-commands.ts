@@ -17,10 +17,6 @@ function quoteArg(value: string): string {
   return JSON.stringify(value);
 }
 
-function beatsNoDaemonFlag(options?: MemoryManagerCommandOptions): string {
-  return options?.noDaemon ? " --no-daemon" : "";
-}
-
 export function resolveMemoryManagerType(repoPath?: string): MemoryManagerType {
   if (!repoPath) return "beads";
   return detectMemoryManagerType(repoPath) ?? "beads";
@@ -51,7 +47,7 @@ export function buildWorkflowStateCommand(
     return options?.leaseId ? `${base} --lease ${quoteArg(options.leaseId)}` : base;
   }
   const compatStatus = mapWorkflowStateToCompatStatus(normalizedState, "memory-manager-commands");
-  return `bd update ${quoteId(id)} --status ${quoteArg(compatStatus)} --add-label ${quoteArg(`wf:state:${normalizedState}`)}${beatsNoDaemonFlag(options)}`;
+  return `bd update ${quoteId(id)} --status ${quoteArg(compatStatus)} --add-label ${quoteArg(`wf:state:${normalizedState}`)}`;
 }
 
 export async function rollbackBeatState(

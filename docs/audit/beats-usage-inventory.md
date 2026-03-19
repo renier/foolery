@@ -59,7 +59,6 @@ Internal infrastructure:
 - Auto-sync on out-of-sync errors (`bd sync --import-only`)
 - Dolt panic detection with JSONL fallback
 - Configurable timeouts (read/write) with retry policy
-- `--no-daemon` fallback for label operations
 
 ### `src/lib/bd-error-suppression.ts` -- Error Suppression Cache (170 lines)
 

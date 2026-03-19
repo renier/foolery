@@ -200,6 +200,10 @@ export function createLineNormalizer(
 
       if (type === "init") return null;
 
+      // Structural events — skip for normalization purposes.
+      if (type === "message_start" || type === "message_finish") return null;
+      if (type === "tool_call" || type === "tool_result") return null;
+
       if (type === "content") {
         const text = typeof obj.content === "string" ? obj.content : "";
         if (!text) return null;
@@ -355,7 +359,6 @@ export function createLineNormalizer(
 // ── 4) Event parsing (terminal display) ─────────────────────
 
 // ANSI helpers
-const MAGENTA = "\x1b[35m";
 const CYAN = "\x1b[36m";
 const DIM = "\x1b[90m";
 const RED = "\x1b[31m";
@@ -375,7 +378,11 @@ function abbreviate(text: string, max: number): string {
  * directly from each agent's native event structure.  It is used
  * exclusively by the terminal/messages pane.
  *
- * Returns `null` for events that should not be displayed.
+ * Return value contract:
+ *   - non-empty string → display this text
+ *   - `""`             → event is known and explicitly suppressed
+ *   - `null`           → event is not handled; caller should fall back
+ *                         to formatStreamEvent
  */
 export function createLineParser(
   dialect: AgentDialect,
@@ -404,16 +411,16 @@ function createOpenCodeParser(): (parsed: unknown) => string | null {
     if (type === "text") {
       const part = obj.part as Record<string, unknown> | undefined;
       const text = typeof part?.text === "string" ? part.text : "";
-      if (!text) return null;
-      return text;
+      if (!text) return "";
+      return text.endsWith("\n") ? text : text + "\n";
     }
 
     if (type === "tool_use") {
-      return formatOpenCodeToolUse(obj);
+      return formatOpenCodeToolUse(obj) ?? "";
     }
 
     if (type === "step_finish") {
-      return formatOpenCodeStepFinish(obj);
+      return formatOpenCodeStepFinish(obj) ?? "";
     }
 
     if (type === "error") {
@@ -497,21 +504,53 @@ function formatOpenCodeStepFinish(obj: Record<string, unknown>): string | null {
 // ── Crush parser ────────────────────────────────────────────
 
 function createCrushParser(): (parsed: unknown) => string | null {
+  let inMessage = false;
+
   return (parsed) => {
     if (!parsed || typeof parsed !== "object") return null;
     const obj = parsed as Record<string, unknown>;
     const type = obj.type;
 
-    if (type === "init") return null;
+    if (type === "init") return "";
+
+    if (type === "message_start") {
+      inMessage = true;
+      return "";
+    }
+
+    if (type === "message_finish") {
+      const wasInMessage = inMessage;
+      inMessage = false;
+      // Terminate the content line that was streamed without newlines.
+      return wasInMessage ? "\n" : "";
+    }
 
     if (type === "content") {
       const text = typeof obj.content === "string" ? obj.content : "";
-      if (!text) return null;
+      if (!text) return "";
+      // Return raw text without trailing newline — tokens accumulate
+      // on the same line until message_finish emits "\n".
       return text;
     }
 
+    if (type === "tool_call") {
+      const formatted = formatCrushToolCall(obj) ?? "";
+      if (!formatted) return "";
+      // If content was streaming (inMessage), terminate that line first
+      // so the tool call header starts on its own line.
+      const prefix = inMessage ? "\n" : "";
+      return prefix + formatted;
+    }
+
+    if (type === "tool_result") {
+      const formatted = formatCrushToolResult(obj) ?? "";
+      if (!formatted) return "";
+      const prefix = inMessage ? "\n" : "";
+      return prefix + formatted;
+    }
+
     if (type === "result") {
-      return formatCrushResult(obj);
+      return formatCrushResult(obj) ?? "";
     }
 
     if (type === "error") {
@@ -520,20 +559,65 @@ function createCrushParser(): (parsed: unknown) => string | null {
       return `${RED}error: ${msg}${RESET}\n`;
     }
 
-    // Unknown event — format as ad-hoc if it has a recognizable shape
-    const eventName = typeof obj.type === "string" ? obj.type : null;
-    if (eventName) {
-      const text =
-        typeof obj.text === "string"
-          ? obj.text
-          : typeof obj.message === "string"
-            ? obj.message
-            : "";
-      return `${MAGENTA}${eventName}${RESET} ${DIM}|${RESET} ${text || "(no text)"}\n`;
-    }
-
     return null;
   };
+}
+
+function formatCrushToolCall(obj: Record<string, unknown>): string | null {
+  const tc = obj.tool_call as Record<string, unknown> | undefined;
+  if (!tc) return null;
+  const name = typeof tc.name === "string" ? tc.name : "unknown";
+  const finished = Boolean(tc.finished);
+
+  // Only show the tool call once it's finished and has input.
+  if (!finished) return null;
+
+  let inputSummary = "";
+  if (typeof tc.input === "string") {
+    try {
+      const parsed = JSON.parse(tc.input) as Record<string, unknown>;
+      if (typeof parsed.command === "string") {
+        inputSummary = abbreviate(parsed.command, 120);
+      } else if (typeof parsed.pattern === "string") {
+        inputSummary = parsed.pattern;
+      } else if (typeof parsed.filePath === "string") {
+        inputSummary = String(parsed.filePath);
+      } else if (typeof parsed.path === "string") {
+        inputSummary = String(parsed.path);
+      } else if (typeof parsed.query === "string") {
+        inputSummary = abbreviate(parsed.query, 100);
+      } else if (typeof parsed.prompt === "string") {
+        inputSummary = abbreviate(parsed.prompt, 100);
+      } else if (typeof parsed.description === "string") {
+        inputSummary = abbreviate(parsed.description, 100);
+      } else if (typeof parsed.url === "string") {
+        inputSummary = abbreviate(parsed.url, 100);
+      }
+    } catch {
+      inputSummary = abbreviate(tc.input, 100);
+    }
+  }
+
+  return `${CYAN}▶ ${name}${inputSummary ? " " + inputSummary : ""}${RESET}\n`;
+}
+
+function formatCrushToolResult(obj: Record<string, unknown>): string | null {
+  const tr = obj.tool_result as Record<string, unknown> | undefined;
+  if (!tr) return null;
+  const name = typeof tr.name === "string" ? tr.name : "";
+  const content = typeof tr.content === "string" ? tr.content : "";
+  const isError = Boolean(tr.is_error);
+
+  if (!content && !isError) return null;
+
+  const parts: string[] = [];
+  if (isError) {
+    parts.push(`${RED}  ✗ ${name}: ${abbreviate(content, 300)}${RESET}\n`);
+  } else {
+    const preview = abbreviate(content.trim(), 300);
+    parts.push(`${DIM}  ${preview.replace(/\n/g, "\n  ")}${RESET}\n`);
+  }
+  return parts.join("");
 }
 
 function formatCrushResult(obj: Record<string, unknown>): string | null {
