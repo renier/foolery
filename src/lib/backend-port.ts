@@ -54,6 +54,8 @@ export interface TakePromptOptions {
   isParent?: boolean;
   /** IDs of child beats (when isParent is true). */
   childBeatIds?: string[];
+  /** Knots lease ID to thread through claim commands. */
+  knotsLeaseId?: string;
 }
 
 /** Result of building a Take!/Scene! prompt. */

@@ -108,6 +108,7 @@ export interface KnotClaimPrompt {
   type?: string;
   priority?: number | null;
   invariants?: Invariant[];
+  lease_id?: string;
   prompt: string;
 }
 
@@ -454,6 +455,7 @@ export interface ClaimKnotOptions {
   agentName?: string;
   agentModel?: string;
   agentVersion?: string;
+  leaseId?: string;
 }
 
 export async function claimKnot(
@@ -465,6 +467,7 @@ export async function claimKnot(
   if (options?.agentName) args.push("--agent-name", options.agentName);
   if (options?.agentModel) args.push("--agent-model", options.agentModel);
   if (options?.agentVersion) args.push("--agent-version", options.agentVersion);
+  if (options?.leaseId) args.push("--lease", options.leaseId);
   const { stdout, stderr, exitCode } = await execWrite(args, { repoPath });
   if (exitCode !== 0) return { ok: false, error: stderr || "knots claim failed" };
   try {
@@ -486,6 +489,7 @@ export async function skillPrompt(
 export interface NextKnotOptions {
   actorKind?: string;
   expectedState?: string;
+  leaseId?: string;
 }
 
 export async function nextKnot(
@@ -497,6 +501,7 @@ export async function nextKnot(
     const args = ["next", id];
     if (options?.expectedState) args.push("--expected-state", options.expectedState);
     if (options?.actorKind) args.push("--actor-kind", options.actorKind);
+    if (options?.leaseId) args.push("--lease", options.leaseId);
     const { stderr, exitCode } = await execWriteWithRetry(args, { repoPath });
     if (exitCode !== 0) return { ok: false, error: stderr || "knots next failed" };
     return { ok: true };

@@ -137,6 +137,7 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
         agentName: input.agentInfo?.agentName,
         agentModel: input.agentInfo?.agentModel,
         agentVersion: input.agentInfo?.agentVersion,
+        leaseId: knotsLeaseId,
       });
       if (!claimResult.ok || !claimResult.data) {
         await terminateKnotsRuntimeLease({
@@ -378,6 +379,7 @@ export class StructuredExecutionBackend implements ExecutionBackendPort {
         const result = await nextKnot(lease.beatId, lease.repoPath, {
           actorKind: "agent",
           expectedState: lease.completion.expectedState,
+          leaseId: lease.knotsLeaseId,
         });
         if (!result.ok) {
           return fail(result.error ?? `Failed to advance knot ${lease.beatId}`);

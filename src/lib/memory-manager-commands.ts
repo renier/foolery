@@ -6,6 +6,7 @@ import type { Beat } from "@/lib/types";
 
 interface MemoryManagerCommandOptions {
   noDaemon?: boolean;
+  leaseId?: string;
 }
 
 function quoteId(id: string): string {
@@ -30,8 +31,11 @@ export function buildShowIssueCommand(id: string, memoryManagerType: MemoryManag
   return `bd show ${quoteId(id)}`;
 }
 
-export function buildClaimCommand(id: string, memoryManagerType: MemoryManagerType): string {
-  if (memoryManagerType === "knots") return `kno claim ${quoteId(id)} --json`;
+export function buildClaimCommand(id: string, memoryManagerType: MemoryManagerType, leaseId?: string): string {
+  if (memoryManagerType === "knots") {
+    const base = `kno claim ${quoteId(id)} --json`;
+    return leaseId ? `${base} --lease ${quoteArg(leaseId)}` : base;
+  }
   return buildShowIssueCommand(id, memoryManagerType);
 }
 
@@ -43,7 +47,8 @@ export function buildWorkflowStateCommand(
 ): string {
   const normalizedState = workflowState.trim().toLowerCase();
   if (memoryManagerType === "knots") {
-    return `kno next ${quoteId(id)} --expected-state ${quoteArg(normalizedState)} --actor-kind agent`;
+    const base = `kno next ${quoteId(id)} --expected-state ${quoteArg(normalizedState)} --actor-kind agent`;
+    return options?.leaseId ? `${base} --lease ${quoteArg(options.leaseId)}` : base;
   }
   const compatStatus = mapWorkflowStateToCompatStatus(normalizedState, "memory-manager-commands");
   return `bd update ${quoteId(id)} --status ${quoteArg(compatStatus)} --add-label ${quoteArg(`wf:state:${normalizedState}`)}${beatsNoDaemonFlag(options)}`;

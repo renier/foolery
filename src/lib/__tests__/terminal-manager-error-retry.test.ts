@@ -297,7 +297,8 @@ describe("terminal-manager error-exit retry", () => {
     await waitFor(() => {
       expect(spawnedChildren).toHaveLength(2);
     });
-    expect(createLeaseMock).toHaveBeenCalledTimes(1);
+    // 1 initial lease + 1 lease rotation for the retry iteration
+    expect(createLeaseMock).toHaveBeenCalledTimes(2);
 
     // Verify rollback was called
     expect(rollbackBeatState).toHaveBeenCalled();

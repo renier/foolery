@@ -217,4 +217,37 @@ describe("nextKnot retry with exponential backoff", () => {
     // Should not have retried further
     expect(execFileCallbacks).toHaveLength(2);
   });
+
+  it("passes --lease flag when leaseId provided", async () => {
+    const promise = nextKnot("K-0001", "/tmp/test", {
+      expectedState: "impl",
+      actorKind: "agent",
+      leaseId: "L-1",
+    });
+
+    await vi.waitFor(() => {
+      expect(execFileCallbacks).toHaveLength(1);
+    });
+    const args = execFileCallbacks[0].args;
+    expect(args).toEqual(expect.arrayContaining(["--lease", "L-1"]));
+    succeedLatest();
+
+    const result = await promise;
+    expect(result.ok).toBe(true);
+  });
+
+  it("omits --lease flag when leaseId not provided", async () => {
+    const promise = nextKnot("K-0001", "/tmp/test", {
+      expectedState: "impl",
+    });
+
+    await vi.waitFor(() => {
+      expect(execFileCallbacks).toHaveLength(1);
+    });
+    const args = execFileCallbacks[0].args;
+    expect(args).not.toEqual(expect.arrayContaining(["--lease"]));
+    succeedLatest();
+
+    await promise;
+  });
 });

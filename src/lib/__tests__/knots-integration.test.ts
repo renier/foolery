@@ -459,6 +459,28 @@ describe("claimKnot", () => {
     expect(result.ok).toBe(false);
     expect(result.error).toContain("parse");
   });
+
+  it("passes --lease flag when leaseId provided", async () => {
+    const prompt = { id: "K-1", title: "T", state: "impl", profile_id: "auto", prompt: "# P", lease_id: "L-1" };
+    const promise = claimKnot("K-1", "/repo", { leaseId: "L-1" });
+    await vi.waitFor(() => expect(execFileCallbacks).toHaveLength(1));
+    const args = execFileCallbacks[0].args;
+    expect(args).toEqual(expect.arrayContaining(["--lease", "L-1"]));
+    resolveNext(JSON.stringify(prompt));
+    const result = await promise;
+    expect(result.ok).toBe(true);
+    expect(result.data?.lease_id).toBe("L-1");
+  });
+
+  it("omits --lease flag when leaseId not provided", async () => {
+    const prompt = { id: "K-1", title: "T", state: "impl", profile_id: "auto", prompt: "# P" };
+    const promise = claimKnot("K-1", "/repo");
+    await vi.waitFor(() => expect(execFileCallbacks).toHaveLength(1));
+    const args = execFileCallbacks[0].args;
+    expect(args).not.toEqual(expect.arrayContaining(["--lease"]));
+    resolveNext(JSON.stringify(prompt));
+    await promise;
+  });
 });
 
 // ---------------------------------------------------------------------------

@@ -623,28 +623,6 @@ export async function createSession(
   }
 
   const id = generateId();
-  let prompt: string;
-  if (customPrompt) {
-    prompt = customPrompt;
-  } else {
-    // Ask the backend for the task-specific prompt
-    const takePromptResult = await getBackend().buildTakePrompt(
-      beat.id,
-      {
-        isParent: effectiveParent,
-        childBeatIds: effectiveParent && waveBeatIds.length > 0 ? waveBeatIds : undefined,
-      },
-      repoPath,
-    );
-    if (!takePromptResult.ok || !takePromptResult.data) {
-      throw new Error(takePromptResult.error?.message ?? "Failed to build take prompt");
-    }
-    const taskPrompt = takePromptResult.data.prompt;
-
-    // The backend's buildTakePrompt already provides beat context and
-    // kno claim instructions.  We only add a thin execution-mode wrapper.
-    prompt = wrapExecutionPrompt(taskPrompt, effectiveParent ? "scene" : "take");
-  }
 
   const session: TerminalSession = {
     id,
@@ -725,6 +703,30 @@ export async function createSession(
     if (!knotsLeaseId) {
       console.warn(`[terminal-manager] Failed to create Knots lease for session ${id}`);
     }
+  }
+
+  let prompt: string;
+  if (customPrompt) {
+    prompt = customPrompt;
+  } else {
+    // Ask the backend for the task-specific prompt
+    const takePromptResult = await getBackend().buildTakePrompt(
+      beat.id,
+      {
+        isParent: effectiveParent,
+        childBeatIds: effectiveParent && waveBeatIds.length > 0 ? waveBeatIds : undefined,
+        knotsLeaseId: entry.knotsLeaseId,
+      },
+      repoPath,
+    );
+    if (!takePromptResult.ok || !takePromptResult.data) {
+      throw new Error(takePromptResult.error?.message ?? "Failed to build take prompt");
+    }
+    const taskPrompt = takePromptResult.data.prompt;
+
+    // The backend's buildTakePrompt already provides beat context and
+    // kno claim instructions.  We only add a thin execution-mode wrapper.
+    prompt = wrapExecutionPrompt(taskPrompt, effectiveParent ? "scene" : "take");
   }
 
   const cwd = resolvedRepoPath;
@@ -1071,11 +1073,50 @@ export async function createSession(
       return null;
     }
 
+    // Rotate lease for the next iteration
+    if (memoryManagerType === "knots") {
+      entry.releaseKnotsLease?.("lease_rotation", "success", { reason: "next_iteration" });
+
+      const newLeaseId = await ensureKnotsLease({
+        repoPath: resolvedRepoPath,
+        source: "terminal_manager_take",
+        sessionId: id,
+        beatId,
+        interactionType: "take",
+        agentInfo,
+      });
+      entry.knotsLeaseId = newLeaseId;
+
+      knotsLeaseTerminationStarted = false;
+      entry.releaseKnotsLease = (
+        reason: string,
+        outcome: "success" | "warning" | "error" = "warning",
+        data?: Record<string, unknown>,
+      ) => {
+        if (knotsLeaseTerminationStarted) return;
+        knotsLeaseTerminationStarted = true;
+        const knotsLeaseId = entry.knotsLeaseId;
+        entry.knotsLeaseId = undefined;
+        void terminateKnotsRuntimeLease({
+          repoPath: resolvedRepoPath,
+          source: "terminal_manager_take",
+          sessionId: id,
+          knotsLeaseId,
+          beatId,
+          interactionType: "take",
+          agentInfo,
+          reason,
+          outcome,
+          data,
+        });
+      };
+    }
+
     // Claim the same beat into its next workflow state.
     console.log(`${tag} claiming ${beatId} from state=${current.state}`);
     const takeResult = await getBackend().buildTakePrompt(
       beatId,
-      {},
+      { knotsLeaseId: entry.knotsLeaseId },
       repoPath,
     );
     if (!takeResult.ok || !takeResult.data) {
@@ -1135,6 +1176,23 @@ export async function createSession(
 
     if (isQueueOrTerminal(current.state, workflow)) {
       console.log(`${tag} beat=${beatId} state=${current.state} — invariant satisfied`);
+
+      // Check for dangling lease on the knot itself
+      if (memoryManagerType === "knots") {
+        try {
+          const { showKnot, terminateLease } = await import("@/lib/knots");
+          const knotResult = await showKnot(beatId, repoPath);
+          if (knotResult.ok && knotResult.data?.lease_id) {
+            console.warn(`${tag} knot ${beatId} has dangling lease ${knotResult.data.lease_id} — terminating`);
+            await terminateLease(knotResult.data.lease_id, repoPath).catch((err) => {
+              console.error(`${tag} failed to terminate dangling lease ${knotResult.data!.lease_id}:`, err);
+            });
+          }
+        } catch (err) {
+          console.error(`${tag} failed to check for dangling lease on ${beatId}:`, err);
+        }
+      }
+
       return true;
     }
 

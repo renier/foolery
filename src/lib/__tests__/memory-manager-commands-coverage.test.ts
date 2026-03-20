@@ -47,6 +47,24 @@ describe("buildClaimCommand (line 32-34)", () => {
       'bd show "foo-123"',
     );
   });
+
+  it("includes --lease flag when leaseId provided for knots", () => {
+    expect(buildClaimCommand("foo-123", "knots", "L-42")).toBe(
+      'kno claim "foo-123" --json --lease "L-42"',
+    );
+  });
+
+  it("omits --lease flag when leaseId not provided for knots", () => {
+    expect(buildClaimCommand("foo-123", "knots")).toBe(
+      'kno claim "foo-123" --json',
+    );
+  });
+
+  it("ignores leaseId for beads", () => {
+    expect(buildClaimCommand("foo-123", "beads", "L-42")).toBe(
+      'bd show "foo-123"',
+    );
+  });
 });
 
 describe("buildWorkflowStateCommand (lines 36-48)", () => {
@@ -75,6 +93,21 @@ describe("buildWorkflowStateCommand (lines 36-48)", () => {
   it("omits --no-daemon flag when noDaemon is not set for beats", () => {
     const cmd = buildWorkflowStateCommand("foo-123", "implementation", "beads");
     expect(cmd).not.toContain("--no-daemon");
+  });
+
+  it("includes --lease flag when leaseId provided for knots", () => {
+    const cmd = buildWorkflowStateCommand("foo-123", "implementation", "knots", { leaseId: "L-42" });
+    expect(cmd).toBe('kno next "foo-123" --expected-state "implementation" --actor-kind agent --lease "L-42"');
+  });
+
+  it("omits --lease flag when leaseId not provided for knots", () => {
+    const cmd = buildWorkflowStateCommand("foo-123", "implementation", "knots");
+    expect(cmd).not.toContain("--lease");
+  });
+
+  it("ignores leaseId for beads", () => {
+    const cmd = buildWorkflowStateCommand("foo-123", "implementation", "beads", { leaseId: "L-42" });
+    expect(cmd).not.toContain("--lease");
   });
 });
 

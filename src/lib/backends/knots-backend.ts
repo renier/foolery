@@ -1309,13 +1309,17 @@ export class KnotsBackend implements BackendPort {
     if (!showResult.ok) return propagateError<TakePromptResult>(showResult);
     const knot = showResult.data!;
 
+    const claimCmd = options?.knotsLeaseId
+      ? `kno claim "${beatId}" --json --lease "${options.knotsLeaseId}"`
+      : `kno claim "${beatId}" --json`;
+
     const prompt = [
       `Beat ID: ${beatId}`,
       knot.title ? `Title: ${knot.title}` : null,
       knot.description ? `Description: ${knot.description}` : knot.body ? `Description: ${knot.body}` : null,
       ``,
       `KNOTS CLAIM MODE (required):`,
-      `Run \`kno claim "${beatId}" --json\` and use the returned \`prompt\` only for the currently claimed step.`,
+      `Run \`${claimCmd}\` and use the returned \`prompt\` only for the currently claimed step.`,
       `Treat that claim result as a single-step authorization: run only the completion command from the claim output, then stop immediately.`,
       `Do not run \`kno claim\` again in this session after the completion command succeeds.`,
       `Do not inspect, review, or advance later workflow states on your own.`,
