@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchBeats } from "@/lib/api";
 import { startSession, abortSession } from "@/lib/terminal-api";
+import { fetchAgents } from "@/lib/settings-api";
 import { BeatTable } from "@/components/beat-table";
 import { BeatDetailLightbox } from "@/components/beat-detail-lightbox";
 import { FilterBar, type ViewPhase } from "@/components/filter-bar";
@@ -335,6 +336,68 @@ function BeatsPageInner() {
     toast.success("Take terminated");
   }, [terminals, updateStatus]);
 
+  const handleRestartBeat = useCallback(async (beat: Beat) => {
+    const running = terminals.find(
+      (terminal) =>
+        terminal.status === "running" && terminal.beatId === beat.id
+    );
+
+    const currentCommand = running?.agentCommand;
+    const currentModel = running?.agentModel;
+
+    if (running) {
+      const abortResult = await abortSession(running.sessionId);
+      if (!abortResult.ok) {
+        toast.error(abortResult.error ?? "Failed to terminate session");
+        return;
+      }
+      updateStatus(running.sessionId, "aborted");
+    }
+
+    let nextAgentId: string | undefined;
+    const agentsResult = await fetchAgents();
+    if (agentsResult.ok && agentsResult.data) {
+      const sortedIds = Object.keys(agentsResult.data).sort((a, b) =>
+        a.localeCompare(b),
+      );
+      if (sortedIds.length > 1 && currentCommand) {
+        const currentIdx = sortedIds.findIndex((id) => {
+          const a = agentsResult.data![id];
+          return a.command === currentCommand
+            && (!currentModel || !a.model || a.model === currentModel);
+        });
+        if (currentIdx >= 0) {
+          nextAgentId = sortedIds[(currentIdx + 1) % sortedIds.length];
+        } else {
+          nextAgentId = sortedIds[0];
+        }
+      } else if (sortedIds.length === 1) {
+        nextAgentId = sortedIds[0];
+      }
+    }
+
+    const repo = (beat as unknown as Record<string, unknown>)._repoPath as string | undefined;
+    const result = await startSession(beat.id, repo ?? activeRepo ?? undefined, undefined, nextAgentId);
+    if (!result.ok || !result.data) {
+      toast.error(result.error ?? "Failed to restart session");
+      return;
+    }
+    upsertTerminal({
+      sessionId: result.data.id,
+      beatId: beat.id,
+      beatTitle: beat.title,
+      repoPath: result.data.repoPath ?? repo ?? activeRepo ?? undefined,
+      agentName: result.data.agentName,
+      agentModel: result.data.agentModel,
+      agentVersion: result.data.agentVersion,
+      agentCommand: result.data.agentCommand,
+      status: "running",
+      startedAt: result.data.startedAt,
+    });
+    const agentLabel = result.data.agentName ?? nextAgentId ?? "agent";
+    toast.success(`Session restarted with ${agentLabel}`);
+  }, [activeRepo, terminals, updateStatus, upsertTerminal]);
+
   const launchTakeForQueuedBeat = useCallback(
     async (item: QueuedBeat) => {
       const result = await startSession(item.beatId, item.repoPath ?? activeRepo ?? undefined);
@@ -518,6 +581,7 @@ function BeatsPageInner() {
                 onShipBeat={handleShipBeat}
                 shippingByBeatId={shippingByBeatId}
                 onAbortShipping={handleAbortShipping}
+                onRestartBeat={handleRestartBeat}
               />
             </>
           )}

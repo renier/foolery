@@ -39,10 +39,10 @@ describe("getBeatColumns", () => {
     expect(hasAction).toBe(true);
   });
 
-  it("hides the action column in the active view", () => {
+  it("shows the action column in the active view", () => {
     const cols = getBeatColumns({ showAgentColumns: true, onShipBeat: () => {} });
     const hasAction = cols.some((c) => c.id === "action");
-    expect(hasAction).toBe(false);
+    expect(hasAction).toBe(true);
   });
 
   it("does not add action column when onShipBeat is not provided", () => {

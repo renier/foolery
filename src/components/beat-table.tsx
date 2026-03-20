@@ -368,6 +368,7 @@ export function BeatTable({
   onShipBeat,
   shippingByBeatId = {},
   onAbortShipping,
+  onRestartBeat,
 }: {
   data: Beat[];
   showRepoColumn?: boolean;
@@ -380,6 +381,7 @@ export function BeatTable({
   onShipBeat?: (beat: Beat) => void;
   shippingByBeatId?: Record<string, string>;
   onAbortShipping?: (beatId: string) => void;
+  onRestartBeat?: (beat: Beat) => void;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -665,12 +667,13 @@ export function BeatTable({
       onAbortShipping,
       allLabels,
       onCloseBeat: initiateClose,
+      onRestartBeat,
       collapsedIds,
       onToggleCollapse: handleToggleCollapse,
       childCountMap,
       parentRollingBeatIds,
     }),
-    [showRepoColumn, showAgentColumns, agentInfoByBeatId, handleUpdateBeat, onOpenBeat, searchParams, router, onShipBeat, shippingByBeatId, onAbortShipping, allLabels, initiateClose, collapsedIds, handleToggleCollapse, childCountMap, parentRollingBeatIds]
+    [showRepoColumn, showAgentColumns, agentInfoByBeatId, handleUpdateBeat, onOpenBeat, searchParams, router, onShipBeat, shippingByBeatId, onAbortShipping, allLabels, initiateClose, onRestartBeat, collapsedIds, handleToggleCollapse, childCountMap, parentRollingBeatIds]
   );
 
   const handleRowFocus = useCallback((beat: Beat) => {

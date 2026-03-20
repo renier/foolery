@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronRight, ChevronDown, X, Clapperboard, Square, Undo2 } from "lucide-react";
+import { ChevronRight, ChevronDown, X, Clapperboard, Square, Undo2, RotateCw } from "lucide-react";
 import { displayBeatLabel, stripBeatPrefix } from "@/lib/beat-display";
 import { isWaveLabel, isInternalLabel, isReadOnlyLabel, extractWaveSlug } from "@/lib/wave-slugs";
 import { builtinProfileDescriptor, builtinWorkflowDescriptors, isRollbackTransition } from "@/lib/workflows";
@@ -157,6 +157,7 @@ export interface BeatColumnOpts {
   onAbortShipping?: (beatId: string) => void;
   allLabels?: string[];
   onCloseBeat?: (beatId: string) => void;
+  onRestartBeat?: (beat: Beat) => void;
   collapsedIds?: Set<string>;
   onToggleCollapse?: (id: string) => void;
   childCountMap?: Map<string, number>;
@@ -326,6 +327,7 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
   const allLabels = typeof opts === "boolean" ? undefined : opts.allLabels;
   const profiles = builtinWorkflowDescriptors();
   const onCloseBeat = typeof opts === "boolean" ? undefined : opts.onCloseBeat;
+  const onRestartBeat = typeof opts === "boolean" ? undefined : opts.onRestartBeat;
   const collapsedIds = typeof opts === "boolean" ? new Set<string>() : (opts.collapsedIds ?? new Set<string>());
   const onToggleCollapse = typeof opts === "boolean" ? undefined : opts.onToggleCollapse;
   const childCountMap = typeof opts === "boolean" ? new Map<string, number>() : (opts.childCountMap ?? new Map<string, number>());
@@ -733,6 +735,85 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
             {actionLabel}
           </button>
         );
+      },
+    });
+  }
+
+  if (isActiveView) {
+    columns.push({
+      id: "action",
+      header: "Action",
+      size: 130,
+      minSize: 130,
+      maxSize: 130,
+      enableSorting: false,
+      cell: ({ row }) => {
+        const beat = row.original;
+        const isTerminal = beat.state === "shipped" || beat.state === "abandoned" || beat.state === "closed";
+        if (isTerminal || beat.type === "gate") return null;
+        const isActiveShipping = Boolean(shippingByBeatId[beat.id]);
+        const isChildOfRolling = parentRollingBeatIds.has(beat.id);
+
+        if (isActiveShipping) {
+          return (
+            <div className="inline-flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-green-700">
+                Rolling...
+              </span>
+              {onRestartBeat && (
+                <button
+                  type="button"
+                  title="Restart session"
+                  className="inline-flex h-5 w-5 items-center justify-center rounded bg-amber-600 text-white hover:bg-amber-500"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRestartBeat(beat);
+                  }}
+                >
+                  <RotateCw className="size-3" />
+                </button>
+              )}
+              <button
+                type="button"
+                title="Stop session"
+                className="inline-flex h-5 w-5 items-center justify-center rounded bg-red-600 text-white hover:bg-red-500"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAbortShipping?.(beat.id);
+                }}
+              >
+                <Square className="size-3" />
+              </button>
+            </div>
+          );
+        }
+
+        if (isChildOfRolling) {
+          return (
+            <span className="text-xs font-semibold text-green-700 animate-pulse">
+              Rolling...
+            </span>
+          );
+        }
+
+        if (onShipBeat) {
+          return (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+              title="Take!"
+              onClick={(e) => {
+                e.stopPropagation();
+                onShipBeat(beat);
+              }}
+            >
+              <Clapperboard className="size-3" />
+              Take!
+            </button>
+          );
+        }
+
+        return null;
       },
     });
   }
