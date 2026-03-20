@@ -16,11 +16,13 @@ export async function listSessions(): Promise<TerminalSession[]> {
 export async function startSession(
   beatId: string,
   repo?: string,
-  prompt?: string
+  prompt?: string,
+  agentId?: string,
 ): Promise<BdResult<TerminalSession>> {
   const body: Record<string, string> = { beatId };
   if (repo) body._repo = repo;
   if (prompt) body.prompt = prompt;
+  if (agentId) body.agentId = agentId;
 
   const res = await fetch(BASE, {
     method: "POST",

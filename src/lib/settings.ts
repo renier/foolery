@@ -581,6 +581,16 @@ export async function getActionAgent(
   return toCliTarget({ command: getFallbackCommand(settings) });
 }
 
+/** Resolves a registered agent by its settings key. Returns null if not found. */
+export async function getAgentById(
+  agentId: string,
+): Promise<AgentTarget | null> {
+  const settings = await loadSettings();
+  const agent = settings.agents[agentId];
+  if (!agent) return null;
+  return toCliTarget(agent, agentId);
+}
+
 /**
  * Resolve the backend type to use. Priority:
  * 1. FOOLERY_BACKEND environment variable

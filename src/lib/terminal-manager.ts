@@ -11,7 +11,7 @@ import {
 } from "@/lib/interaction-logger";
 
 import { regroomAncestors } from "@/lib/regroom";
-import { getActionAgent, getStepAgent, loadSettings } from "@/lib/settings";
+import { getActionAgent, getAgentById, getStepAgent, loadSettings } from "@/lib/settings";
 import {
   buildPromptModeArgs,
   resolveDialect,
@@ -557,7 +557,8 @@ function formatStreamEvent(obj: Record<string, unknown>): string | null {
 export async function createSession(
   beatId: string,
   repoPath?: string,
-  customPrompt?: string
+  customPrompt?: string,
+  agentId?: string,
 ): Promise<TerminalSession> {
   // Enforce max concurrent sessions
   const settings = await loadSettings();
@@ -629,11 +630,14 @@ export async function createSession(
     toWorkflowPromptTarget(child, workflowsById, fallbackWorkflow),
   );
 
-  // Resolve agent: try pool selection by workflow step, fall back to action mapping
+  // Resolve agent: use explicit override, try pool selection by workflow step, fall back to action mapping
   const resolved = resolveStep(beat.state);
-  const agent = resolved
-    ? await getStepAgent(resolved.step, "take", beatId)
-    : await getActionAgent("take");
+  const agentOverride = agentId ? await getAgentById(agentId) : null;
+  const agent = agentOverride
+    ? agentOverride
+    : resolved
+      ? await getStepAgent(resolved.step, "take", beatId)
+      : await getActionAgent("take");
 
   const agentInfo = toExecutionAgentInfo(agent);
 

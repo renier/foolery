@@ -7,7 +7,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { beatId, prompt, _repo } = body;
+  const { beatId, prompt, _repo, agentId } = body;
 
   if (!beatId || typeof beatId !== "string") {
     return NextResponse.json(
@@ -17,7 +17,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const session = await createSession(beatId, _repo, prompt);
+    const session = await createSession(
+      beatId,
+      _repo,
+      prompt,
+      typeof agentId === "string" ? agentId : undefined,
+    );
     return NextResponse.json({ data: session }, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to create session";
