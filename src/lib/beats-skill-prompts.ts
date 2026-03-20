@@ -11,8 +11,8 @@ const EXIT_STATE_BY_STEP: Readonly<Record<WorkflowStepValue, string>> = Object.f
   [WorkflowStep.ShipmentReview]: "shipped",
 });
 
-function transitionCommand(beatId: string, workflowState: string): string {
-  return buildWorkflowStateCommand(beatId, workflowState, "beads", { noDaemon: true });
+function transitionCommand(beatId: string, workflowState: string, fromState?: string): string {
+  return buildWorkflowStateCommand(beatId, workflowState, "beads", { fromState });
 }
 
 function invariantLines(step: WorkflowStepValue, currentState: string, beatId: string): string[] {
@@ -20,7 +20,7 @@ function invariantLines(step: WorkflowStepValue, currentState: string, beatId: s
     "CRITICAL INVARIANT — QUEUE/TERMINAL STATE REQUIREMENT:",
     "Before ending your work, ensure the beat is in a queue state (ready_for_*) or terminal state (shipped/abandoned).",
     "Never leave work in an action state (planning, plan_review, implementation, implementation_review, shipment, shipment_review).",
-    `If the beat is currently in an action state (${currentState}), run \`${transitionCommand(beatId, EXIT_STATE_BY_STEP[step])}\` before stopping.`,
+    `If the beat is currently in an action state (${currentState}), run \`${transitionCommand(beatId, EXIT_STATE_BY_STEP[step], currentState)}\` before stopping.`,
   ];
 }
 
@@ -49,7 +49,7 @@ function commonHeader(
 }
 
 function buildPlanningPrompt(beatId: string, currentState: string): string {
-  const toPlanReview = transitionCommand(beatId, "ready_for_plan_review");
+  const toPlanReview = transitionCommand(beatId, "ready_for_plan_review", currentState);
   return [
     ...commonHeader("Planning", beatId, currentState, WorkflowStep.Planning, ["ready_for_plan_review"]),
     "1. Produce or refine an implementation plan for the beat.",
@@ -63,8 +63,8 @@ function buildPlanningPrompt(beatId: string, currentState: string): string {
 }
 
 function buildPlanReviewPrompt(beatId: string, currentState: string): string {
-  const toImplementation = transitionCommand(beatId, "ready_for_implementation");
-  const toPlanning = transitionCommand(beatId, "ready_for_planning");
+  const toImplementation = transitionCommand(beatId, "ready_for_implementation", currentState);
+  const toPlanning = transitionCommand(beatId, "ready_for_planning", currentState);
   return [
     ...commonHeader(
       "Plan Review",
@@ -84,7 +84,7 @@ function buildPlanReviewPrompt(beatId: string, currentState: string): string {
 }
 
 function buildImplementationPrompt(beatId: string, currentState: string): string {
-  const toImplementationReview = transitionCommand(beatId, "ready_for_implementation_review");
+  const toImplementationReview = transitionCommand(beatId, "ready_for_implementation_review", currentState);
   return [
     ...commonHeader(
       "Implementation",
@@ -105,8 +105,8 @@ function buildImplementationPrompt(beatId: string, currentState: string): string
 }
 
 function buildImplementationReviewPrompt(beatId: string, currentState: string): string {
-  const toShipment = transitionCommand(beatId, "ready_for_shipment");
-  const toImplementation = transitionCommand(beatId, "ready_for_implementation");
+  const toShipment = transitionCommand(beatId, "ready_for_shipment", currentState);
+  const toImplementation = transitionCommand(beatId, "ready_for_implementation", currentState);
   return [
     ...commonHeader(
       "Implementation Review",
@@ -126,7 +126,7 @@ function buildImplementationReviewPrompt(beatId: string, currentState: string): 
 }
 
 function buildShipmentPrompt(beatId: string, currentState: string): string {
-  const toShipmentReview = transitionCommand(beatId, "ready_for_shipment_review");
+  const toShipmentReview = transitionCommand(beatId, "ready_for_shipment_review", currentState);
   return [
     ...commonHeader("Shipment", beatId, currentState, WorkflowStep.Shipment, ["ready_for_shipment_review"]),
     "1. Ensure implementation is committed and integrated to the expected target branch.",
@@ -140,9 +140,9 @@ function buildShipmentPrompt(beatId: string, currentState: string): string {
 }
 
 function buildShipmentReviewPrompt(beatId: string, currentState: string): string {
-  const toShipped = transitionCommand(beatId, "shipped");
-  const toShipment = transitionCommand(beatId, "ready_for_shipment");
-  const toImplementation = transitionCommand(beatId, "ready_for_implementation");
+  const toShipped = transitionCommand(beatId, "shipped", currentState);
+  const toShipment = transitionCommand(beatId, "ready_for_shipment", currentState);
+  const toImplementation = transitionCommand(beatId, "ready_for_implementation", currentState);
   return [
     ...commonHeader(
       "Shipment Review",

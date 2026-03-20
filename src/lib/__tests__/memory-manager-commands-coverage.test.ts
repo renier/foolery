@@ -73,11 +73,34 @@ describe("buildWorkflowStateCommand (lines 36-48)", () => {
     expect(cmd).toBe('kno next "foo-123" --expected-state "implementation" --actor-kind agent');
   });
 
-  it("returns bd update with compat status and wf:state label for beats", () => {
+  it("returns bd update + bd label add for beats without fromState", () => {
     const cmd = buildWorkflowStateCommand("foo-123", "implementation", "beads");
     expect(cmd).toContain('bd update "foo-123"');
     expect(cmd).toContain("--status");
-    expect(cmd).toContain('--add-label "wf:state:implementation"');
+    expect(cmd).toContain('bd label add "foo-123" "wf:state:implementation"');
+    expect(cmd).not.toContain("--add-label");
+    expect(cmd).not.toContain("bd label remove");
+  });
+
+  it("returns bd update + bd label remove + bd label add for beats with fromState", () => {
+    const cmd = buildWorkflowStateCommand("foo-123", "ready_for_implementation", "beads", { fromState: "plan_review" });
+    expect(cmd).toContain('bd update "foo-123"');
+    expect(cmd).toContain('bd label remove "foo-123" "wf:state:plan_review"');
+    expect(cmd).toContain('bd label add "foo-123" "wf:state:ready_for_implementation"');
+  });
+
+  it("normalizes fromState for beats label remove", () => {
+    const cmd = buildWorkflowStateCommand("foo-123", "ready_for_implementation", "beads", { fromState: "  PLAN_REVIEW  " });
+    expect(cmd).toContain('bd label remove "foo-123" "wf:state:plan_review"');
+  });
+
+  it("preserves && ordering: update then remove then add", () => {
+    const cmd = buildWorkflowStateCommand("foo-123", "ready_for_implementation", "beads", { fromState: "plan_review" });
+    const updateIdx = cmd.indexOf("bd update");
+    const removeIdx = cmd.indexOf("bd label remove");
+    const addIdx = cmd.indexOf("bd label add");
+    expect(updateIdx).toBeLessThan(removeIdx);
+    expect(removeIdx).toBeLessThan(addIdx);
   });
 
   it("normalizes workflow state for knots kno next command", () => {

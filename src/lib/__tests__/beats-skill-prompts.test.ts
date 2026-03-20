@@ -60,7 +60,7 @@ describe("getBeatsSkillPrompt", () => {
       expect(prompt).toContain("Complete exactly one workflow action, then stop.");
 
       for (const workflowState of entry.transitions) {
-        const transitionCmd = buildWorkflowStateCommand(beatId, workflowState, "beads", { noDaemon: true });
+        const transitionCmd = buildWorkflowStateCommand(beatId, workflowState, "beads", { fromState: currentState });
         expect(prompt).toContain(transitionCmd);
         expect(prompt).toContain(`\`${workflowState}\``);
       }

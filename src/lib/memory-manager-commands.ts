@@ -7,6 +7,7 @@ import type { Beat } from "@/lib/types";
 interface MemoryManagerCommandOptions {
   noDaemon?: boolean;
   leaseId?: string;
+  fromState?: string;
 }
 
 function quoteId(id: string): string {
@@ -47,7 +48,15 @@ export function buildWorkflowStateCommand(
     return options?.leaseId ? `${base} --lease ${quoteArg(options.leaseId)}` : base;
   }
   const compatStatus = mapWorkflowStateToCompatStatus(normalizedState, "memory-manager-commands");
-  return `bd update ${quoteId(id)} --status ${quoteArg(compatStatus)} --add-label ${quoteArg(`wf:state:${normalizedState}`)}`;
+  const qid = quoteId(id);
+  const newLabel = quoteArg(`wf:state:${normalizedState}`);
+  const parts = [`bd update ${qid} --status ${quoteArg(compatStatus)}`];
+  if (options?.fromState) {
+    const oldLabel = quoteArg(`wf:state:${options.fromState.trim().toLowerCase()}`);
+    parts.push(`bd label remove ${qid} ${oldLabel}`);
+  }
+  parts.push(`bd label add ${qid} ${newLabel}`);
+  return parts.join(" && ");
 }
 
 export async function rollbackBeatState(

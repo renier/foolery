@@ -179,9 +179,10 @@ function buildGranularProgressionCommands(
       ? nonTerminalStates.slice(currentIndex + 1)
       : nonTerminalStates;
 
-  const commands = progression.map((state) =>
-    buildWorkflowStateCommand(target.id, state, memoryManagerType),
-  );
+  const commands = progression.map((state, i) => {
+    const from = i === 0 ? (current ?? undefined) : progression[i - 1];
+    return buildWorkflowStateCommand(target.id, state, memoryManagerType, { fromState: from });
+  });
   return [...new Set(commands)];
 }
 
@@ -207,7 +208,7 @@ function buildSingleTargetFollowUpLines(
   lines.push("Human review is required: either review manually or delegate review to an agent.");
   if (target.workflow.finalCutState) {
     lines.push("After merge/PR handling, move beat to the next human-action queue:");
-    lines.push(`- ${buildWorkflowStateCommand(target.id, target.workflow.finalCutState, memoryManagerType)}`);
+    lines.push(`- ${buildWorkflowStateCommand(target.id, target.workflow.finalCutState, memoryManagerType, { fromState: normalizeWorkflowState(target.workflowState) ?? undefined })}`);
   } else {
     lines.push("This workflow does not define a human-action queue state.");
   }
