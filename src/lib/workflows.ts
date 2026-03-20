@@ -829,6 +829,19 @@ export function beatInRetake(
 }
 
 /**
+ * Returns true when the given state is a terminal (closed) state.
+ *
+ * A terminal state means the beat is finished — shipped, abandoned, or closed.
+ * Used by dependency logic: a blocker in a terminal state no longer blocks.
+ */
+export function isTerminalState(state: string, workflow?: MemoryWorkflowDescriptor): boolean {
+  const terminalStates = workflow?.terminalStates ?? ["shipped", "abandoned", "closed"];
+  if (terminalStates.includes(state)) return true;
+  if (TERMINAL_STATUS_STATES.has(state) || LEGACY_TERMINAL_STATES.has(state)) return true;
+  return false;
+}
+
+/**
  * Returns true when the state is a queue state (queued phase) or a terminal state.
  * An agent must never end a work iteration in an active (action) state;
  * this helper expresses the invariant check.

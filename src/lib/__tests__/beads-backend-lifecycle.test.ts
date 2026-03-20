@@ -132,5 +132,95 @@ describe("BeadsBackend lifecycle", () => {
       expect(readyIds).toContain(blockerId);
       expect(readyIds).not.toContain(blockedId);
     });
+
+    it("listReady includes beat when blocker is in a terminal state", async () => {
+      const res1 = await backend.create(sample("blocker"));
+      const res2 = await backend.create(sample("blocked"));
+      const blockerId = (res1 as { ok: true; data: { id: string } }).data.id;
+      const blockedId = (res2 as { ok: true; data: { id: string } }).data.id;
+
+      await backend.addDependency(blockerId, blockedId);
+
+      const readyBefore = await backend.listReady();
+      const readyIdsBefore = (readyBefore as { ok: true; data: Array<{ id: string }> }).data.map((b) => b.id);
+      expect(readyIdsBefore).not.toContain(blockedId);
+
+      await backend.close(blockerId);
+
+      const readyAfter = await backend.listReady();
+      expect(readyAfter.ok).toBe(true);
+      const readyIdsAfter = (readyAfter as { ok: true; data: Array<{ id: string }> }).data.map((b) => b.id);
+      expect(readyIdsAfter).toContain(blockedId);
+    });
+
+    it("listReady still blocks when only some blockers are terminal", async () => {
+      const res1 = await backend.create(sample("blocker-1"));
+      const res2 = await backend.create(sample("blocker-2"));
+      const res3 = await backend.create(sample("blocked"));
+      const blocker1Id = (res1 as { ok: true; data: { id: string } }).data.id;
+      const blocker2Id = (res2 as { ok: true; data: { id: string } }).data.id;
+      const blockedId = (res3 as { ok: true; data: { id: string } }).data.id;
+
+      await backend.addDependency(blocker1Id, blockedId);
+      await backend.addDependency(blocker2Id, blockedId);
+
+      await backend.close(blocker1Id);
+
+      const readyRes = await backend.listReady();
+      expect(readyRes.ok).toBe(true);
+      const readyIds = (readyRes as { ok: true; data: Array<{ id: string }> }).data.map((b) => b.id);
+      expect(readyIds).not.toContain(blockedId);
+    });
+
+    it("listReady unblocks when all blockers reach terminal state", async () => {
+      const res1 = await backend.create(sample("blocker-1"));
+      const res2 = await backend.create(sample("blocker-2"));
+      const res3 = await backend.create(sample("blocked"));
+      const blocker1Id = (res1 as { ok: true; data: { id: string } }).data.id;
+      const blocker2Id = (res2 as { ok: true; data: { id: string } }).data.id;
+      const blockedId = (res3 as { ok: true; data: { id: string } }).data.id;
+
+      await backend.addDependency(blocker1Id, blockedId);
+      await backend.addDependency(blocker2Id, blockedId);
+
+      await backend.close(blocker1Id);
+      await backend.close(blocker2Id);
+
+      const readyRes = await backend.listReady();
+      expect(readyRes.ok).toBe(true);
+      const readyIds = (readyRes as { ok: true; data: Array<{ id: string }> }).data.map((b) => b.id);
+      expect(readyIds).toContain(blockedId);
+    });
+
+    it("listReady unblocks when blocker is abandoned", async () => {
+      const res1 = await backend.create(sample("blocker"));
+      const res2 = await backend.create(sample("blocked"));
+      const blockerId = (res1 as { ok: true; data: { id: string } }).data.id;
+      const blockedId = (res2 as { ok: true; data: { id: string } }).data.id;
+
+      await backend.addDependency(blockerId, blockedId);
+
+      await backend.update(blockerId, { state: "abandoned" });
+
+      const readyRes = await backend.listReady();
+      expect(readyRes.ok).toBe(true);
+      const readyIds = (readyRes as { ok: true; data: Array<{ id: string }> }).data.map((b) => b.id);
+      expect(readyIds).toContain(blockedId);
+    });
+
+    it("listDependencies includes blocker state", async () => {
+      const res1 = await backend.create(sample("blocker"));
+      const res2 = await backend.create(sample("blocked"));
+      const blockerId = (res1 as { ok: true; data: { id: string } }).data.id;
+      const blockedId = (res2 as { ok: true; data: { id: string } }).data.id;
+
+      await backend.addDependency(blockerId, blockedId);
+
+      const depsRes = await backend.listDependencies(blockedId);
+      expect(depsRes.ok).toBe(true);
+      const deps = (depsRes as { ok: true; data: Array<{ id: string; state?: string }> }).data;
+      expect(deps).toHaveLength(1);
+      expect(deps[0]!.state).toBeDefined();
+    });
   });
 });

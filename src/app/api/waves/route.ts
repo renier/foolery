@@ -9,7 +9,7 @@ import type {
   WaveReadiness,
   WaveSummary,
 } from "@/lib/types";
-import { beatInFinalCut, workflowDescriptorById } from "@/lib/workflows";
+import { beatInFinalCut, isTerminalState, workflowDescriptorById } from "@/lib/workflows";
 import { displayBeatLabel } from "@/lib/beat-display";
 
 interface DepEdge {
@@ -200,6 +200,7 @@ export async function GET(request: NextRequest) {
     if (result.status === "fulfilled" && result.value.ok && result.value.data) {
       for (const dep of result.value.data) {
         if (dep.dependency_type !== "blocks") continue;
+        if (dep.state && isTerminalState(dep.state)) continue;
         const blocker = dep.id;
         const blocked = beats[index]?.id;
         if (!blocker || !blocked) continue;

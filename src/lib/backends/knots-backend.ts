@@ -37,6 +37,7 @@ import * as knots from "@/lib/knots";
 import {
   deriveWorkflowRuntimeState,
   inferWorkflowMode,
+  isTerminalState,
   normalizeStateForWorkflow,
   profileDisplayName,
   resolveStep,
@@ -296,8 +297,14 @@ function deriveParentId(
   );
 }
 
-function isBlockedByEdges(id: string, edges: KnotEdge[]): boolean {
-  return edges.some((edge) => edge.kind === "blocked_by" && edge.src === id);
+function isBlockedByEdges(id: string, edges: KnotEdge[], beatMap?: Map<string, Beat>): boolean {
+  return edges.some((edge) => {
+    if (edge.kind !== "blocked_by" || edge.src !== id) return false;
+    if (!beatMap) return true;
+    const blocker = beatMap.get(edge.dst);
+    if (!blocker) return true;
+    return !isTerminalState(blocker.state);
+  });
 }
 
 function normalizeOwners(profile: KnotProfileDefinition): MemoryWorkflowOwners {
@@ -822,11 +829,14 @@ export class KnotsBackend implements BackendPort {
     const builtResult = await this.buildBeatsForRepo(rp);
     if (!builtResult.ok) return builtResult;
 
-    const beats = (builtResult.data ?? []).filter((beat) => {
+    const allBeats = builtResult.data ?? [];
+    const beatMap = new Map(allBeats.map((b) => [b.id, b]));
+
+    const beats = allBeats.filter((beat) => {
       if (!beat.isAgentClaimable) return false;
       const cached = this.edgeCache.get(this.edgeCacheKey(beat.id, rp));
       const edges = cached?.edges ?? [];
-      return !isBlockedByEdges(beat.id, edges);
+      return !isBlockedByEdges(beat.id, edges, beatMap);
     });
 
     return ok(applyFilters(beats, filters));
@@ -1209,18 +1219,22 @@ export class KnotsBackend implements BackendPort {
     // Enrich deps with linked knot aliases
     const uniqueLinkedIds = [...new Set(deps.map((d) => d.id))];
     const aliasMap = new Map<string, string[]>();
+    const stateMap = new Map<string, string>();
     await Promise.allSettled(
       uniqueLinkedIds.map(async (linkedId) => {
         const linkedKnot = fromKnots(await knots.showKnot(linkedId, rp));
         if (linkedKnot.ok && linkedKnot.data) {
           const a = collectAliases(linkedKnot.data);
           if (a.length) aliasMap.set(linkedId, a);
+          if (linkedKnot.data.state) stateMap.set(linkedId, linkedKnot.data.state);
         }
       }),
     );
     for (const dep of deps) {
       const linkedAliases = aliasMap.get(dep.id);
       if (linkedAliases?.length) dep.aliases = linkedAliases;
+      const linkedState = stateMap.get(dep.id);
+      if (linkedState) dep.state = linkedState;
     }
 
     return ok(deps);

@@ -29,6 +29,7 @@ import {
   beatInFinalCut,
   beatInRetake,
   isRollbackTransition,
+  isTerminalState,
   WF_STATE_LABEL_PREFIX,
   WF_PROFILE_LABEL_PREFIX,
 } from "@/lib/workflows";
@@ -800,5 +801,42 @@ describe("isRollbackTransition", () => {
     expect(isRollbackTransition("unknown", "planning")).toBe(false);
     expect(isRollbackTransition("planning", "unknown")).toBe(false);
     expect(isRollbackTransition("deferred", "planning")).toBe(false);
+  });
+});
+
+describe("isTerminalState", () => {
+  it("returns true for shipped, abandoned, closed", () => {
+    expect(isTerminalState("shipped")).toBe(true);
+    expect(isTerminalState("abandoned")).toBe(true);
+    expect(isTerminalState("closed")).toBe(true);
+  });
+
+  it("returns true for legacy terminal states (done, approved)", () => {
+    expect(isTerminalState("done")).toBe(true);
+    expect(isTerminalState("approved")).toBe(true);
+  });
+
+  it("returns false for active workflow states", () => {
+    expect(isTerminalState("ready_for_planning")).toBe(false);
+    expect(isTerminalState("planning")).toBe(false);
+    expect(isTerminalState("implementation")).toBe(false);
+    expect(isTerminalState("ready_for_implementation")).toBe(false);
+  });
+
+  it("returns false for deferred", () => {
+    expect(isTerminalState("deferred")).toBe(false);
+  });
+
+  it("returns false for unknown states", () => {
+    expect(isTerminalState("some_random_state")).toBe(false);
+  });
+
+  it("respects custom workflow terminal states", () => {
+    const customWorkflow = {
+      terminalStates: ["completed", "cancelled"],
+    } as MemoryWorkflowDescriptor;
+    expect(isTerminalState("completed", customWorkflow)).toBe(true);
+    expect(isTerminalState("cancelled", customWorkflow)).toBe(true);
+    expect(isTerminalState("shipped", customWorkflow)).toBe(true);
   });
 });

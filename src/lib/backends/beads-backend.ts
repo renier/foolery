@@ -36,6 +36,7 @@ import {
   builtinWorkflowDescriptors,
   deriveWorkflowRuntimeState,
   forwardTransitionTarget,
+  isTerminalState,
   mapStatusToDefaultWorkflowState,
   normalizeStateForWorkflow,
   resolveStep,
@@ -187,7 +188,7 @@ export class BeadsBackend implements BackendPort {
   ): Promise<BackendResult<Beat[]>> {
     const rp = this.resolvePath(repoPath);
     const entry = await this.ensureLoaded(rp);
-    const blockedIds = new Set(entry.deps.map((d) => d.blockedId));
+    const blockedIds = activelyBlockedIds(entry.beads, entry.deps);
     let items = Array.from(entry.beads.values()).filter(
       (b) => resolveStep(b.state)?.phase === StepPhase.Queued && !blockedIds.has(b.id) && !b.requiresHumanAction,
     );
@@ -373,13 +374,18 @@ export class BeadsBackend implements BackendPort {
     if (options?.type && options.type !== "blocks") {
       matches = [];
     }
-    const result: BeatDependency[] = matches.map((d) => ({
-      id: d.blockerId === id ? d.blockedId : d.blockerId,
-      aliases: entry.beads.get(d.blockerId === id ? d.blockedId : d.blockerId)?.aliases,
-      type: "blocks",
-      source: d.blockerId,
-      target: d.blockedId,
-    }));
+    const result: BeatDependency[] = matches.map((d) => {
+      const linkedId = d.blockerId === id ? d.blockedId : d.blockerId;
+      const linkedBeat = entry.beads.get(linkedId);
+      return {
+        id: linkedId,
+        aliases: linkedBeat?.aliases,
+        type: "blocks",
+        source: d.blockerId,
+        target: d.blockedId,
+        state: linkedBeat?.state,
+      };
+    });
     return ok(result);
   }
 
@@ -529,6 +535,16 @@ export class BeadsBackend implements BackendPort {
 }
 
 // ── Internal helpers (kept below 75 lines each) ─────────────────
+
+function activelyBlockedIds(beads: Map<string, Beat>, deps: DepRecord[]): Set<string> {
+  const blocked = new Set<string>();
+  for (const dep of deps) {
+    const blocker = beads.get(dep.blockerId);
+    if (blocker && isTerminalState(blocker.state)) continue;
+    blocked.add(dep.blockedId);
+  }
+  return blocked;
+}
 
 function shallowCloneBeat(beat: Beat): Beat {
   return { ...beat, labels: [...beat.labels] };

@@ -793,6 +793,72 @@ describe("KnotsBackend coverage: listReady with blocking edges", () => {
     expect(readyIds).toContain("R1");
     expect(readyIds).not.toContain("R2");
   });
+
+  it("unblocks beat when blocker reaches terminal state (shipped)", async () => {
+    const backend = new KnotsBackend("/repo");
+    insertKnot({ id: "TR1", title: "Ready", state: "ready_for_implementation" });
+    insertKnot({ id: "TR2", title: "Was blocked", state: "ready_for_implementation" });
+    insertKnot({ id: "TR3", title: "Shipped blocker", state: "shipped" });
+    store.edges.push({ src: "TR2", kind: "blocked_by", dst: "TR3" });
+
+    const listed = await backend.list();
+    expect(listed.ok).toBe(true);
+
+    const ready = await backend.listReady();
+    expect(ready.ok).toBe(true);
+    const readyIds = ready.data?.map((b) => b.id);
+    expect(readyIds).toContain("TR1");
+    expect(readyIds).toContain("TR2");
+  });
+
+  it("unblocks beat when blocker reaches terminal state (abandoned)", async () => {
+    const backend = new KnotsBackend("/repo");
+    insertKnot({ id: "TA1", title: "Was blocked", state: "ready_for_implementation" });
+    insertKnot({ id: "TA2", title: "Abandoned blocker", state: "abandoned" });
+    store.edges.push({ src: "TA1", kind: "blocked_by", dst: "TA2" });
+
+    const listed = await backend.list();
+    expect(listed.ok).toBe(true);
+
+    const ready = await backend.listReady();
+    expect(ready.ok).toBe(true);
+    const readyIds = ready.data?.map((b) => b.id);
+    expect(readyIds).toContain("TA1");
+  });
+
+  it("stays blocked when only some blockers are terminal", async () => {
+    const backend = new KnotsBackend("/repo");
+    insertKnot({ id: "PM1", title: "Blocked", state: "ready_for_implementation" });
+    insertKnot({ id: "PM2", title: "Shipped blocker", state: "shipped" });
+    insertKnot({ id: "PM3", title: "Active blocker", state: "implementation" });
+    store.edges.push({ src: "PM1", kind: "blocked_by", dst: "PM2" });
+    store.edges.push({ src: "PM1", kind: "blocked_by", dst: "PM3" });
+
+    const listed = await backend.list();
+    expect(listed.ok).toBe(true);
+
+    const ready = await backend.listReady();
+    expect(ready.ok).toBe(true);
+    const readyIds = ready.data?.map((b) => b.id);
+    expect(readyIds).not.toContain("PM1");
+  });
+
+  it("unblocks when all blockers are terminal", async () => {
+    const backend = new KnotsBackend("/repo");
+    insertKnot({ id: "AB1", title: "Blocked", state: "ready_for_implementation" });
+    insertKnot({ id: "AB2", title: "Shipped blocker", state: "shipped" });
+    insertKnot({ id: "AB3", title: "Closed blocker", state: "closed" });
+    store.edges.push({ src: "AB1", kind: "blocked_by", dst: "AB2" });
+    store.edges.push({ src: "AB1", kind: "blocked_by", dst: "AB3" });
+
+    const listed = await backend.list();
+    expect(listed.ok).toBe(true);
+
+    const ready = await backend.listReady();
+    expect(ready.ok).toBe(true);
+    const readyIds = ready.data?.map((b) => b.id);
+    expect(readyIds).toContain("AB1");
+  });
 });
 
 describe("KnotsBackend coverage: update with parent manipulation", () => {
