@@ -8,6 +8,7 @@ import type {
   AgentHistorySession,
 } from "@/lib/agent-history-types";
 import { fetchMessageTypeIndex } from "@/lib/agent-message-type-api";
+import { Switch } from "@/components/ui/switch";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -94,12 +95,14 @@ export interface InteractionPickerState {
   selectedInteraction: string | null;
   messageTypeFilters: Set<string>;
   workflowStepFilters: Set<WorkflowStepFilterId>;
+  thinkingDetailVisible: boolean;
   availableMessageTypes: string[];
   availableWorkflowStepFilters: readonly WorkflowStepFilterOption[];
   isIndexLoading: boolean;
   selectInteraction: (id: string) => void;
   toggleTypeFilter: (type: string) => void;
   toggleWorkflowStepFilter: (stepId: WorkflowStepFilterId) => void;
+  toggleThinkingDetail: () => void;
   clearFilters: () => void;
   entryRefCallback: (id: string, node: HTMLDivElement | null) => void;
   highlightedEntryId: string | null;
@@ -171,6 +174,7 @@ export function useInteractionPicker(
   const [workflowStepFilters, setWorkflowStepFilters] = useState<
     Set<WorkflowStepFilterId>
   >(new Set());
+  const [thinkingDetailVisible, setThinkingDetailVisible] = useState(false);
 
   // Fetch message type index
   const typeIndexQuery = useQuery({
@@ -286,6 +290,10 @@ export function useInteractionPicker(
     setWorkflowStepFilters(new Set());
   }, []);
 
+  const toggleThinkingDetail = useCallback(() => {
+    setThinkingDetailVisible((prev) => !prev);
+  }, []);
+
   const sessionMatchesWorkflowFilter = useCallback(
     (session: AgentHistorySession): boolean => {
       if (workflowStepFilters.size === 0) return true;
@@ -314,20 +322,29 @@ export function useInteractionPicker(
         return false;
       }
 
-      if (messageTypeFilters.size === 0) return true;
       if (entry.kind !== "response") return true; // always show non-response
       if (!entry.raw) return false;
+
       try {
         const parsed = JSON.parse(entry.raw.trim());
-        return (
-          typeof parsed.type === "string" &&
-          messageTypeFilters.has(parsed.type)
-        );
+        const type = typeof parsed.type === "string" ? parsed.type : "";
+
+        // Explicit message type filters take precedence
+        if (messageTypeFilters.size > 0) {
+          return messageTypeFilters.has(type);
+        }
+
+        // When thinking detail is hidden, suppress tool results and system events
+        if (!thinkingDetailVisible && (type === "user" || type === "system")) {
+          return false;
+        }
+
+        return true;
       } catch {
         return false;
       }
     },
-    [messageTypeFilters, sessionMatchesWorkflowFilter],
+    [messageTypeFilters, thinkingDetailVisible, sessionMatchesWorkflowFilter],
   );
 
   // Reset on session change
@@ -342,12 +359,14 @@ export function useInteractionPicker(
     selectedInteraction,
     messageTypeFilters,
     workflowStepFilters,
+    thinkingDetailVisible,
     availableMessageTypes,
     availableWorkflowStepFilters,
     isIndexLoading: typeIndexQuery.isLoading,
     selectInteraction,
     toggleTypeFilter,
     toggleWorkflowStepFilter,
+    toggleThinkingDetail,
     clearFilters,
     entryRefCallback,
     highlightedEntryId,
@@ -414,6 +433,17 @@ export function InteractionPicker({
         setDropdownOpen={setFilterDropdownOpen}
         picker={picker}
       />
+
+      <span className="text-slate-600">|</span>
+
+      <label className="inline-flex items-center gap-1.5">
+        <span className="text-[11px] text-slate-400">Detail</span>
+        <Switch
+          checked={picker.thinkingDetailVisible}
+          onCheckedChange={picker.toggleThinkingDetail}
+          className="data-[state=checked]:bg-cyan-600 data-[state=unchecked]:bg-slate-600"
+        />
+      </label>
 
       <span className="ml-auto text-[11px] text-slate-400">
         {picker.interactions.length} interaction
