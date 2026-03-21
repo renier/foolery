@@ -21,6 +21,8 @@ import {
 import { useTerminalStore, getActiveTerminal } from "@/stores/terminal-store";
 import { abortSession, startSession, listSessions } from "@/lib/terminal-api";
 import { sessionConnections } from "@/lib/session-connection-manager";
+import { createDetailFilter } from "@/lib/terminal-detail-filter";
+import { Switch } from "@/components/ui/switch";
 import {
   detectVendor,
   useAgentInfo,
@@ -181,6 +183,8 @@ export function TerminalPanel() {
   const recentOutputBySession = useRef<Map<string, string>>(new Map());
   const failureHintBySession = useRef<Map<string, TerminalFailureGuidance>>(new Map());
   const hasRehydrated = useRef(false);
+  const [thinkingDetailVisible, setThinkingDetailVisible] = useState(false);
+  const detailFilterRef = useRef(createDetailFilter());
   const [completionAnimationEnabled, setCompletionAnimationEnabled] = useState(false);
   const [tabStripState, setTabStripState] = useState(() =>
     resolveTerminalTabStripState({ scrollLeft: 0, scrollWidth: 0, clientWidth: 0 }),
@@ -524,12 +528,25 @@ export function TerminalPanel() {
         toast.info("Retry launched with take recovery prompt.");
       };
 
+      // Reset the detail filter for a fresh replay
+      const detailFilter = detailFilterRef.current;
+      detailFilter.reset();
+
+      const writeFiltered = (data: string) => {
+        if (thinkingDetailVisible) {
+          liveTerm.write(data);
+        } else {
+          const filtered = detailFilter.filter(data);
+          if (filtered) liveTerm.write(filtered);
+        }
+      };
+
       // Replay buffered output from the connection manager
       const buffer = sessionConnections.getBuffer(sessionId);
       for (const entry of buffer) {
         if (entry.type === "stdout") {
           appendRecentOutput(entry.data);
-          liveTerm.write(entry.data);
+          writeFiltered(entry.data);
         } else if (entry.type === "stderr") {
           appendRecentOutput(entry.data);
           liveTerm.write(`\x1b[31m${entry.data}\x1b[0m`);
@@ -550,7 +567,7 @@ export function TerminalPanel() {
         if (disposed) return;
         if (event.type === "stdout") {
           appendRecentOutput(event.data);
-          liveTerm.write(event.data);
+          writeFiltered(event.data);
         } else if (event.type === "stderr") {
           appendRecentOutput(event.data);
           liveTerm.write(`\x1b[31m${event.data}\x1b[0m`);
@@ -584,6 +601,7 @@ export function TerminalPanel() {
     removeTerminal,
     upsertTerminal,
     agentInfo?.command,
+    thinkingDetailVisible,
   ]);
 
   useEffect(() => {
@@ -817,6 +835,14 @@ export function TerminalPanel() {
         </div>
 
         <div className="flex items-center gap-1">
+          <label className="inline-flex items-center gap-1.5 px-1">
+            <span className="text-[11px] text-white/50">Detail</span>
+            <Switch
+              checked={thinkingDetailVisible}
+              onCheckedChange={setThinkingDetailVisible}
+              className="data-[state=checked]:bg-cyan-600 data-[state=unchecked]:bg-white/20"
+            />
+          </label>
           <button
             type="button"
             className="rounded p-1 text-white/60 hover:bg-white/10 hover:text-white"
