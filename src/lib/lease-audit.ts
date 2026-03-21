@@ -1,6 +1,7 @@
 import { appendFile, mkdir, readFile, readdir } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { resolveInteractionLogRoot } from "@/lib/interaction-logger";
+import { inferCanonicalRepoPath, trimPathSeparators } from "@/lib/git-worktree";
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -72,18 +73,9 @@ const AUDIT_FILENAME = "lease-audit.jsonl";
 const LEASE_LIFECYCLE_FILENAME = "leases.jsonl";
 export const LEASES_SLUG = "_leases";
 const DEV_LOG_DIRNAME = ".foolery-logs";
-const SIBLING_WORKTREE_PATTERN = /^(.*)-wt-[^\\/]+$/u;
-const CLAUDE_WORKTREES_SEGMENT =
-  /^(.*?)[\\/]\.claude[\\/]worktrees[\\/][^\\/]+(?:[\\/].*)?$/u;
-const KNOTS_WORKTREE_SEGMENT =
-  /^(.*?)[\\/]\.knots[\\/]_worktree(?:[\\/].*)?$/u;
 const leaseLifecycleWriteQueue = new Map<string, Promise<void>>();
 
 // ── Path helpers ───────────────────────────────────────────────
-
-function trimPathSeparators(value: string): string {
-  return value.replace(/[\\/]+$/u, "");
-}
 
 function auditFilePath(logRoot: string): string {
   return join(logRoot, AUDIT_FILENAME);
@@ -115,26 +107,7 @@ function enqueueWrite(filePath: string, task: () => Promise<void>): Promise<void
   return next;
 }
 
-// ── Worktree discovery (mirrors agent-history.ts) ──────────────
-
-function inferCanonicalRepoPath(repoPath: string): string | null {
-  const trimmed = trimPathSeparators(repoPath.trim());
-  if (!trimmed) return null;
-
-  const claudeMatch = trimmed.match(CLAUDE_WORKTREES_SEGMENT);
-  if (claudeMatch?.[1]) return trimPathSeparators(claudeMatch[1]);
-
-  const knotsMatch = trimmed.match(KNOTS_WORKTREE_SEGMENT);
-  if (knotsMatch?.[1]) return trimPathSeparators(knotsMatch[1]);
-
-  const baseName = basename(trimmed);
-  const siblingMatch = baseName.match(SIBLING_WORKTREE_PATTERN);
-  if (siblingMatch?.[1]) {
-    return trimPathSeparators(join(dirname(trimmed), siblingMatch[1]));
-  }
-
-  return null;
-}
+// ── Worktree discovery ──────────────────────────────────────
 
 async function listSubdirectories(dir: string): Promise<string[]> {
   try {

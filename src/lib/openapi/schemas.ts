@@ -33,6 +33,7 @@ export const componentSchemas = {
       updated: { type: "string", format: "date-time" },
       closed: { type: "string", format: "date-time" },
       metadata: { type: "object", additionalProperties: true },
+      branch: { type: "string", description: "Git branch name assigned to this beat for worktree isolation" },
     },
   },
 
@@ -130,6 +131,8 @@ export const componentSchemas = {
       beatTitle: { type: "string" },
       beatIds: { type: "array", items: { type: "string" } },
       repoPath: { type: "string" },
+      beatBranch: { type: "string", description: "Git branch name for beat isolation worktree" },
+      beatWorktreePath: { type: "string", description: "Filesystem path to the beat worktree" },
       agentName: { type: "string" },
       agentModel: { type: "string" },
       agentVersion: { type: "string" },

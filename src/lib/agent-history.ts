@@ -5,6 +5,7 @@ import { gunzip as gunzipCallback } from "node:zlib";
 import { promisify } from "node:util";
 import { naturalCompare } from "@/lib/beat-sort";
 import { resolveInteractionLogRoot } from "@/lib/interaction-logger";
+import { inferCanonicalRepoPath, trimPathSeparators } from "@/lib/git-worktree";
 import type {
   AgentHistoryBeatSummary,
   AgentHistoryEntry,
@@ -18,9 +19,6 @@ const MAX_LINE_CHARS = 120_000;
 const DEV_LOG_DIRNAME = ".foolery-logs";
 const DOT_GIT = ".git";
 const GITDIR_PREFIX = "gitdir:";
-const CLAUDE_WORKTREES_SEGMENT = /^(.*?)[\\/]\.claude[\\/]worktrees[\\/][^\\/]+(?:[\\/].*)?$/u;
-const KNOTS_WORKTREE_SEGMENT = /^(.*?)[\\/]\.knots[\\/]_worktree(?:[\\/].*)?$/u;
-const SIBLING_WORKTREE_PATTERN = /^(.*)-wt-[^\\/]+$/u;
 
 interface AgentHistoryQuery {
   repoPath?: string;
@@ -83,29 +81,6 @@ function devLogRootForRepoPath(repoPath: string): string | null {
   return join(trimmed, DEV_LOG_DIRNAME);
 }
 
-function inferCanonicalRepoPath(repoPath: string): string | null {
-  const trimmed = trimPathSeparators(repoPath.trim());
-  if (!trimmed) return null;
-
-  const claudeMatch = trimmed.match(CLAUDE_WORKTREES_SEGMENT);
-  if (claudeMatch?.[1]) {
-    return trimPathSeparators(claudeMatch[1]);
-  }
-
-  const knotsWorktreeMatch = trimmed.match(KNOTS_WORKTREE_SEGMENT);
-  if (knotsWorktreeMatch?.[1]) {
-    return trimPathSeparators(knotsWorktreeMatch[1]);
-  }
-
-  const baseName = basename(trimmed);
-  const siblingMatch = baseName.match(SIBLING_WORKTREE_PATTERN);
-  if (siblingMatch?.[1]) {
-    return trimPathSeparators(join(dirname(trimmed), siblingMatch[1]));
-  }
-
-  return null;
-}
-
 async function listSubdirectories(dir: string): Promise<string[]> {
   try {
     const entries = await readdir(dir, { withFileTypes: true, encoding: "utf8" });
@@ -145,10 +120,6 @@ async function discoverRelatedRepoPaths(repoPath: string): Promise<string[]> {
   }
 
   return Array.from(related.values());
-}
-
-function trimPathSeparators(value: string): string {
-  return value.replace(/[\\/]+$/u, "");
 }
 
 function pathsSharePrefix(a: string, b: string): boolean {

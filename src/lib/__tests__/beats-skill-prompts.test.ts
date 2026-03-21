@@ -72,4 +72,22 @@ describe("getBeatsSkillPrompt", () => {
       }
     });
   }
+
+  it("shipment prompt includes branch-aware merge instructions", () => {
+    const prompt = getBeatsSkillPrompt(WorkflowStep.Shipment, beatId, "shipment");
+
+    expect(prompt).toContain("git branch --show-current");
+    expect(prompt).toContain("git fetch origin && git rebase origin/main");
+    expect(prompt).toContain("git checkout main && git merge");
+    expect(prompt).toContain("--no-ff");
+    expect(prompt).toContain("git push origin main");
+    expect(prompt).toContain("ready_for_implementation");
+  });
+
+  it("shipment review prompt verifies code is on main", () => {
+    const prompt = getBeatsSkillPrompt(WorkflowStep.ShipmentReview, beatId, "shipment_review");
+
+    expect(prompt).toContain("committed to `main`");
+    expect(prompt).toContain("pushed to the remote");
+  });
 });

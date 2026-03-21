@@ -8,6 +8,8 @@
  */
 
 import { listRepos } from "@/lib/registry";
+import { access } from "node:fs/promises";
+import { constants } from "node:fs";
 import { getBackend } from "@/lib/backend-instance";
 import { resolveMemoryManagerType, rollbackBeatState } from "@/lib/memory-manager-commands";
 import {
@@ -18,6 +20,7 @@ import {
   defaultWorkflowDescriptor,
   isQueueOrTerminal,
 } from "@/lib/workflows";
+import { removeBeatWorktree, beatWorktreePath } from "@/lib/git-worktree";
 import type { Beat, MemoryWorkflowDescriptor } from "@/lib/types";
 
 const TAG = "[orphan-reconciler]";
@@ -95,6 +98,26 @@ async function reconcileRepo(
       const message = err instanceof Error ? err.message : String(err);
       console.error(`${TAG} rollback failed for ${beat.id} in ${repoPath}: ${message}`);
       result.errors.push({ repoPath, beatId: beat.id, message });
+    }
+  }
+
+  // Clean up orphaned worktrees for beats in terminal states.
+  // Only attempt removal for beats that actually have a worktree directory on disk.
+  const terminalBeats = listResult.data.filter((beat) =>
+    beat.state === "shipped" || beat.state === "abandoned" || beat.state === "closed",
+  );
+  for (const beat of terminalBeats) {
+    const wtPath = beatWorktreePath(repoPath, beat.id);
+    try {
+      await access(wtPath, constants.F_OK);
+    } catch {
+      continue;
+    }
+    try {
+      await removeBeatWorktree(repoPath, beat.id);
+      console.log(`${TAG} cleaned up orphaned worktree for terminal beat ${beat.id}`);
+    } catch (err) {
+      console.warn(`${TAG} worktree cleanup failed for ${beat.id}: ${err}`);
     }
   }
 }

@@ -20,10 +20,15 @@ export interface StdinPromptTerminalFailureGuidance extends TerminalFailureGuida
   kind: "stdin_prompt";
 }
 
+export interface MergeConflictTerminalFailureGuidance extends TerminalFailureGuidanceBase {
+  kind: "merge_conflict";
+}
+
 export type TerminalFailureGuidance =
   | AuthTerminalFailureGuidance
   | MissingCwdTerminalFailureGuidance
-  | StdinPromptTerminalFailureGuidance;
+  | StdinPromptTerminalFailureGuidance
+  | MergeConflictTerminalFailureGuidance;
 
 const AUTH_FAILURE_PATTERNS: RegExp[] = [
   /\boauth token has expired\b/i,
@@ -47,6 +52,15 @@ const SESSION_ID_PATTERNS: RegExp[] = [
 ];
 
 const ANSI_ESCAPE_PATTERN = /\u001b\[[0-9;]*m/g;
+
+const MERGE_CONFLICT_PATTERNS: RegExp[] = [
+  /\bmerge conflict\b/i,
+  /\bconflict(?:s)?\s+(?:in|during)\s+merge\b/i,
+  /\bautomatic merge failed\b/i,
+  /\bfix conflicts and then commit\b/i,
+  /\bCONFLICT \(content\)/i,
+  /\brebase.*conflict/i,
+];
 
 export function detectAgentVendor(command: string | undefined): AgentVendor {
   const lower = (command ?? "").toLowerCase();
@@ -176,7 +190,21 @@ export function classifyTerminalFailure(
     };
   }
 
-  if (!isAuthFailure(normalized)) return null;
+  if (!isAuthFailure(normalized)) {
+    if (MERGE_CONFLICT_PATTERNS.some((pattern) => pattern.test(normalized))) {
+      return {
+        kind: "merge_conflict",
+        title: "Merge conflict during beat branch integration",
+        toast: "Beat branch merge failed due to conflicts. The beat will be rolled back to implementation.",
+        steps: [
+          "The agent encountered merge conflicts when trying to merge the beat branch into main.",
+          "The beat has been (or should be) rolled back to ready_for_implementation.",
+          "Retry the Take action — the agent will re-implement on a fresh rebase from main.",
+        ],
+      };
+    }
+    return null;
+  }
 
   return {
     kind: "auth",

@@ -57,6 +57,9 @@ vi.mock("node:child_process", () => ({
   exec: vi.fn((_cmd: string, _opts: unknown, cb?: (err: Error | null, result: { stdout: string; stderr: string }) => void) => {
     if (cb) cb(null, { stdout: "", stderr: "" });
   }),
+  execFile: vi.fn((_file: string, _args: string[], _opts: unknown, cb?: (err: Error | null, stdout: string, stderr: string) => void) => {
+    if (cb) cb(null, "", "");
+  }),
 }));
 
 vi.mock("@/lib/backend-instance", () => ({

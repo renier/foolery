@@ -9,6 +9,13 @@ import {
   noopInteractionLog,
   type InteractionLog,
 } from "@/lib/interaction-logger";
+import {
+  createBeatWorktree,
+  removeBeatWorktree,
+  inferCanonicalRepoPath,
+  beatWorktreePath as computeBeatWorktreePath,
+  beatBranchName as computeBeatBranchName,
+} from "@/lib/git-worktree";
 
 import { regroomAncestors } from "@/lib/regroom";
 import { getActionAgent, getAgentById, getStepAgent, loadSettings } from "@/lib/settings";
@@ -139,6 +146,16 @@ function generateId(): string {
   return `term-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function getActiveBeatSessionsForRepo(repoPath: string): SessionEntry[] {
+  const canonical = inferCanonicalRepoPath(repoPath) ?? repoPath;
+  return Array.from(sessions.values()).filter((e) => {
+    if (e.session.status !== "running") return false;
+    const sessionRepo = e.session.repoPath ?? "";
+    const sessionCanonical = inferCanonicalRepoPath(sessionRepo) ?? sessionRepo;
+    return sessionCanonical === canonical;
+  });
+}
+
 function toObject(value: unknown): JsonObject | null {
   if (!value || typeof value !== "object") return null;
   return value as JsonObject;
@@ -255,6 +272,7 @@ function buildSingleBeatCompletionFollowUp(
   return [
     "Ship completion follow-up:",
     `Confirm that changes for ${target.id} are merged and pushed according to your normal shipping guidelines.`,
+    "If you are on a beat branch (not `main`), rebase onto `main`, merge with `--no-ff`, and push.",
     "Do not ask for another follow-up prompt until merge/push confirmation is done (or blocked by a hard error).",
     ...buildShipFollowUpBoundaryLines("single"),
     ...buildSingleTargetFollowUpLines(target, memoryManagerType),
@@ -681,11 +699,42 @@ export async function createSession(
 
   const id = generateId();
 
+  // ── Beat branch isolation via worktree ──────────────────
+  // When other beats are already running on the same repo, create a
+  // dedicated worktree so this beat's work happens on an isolated branch.
+  // Also reuse an existing worktree if this beat is re-entered after rollback.
+  let beatBranch: string | undefined;
+  let beatWorktreePath: string | undefined;
+  if (!effectiveParent && !customPrompt) {
+    const existingWorktree = computeBeatWorktreePath(resolvedRepoPath, beatId);
+    const worktreeExists = existsSync(existingWorktree);
+
+    if (worktreeExists) {
+      beatBranch = computeBeatBranchName(resolvedRepoPath, beatId);
+      beatWorktreePath = existingWorktree;
+      console.log(`[terminal-manager] reusing existing worktree: branch=${beatBranch} path=${beatWorktreePath}`);
+    } else {
+      const otherSessions = getActiveBeatSessionsForRepo(resolvedRepoPath);
+      if (otherSessions.length > 0) {
+        const worktreeResult = await createBeatWorktree(resolvedRepoPath, beatId);
+        if (worktreeResult.ok) {
+          beatBranch = worktreeResult.branchName;
+          beatWorktreePath = worktreeResult.worktreePath;
+          console.log(`[terminal-manager] worktree created: branch=${beatBranch} path=${beatWorktreePath}`);
+        } else {
+          console.warn(`[terminal-manager] worktree creation failed, falling back to shared cwd: ${worktreeResult.error}`);
+        }
+      }
+    }
+  }
+
   const session: TerminalSession = {
     id,
     beatId: beat.id,
     beatTitle: beat.title,
     repoPath: resolvedRepoPath,
+    beatBranch,
+    beatWorktreePath,
     agentName: agentDisplayName(agent),
     agentModel: agent.model,
     agentVersion: agent.version,
@@ -788,7 +837,7 @@ export async function createSession(
     prompt = wrapExecutionPrompt(taskPrompt, effectiveParent ? "scene" : "take");
   }
 
-  const cwd = resolvedRepoPath;
+  const cwd = beatWorktreePath ?? resolvedRepoPath;
 
   const pushEvent = (evt: TerminalEvent) => {
     if (buffer.length >= MAX_BUFFER) buffer.shift();
@@ -873,6 +922,24 @@ export async function createSession(
       exitCode === 0 ? "success" : "warning",
       { exitCode, finalStatus: session.status },
     );
+
+    // Clean up beat worktree when the session ends with a terminal beat state.
+    // Deferred so it doesn't block the session finish path.
+    if (beatWorktreePath) {
+      (async () => {
+        try {
+          const currentResult = await getBackend().get(beatId, repoPath);
+          const state = currentResult.ok ? currentResult.data?.state : undefined;
+          const isTerminal = state === "shipped" || state === "abandoned" || state === "closed";
+          if (isTerminal) {
+            await removeBeatWorktree(resolvedRepoPath, beatId);
+            console.log(`[terminal-manager] cleaned up worktree for shipped beat ${beatId}`);
+          }
+        } catch (err) {
+          console.warn(`[terminal-manager] worktree cleanup failed for ${beatId}:`, err);
+        }
+      })();
+    }
 
     setTimeout(() => { emitter.removeAllListeners(); }, 2000);
     setTimeout(() => { buffer.length = 0; sessions.delete(id); }, CLEANUP_DELAY_MS);

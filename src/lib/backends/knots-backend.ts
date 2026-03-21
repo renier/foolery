@@ -637,11 +637,19 @@ export const BUILTIN_SKILL_PROMPTS: Readonly<Record<string, string>> = Object.fr
 - Implementation work from a prior phase
 
 ## Actions
-1. Check if implementation code is already committed to \`main\`. If so, skip to Completion.
-2. Check if implementation code is committed to a feature branch. If so, merge the branch into \`main\`, push, then skip to Completion.
-3. Search the repository for committed code that references this knot ID or the problem description. If matching commits are found, go back to step 1.
-4. If no committed code is found anywhere, roll back:
-   \`kno update <id> --status ready_for_implementation --add-note "No committed implementation found; rolling back to implementation."\`
+1. Check which branch you are on with \`git branch --show-current\`.
+2. If you are NOT on \`main\`:
+   a. Ensure all implementation work is committed to the current beat branch.
+   b. Rebase onto main: \`git fetch origin && git rebase origin/main\`.
+   c. If there are merge conflicts, resolve them. If unresolvable, roll back:
+      \`kno update <id> --status ready_for_implementation --add-note "<conflict details>"\`
+   d. Switch to main and merge: \`git checkout main && git merge <beat-branch> --no-ff\`.
+   e. Push: \`git push origin main\`.
+3. If you are already on \`main\`:
+   a. Check if implementation code is already committed to \`main\`. If so, skip to Completion.
+   b. Search the repository for committed code that references this knot ID or the problem description. If matching commits are found, go back to step 3a.
+   c. If no committed code is found anywhere, roll back:
+      \`kno update <id> --status ready_for_implementation --add-note "No committed implementation found; rolling back to implementation."\`
 
 ## Output
 - Implementation code merged and pushed to \`main\`
@@ -659,9 +667,9 @@ export const BUILTIN_SKILL_PROMPTS: Readonly<Record<string, string>> = Object.fr
 - Code merged to main, CI green
 
 ## Actions
-1. Check if implementation code is committed to \`main\`. If so, skip to Completion.
-2. Check if implementation code is committed to a feature branch. If so, merge the branch into \`main\`, push, then skip to Completion.
-3. Search the repository for committed code that references this knot ID or the problem description. If matching commits are found, go back to step 1.
+1. Verify that implementation code is committed to \`main\` and pushed to the remote.
+2. If code is on a feature branch but not yet on \`main\`, merge the branch into \`main\`, push, then continue.
+3. Confirm shipment completeness: tests pass, no regressions, CI green.
 4. If no committed code is found anywhere, roll back:
    \`kno update <id> --status ready_for_implementation --add-note "No committed implementation found; rolling back to implementation."\`
 

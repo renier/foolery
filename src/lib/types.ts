@@ -88,6 +88,7 @@ export interface Beat {
   closed?: string;
   invariants?: Invariant[];
   metadata?: Record<string, unknown>;
+  branch?: string;
 }
 
 export interface BeatDependency {
@@ -141,6 +142,8 @@ export interface TerminalSession {
   beatTitle: string;
   beatIds?: string[];
   repoPath?: string;
+  beatBranch?: string;
+  beatWorktreePath?: string;
   agentName?: string;
   agentModel?: string;
   agentVersion?: string;

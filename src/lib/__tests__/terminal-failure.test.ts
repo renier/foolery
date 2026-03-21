@@ -120,4 +120,39 @@ describe("classifyTerminalFailure", () => {
     if (!result || result.kind !== "missing_cwd") return;
     expect(result.missingPath).toBe("/gone/path");
   });
+
+  it("classifies git merge conflict output as merge_conflict", () => {
+    const text = [
+      "Auto-merging src/lib/main.ts",
+      "CONFLICT (content): Merge conflict in src/lib/main.ts",
+      "Automatic merge failed; fix conflicts and then commit the result.",
+    ].join("\n");
+
+    const result = classifyTerminalFailure(text, "claude");
+    expect(result).not.toBeNull();
+    expect(result?.kind).toBe("merge_conflict");
+    expect(result?.title).toContain("Merge conflict");
+    expect(result?.steps.length).toBeGreaterThan(0);
+  });
+
+  it("classifies rebase conflict as merge_conflict", () => {
+    const text = "error: could not apply abc1234... fix: update handler\nhint: Resolve all conflicts manually, mark them as resolved with\nhint: rebase conflict detected";
+
+    const result = classifyTerminalFailure(text, "codex");
+    expect(result).not.toBeNull();
+    expect(result?.kind).toBe("merge_conflict");
+  });
+
+  it("does not classify generic errors as merge_conflict", () => {
+    const text = "Process exited with code 1 because lint failed";
+    const result = classifyTerminalFailure(text, "claude");
+    expect(result).toBeNull();
+  });
+
+  it("prefers auth failure over merge_conflict when both patterns present", () => {
+    const text = "authentication_error: OAuth token has expired. Also there was a merge conflict.";
+    const result = classifyTerminalFailure(text, "claude");
+    expect(result).not.toBeNull();
+    expect(result?.kind).toBe("auth");
+  });
 });
