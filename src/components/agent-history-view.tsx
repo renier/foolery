@@ -277,7 +277,7 @@ function SessionEntryRow({
 }) {
   if (entry.kind === "session_start") {
     return (
-      <div className="rounded border border-slate-700 bg-slate-900/80 px-2.5 py-1.5 text-[11px] text-slate-300">
+      <div className="rounded border border-slate-700 bg-slate-900/80 px-2.5 py-1.5 text-[12px] text-slate-200">
         Session started at {formatTime(entry.ts)}
       </div>
     );
@@ -285,7 +285,7 @@ function SessionEntryRow({
 
   if (entry.kind === "session_end") {
     return (
-      <div className="rounded border border-slate-700 bg-slate-900/80 px-2.5 py-1.5 text-[11px] text-slate-300">
+      <div className="rounded border border-slate-700 bg-slate-900/80 px-2.5 py-1.5 text-[12px] text-slate-200">
         Session ended at {formatTime(entry.ts)}
         {entry.status ? ` · ${entry.status}` : ""}
         {entry.exitCode !== undefined ? ` · exit ${entry.exitCode}` : ""}
@@ -296,26 +296,26 @@ function SessionEntryRow({
   if (entry.kind === "prompt") {
     const stateLabel = workflowStateBadgeLabel(entry.workflowState);
     return (
-      <div className="rounded border border-sky-500/50 bg-sky-950/35 px-2.5 py-1.5">
-        <div className="mb-1 flex flex-wrap items-center gap-2 text-[10px] text-sky-200">
-          <MessageSquareText className="size-3.5" />
+      <div className="rounded border border-sky-500/50 bg-sky-950/50 px-2.5 py-1.5">
+        <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-sky-100">
+          <MessageSquareText className="size-4" />
           <span className="font-semibold uppercase tracking-wide">App -&gt; Agent{agentLabel ? ` · ${agentLabel}` : ""}</span>
           {typeof entry.promptNumber === "number" ? (
-            <Badge variant="outline" className="border-sky-400/40 bg-sky-900/40 text-[11px] font-normal text-sky-100">
+            <Badge variant="outline" className="border-sky-400/40 bg-sky-900/40 text-[12px] font-normal text-sky-100">
               {`Prompt #${entry.promptNumber}`}
             </Badge>
           ) : null}
-          <Badge variant="outline" className="border-sky-400/40 bg-sky-900/40 text-[11px] font-normal text-sky-100">
+          <Badge variant="outline" className="border-sky-400/40 bg-sky-900/40 text-[12px] font-normal text-sky-100">
             {promptSourceLabel(entry.promptSource)}
           </Badge>
           {stateLabel ? (
-            <Badge variant="outline" className="border-sky-400/40 bg-sky-900/40 text-[11px] font-normal text-sky-100">
+            <Badge variant="outline" className="border-sky-400/40 bg-sky-900/40 text-[12px] font-normal text-sky-100">
               {stateLabel}
             </Badge>
           ) : null}
           <span>{formatTime(entry.ts)}</span>
         </div>
-        <pre className="whitespace-pre-wrap break-words font-mono text-[11px] leading-5 text-sky-100">
+        <pre className="whitespace-pre-wrap break-words font-mono text-[12px] leading-5 text-sky-100">
           {entry.prompt ?? "(empty prompt)"}
         </pre>
       </div>
@@ -327,39 +327,39 @@ function SessionEntryRow({
   const showRaw = raw.trim().length > 0 && summary.trim() !== raw.trim();
 
   return (
-    <div className="rounded border border-slate-700 bg-slate-900/60 px-2.5 py-1.5">
-      <div className="mb-1 flex flex-wrap items-center gap-2 text-[10px] text-slate-300">
-        <Bot className="size-3.5" />
+    <div className="rounded border border-slate-700 bg-slate-900/80 px-2.5 py-1.5">
+      <div className="mb-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-200">
+        <Bot className="size-4" />
         <span className="font-semibold uppercase tracking-wide text-slate-100">Agent{agentLabel ? ` · ${agentLabel}` : ""} -&gt; App</span>
         {interactionType ? (
-          <Badge variant="outline" className={`text-[11px] font-normal ${interactionTypeTone(interactionType)}`}>
+          <Badge variant="outline" className={`text-[12px] font-normal ${interactionTypeTone(interactionType)}`}>
             {interactionTypeLabel(interactionType)}
           </Badge>
         ) : null}
         {typeof precedingPrompt?.promptNumber === "number" ? (
-          <Badge variant="outline" className="border-slate-500/40 bg-slate-800/40 text-[11px] font-normal text-slate-300">
+          <Badge variant="outline" className="border-slate-500/40 bg-slate-800/40 text-[12px] font-normal text-slate-200">
             {`Prompt #${precedingPrompt.promptNumber}`}
           </Badge>
         ) : null}
         {precedingPrompt?.source ? (
-          <Badge variant="outline" className="border-slate-500/40 bg-slate-800/40 text-[11px] font-normal text-slate-300">
+          <Badge variant="outline" className="border-slate-500/40 bg-slate-800/40 text-[12px] font-normal text-slate-200">
             {promptSourceLabel(precedingPrompt.source)}
           </Badge>
         ) : null}
         {precedingPrompt?.workflowState ? (
-          <Badge variant="outline" className="border-slate-500/40 bg-slate-800/40 text-[11px] font-normal text-slate-300">
+          <Badge variant="outline" className="border-slate-500/40 bg-slate-800/40 text-[12px] font-normal text-slate-200">
             {workflowStateBadgeLabel(precedingPrompt.workflowState)}
           </Badge>
         ) : null}
         <span>{formatTime(entry.ts)}</span>
       </div>
-      <pre className="whitespace-pre-wrap break-words font-mono text-[11px] leading-5 text-slate-100">
+      <pre className="whitespace-pre-wrap break-words font-mono text-[12px] leading-5 text-slate-100">
         {summary || "(empty response)"}
       </pre>
       {showRaw ? (
-        <details className="mt-1.5 rounded border border-slate-700 bg-black/40 px-2 py-1 text-[10px]">
-          <summary className="cursor-pointer text-slate-400">Raw event</summary>
-          <pre className="mt-1 whitespace-pre-wrap break-words font-mono text-[10px] leading-5 text-slate-200">
+        <details className="mt-1.5 rounded border border-slate-700 bg-black/40 px-2 py-1 text-[11px]">
+          <summary className="cursor-pointer text-slate-300">Raw event</summary>
+          <pre className="mt-1 whitespace-pre-wrap break-words font-mono text-[11px] leading-5 text-slate-200">
             {clipDisplay(raw, 16_000)}
           </pre>
         </details>
@@ -426,22 +426,22 @@ function SessionCard({
       <header className="flex flex-wrap items-center gap-2 border-b border-slate-700 px-2.5 py-1.5">
         <Badge
           variant="outline"
-          className={`text-[11px] uppercase ${interactionTypeTone(session.interactionType)}`}
+          className={`text-[12px] uppercase ${interactionTypeTone(session.interactionType)}`}
         >
           {interactionTypeLabel(session.interactionType)}
         </Badge>
-        <Badge variant="outline" className={`text-[11px] ${statusTone(session.status)}`}>
+        <Badge variant="outline" className={`text-[12px] ${statusTone(session.status)}`}>
           {session.status ?? "unknown"}
         </Badge>
         {agentLabel ? (
-          <span className="font-mono text-[11px] text-slate-300">{agentLabel}</span>
+          <span className="font-mono text-[12px] text-slate-200">{agentLabel}</span>
         ) : null}
-        <span className="font-mono text-[11px] text-slate-400">{session.sessionId}</span>
-        <span className="ml-auto text-[11px] text-slate-400">{formatTime(session.updatedAt)}</span>
+        <span className="font-mono text-[12px] text-slate-300">{session.sessionId}</span>
+        <span className="ml-auto text-[12px] text-slate-300">{formatTime(session.updatedAt)}</span>
       </header>
       <div className="space-y-1.5 p-2.5">
         {filteredEntries.length === 0 ? (
-          <div className="rounded border border-slate-700 bg-slate-900/70 px-2.5 py-1.5 text-[11px] text-slate-300">
+          <div className="rounded border border-slate-700 bg-slate-900/70 px-2.5 py-1.5 text-[12px] text-slate-200">
             {enrichedEntries.length === 0
               ? "No log entries captured for this session."
               : "No entries match the active filters."}
@@ -1056,17 +1056,17 @@ export function AgentHistoryView() {
 
       <section className="rounded-lg border border-slate-700 bg-[#05070f] text-slate-100">
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-700 px-2.5 py-1.5">
-          <TerminalSquare className="size-3.5 text-slate-300" />
-          <p className="text-[13px] font-semibold text-slate-100">Conversation Log</p>
+          <TerminalSquare className="size-4 text-slate-200" />
+          <p className="text-[14px] font-semibold text-slate-100">Conversation Log</p>
           {loadedSummary ? (
-            <span className="max-w-[40ch] truncate text-[11px] text-slate-200">
+            <span className="max-w-[40ch] truncate text-[12px] text-slate-100">
               {loadedTitle}
             </span>
           ) : null}
           {loadedSummary ? (
             <button
               type="button"
-              className="font-mono text-[11px] text-slate-400 underline-offset-2 hover:underline"
+              className="font-mono text-[12px] text-slate-300 underline-offset-2 hover:underline"
               onClick={() => copyBeatId(loadedSummary.beatId)}
               title="Click to copy ID"
             >
@@ -1077,16 +1077,16 @@ export function AgentHistoryView() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 gap-1 px-2 text-[11px] text-slate-300 hover:text-white"
+              className="h-6 gap-1 px-2 text-[12px] text-slate-200 hover:text-white"
               onClick={() => setDebugPanelOpen((prev) => !prev)}
             >
-              <Bug className="size-3" />
+              <Bug className="size-3.5" />
               {debugPanelOpen ? "Close Debug" : "Debug"}
             </Button>
           ) : null}
           {loadedSummary ? (
-            <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-slate-400">
-              <Clock3 className="size-3" />
+            <span className="ml-auto inline-flex items-center gap-1 text-[12px] text-slate-300">
+              <Clock3 className="size-3.5" />
               Last updated {relativeTime(loadedSummary.lastWorkedAt)}
             </span>
           ) : null}
@@ -1097,8 +1097,8 @@ export function AgentHistoryView() {
         ) : null}
 
         {loadedSummary && sessions.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-700 px-2.5 py-2 text-[11px]">
-            <span className="font-medium text-slate-300">Conversation</span>
+          <div className="flex flex-wrap items-center gap-2 border-b border-slate-700 px-2.5 py-2 text-[12px]">
+            <span className="font-medium text-slate-200">Conversation</span>
             {sessions.map((session, index) => {
               const selected = session.sessionId === selectedDebugSession?.sessionId;
               return (
@@ -1119,7 +1119,7 @@ export function AgentHistoryView() {
               );
             })}
             {selectedDebugSession ? (
-              <span className="ml-auto text-[11px] text-slate-400">
+              <span className="ml-auto text-[12px] text-slate-300">
                 Debug target: {selectedDebugSession.sessionId}
               </span>
             ) : null}
@@ -1142,30 +1142,30 @@ export function AgentHistoryView() {
             )}
           >
             {!loadedSummary ? (
-              <div className="rounded border border-dashed border-slate-700 px-3 py-6 text-center text-[11px] text-slate-400">
+              <div className="rounded border border-dashed border-slate-700 px-3 py-6 text-center text-[12px] text-slate-300">
                 Use click or Enter on a focused beat to load app and agent logs.
               </div>
             ) : sessionsQuery.isLoading && sessions.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 rounded border border-dashed border-slate-700 px-3 py-6 text-[11px] text-slate-400">
+              <div className="flex flex-col items-center gap-2 rounded border border-dashed border-slate-700 px-3 py-6 text-[12px] text-slate-300">
                 <Spinner className="size-4" />
                 <span>Loading logs for {stripIdPrefix(loadedSummary.beatId)}…</span>
-                <span className="text-[10px]">prompt histories are BIG, please be patient :-)</span>
+                <span className="text-[11px]">prompt histories are BIG, please be patient :-)</span>
               </div>
             ) : sessions.length === 0 ? (
-              <div className="rounded border border-dashed border-slate-700 px-3 py-6 text-center text-[11px] text-slate-400">
+              <div className="rounded border border-dashed border-slate-700 px-3 py-6 text-center text-[12px] text-slate-300">
                 No captured log sessions for this beat yet.
               </div>
             ) : (
               <div className="space-y-2">
                 {sessionsQuery.isFetching && !sessionsQuery.isLoading ? (
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
                     <Spinner className="size-3" />
                     <span>Refreshing…</span>
                   </div>
                 ) : null}
-                <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                  <Workflow className="size-3.5" />
-                  <Sparkles className="size-3.5" />
+                <div className="flex items-center gap-2 text-[12px] text-slate-300">
+                  <Workflow className="size-4" />
+                  <Sparkles className="size-4" />
                   {sessions.length} session{sessions.length === 1 ? "" : "s"}
                 </div>
                 {sessions.map((session) => (
