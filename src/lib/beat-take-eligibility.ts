@@ -2,7 +2,7 @@ import type { Beat } from "@/lib/types";
 
 export type TakeEligibleBeat = Pick<
   Beat,
-  "state" | "type" | "nextActionOwnerKind" | "isAgentClaimable"
+  "state" | "type" | "nextActionOwnerKind" | "isAgentClaimable" | "blockedByDependency"
 >;
 
 export function canTakeBeat(beat: TakeEligibleBeat): boolean {
@@ -13,5 +13,6 @@ export function canTakeBeat(beat: TakeEligibleBeat): boolean {
   if (isTerminal) return false;
   if (beat.type === "gate") return false;
   if (beat.nextActionOwnerKind === "human") return false;
+  if (beat.blockedByDependency) return false;
   return beat.isAgentClaimable !== false;
 }

@@ -223,4 +223,63 @@ describe("BeadsBackend lifecycle", () => {
       expect(deps[0]!.state).toBeDefined();
     });
   });
+
+  describe("blockedByDependency field", () => {
+    it("list() sets blockedByDependency=true for beats with active blockers", async () => {
+      const res1 = await backend.create(sample("blocker"));
+      const res2 = await backend.create(sample("blocked"));
+      const blockerId = (res1 as { ok: true; data: { id: string } }).data.id;
+      const blockedId = (res2 as { ok: true; data: { id: string } }).data.id;
+
+      await backend.addDependency(blockerId, blockedId);
+
+      const listRes = await backend.list();
+      expect(listRes.ok).toBe(true);
+      const beats = (listRes as { ok: true; data: Array<{ id: string; blockedByDependency?: boolean }> }).data;
+      const blocked = beats.find((b) => b.id === blockedId);
+      const blocker = beats.find((b) => b.id === blockerId);
+      expect(blocked?.blockedByDependency).toBe(true);
+      expect(blocker?.blockedByDependency).toBe(false);
+    });
+
+    it("list() sets blockedByDependency=false when blocker is terminal", async () => {
+      const res1 = await backend.create(sample("blocker"));
+      const res2 = await backend.create(sample("blocked"));
+      const blockerId = (res1 as { ok: true; data: { id: string } }).data.id;
+      const blockedId = (res2 as { ok: true; data: { id: string } }).data.id;
+
+      await backend.addDependency(blockerId, blockedId);
+      await backend.close(blockerId);
+
+      const listRes = await backend.list();
+      expect(listRes.ok).toBe(true);
+      const beats = (listRes as { ok: true; data: Array<{ id: string; blockedByDependency?: boolean }> }).data;
+      const blocked = beats.find((b) => b.id === blockedId);
+      expect(blocked?.blockedByDependency).toBe(false);
+    });
+
+    it("get() sets blockedByDependency on individual beat", async () => {
+      const res1 = await backend.create(sample("blocker"));
+      const res2 = await backend.create(sample("blocked"));
+      const blockerId = (res1 as { ok: true; data: { id: string } }).data.id;
+      const blockedId = (res2 as { ok: true; data: { id: string } }).data.id;
+
+      await backend.addDependency(blockerId, blockedId);
+
+      const getRes = await backend.get(blockedId);
+      expect(getRes.ok).toBe(true);
+      const beat = (getRes as { ok: true; data: { blockedByDependency?: boolean } }).data;
+      expect(beat.blockedByDependency).toBe(true);
+    });
+
+    it("get() sets blockedByDependency=false for beat with no deps", async () => {
+      const res = await backend.create(sample("no-deps"));
+      const id = (res as { ok: true; data: { id: string } }).data.id;
+
+      const getRes = await backend.get(id);
+      expect(getRes.ok).toBe(true);
+      const beat = (getRes as { ok: true; data: { blockedByDependency?: boolean } }).data;
+      expect(beat.blockedByDependency).toBe(false);
+    });
+  });
 });

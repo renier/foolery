@@ -75,6 +75,7 @@ export interface Beat {
   nextActionOwnerKind?: ActionOwnerKind;
   requiresHumanAction?: boolean;
   isAgentClaimable?: boolean;
+  blockedByDependency?: boolean;
   priority: BeatPriority;
   labels: string[];
   assignee?: string;

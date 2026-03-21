@@ -36,10 +36,11 @@ export async function GET(
         }
       };
 
+      let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+
       const cleanup = () => {
         entry.emitter.off("data", listener);
-        // heartbeatTimer is not cleared here — the interval callback
-        // self-cleans on its next tick via the `closed` guard.
+        if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
       };
 
       const closeStream = () => {
@@ -75,11 +76,10 @@ export async function GET(
 
       // Heartbeat: send an SSE comment every 15 s to keep the connection
       // alive during quiet periods (e.g. while the agent executes tools).
-      // The callback self-cleans via the `closed` guard when closeStream()
-      // has been called, so no explicit clearInterval is needed in cleanup().
-      const heartbeatTimer = setInterval(() => {
+      heartbeatTimer = setInterval(() => {
         if (closed) {
-          clearInterval(heartbeatTimer);
+          clearInterval(heartbeatTimer!);
+          heartbeatTimer = null;
           return;
         }
         try {

@@ -804,6 +804,14 @@ export class KnotsBackend implements BackendPort {
     return ok(beats);
   }
 
+  private enrichWithBlockedStatus(beats: Beat[], repoPath: string): void {
+    const beatMap = new Map(beats.map((b) => [b.id, b]));
+    for (const beat of beats) {
+      const cached = this.edgeCache.get(this.edgeCacheKey(beat.id, repoPath));
+      beat.blockedByDependency = isBlockedByEdges(beat.id, cached?.edges ?? [], beatMap);
+    }
+  }
+
   async listWorkflows(
     repoPath?: string,
   ): Promise<BackendResult<MemoryWorkflowDescriptor[]>> {
@@ -818,7 +826,9 @@ export class KnotsBackend implements BackendPort {
     const rp = this.resolvePath(repoPath);
     const result = await this.buildBeatsForRepo(rp);
     if (!result.ok) return result;
-    return ok(applyFilters(result.data ?? [], filters));
+    const allBeats = result.data ?? [];
+    this.enrichWithBlockedStatus(allBeats, rp);
+    return ok(applyFilters(allBeats, filters));
   }
 
   async listReady(
@@ -830,13 +840,11 @@ export class KnotsBackend implements BackendPort {
     if (!builtResult.ok) return builtResult;
 
     const allBeats = builtResult.data ?? [];
-    const beatMap = new Map(allBeats.map((b) => [b.id, b]));
+    this.enrichWithBlockedStatus(allBeats, rp);
 
     const beats = allBeats.filter((beat) => {
       if (!beat.isAgentClaimable) return false;
-      const cached = this.edgeCache.get(this.edgeCacheKey(beat.id, rp));
-      const edges = cached?.edges ?? [];
-      return !isBlockedByEdges(beat.id, edges, beatMap);
+      return !beat.blockedByDependency;
     });
 
     return ok(applyFilters(beats, filters));
@@ -851,8 +859,11 @@ export class KnotsBackend implements BackendPort {
     const result = await this.buildBeatsForRepo(rp);
     if (!result.ok) return result;
 
+    const allBeats = result.data ?? [];
+    this.enrichWithBlockedStatus(allBeats, rp);
+
     const lower = query.toLowerCase();
-    const matches = (result.data ?? []).filter((beat) =>
+    const matches = allBeats.filter((beat) =>
       beat.id.toLowerCase().includes(lower) ||
       (beat.aliases ?? []).some((alias) => alias.toLowerCase().includes(lower)) ||
       beat.title.toLowerCase().includes(lower) ||
@@ -872,7 +883,10 @@ export class KnotsBackend implements BackendPort {
     const result = await this.buildBeatsForRepo(rp);
     if (!result.ok) return result;
 
-    const matches = (result.data ?? []).filter((beat) => matchExpression(beat, expression));
+    const allBeats = result.data ?? [];
+    this.enrichWithBlockedStatus(allBeats, rp);
+
+    const matches = allBeats.filter((beat) => matchExpression(beat, expression));
     return ok(matches);
   }
 
@@ -890,7 +904,22 @@ export class KnotsBackend implements BackendPort {
     const workflowMapResult = await this.workflowMapByProfileId(rp);
     if (!workflowMapResult.ok) return propagateError<Beat>(workflowMapResult);
 
-    return ok(toBeat(knotResult.data!, edgesResult.data ?? [], new Set([id]), new Map(), workflowMapResult.data ?? new Map()));
+    const beat = toBeat(knotResult.data!, edgesResult.data ?? [], new Set([id]), new Map(), workflowMapResult.data ?? new Map());
+
+    const blockerEdges = (edgesResult.data ?? []).filter((e) => e.kind === "blocked_by" && e.src === id);
+    if (blockerEdges.length > 0) {
+      let blocked = false;
+      for (const edge of blockerEdges) {
+        const blockerResult = fromKnots(await knots.showKnot(edge.dst, rp));
+        if (!blockerResult.ok || !blockerResult.data) { blocked = true; continue; }
+        if (!isTerminalState(blockerResult.data.state)) { blocked = true; break; }
+      }
+      beat.blockedByDependency = blocked;
+    } else {
+      beat.blockedByDependency = false;
+    }
+
+    return ok(beat);
   }
 
   async create(

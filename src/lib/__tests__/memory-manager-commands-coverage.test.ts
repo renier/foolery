@@ -6,20 +6,16 @@ vi.mock("@/lib/memory-manager-detection", () => ({
   detectMemoryManagerType: (...args: unknown[]) => mockDetectMemoryManagerType(...args),
 }));
 
-type ExecCallback = (err: Error | null, stdout: string, stderr: string) => void;
-const mockExec = vi.fn((_cmd: string, _opts: unknown, cb: ExecCallback) => cb(null, "", ""));
-vi.mock("node:child_process", () => ({
-  exec: (cmd: string, opts: unknown, cb: ExecCallback) => mockExec(cmd, opts, cb),
+const mockRollbackKnot = vi.fn().mockResolvedValue({ ok: true });
+const mockUpdateKnot = vi.fn().mockResolvedValue({ ok: true });
+vi.mock("@/lib/knots", () => ({
+  rollbackKnot: (...args: unknown[]) => mockRollbackKnot(...args),
+  updateKnot: (...args: unknown[]) => mockUpdateKnot(...args),
 }));
 
 const mockBackendUpdate = vi.fn().mockResolvedValue({ ok: true });
 vi.mock("@/lib/backend-instance", () => ({
   getBackend: () => ({ update: mockBackendUpdate }),
-}));
-
-const mockUpdateKnot = vi.fn().mockResolvedValue({ ok: true });
-vi.mock("@/lib/knots", () => ({
-  updateKnot: (...args: unknown[]) => mockUpdateKnot(...args),
 }));
 
 import {
@@ -30,9 +26,9 @@ import {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockExec.mockImplementation((_cmd: string, _opts: unknown, cb: ExecCallback) => cb(null, "", ""));
-  mockBackendUpdate.mockResolvedValue({ ok: true });
+  mockRollbackKnot.mockResolvedValue({ ok: true });
   mockUpdateKnot.mockResolvedValue({ ok: true });
+  mockBackendUpdate.mockResolvedValue({ ok: true });
 });
 
 describe("buildClaimCommand (line 32-34)", () => {
@@ -108,16 +104,6 @@ describe("buildWorkflowStateCommand (lines 36-48)", () => {
     expect(cmd).toBe('kno next "foo-123" --expected-state "implementation" --actor-kind agent');
   });
 
-  it("appends --no-daemon flag when noDaemon option is set for beats", () => {
-    const cmd = buildWorkflowStateCommand("foo-123", "implementation", "beads", { noDaemon: true });
-    expect(cmd).toContain("--no-daemon");
-  });
-
-  it("omits --no-daemon flag when noDaemon is not set for beats", () => {
-    const cmd = buildWorkflowStateCommand("foo-123", "implementation", "beads");
-    expect(cmd).not.toContain("--no-daemon");
-  });
-
   it("includes --lease flag when leaseId provided for knots", () => {
     const cmd = buildWorkflowStateCommand("foo-123", "implementation", "knots", { leaseId: "L-42" });
     expect(cmd).toBe('kno next "foo-123" --expected-state "implementation" --actor-kind agent --lease "L-42"');
@@ -147,55 +133,47 @@ describe("quoteId helper (line 9)", () => {
 });
 
 describe("rollbackBeatState", () => {
-  it("uses kno rb with quoted id for knots", async () => {
+  it("calls rollbackKnot for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots");
-    expect(mockExec).toHaveBeenCalledTimes(1);
-    expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
+    expect(mockRollbackKnot).toHaveBeenCalledTimes(1);
+    expect(mockRollbackKnot).toHaveBeenCalledWith("beat-42", "/tmp");
   });
 
-  it("adds a note when reason is provided for knots", async () => {
+  it("calls updateKnot to add note when reason is provided for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots", "flaky test");
-    expect(mockExec).toHaveBeenCalledTimes(1);
-    expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
-    expect(mockUpdateKnot).toHaveBeenCalledOnce();
+    expect(mockRollbackKnot).toHaveBeenCalledTimes(1);
+    expect(mockUpdateKnot).toHaveBeenCalledTimes(1);
     expect(mockUpdateKnot).toHaveBeenCalledWith("beat-42", { addNote: "flaky test" }, "/tmp");
   });
 
   it("does not add a note when reason is omitted for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots");
-    expect(mockExec).toHaveBeenCalledTimes(1);
+    expect(mockRollbackKnot).toHaveBeenCalledTimes(1);
     expect(mockUpdateKnot).not.toHaveBeenCalled();
   });
 
-  it("uses backend.update() for beads instead of exec", async () => {
+  it("uses backend.update() for beads instead of knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "beads");
-    expect(mockExec).not.toHaveBeenCalled();
+    expect(mockRollbackKnot).not.toHaveBeenCalled();
     expect(mockBackendUpdate).toHaveBeenCalledWith("beat-42", { state: "triage" }, "/tmp");
   });
 
-  it("propagates exec errors for knots", async () => {
-    mockExec.mockImplementation((_cmd: string, _opts: unknown, cb: ExecCallback) =>
-      cb(new Error("command failed"), "", "kno: not found"),
-    );
+  it("propagates errors from rollbackKnot", async () => {
+    mockRollbackKnot.mockResolvedValue({ ok: false, error: "knots rb failed" });
     await expect(
       rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots"),
-    ).rejects.toThrow("command failed");
-  });
-
-  it("escapes special characters in beatId via JSON.stringify", async () => {
-    await rollbackBeatState('id with "quotes" & spaces', "impl", "triage", "/tmp", "knots");
-    expect(mockExec.mock.calls[0][0]).toBe('kno rb "id with \\"quotes\\" & spaces"');
+    ).rejects.toThrow("knots rb failed");
   });
 
   it("does not add a note when reason is an empty string for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots", "");
-    expect(mockExec).toHaveBeenCalledTimes(1);
-    expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
+    expect(mockRollbackKnot).toHaveBeenCalledTimes(1);
+    expect(mockUpdateKnot).not.toHaveBeenCalled();
   });
 
   it("does not add a note when reason is undefined for knots", async () => {
     await rollbackBeatState("beat-42", "implementation", "triage", "/tmp", "knots", undefined);
-    expect(mockExec).toHaveBeenCalledTimes(1);
-    expect(mockExec.mock.calls[0][0]).toBe('kno rb "beat-42"');
+    expect(mockRollbackKnot).toHaveBeenCalledTimes(1);
+    expect(mockUpdateKnot).not.toHaveBeenCalled();
   });
 });

@@ -508,6 +508,15 @@ export async function nextKnot(
   });
 }
 
+export async function rollbackKnot(
+  id: string,
+  repoPath?: string,
+): Promise<BdResult<void>> {
+  const { stderr, exitCode } = await execWriteWithRetry(["rb", id], { repoPath });
+  if (exitCode !== 0) return { ok: false, error: stderr || "knots rb failed" };
+  return { ok: true };
+}
+
 export interface SetKnotProfileOptions {
   state?: string;
   ifMatch?: string;

@@ -686,6 +686,7 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
         const isTerminal = beat.state === "shipped" || beat.state === "abandoned" || beat.state === "closed";
         if (isTerminal || beat.type === "gate") return null;
         if (beat.nextActionOwnerKind === "human") return null;
+        if (beat.blockedByDependency) return null;
         const isActiveShipping = Boolean(shippingByBeatId[beat.id]);
         const isChildOfRolling = parentRollingBeatIds.has(beat.id);
         const hb = beat as unknown as { _hasChildren?: boolean; _memoryManagerType?: string };
@@ -751,6 +752,7 @@ export function getBeatColumns(opts: BeatColumnOpts | boolean = false): ColumnDe
         const beat = row.original;
         const isTerminal = beat.state === "shipped" || beat.state === "abandoned" || beat.state === "closed";
         if (isTerminal || beat.type === "gate") return null;
+        if (beat.blockedByDependency) return null;
         const isActiveShipping = Boolean(shippingByBeatId[beat.id]);
         const isChildOfRolling = parentRollingBeatIds.has(beat.id);
 

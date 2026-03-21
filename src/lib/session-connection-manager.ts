@@ -1,4 +1,4 @@
-import { connectToSession } from "./terminal-api";
+import { connectToSession, listSessions } from "./terminal-api";
 import { invalidateBeatListQueries } from "./beat-query-cache";
 import { useTerminalStore } from "@/stores/terminal-store";
 import { useNotificationStore } from "@/stores/notification-store";
@@ -30,11 +30,19 @@ const MAX_BUFFER = 5_000;
  */
 const MAX_MANAGER_RECONNECTS = 3;
 
+/**
+ * Interval between periodic health checks that poll the server for sessions
+ * the client believes are running.  Catches missed exit events and sessions
+ * orphaned after SSE reconnection exhaustion.
+ */
+const HEALTH_CHECK_INTERVAL_MS = 30_000;
+
 class SessionConnectionManager {
   private connections = new Map<string, Connection>();
   private reconnectCounts = new Map<string, number>();
   private storeUnsubscribe: (() => void) | null = null;
   private queryClientRef: QueryClient | null = null;
+  private healthCheckTimer: ReturnType<typeof setInterval> | null = null;
 
   /** Idempotent — creates SSE connection if not already connected. */
   connect(sessionId: string): void {
@@ -207,6 +215,12 @@ class SessionConnectionManager {
       console.warn(
         `[session-connection-manager] [${sessionId}] giving up after ${attempts} reconnection attempts`,
       );
+      useTerminalStore.getState().updateStatus(sessionId, "disconnected");
+      const { addNotification } = useNotificationStore.getState();
+      addNotification({
+        message: `Session lost connection after ${attempts} reconnection attempts`,
+        beatId: terminal.beatId,
+      });
       return;
     }
     this.reconnectCounts.set(sessionId, attempts + 1);
@@ -284,10 +298,13 @@ class SessionConnectionManager {
     this.storeUnsubscribe = useTerminalStore.subscribe(() => {
       this.syncConnections();
     });
+
+    this.startHealthCheck();
   }
 
   /** Stop syncing and disconnect all. */
   stopSync(): void {
+    this.stopHealthCheck();
     this.storeUnsubscribe?.();
     this.storeUnsubscribe = null;
     for (const sessionId of [...this.connections.keys()]) {
@@ -316,6 +333,71 @@ class SessionConnectionManager {
         const conn = this.connections.get(sessionId);
         if (conn?.exitReceived) {
           this.disconnect(sessionId);
+        }
+      }
+    }
+  }
+
+  private startHealthCheck(): void {
+    if (this.healthCheckTimer) return;
+    this.healthCheckTimer = setInterval(() => {
+      void this.pollHealth();
+    }, HEALTH_CHECK_INTERVAL_MS);
+  }
+
+  private stopHealthCheck(): void {
+    if (this.healthCheckTimer) {
+      clearInterval(this.healthCheckTimer);
+      this.healthCheckTimer = null;
+    }
+  }
+
+  private async pollHealth(): Promise<void> {
+    const { terminals } = useTerminalStore.getState();
+    const running = terminals.filter((t) => t.status === "running");
+    if (running.length === 0) return;
+
+    let serverSessions: Awaited<ReturnType<typeof listSessions>>;
+    try {
+      serverSessions = await listSessions();
+    } catch {
+      return;
+    }
+
+    const serverMap = new Map(serverSessions.map((s) => [s.id, s]));
+
+    for (const terminal of running) {
+      const conn = this.connections.get(terminal.sessionId);
+      if (conn?.exitReceived) continue;
+
+      const server = serverMap.get(terminal.sessionId);
+      if (!server) {
+        if (conn) conn.exitReceived = true;
+        useTerminalStore.getState().updateStatus(terminal.sessionId, "disconnected");
+        const exitEvent: TerminalEvent = { type: "exit", data: "-2", timestamp: Date.now() };
+        if (conn) {
+          for (const listener of conn.listeners) {
+            listener(exitEvent);
+          }
+        }
+      } else if (
+        server.status === "completed" ||
+        server.status === "error" ||
+        server.status === "aborted"
+      ) {
+        if (conn) conn.exitReceived = true;
+        const exitCode = server.exitCode ?? (server.status === "completed" ? 0 : 1);
+        const storeStatus = server.status === "completed"
+          ? "completed"
+          : server.status === "aborted"
+            ? "aborted"
+            : "error";
+        useTerminalStore.getState().updateStatus(terminal.sessionId, storeStatus);
+        const exitEvent: TerminalEvent = { type: "exit", data: String(exitCode), timestamp: Date.now() };
+        if (conn) {
+          for (const listener of conn.listeners) {
+            listener(exitEvent);
+          }
         }
       }
     }

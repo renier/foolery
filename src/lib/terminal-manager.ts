@@ -76,6 +76,39 @@ const MAX_BUFFER = 5000;
 const DEFAULT_MAX_SESSIONS = 5;
 const CLEANUP_DELAY_MS = 5 * 60 * 1000;
 const INPUT_CLOSE_GRACE_MS = 2000;
+const STALL_TIMEOUT_MS = 15 * 60 * 1000;
+const INVARIANT_TIMEOUT_MS = 30_000;
+
+interface StallTimer {
+  touch: () => void;
+  clear: () => void;
+}
+
+function createStallTimer(timeoutMs: number, onStall: () => void): StallTimer {
+  let timer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+    timer = null;
+    onStall();
+  }, timeoutMs);
+  return {
+    touch() {
+      if (timer) { clearTimeout(timer); timer = setTimeout(() => { timer = null; onStall(); }, timeoutMs); }
+    },
+    clear() {
+      if (timer) { clearTimeout(timer); timer = null; }
+    },
+  };
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<undefined>((resolve) => {
+    timer = setTimeout(() => {
+      console.warn(`[terminal-manager] ${label} timed out after ${ms}ms`);
+      resolve(undefined);
+    }, ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 /**
  * Resolve a CLI command that may not be on PATH.
@@ -1189,8 +1222,12 @@ export async function createSession(
    * Enforce queue/terminal invariant after a take-loop iteration.
    * Returns true if the beat is already in a valid resting state.
    * If the beat is in an action state after retry exhaustion, forces rollback.
+   * Wrapped with a timeout so a hung backend never blocks finishSession.
    */
-  const enforceQueueTerminalInvariant = async (): Promise<boolean> => {
+  const enforceQueueTerminalInvariant = (): Promise<boolean | undefined> =>
+    withTimeout(enforceQueueTerminalInvariantInner(), INVARIANT_TIMEOUT_MS, `[${id}] enforceQueueTerminalInvariant`);
+
+  const enforceQueueTerminalInvariantInner = async (): Promise<boolean> => {
     const tag = `[terminal-manager] [${id}] [invariant]`;
     const currentResult = await getBackend().get(beatId, repoPath);
     if (!currentResult.ok || !currentResult.data) {
@@ -1407,7 +1444,7 @@ export async function createSession(
         rollbackNeeded = !isQueueOrTerminal(postExitState, postExitWorkflow);
       }
       const invariantOk = await enforceQueueTerminalInvariant();
-      record.rolledBack = rollbackNeeded && invariantOk;
+      record.rolledBack = rollbackNeeded && (invariantOk ?? false);
 
       // Persist stats before retry attempt.
       Promise.resolve(appendOutcomeRecord(record)).catch((err) => {
@@ -1539,6 +1576,21 @@ export async function createSession(
 
     console.log(`[terminal-manager] [${id}] [take-loop] iteration ${takeIteration}: pid=${takeChild.pid ?? "failed"} beat=${beatId} beat_state=${beatState ?? "unknown"}`);
 
+    const takeStall = createStallTimer(STALL_TIMEOUT_MS, () => {
+      console.warn(`[terminal-manager] [${id}] [take-loop] [stall] no output for ${STALL_TIMEOUT_MS / 1000}s — killing agent`);
+      pushEvent({
+        type: "stderr",
+        data: `\x1b[31m--- Session stalled: no agent output for ${STALL_TIMEOUT_MS / 60000} min, terminating ---\x1b[0m\n`,
+        timestamp: Date.now(),
+      });
+      sessionAborted = true;
+      try {
+        const pid = takeChild.pid;
+        if (pid) process.kill(-pid, "SIGKILL");
+        else takeChild.kill("SIGKILL");
+      } catch { /* already dead */ }
+    });
+
     let takeStdinClosed = !effectiveIsInteractive;
     let takeLineBuffer = "";
     let takeCloseInputTimer: NodeJS.Timeout | null = null;
@@ -1602,6 +1654,7 @@ export async function createSession(
     };
 
     takeChild.stdout?.on("data", (chunk: Buffer) => {
+      takeStall.touch();
       interactionLog.logStdout(chunk.toString());
       takeLineBuffer += chunk.toString();
       const lines = takeLineBuffer.split("\n");
@@ -1635,11 +1688,13 @@ export async function createSession(
     });
 
     takeChild.stderr?.on("data", (chunk: Buffer) => {
+      takeStall.touch();
       interactionLog.logStderr(chunk.toString());
       pushEvent({ type: "stderr", data: chunk.toString(), timestamp: Date.now() });
     });
 
     takeChild.on("close", (takeCode) => {
+      takeStall.clear();
       if (takeLineBuffer.trim()) {
         interactionLog.logResponse(takeLineBuffer);
         try {
@@ -1675,6 +1730,7 @@ export async function createSession(
     const takeErrorPrefix = `[take ${takeIteration} | beat: ${beatId.slice(0, 12)} | agent: ${effectiveDialect}]`;
 
     takeChild.on("error", (err) => {
+      takeStall.clear();
       console.error(`[terminal-manager] [${id}] [take-loop] spawn error:`, err.message);
       if (takeCloseInputTimer) { clearTimeout(takeCloseInputTimer); takeCloseInputTimer = null; }
       takeStdinClosed = true;
@@ -1702,6 +1758,7 @@ export async function createSession(
       const sent = takeSendUserTurn(takePrompt, `take_${takeIteration}`);
       if (!sent) {
         takeCloseInput();
+        takeStall.clear();
         pushEvent({ type: "stderr", data: `${takeErrorPrefix} Failed to send prompt — stdin is closed or unavailable.\n`, timestamp: Date.now() });
         takeChild.kill("SIGTERM");
         entry.process = null;
@@ -1731,6 +1788,20 @@ export async function createSession(
   console.log(`[terminal-manager]   agent: ${agent.command}${agent.model ? ` (model: ${agent.model})` : ""}`);
   console.log(`[terminal-manager]   pid: ${child.pid ?? "failed to spawn"}`);
 
+  const stall = createStallTimer(STALL_TIMEOUT_MS, () => {
+    console.warn(`[terminal-manager] [${id}] [stall] no output for ${STALL_TIMEOUT_MS / 1000}s — killing agent`);
+    pushEvent({
+      type: "stderr",
+      data: `\x1b[31m--- Session stalled: no agent output for ${STALL_TIMEOUT_MS / 60000} min, terminating ---\x1b[0m\n`,
+      timestamp: Date.now(),
+    });
+    sessionAborted = true;
+    try {
+      const pid = child.pid;
+      if (pid) process.kill(-pid, "SIGKILL");
+      else child.kill("SIGKILL");
+    } catch { /* already dead */ }
+  });
 
   let stdinClosed = !isInteractive;
   let closeInputTimer: NodeJS.Timeout | null = null;
@@ -1877,6 +1948,7 @@ export async function createSession(
   // Parse stream-json NDJSON output from agent CLI
   let lineBuffer = "";
   child.stdout?.on("data", (chunk: Buffer) => {
+    stall.touch();
     interactionLog.logStdout(chunk.toString());
     lineBuffer += chunk.toString();
     const lines = lineBuffer.split("\n");
@@ -1921,6 +1993,7 @@ export async function createSession(
   });
 
   child.stderr?.on("data", (chunk: Buffer) => {
+    stall.touch();
     const text = chunk.toString();
     interactionLog.logStderr(text);
     console.log(`[terminal-manager] [${id}] stderr: ${text.slice(0, 200)}`);
@@ -1928,6 +2001,7 @@ export async function createSession(
   });
 
   child.on("close", (code, signal) => {
+    stall.clear();
     // Flush any remaining line buffer
     if (lineBuffer.trim()) {
       interactionLog.logResponse(lineBuffer);
@@ -1986,10 +2060,14 @@ export async function createSession(
     (async () => {
       await enforceQueueTerminalInvariant();
       finishSession(code ?? 1);
-    })();
+    })().catch((err) => {
+      console.error(`[terminal-manager] [${id}] unhandled error in close handler:`, err);
+      finishSession(code ?? 1);
+    });
   });
 
   child.on("error", (err) => {
+    stall.clear();
     console.error(`[terminal-manager] [${id}] spawn error:`, err.message);
     if (closeInputTimer) {
       clearTimeout(closeInputTimer);

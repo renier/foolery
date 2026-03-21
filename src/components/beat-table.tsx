@@ -1169,6 +1169,7 @@ function handleActionKeys(
     if (!ctx.onShipBeat || currentIndex < 0) return;
     const beat = rows[currentIndex].original;
     if (beat.state === "shipped" || beat.state === "closed" || beat.type === "gate") return;
+    if (beat.blockedByDependency) return;
     const isInheritedRolling = ctx.parentRollingBeatIds.has(beat.id) || Boolean(beat.parent && ctx.shippingByBeatId[beat.parent]);
     // Block Take! when parent/ancestor is rolling
     if (isInheritedRolling) return;

@@ -33,4 +33,16 @@ describe("canTakeBeat", () => {
   it("blocks beats explicitly marked not claimable", () => {
     expect(canTakeBeat(makeBeat({ isAgentClaimable: false }))).toBe(false);
   });
+
+  it("blocks beats with active dependency blockers", () => {
+    expect(canTakeBeat(makeBeat({ blockedByDependency: true }))).toBe(false);
+  });
+
+  it("allows beats with no active dependency blockers", () => {
+    expect(canTakeBeat(makeBeat({ blockedByDependency: false }))).toBe(true);
+  });
+
+  it("allows beats with undefined blockedByDependency", () => {
+    expect(canTakeBeat(makeBeat({ blockedByDependency: undefined }))).toBe(true);
+  });
 });

@@ -1,11 +1,10 @@
 import { detectMemoryManagerType } from "@/lib/memory-manager-detection";
 import type { MemoryManagerType } from "@/lib/memory-managers";
 import { mapWorkflowStateToCompatStatus } from "@/lib/workflows";
-import { updateKnot } from "@/lib/knots";
+
 import type { Beat } from "@/lib/types";
 
 interface MemoryManagerCommandOptions {
-  noDaemon?: boolean;
   leaseId?: string;
   fromState?: string;
 }
@@ -68,13 +67,9 @@ export async function rollbackBeatState(
   reason?: string,
 ): Promise<void> {
   if (memoryManagerType === "knots") {
-    const cmd = `kno rb ${quoteId(beatId)}`;
-    const { exec: execCb } = await import("node:child_process");
-    const { promisify } = await import("node:util");
-    const execAsync = promisify(execCb);
-    await execAsync(cmd, { cwd: repoPath });
-
-    // Add a note on the knot documenting the rollback (best-effort)
+    const { rollbackKnot, updateKnot } = await import("@/lib/knots");
+    const result = await rollbackKnot(beatId, repoPath);
+    if (!result.ok) throw new Error(result.error ?? "knots rb failed");
     if (reason) {
       try {
         await updateKnot(beatId, { addNote: reason }, repoPath);

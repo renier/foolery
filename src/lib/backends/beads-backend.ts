@@ -177,9 +177,10 @@ export class BeadsBackend implements BackendPort {
   ): Promise<BackendResult<Beat[]>> {
     const rp = this.resolvePath(repoPath);
     const entry = await this.ensureLoaded(rp);
+    const blockedIds = activelyBlockedIds(entry.beads, entry.deps);
     let items = Array.from(entry.beads.values());
     items = applyFilters(items, filters);
-    return ok(items.map(shallowCloneBeat));
+    return ok(items.map((b) => ({ ...shallowCloneBeat(b), blockedByDependency: blockedIds.has(b.id) })));
   }
 
   async listReady(
@@ -193,7 +194,7 @@ export class BeadsBackend implements BackendPort {
       (b) => resolveStep(b.state)?.phase === StepPhase.Queued && !blockedIds.has(b.id) && !b.requiresHumanAction,
     );
     items = applyFilters(items, filters);
-    return ok(items.map(shallowCloneBeat));
+    return ok(items.map((b) => ({ ...shallowCloneBeat(b), blockedByDependency: false as const })));
   }
 
   async search(
@@ -203,6 +204,7 @@ export class BeadsBackend implements BackendPort {
   ): Promise<BackendResult<Beat[]>> {
     const rp = this.resolvePath(repoPath);
     const entry = await this.ensureLoaded(rp);
+    const blockedIds = activelyBlockedIds(entry.beads, entry.deps);
     const lower = query.toLowerCase();
     let items = Array.from(entry.beads.values()).filter(
       (b) =>
@@ -212,7 +214,7 @@ export class BeadsBackend implements BackendPort {
         (b.description ?? "").toLowerCase().includes(lower),
     );
     items = applyFilters(items, filters);
-    return ok(items.map(shallowCloneBeat));
+    return ok(items.map((b) => ({ ...shallowCloneBeat(b), blockedByDependency: blockedIds.has(b.id) })));
   }
 
   async query(
@@ -222,10 +224,11 @@ export class BeadsBackend implements BackendPort {
   ): Promise<BackendResult<Beat[]>> {
     const rp = this.resolvePath(repoPath);
     const entry = await this.ensureLoaded(rp);
+    const blockedIds = activelyBlockedIds(entry.beads, entry.deps);
     const items = Array.from(entry.beads.values()).filter((b) =>
       matchExpression(b, expression),
     );
-    return ok(items.map(shallowCloneBeat));
+    return ok(items.map((b) => ({ ...shallowCloneBeat(b), blockedByDependency: blockedIds.has(b.id) })));
   }
 
   async get(
@@ -236,7 +239,8 @@ export class BeadsBackend implements BackendPort {
     const entry = await this.ensureLoaded(rp);
     const beat = entry.beads.get(id);
     if (!beat) return backendError("NOT_FOUND", `Beat ${id} not found`);
-    return ok({ ...beat, labels: [...beat.labels] });
+    const blockedIds = activelyBlockedIds(entry.beads, entry.deps);
+    return ok({ ...beat, labels: [...beat.labels], blockedByDependency: blockedIds.has(id) });
   }
 
   // -- Write operations ---------------------------------------------------
